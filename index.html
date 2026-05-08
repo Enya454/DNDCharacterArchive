@@ -450,7 +450,7 @@ function AbilityRoller({ abilities, onChange }) {
 
 // ============================================================
 // CHARACTER CREATION WIZARD
-// Steps: Identity → Background → Species → Class → Abilities
+// Steps: Identity → Class → Species → Background → Abilities
 //        → Equipment & Spells → Finalise
 // ============================================================
 function CharacterCreationWizard({ gameData, onSave, onCancel }) {
@@ -458,7 +458,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const [char, setChar] = useState({ ...DEFAULT_CHAR });
   const { species:speciesDb, classes, backgrounds, themes, alignments, languages:languageList, skills:allSkills } = gameData;
 
-  const STEPS = ["Identity","Background","Species","Class","Abilities","Equipment & Spells","Finalise"];
+  const STEPS = ["Identity","Class","Species","Background","Abilities","Equipment & Spells","Finalise"];
   const speciesData = speciesDb?.[char.species];
   const classData   = classes?.[char.class];
   const bgData      = backgrounds?.[char.background];
@@ -557,8 +557,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
           </div>
         )}
 
-        {/* ── STEP 1: Background ── */}
-        {step === 1 && (
+        {/* ── STEP 3: Background ── */}
+        {step === 3 && (
           <div>
             <div style={ws.optGrid}>
               {Object.entries(backgrounds || {}).map(([n, d]) => (
@@ -679,8 +679,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
           </div>
         )}
 
-        {/* ── STEP 3: Class ── */}
-        {step === 3 && (
+        {/* ── STEP 1: Class ── */}
+        {step === 1 && (
           <div>
             <div style={ws.optGrid}>
               {Object.entries(classes || {}).map(([n, d]) => (
