@@ -1,1238 +1,693 @@
 {
-  "_readme": {
-    "title": "Tome of Heroes — Game Data File",
-    "description": "Edit this file to customise races, classes, backgrounds, spells, themes, and music. The app reads this file on load. JSON does not support comments, so all documentation is in these _readme/_notes/_fields fields — you can safely delete them.",
-    "abilityKeys": "str | dex | con | int | wis | cha  (always lowercase, always these 6)",
-    "skillKeys": "Acrobatics | Animal Handling | Arcana | Athletics | Deception | History | Insight | Intimidation | Investigation | Medicine | Nature | Perception | Performance | Persuasion | Religion | Sleight of Hand | Stealth | Survival",
-    "spellLevels": "0 = cantrip, 1–9 = spell levels",
-    "howToAddRace": "Copy any entry in 'races', change the key (name), adjust abilityBonuses, traits, speed, size",
-    "howToAddClass": "Copy any entry in 'classes'. spellcaster:false removes the spell tab. spellcastingAbility must be one of the 6 ability keys.",
-    "howToAddSpells": "Add to 'spells'. classKey must exactly match a key in 'classes'. level 0 = cantrip.",
-    "howToAddTheme": "Copy any entry in 'themes'. All color values are CSS (hex, rgb, hsl etc). fontDisplay/fontBody should be Google Fonts names.",
-    "howToAddMusic": "Add to 'music'. Set url to null if you want to add it later. id must be unique.",
-    "version": "1.0"
+  "_notes": {
+    "featureTypes": "passive=just text shown, proficiency_choice=pick N skills from list, expertise_choice=pick N skills for expertise, choice=pick one option from named list, asi_choice=assign N bonus points to abilities (half-elf style), language_choice=pick N languages",
+    "leveledFeatures": "features is an array of feature objects. Each unlocks at a given level. locked=true features are shown but greyed out above the character's level.",
+    "subclasses": "Each class can have a 'subclasses' object. Key = subclass name, value = object with 'features' array (same format) and optional 'spellcastingAbility'.",
+    "speciesFeatures": "Same feature format as classes. 'auto' features are displayed as granted. Choice features prompt the user to pick."
   },
 
-  "races": {
-    "_notes": "Each key is the displayed race name. abilityBonuses: use ability keys, values are integers. traits: array of strings shown as tags. speed: movement in feet. size: Small | Medium | Large.",
-
+  "species": {
     "Human": {
-      "abilityBonuses": { "str": 1, "dex": 1, "con": 1, "int": 1, "wis": 1, "cha": 1 },
-      "traits": ["Extra Language", "Extra Skill"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "str":1,"dex":1,"con":1,"int":1,"wis":1,"cha":1 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Ability Score Increase", "level": 1, "type": "passive", "description": "Your ability scores each increase by 1." },
+        { "name": "Extra Language",          "level": 1, "type": "language_choice", "count": 1, "description": "You can speak, read, and write one extra language of your choice." },
+        { "name": "Extra Skill",             "level": 1, "type": "proficiency_choice", "count": 1, "from": "all", "description": "You gain proficiency in one skill of your choice." }
+      ]
     },
     "Elf": {
-      "abilityBonuses": { "dex": 2, "int": 1 },
-      "traits": ["Darkvision", "Fey Ancestry", "Trance", "Keen Senses"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "dex":2, "int":1 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",    "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Keen Senses",   "level": 1, "type": "passive", "description": "You have proficiency in the Perception skill.", "grantsSkills": ["Perception"] },
+        { "name": "Fey Ancestry",  "level": 1, "type": "passive", "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep." },
+        { "name": "Trance",        "level": 1, "type": "passive", "description": "Elves don't need to sleep. Instead, they meditate deeply for 4 hours a day." }
+      ]
     },
     "Dwarf": {
-      "abilityBonuses": { "con": 2, "wis": 1 },
-      "traits": ["Darkvision", "Dwarven Resilience", "Stonecunning", "Dwarven Combat Training"],
-      "speed": 25,
-      "size": "Medium"
+      "abilityBonuses": { "con":2, "wis":1 },
+      "speed": 25, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",           "level": 1, "type": "passive", "description": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Dwarven Resilience",   "level": 1, "type": "passive", "description": "You have advantage on saving throws against poison, and you have resistance against poison damage." },
+        { "name": "Dwarven Combat Training","level": 1,"type": "passive", "description": "You have proficiency with the battleaxe, handaxe, light hammer, and warhammer." },
+        { "name": "Stonecunning",         "level": 1, "type": "passive", "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus." },
+        { "name": "Tool Proficiency",     "level": 1, "type": "choice", "description": "You gain proficiency with the artisan's tools of your choice.", "options": ["Smith's Tools","Brewer's Supplies","Mason's Tools"] },
+        { "name": "Dwarven Language",     "level": 1, "type": "passive", "description": "You can speak, read, and write Common and Dwarvish." }
+      ]
     },
     "Halfling": {
-      "abilityBonuses": { "dex": 2, "cha": 1 },
-      "traits": ["Lucky", "Brave", "Halfling Nimbleness"],
-      "speed": 25,
-      "size": "Small"
+      "abilityBonuses": { "dex":2, "cha":1 },
+      "speed": 25, "size": "Small",
+      "features": [
+        { "name": "Lucky",              "level": 1, "type": "passive", "description": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll." },
+        { "name": "Brave",              "level": 1, "type": "passive", "description": "You have advantage on saving throws against being frightened." },
+        { "name": "Halfling Nimbleness","level": 1, "type": "passive", "description": "You can move through the space of any creature that is of a size larger than yours." },
+        { "name": "Naturally Stealthy", "level": 1, "type": "passive", "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you." }
+      ]
     },
     "Gnome": {
-      "abilityBonuses": { "int": 2, "dex": 1 },
-      "traits": ["Darkvision", "Gnome Cunning"],
-      "speed": 25,
-      "size": "Small"
+      "abilityBonuses": { "int":2, "dex":1 },
+      "speed": 25, "size": "Small",
+      "features": [
+        { "name": "Darkvision",    "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Gnome Cunning", "level": 1, "type": "passive", "description": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic." }
+      ]
     },
     "Half-Elf": {
-      "abilityBonuses": { "cha": 2, "str": 1, "dex": 1 },
-      "traits": ["Darkvision", "Fey Ancestry", "Two Extra Skills"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "cha":2 },
+      "abilityBonusChoices": { "count": 2, "amount": 1, "exclude": ["cha"], "description": "Choose 2 different ability scores (not Charisma) to each increase by 1." },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",      "level": 1, "type": "passive", "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Fey Ancestry",    "level": 1, "type": "passive", "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep." },
+        { "name": "Skill Versatility","level": 1,"type": "proficiency_choice", "count": 2, "from": "all", "description": "You gain proficiency in two skills of your choice." },
+        { "name": "Extra Language",  "level": 1, "type": "language_choice", "count": 1, "description": "You can speak, read, and write one extra language of your choice." }
+      ]
     },
     "Half-Orc": {
-      "abilityBonuses": { "str": 2, "con": 1 },
-      "traits": ["Darkvision", "Relentless Endurance", "Savage Attacks", "Menacing"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "str":2, "con":1 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",         "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Menacing",           "level": 1, "type": "passive", "description": "You gain proficiency in the Intimidation skill.", "grantsSkills": ["Intimidation"] },
+        { "name": "Relentless Endurance","level": 1,"type": "passive", "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest." },
+        { "name": "Savage Attacks",     "level": 1, "type": "passive", "description": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit." }
+      ]
     },
     "Tiefling": {
-      "abilityBonuses": { "int": 1, "cha": 2 },
-      "traits": ["Darkvision", "Hellish Resistance", "Infernal Legacy"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "int":1, "cha":2 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",      "level": 1, "type": "passive", "description": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Hellish Resistance","level": 1,"type": "passive", "description": "You have resistance to fire damage." },
+        { "name": "Infernal Legacy", "level": 1, "type": "passive", "description": "You know the thaumaturgy cantrip. At 3rd level you can cast hellish rebuke once per long rest. At 5th level you can cast darkness once per long rest." }
+      ]
     },
     "Dragonborn": {
-      "abilityBonuses": { "str": 2, "cha": 1 },
-      "traits": ["Draconic Ancestry", "Breath Weapon", "Damage Resistance"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "str":2, "cha":1 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Draconic Ancestry", "level": 1, "type": "choice", "description": "Choose the type of dragon your character descends from. This determines your breath weapon damage type and damage resistance.", "options": ["Black (Acid)","Blue (Lightning)","Brass (Fire)","Bronze (Lightning)","Copper (Acid)","Gold (Fire)","Green (Poison)","Red (Fire)","Silver (Cold)","White (Cold)"] },
+        { "name": "Breath Weapon",     "level": 1, "type": "passive", "description": "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area must make a saving throw. DC = 8 + Con modifier + proficiency bonus. You can use this a number of times equal to your proficiency bonus, and regain all uses on a long rest." },
+        { "name": "Damage Resistance", "level": 1, "type": "passive", "description": "You have resistance to the damage type associated with your draconic ancestry." }
+      ]
     },
     "Aasimar": {
-      "abilityBonuses": { "cha": 2, "wis": 1 },
-      "traits": ["Darkvision", "Celestial Resistance", "Healing Hands", "Light Bearer"],
-      "speed": 30,
-      "size": "Medium"
-    },
-
-    "_example_custom_race": {
-      "_note": "DELETE this entry or rename it (remove the underscore) to use it. This is just an example.",
-      "abilityBonuses": { "str": 2, "con": 1 },
-      "traits": ["Natural Armor", "Powerful Build", "Stone's Endurance"],
-      "speed": 30,
-      "size": "Medium"
+      "abilityBonuses": { "cha":2, "wis":1 },
+      "speed": 30, "size": "Medium",
+      "features": [
+        { "name": "Darkvision",       "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Celestial Resistance","level": 1,"type": "passive","description": "You have resistance to necrotic damage and radiant damage." },
+        { "name": "Healing Hands",    "level": 1, "type": "passive", "description": "As an action, you can touch a creature and cause it to regain a number of hit points equal to your level. Once you use this trait, you can't use it again until you finish a long rest." },
+        { "name": "Light Bearer",     "level": 1, "type": "passive", "description": "You know the light cantrip. Charisma is your spellcasting ability for it." }
+      ]
     }
   },
 
   "classes": {
-    "_notes": "hitDie: integer (6/8/10/12). primaryAbility: ability key. savingThrows: array of 2 ability keys. spellcaster: true/false. spellcastingAbility: ability key (only needed if spellcaster=true). features: object where each key is a level number (as string) and value is an array of feature name strings. You MUST include all levels 1–20, use [] for empty levels.",
-
     "Barbarian": {
       "hitDie": 12,
       "primaryAbility": "str",
-      "savingThrows": ["str", "con"],
-      "armorProficiencies": ["Light", "Medium", "Shields"],
-      "weaponProficiencies": ["Simple", "Martial"],
-      "skills": ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
-      "skillCount": 2,
+      "savingThrows": ["str","con"],
+      "armorProficiencies": ["Light","Medium","Shields"],
+      "weaponProficiencies": ["Simple","Martial"],
+      "toolProficiencies": [],
       "spellcaster": false,
-      "features": {
-        "1":  ["Rage (2/rest)", "Unarmored Defense"],
-        "2":  ["Reckless Attack", "Danger Sense"],
-        "3":  ["Primal Path"],
-        "4":  ["ASI"],
-        "5":  ["Extra Attack", "Fast Movement"],
-        "6":  ["Path Feature", "Rage (3/rest)"],
-        "7":  ["Feral Instinct"],
-        "8":  ["ASI"],
-        "9":  ["Brutal Critical (1 die)"],
-        "10": ["Path Feature"],
-        "11": ["Relentless Rage"],
-        "12": ["ASI", "Rage (4/rest)"],
-        "13": ["Brutal Critical (2 dice)"],
-        "14": ["Path Feature"],
-        "15": ["Persistent Rage"],
-        "16": ["ASI"],
-        "17": ["Brutal Critical (3 dice)", "Rage (5/rest)"],
-        "18": ["Indomitable Might"],
-        "19": ["ASI"],
-        "20": ["Primal Champion"]
-      }
-    },
-
-    "Bard": {
-      "hitDie": 8,
-      "primaryAbility": "cha",
-      "savingThrows": ["dex", "cha"],
-      "armorProficiencies": ["Light"],
-      "weaponProficiencies": ["Simple", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"],
-      "skills": ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"],
-      "skillCount": 3,
-      "spellcaster": true,
-      "spellcastingAbility": "cha",
-      "features": {
-        "1":  ["Spellcasting", "Bardic Inspiration (d6)"],
-        "2":  ["Jack of All Trades", "Song of Rest (d6)"],
-        "3":  ["Bard College", "Expertise"],
-        "4":  ["ASI"],
-        "5":  ["Bardic Inspiration (d8)", "Font of Inspiration"],
-        "6":  ["Countercharm", "College Feature"],
-        "7":  [],
-        "8":  ["ASI"],
-        "9":  ["Song of Rest (d8)"],
-        "10": ["Bardic Inspiration (d10)", "Expertise", "Magical Secrets"],
-        "11": [],
-        "12": ["ASI"],
-        "13": ["Song of Rest (d10)"],
-        "14": ["Magical Secrets", "College Feature"],
-        "15": ["Bardic Inspiration (d12)"],
-        "16": ["ASI"],
-        "17": ["Song of Rest (d12)"],
-        "18": ["Magical Secrets"],
-        "19": ["ASI"],
-        "20": ["Superior Inspiration"]
-      }
-    },
-
-    "Cleric": {
-      "hitDie": 8,
-      "primaryAbility": "wis",
-      "savingThrows": ["wis", "cha"],
-      "armorProficiencies": ["Light", "Medium", "Shields"],
-      "weaponProficiencies": ["Simple"],
-      "skills": ["History", "Insight", "Medicine", "Persuasion", "Religion"],
-      "skillCount": 2,
-      "spellcaster": true,
-      "spellcastingAbility": "wis",
-      "features": {
-        "1":  ["Spellcasting", "Divine Domain"],
-        "2":  ["Channel Divinity (1/rest)", "Domain Feature"],
-        "3":  ["Domain Feature"],
-        "4":  ["ASI"],
-        "5":  ["Destroy Undead (CR 1/2)"],
-        "6":  ["Channel Divinity (2/rest)", "Domain Feature"],
-        "7":  ["Domain Feature"],
-        "8":  ["ASI", "Destroy Undead (CR 1)", "Domain Feature"],
-        "9":  [],
-        "10": ["Divine Intervention"],
-        "11": ["Destroy Undead (CR 2)"],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Destroy Undead (CR 3)"],
-        "15": [],
-        "16": ["ASI"],
-        "17": ["Destroy Undead (CR 4)", "Domain Feature"],
-        "18": ["Channel Divinity (3/rest)"],
-        "19": ["ASI"],
-        "20": ["Divine Intervention Improvement"]
-      }
-    },
-
-    "Druid": {
-      "hitDie": 8,
-      "primaryAbility": "wis",
-      "savingThrows": ["int", "wis"],
-      "armorProficiencies": ["Light", "Medium", "Shields (non-metal)"],
-      "weaponProficiencies": ["Clubs", "Daggers", "Darts", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Slings", "Spears"],
-      "skills": ["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"],
-      "skillCount": 2,
-      "spellcaster": true,
-      "spellcastingAbility": "wis",
-      "features": {
-        "1":  ["Spellcasting", "Druidic"],
-        "2":  ["Wild Shape", "Druid Circle"],
-        "3":  ["Circle Feature"],
-        "4":  ["Wild Shape Improvement", "ASI"],
-        "5":  [],
-        "6":  ["Circle Feature"],
-        "7":  [],
-        "8":  ["Wild Shape Improvement", "ASI"],
-        "9":  [],
-        "10": ["Circle Feature"],
-        "11": [],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Circle Feature"],
-        "15": [],
-        "16": ["ASI"],
-        "17": [],
-        "18": ["Timeless Body", "Beast Spells"],
-        "19": ["ASI"],
-        "20": ["Archdruid"]
-      }
-    },
-
-    "Fighter": {
-      "hitDie": 10,
-      "primaryAbility": "str",
-      "savingThrows": ["str", "con"],
-      "armorProficiencies": ["All Armor", "Shields"],
-      "weaponProficiencies": ["Simple", "Martial"],
-      "skills": ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"],
-      "skillCount": 2,
-      "spellcaster": false,
-      "features": {
-        "1":  ["Fighting Style", "Second Wind"],
-        "2":  ["Action Surge (1/rest)"],
-        "3":  ["Martial Archetype"],
-        "4":  ["ASI"],
-        "5":  ["Extra Attack"],
-        "6":  ["ASI"],
-        "7":  ["Archetype Feature"],
-        "8":  ["ASI"],
-        "9":  ["Indomitable (1/day)"],
-        "10": ["Archetype Feature"],
-        "11": ["Extra Attack (2)"],
-        "12": ["ASI"],
-        "13": ["Indomitable (2/day)"],
-        "14": ["ASI"],
-        "15": ["Archetype Feature"],
-        "16": ["ASI"],
-        "17": ["Action Surge (2/rest)", "Indomitable (3/day)"],
-        "18": ["Archetype Feature"],
-        "19": ["ASI"],
-        "20": ["Extra Attack (3)"]
-      }
-    },
-
-    "Monk": {
-      "hitDie": 8,
-      "primaryAbility": "dex",
-      "savingThrows": ["str", "dex"],
-      "armorProficiencies": [],
-      "weaponProficiencies": ["Simple", "Shortswords"],
-      "skills": ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
-      "skillCount": 2,
-      "spellcaster": false,
-      "features": {
-        "1":  ["Unarmored Defense", "Martial Arts"],
-        "2":  ["Ki", "Unarmored Movement"],
-        "3":  ["Monastic Tradition", "Deflect Missiles"],
-        "4":  ["ASI", "Slow Fall"],
-        "5":  ["Extra Attack", "Stunning Strike"],
-        "6":  ["Ki-Empowered Strikes", "Tradition Feature"],
-        "7":  ["Evasion", "Stillness of Mind"],
-        "8":  ["ASI"],
-        "9":  ["Unarmored Movement Improvement"],
-        "10": ["Purity of Body"],
-        "11": ["Tradition Feature"],
-        "12": ["ASI"],
-        "13": ["Tongue of the Sun and Moon"],
-        "14": ["Diamond Soul"],
-        "15": ["Timeless Body"],
-        "16": ["ASI"],
-        "17": ["Tradition Feature"],
-        "18": ["Empty Body"],
-        "19": ["ASI"],
-        "20": ["Perfect Self"]
-      }
-    },
-
-    "Paladin": {
-      "hitDie": 10,
-      "primaryAbility": "str",
-      "savingThrows": ["wis", "cha"],
-      "armorProficiencies": ["All Armor", "Shields"],
-      "weaponProficiencies": ["Simple", "Martial"],
-      "skills": ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"],
-      "skillCount": 2,
-      "spellcaster": true,
-      "spellcastingAbility": "cha",
-      "features": {
-        "1":  ["Divine Sense", "Lay on Hands"],
-        "2":  ["Fighting Style", "Spellcasting", "Divine Smite"],
-        "3":  ["Divine Health", "Sacred Oath"],
-        "4":  ["ASI"],
-        "5":  ["Extra Attack"],
-        "6":  ["Aura of Protection"],
-        "7":  ["Oath Feature"],
-        "8":  ["ASI"],
-        "9":  [],
-        "10": ["Aura of Courage"],
-        "11": ["Improved Divine Smite"],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Cleansing Touch"],
-        "15": ["Oath Feature"],
-        "16": ["ASI"],
-        "17": [],
-        "18": ["Aura Improvements"],
-        "19": ["ASI"],
-        "20": ["Sacred Oath Feature"]
-      }
-    },
-
-    "Ranger": {
-      "hitDie": 10,
-      "primaryAbility": "dex",
-      "savingThrows": ["str", "dex"],
-      "armorProficiencies": ["Light", "Medium", "Shields"],
-      "weaponProficiencies": ["Simple", "Martial"],
-      "skills": ["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"],
-      "skillCount": 3,
-      "spellcaster": true,
-      "spellcastingAbility": "wis",
-      "features": {
-        "1":  ["Favored Enemy", "Natural Explorer"],
-        "2":  ["Fighting Style", "Spellcasting"],
-        "3":  ["Ranger Archetype", "Primeval Awareness"],
-        "4":  ["ASI"],
-        "5":  ["Extra Attack"],
-        "6":  ["Favored Enemy Improvement", "Natural Explorer Improvement"],
-        "7":  ["Archetype Feature"],
-        "8":  ["ASI", "Land's Stride"],
-        "9":  [],
-        "10": ["Natural Explorer Improvement", "Hide in Plain Sight"],
-        "11": ["Archetype Feature"],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Favored Enemy Improvement", "Vanish"],
-        "15": ["Archetype Feature"],
-        "16": ["ASI"],
-        "17": [],
-        "18": ["Feral Senses"],
-        "19": ["ASI"],
-        "20": ["Foe Slayer"]
+      "features": [
+        { "level": 1, "name": "Hit Points",        "type": "passive", "description": "Hit Dice: 1d12 per Barbarian level. HP at 1st level: 12 + Constitution modifier. HP at higher levels: 1d12 (or 7) + Constitution modifier per level above 1st." },
+        { "level": 1, "name": "Proficiencies",     "type": "passive", "description": "Armor: Light, Medium, Shields. Weapons: Simple, Martial. Saving Throws: Strength, Constitution. Skills: Choose 2 from Animal Handling, Athletics, Intimidation, Nature, Perception, Survival." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Animal Handling","Athletics","Intimidation","Nature","Perception","Survival"], "description": "Choose 2 skills from the Barbarian list." },
+        { "level": 1, "name": "Rage",              "type": "passive", "description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging you gain advantage on Strength checks and saving throws, a bonus to damage rolls, and resistance to bludgeoning, piercing, and slashing damage. You can rage 2 times per long rest at 1st level, increasing as you level up." },
+        { "level": 1, "name": "Unarmored Defense", "type": "passive", "description": "While you are not wearing any armor, your AC equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit." },
+        { "level": 2, "name": "Reckless Attack",   "type": "passive", "description": "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly, giving you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn." },
+        { "level": 2, "name": "Danger Sense",      "type": "passive", "description": "At 2nd level, you gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger. You have advantage on Dexterity saving throws against effects that you can see, such as traps and spells." },
+        { "level": 3, "name": "Primal Path",       "type": "subclass_choice", "description": "At 3rd level, you choose a path that shapes the nature of your rage." },
+        { "level": 4, "name": "Ability Score Improvement", "type": "asi", "description": "You can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. You can't increase an ability score above 20 using this feature." },
+        { "level": 5, "name": "Extra Attack",      "type": "passive", "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn." },
+        { "level": 5, "name": "Fast Movement",     "type": "passive", "description": "Starting at 5th level, your speed increases by 10 feet while you aren't wearing heavy armor." },
+        { "level": 7, "name": "Feral Instinct",    "type": "passive", "description": "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn." },
+        { "level": 9, "name": "Brutal Critical",   "type": "passive", "description": "Beginning at 9th level, you can roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. This increases to two additional dice at 13th level and three additional dice at 17th level." },
+        { "level": 11, "name": "Relentless Rage",  "type": "passive", "description": "Starting at 11th level, your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, you drop to 1 hit point instead." },
+        { "level": 15, "name": "Persistent Rage",  "type": "passive", "description": "Beginning at 15th level, your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it." },
+        { "level": 18, "name": "Indomitable Might","type": "passive", "description": "Beginning at 18th level, if your total for a Strength check is less than your Strength score, you can use that score in place of the total." },
+        { "level": 20, "name": "Primal Champion",  "type": "passive", "description": "At 20th level, you embody the power of the wilds. Your Strength and Constitution scores increase by 4. Your maximum for those scores is now 24." }
+      ],
+      "subclasses": {
+        "Path of the Berserker": {
+          "features": [
+            { "level": 3,  "name": "Frenzy",          "type": "passive", "description": "Starting when you choose this path at 3rd level, you can go into a frenzy when you rage. If you do so, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns after this one." },
+            { "level": 6,  "name": "Mindless Rage",   "type": "passive", "description": "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage." },
+            { "level": 10, "name": "Intimidating Presence","type":"passive","description": "Beginning at 10th level, you can use your action to frighten someone with your menacing presence." },
+            { "level": 14, "name": "Retaliation",     "type": "passive", "description": "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature." }
+          ]
+        },
+        "Path of the Totem Warrior": {
+          "features": [
+            { "level": 3,  "name": "Spirit Seeker",   "type": "passive", "description": "Yours is a path that seeks attunement with the natural world, giving you a kinship with beasts. At 3rd level you gain the ability to cast the Beast Sense and Speak with Animals spells as rituals." },
+            { "level": 3,  "name": "Totem Spirit",    "type": "choice",  "description": "At 3rd level, when you adopt this path, you choose a totem spirit and gain its feature.", "options": ["Bear — While raging you have resistance to all damage except psychic","Eagle — While raging you are difficult to track and can Dash as a bonus action","Wolf — While raging your friends have advantage on melee attack rolls against creatures adjacent to you"] },
+            { "level": 6,  "name": "Aspect of the Beast","type":"choice", "description": "At 6th level, you gain a magical benefit based on the totem animal of your choice.", "options": ["Bear — Your carrying capacity doubles","Eagle — You can see up to 1 mile with perfect clarity","Wolf — You can track other creatures while traveling at a fast pace"] },
+            { "level": 14, "name": "Totemic Attunement","type":"choice", "description": "At 14th level, you gain a magical benefit based on a totem animal of your choice.", "options": ["Bear — While raging, any creature within 5 ft has disadvantage on attacks not against you","Eagle — While raging you have a flying speed equal to your current walking speed","Wolf — While raging you can use a bonus action to knock a Large or smaller creature prone"] }
+          ]
+        }
       }
     },
 
     "Rogue": {
       "hitDie": 8,
       "primaryAbility": "dex",
-      "savingThrows": ["dex", "int"],
+      "savingThrows": ["dex","int"],
       "armorProficiencies": ["Light"],
-      "weaponProficiencies": ["Simple", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"],
-      "skills": ["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"],
-      "skillCount": 4,
+      "weaponProficiencies": ["Simple","Hand Crossbows","Longswords","Rapiers","Shortswords"],
+      "toolProficiencies": ["Thieves' Tools"],
       "spellcaster": false,
-      "features": {
-        "1":  ["Expertise", "Sneak Attack (1d6)", "Thieves' Cant"],
-        "2":  ["Cunning Action"],
-        "3":  ["Roguish Archetype", "Sneak Attack (2d6)"],
-        "4":  ["ASI"],
-        "5":  ["Uncanny Dodge", "Sneak Attack (3d6)"],
-        "6":  ["Expertise", "Sneak Attack (4d6)"],
-        "7":  ["Evasion", "Sneak Attack (4d6)"],
-        "8":  ["ASI", "Sneak Attack (5d6)"],
-        "9":  ["Archetype Feature", "Sneak Attack (5d6)"],
-        "10": ["ASI", "Sneak Attack (6d6)"],
-        "11": ["Reliable Talent", "Sneak Attack (6d6)"],
-        "12": ["ASI", "Sneak Attack (7d6)"],
-        "13": ["Archetype Feature", "Sneak Attack (7d6)"],
-        "14": ["Blindsense", "Sneak Attack (8d6)"],
-        "15": ["Slippery Mind", "Sneak Attack (8d6)"],
-        "16": ["ASI", "Sneak Attack (9d6)"],
-        "17": ["Archetype Feature", "Sneak Attack (9d6)"],
-        "18": ["Elusive", "Sneak Attack (10d6)"],
-        "19": ["ASI", "Sneak Attack (10d6)"],
-        "20": ["Stroke of Luck", "Sneak Attack (10d6)"]
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Rogue level. HP at 1st level: 8 + Constitution modifier. HP at higher levels: 1d8 (or 5) + Constitution modifier per level above 1st." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light. Weapons: Simple, Hand Crossbows, Longswords, Rapiers, Shortswords. Tools: Thieves' Tools. Saving Throws: Dexterity, Intelligence." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 4, "from": ["Acrobatics","Athletics","Deception","Insight","Intimidation","Investigation","Perception","Performance","Persuasion","Sleight of Hand","Stealth"], "description": "Choose 4 skills from the Rogue list." },
+        { "level": 1, "name": "Expertise",          "type": "expertise_choice", "count": 2, "description": "At 1st level, choose two of your skill proficiencies, or one of your skill proficiencies and your proficiency with thieves' tools. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies." },
+        { "level": 1, "name": "Sneak Attack",       "type": "passive", "description": "Beginning at 1st level, you know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. This extra damage increases as you gain Rogue levels: 2d6 at 3rd, 3d6 at 5th, 4d6 at 7th, 5d6 at 9th..." },
+        { "level": 1, "name": "Thieves' Cant",      "type": "passive", "description": "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. It takes four times longer to convey such a message than it does to speak the same idea plainly." },
+        { "level": 2, "name": "Cunning Action",     "type": "passive", "description": "Starting at 2nd level, your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action." },
+        { "level": 3, "name": "Roguish Archetype",  "type": "subclass_choice", "description": "At 3rd level, you choose an archetype that you emulate in the exercise of your rogue abilities." },
+        { "level": 4, "name": "Ability Score Improvement","type":"asi","description": "You can increase one ability score by 2, or two ability scores by 1 each. You can't exceed 20." },
+        { "level": 5, "name": "Uncanny Dodge",      "type": "passive", "description": "Starting at 5th level, when an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you." },
+        { "level": 6, "name": "Expertise (2nd)",    "type": "expertise_choice", "count": 2, "description": "At 6th level, choose two more of your skill proficiencies. Your proficiency bonus is doubled for those skills." },
+        { "level": 7, "name": "Evasion",            "type": "passive", "description": "Beginning at 7th level, you can nimbly dodge out of the way of certain area effects. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail." },
+        { "level": 11, "name": "Reliable Talent",   "type": "passive", "description": "By 11th level, you have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your proficiency bonus, you can treat a d20 roll of 9 or lower as a 10." },
+        { "level": 14, "name": "Blindsense",        "type": "passive", "description": "Starting at 14th level, if you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you." },
+        { "level": 15, "name": "Slippery Mind",     "type": "passive", "description": "By 15th level, you have acquired greater mental strength. You gain proficiency in Wisdom saving throws." },
+        { "level": 18, "name": "Elusive",           "type": "passive", "description": "Beginning at 18th level, you are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated." },
+        { "level": 20, "name": "Stroke of Luck",    "type": "passive", "description": "At 20th level, you have an uncanny knack for succeeding when you need to. If your attack misses a target within range, you can turn the miss into a hit. Alternatively, if you fail an ability check, you can treat the d20 roll as a 20. Once you use this feature, you can't use it again until you finish a short or long rest." }
+      ],
+      "subclasses": {
+        "Thief": {
+          "features": [
+            { "level": 3,  "name": "Fast Hands",       "type": "passive", "description": "Starting at 3rd level, you can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action." },
+            { "level": 3,  "name": "Second-Story Work", "type":"passive", "description": "When you choose this archetype at 3rd level, you gain the ability to climb faster than normal; climbing no longer costs you extra movement. Additionally, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier." },
+            { "level": 9,  "name": "Supreme Sneak",    "type": "passive", "description": "Starting at 9th level, you have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn." },
+            { "level": 13, "name": "Use Magic Device", "type": "passive", "description": "By 13th level, you have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of magic items." },
+            { "level": 17, "name": "Thief's Reflexes", "type": "passive", "description": "When you reach 17th level, you have become adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10." }
+          ]
+        },
+        "Assassin": {
+          "features": [
+            { "level": 3,  "name": "Bonus Proficiencies","type":"passive","description": "When you choose this archetype at 3rd level, you gain proficiency with the disguise kit and the poisoner's kit." },
+            { "level": 3,  "name": "Assassinate",       "type": "passive","description": "Starting at 3rd level, you are at your deadliest when you get the drop on your enemies. You have advantage on attack rolls against any creature that hasn't taken a turn in the combat yet. In addition, any hit you score against a creature that is surprised is a critical hit." },
+            { "level": 9,  "name": "Infiltration Expertise","type":"passive","description": "Starting at 9th level, you can unfailingly create false identities for yourself." },
+            { "level": 13, "name": "Impostor",          "type": "passive","description": "At 13th level, you gain the ability to unerringly mimic another person's speech, writing, and behavior." },
+            { "level": 17, "name": "Death Strike",      "type": "passive","description": "Starting at 17th level, you become a master of instant death. When you attack and hit a creature that is surprised, it must make a Constitution saving throw (DC 8 + your Dexterity modifier + your proficiency bonus). On a failed save, double the damage of your attack against the creature." }
+          ]
+        },
+        "Arcane Trickster": {
+          "spellcaster": true,
+          "spellcastingAbility": "int",
+          "features": [
+            { "level": 3,  "name": "Spellcasting",      "type": "passive","description": "When you reach 3rd level, you augment your martial prowess with the ability to cast spells. You learn 3 cantrips (Mage Hand plus 2 others from the wizard list) and 3 1st-level spells from the enchantment or illusion schools." },
+            { "level": 3,  "name": "Mage Hand Legerdemain","type":"passive","description": "Starting at 3rd level, when you cast Mage Hand, you can make the spectral hand invisible, and you can perform the following additional tasks with it." },
+            { "level": 9,  "name": "Magical Ambush",    "type": "passive","description": "Starting at 9th level, if you are hidden from a creature when you cast a spell on it, the creature has disadvantage on any saving throw it makes against the spell this turn." },
+            { "level": 13, "name": "Versatile Trickster","type":"passive","description": "At 13th level, you gain the ability to distract targets with your Mage Hand. As a bonus action on your turn, you can designate a creature within 5 feet of the spectral hand created by the spell. Doing so gives you advantage on attack rolls against that creature until the end of the turn." },
+            { "level": 17, "name": "Spell Thief",       "type": "passive","description": "At 17th level, you gain the ability to magically steal the knowledge of how to cast a spell from another spellcaster." }
+          ]
+        }
       }
     },
 
-    "Sorcerer": {
-      "hitDie": 6,
-      "primaryAbility": "cha",
-      "savingThrows": ["con", "cha"],
-      "armorProficiencies": [],
-      "weaponProficiencies": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"],
-      "skills": ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
-      "skillCount": 2,
-      "spellcaster": true,
-      "spellcastingAbility": "cha",
-      "features": {
-        "1":  ["Spellcasting", "Sorcerous Origin"],
-        "2":  ["Font of Magic"],
-        "3":  ["Metamagic (2)"],
-        "4":  ["ASI"],
-        "5":  [],
-        "6":  ["Origin Feature"],
-        "7":  [],
-        "8":  ["ASI"],
-        "9":  [],
-        "10": ["Metamagic (3)"],
-        "11": [],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Origin Feature"],
-        "15": [],
-        "16": ["ASI"],
-        "17": ["Metamagic (4)"],
-        "18": ["Origin Feature"],
-        "19": ["ASI"],
-        "20": ["Sorcerous Restoration"]
-      }
-    },
-
-    "Warlock": {
-      "hitDie": 8,
-      "primaryAbility": "cha",
-      "savingThrows": ["wis", "cha"],
-      "armorProficiencies": ["Light"],
-      "weaponProficiencies": ["Simple"],
-      "skills": ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"],
-      "skillCount": 2,
-      "spellcaster": true,
-      "spellcastingAbility": "cha",
-      "features": {
-        "1":  ["Otherworldly Patron", "Pact Magic"],
-        "2":  ["Eldritch Invocations (2)"],
-        "3":  ["Pact Boon"],
-        "4":  ["ASI"],
-        "5":  ["Eldritch Invocations (3)"],
-        "6":  ["Patron Feature"],
-        "7":  ["Eldritch Invocations (4)"],
-        "8":  ["ASI"],
-        "9":  ["Eldritch Invocations (5)"],
-        "10": ["Patron Feature"],
-        "11": ["Mystic Arcanum (6th)"],
-        "12": ["ASI", "Eldritch Invocations (6)"],
-        "13": ["Mystic Arcanum (7th)"],
-        "14": ["Patron Feature"],
-        "15": ["Mystic Arcanum (8th)", "Eldritch Invocations (7)"],
-        "16": ["ASI"],
-        "17": ["Mystic Arcanum (9th)"],
-        "18": ["Eldritch Invocations (8)"],
-        "19": ["ASI"],
-        "20": ["Eldritch Master"]
+    "Fighter": {
+      "hitDie": 10,
+      "primaryAbility": "str",
+      "savingThrows": ["str","con"],
+      "armorProficiencies": ["All Armor","Shields"],
+      "weaponProficiencies": ["Simple","Martial"],
+      "toolProficiencies": [],
+      "spellcaster": false,
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d10 per Fighter level. HP at 1st level: 10 + Constitution modifier. HP at higher levels: 1d10 (or 6) + Constitution modifier per level above 1st." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: All armor, Shields. Weapons: Simple, Martial. Saving Throws: Strength, Constitution." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Acrobatics","Animal Handling","Athletics","History","Insight","Intimidation","Perception","Survival"], "description": "Choose 2 skills from the Fighter list." },
+        { "level": 1, "name": "Fighting Style",     "type": "choice", "description": "You adopt a particular style of fighting as your specialty. Choose one of the following options.", "options": ["Archery — +2 bonus to ranged weapon attack rolls","Defense — +1 bonus to AC when wearing armor","Dueling — +2 damage when wielding a melee weapon in one hand and no other weapons","Great Weapon Fighting — Reroll 1s and 2s on damage dice for two-handed weapons","Protection — Use reaction to impose disadvantage on an attack against an adjacent ally","Two-Weapon Fighting — Add ability modifier to off-hand attack damage"] },
+        { "level": 1, "name": "Second Wind",        "type": "passive", "description": "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level. Once you use this feature, you must finish a short or long rest before you can use it again." },
+        { "level": 2, "name": "Action Surge",       "type": "passive", "description": "Starting at 2nd level, you can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn." },
+        { "level": 3, "name": "Martial Archetype",  "type": "subclass_choice", "description": "At 3rd level, you choose an archetype that you strive to emulate in your combat styles and techniques." },
+        { "level": 4, "name": "Ability Score Improvement","type":"asi","description": "You can increase one ability score by 2, or two ability scores by 1 each." },
+        { "level": 5, "name": "Extra Attack",       "type": "passive", "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn. The number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level." },
+        { "level": 9, "name": "Indomitable",        "type": "passive", "description": "Beginning at 9th level, you can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest." },
+        { "level": 11, "name": "Extra Attack (2)",  "type": "passive", "description": "You can attack three times when you take the Attack action." },
+        { "level": 20, "name": "Extra Attack (3)",  "type": "passive", "description": "You can attack four times when you take the Attack action." }
+      ],
+      "subclasses": {
+        "Champion": {
+          "features": [
+            { "level": 3,  "name": "Improved Critical","type":"passive","description": "Beginning when you choose this archetype at 3rd level, your weapon attacks score a critical hit on a roll of 19 or 20." },
+            { "level": 7,  "name": "Remarkable Athlete","type":"passive","description": "Starting at 7th level, you can add half your proficiency bonus (rounded up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus." },
+            { "level": 10, "name": "Additional Fighting Style","type":"choice","description": "At 10th level, you can choose a second option from the Fighting Style class feature.", "options": ["Archery","Defense","Dueling","Great Weapon Fighting","Protection","Two-Weapon Fighting"] },
+            { "level": 15, "name": "Superior Critical","type":"passive","description": "Starting at 15th level, your weapon attacks score a critical hit on a roll of 18–20." },
+            { "level": 18, "name": "Survivor",       "type": "passive","description": "At 18th level, you attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left." }
+          ]
+        },
+        "Battle Master": {
+          "features": [
+            { "level": 3,  "name": "Combat Superiority","type":"passive","description": "When you choose this archetype at 3rd level, you learn maneuvers that are fueled by special dice called superiority dice (d8s). You have 4, gaining more as you level up." },
+            { "level": 3,  "name": "Maneuvers",      "type": "choice", "description": "You learn 3 maneuvers of your choice. You learn 2 additional maneuvers at 7th, 10th, and 15th level.", "options": ["Commander's Strike","Disarming Attack","Distracting Strike","Evasive Footwork","Feinting Attack","Goading Attack","Lunging Attack","Maneuvering Attack","Menacing Attack","Parry","Precision Attack","Pushing Attack","Rally","Riposte","Sweeping Attack","Trip Attack"] },
+            { "level": 7,  "name": "Know Your Enemy","type":"passive","description": "Starting at 7th level, if you spend at least 1 minute observing or interacting with another creature outside combat, you can learn certain information about its capabilities compared to your own." },
+            { "level": 15, "name": "Relentless",     "type": "passive","description": "Starting at 15th level, when you roll initiative and have no superiority dice remaining, you regain one superiority die." }
+          ]
+        },
+        "Eldritch Knight": {
+          "spellcaster": true,
+          "spellcastingAbility": "int",
+          "features": [
+            { "level": 3,  "name": "Spellcasting",   "type": "passive","description": "When you reach 3rd level, you augment your martial prowess with the ability to cast spells. You learn 2 cantrips from the wizard spell list and 3 first-level spells from the abjuration or evocation schools." },
+            { "level": 7,  "name": "War Magic",      "type": "passive","description": "Beginning at 7th level, when you use your action to cast a cantrip, you can make one weapon attack as a bonus action." },
+            { "level": 10, "name": "Eldritch Strike","type":"passive","description": "At 10th level, you learn how to make your weapon strikes undercut a creature's resistance to your spells. When you hit a creature with a weapon attack, that creature has disadvantage on the next saving throw it makes against a spell you cast before the end of your next turn." },
+            { "level": 15, "name": "Arcane Charge",  "type": "passive","description": "At 15th level, you gain the ability to teleport up to 30 feet to an unoccupied space you can see when you use your Action Surge." }
+          ]
+        }
       }
     },
 
     "Wizard": {
       "hitDie": 6,
       "primaryAbility": "int",
-      "savingThrows": ["int", "wis"],
+      "savingThrows": ["int","wis"],
       "armorProficiencies": [],
-      "weaponProficiencies": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"],
-      "skills": ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"],
-      "skillCount": 2,
+      "weaponProficiencies": ["Daggers","Darts","Slings","Quarterstaffs","Light Crossbows"],
+      "toolProficiencies": [],
       "spellcaster": true,
       "spellcastingAbility": "int",
-      "features": {
-        "1":  ["Spellcasting", "Arcane Recovery"],
-        "2":  ["Arcane Tradition"],
-        "3":  [],
-        "4":  ["ASI"],
-        "5":  [],
-        "6":  ["Tradition Feature"],
-        "7":  [],
-        "8":  ["ASI"],
-        "9":  [],
-        "10": ["Tradition Feature"],
-        "11": [],
-        "12": ["ASI"],
-        "13": [],
-        "14": ["Tradition Feature"],
-        "15": [],
-        "16": ["ASI"],
-        "17": [],
-        "18": ["Spell Mastery"],
-        "19": ["ASI"],
-        "20": ["Signature Spells"]
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d6 per Wizard level. HP at 1st level: 6 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Weapons: Daggers, Darts, Slings, Quarterstaffs, Light Crossbows. Saving Throws: Intelligence, Wisdom." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Arcana","History","Insight","Investigation","Medicine","Religion"], "description": "Choose 2 skills from the Wizard list." },
+        { "level": 1, "name": "Spellcasting",       "type": "passive", "description": "As a student of arcane magic, you have a spellbook containing spells that show the first glimmerings of your true power. Your spellcasting ability is Intelligence." },
+        { "level": 1, "name": "Arcane Recovery",    "type": "passive", "description": "You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your wizard level (rounded up)." },
+        { "level": 2, "name": "Arcane Tradition",   "type": "subclass_choice", "description": "When you reach 2nd level, you choose an arcane tradition, shaping your practice of magic through one of eight schools." },
+        { "level": 4, "name": "Ability Score Improvement","type":"asi","description": "You can increase one ability score by 2, or two ability scores by 1 each." },
+        { "level": 18, "name": "Spell Mastery",     "type": "passive", "description": "At 18th level, you have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared." },
+        { "level": 20, "name": "Signature Spells",  "type": "passive", "description": "When you reach 20th level, you gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot." }
+      ],
+      "subclasses": {
+        "School of Evocation": {
+          "features": [
+            { "level": 2,  "name": "Evocation Savant","type":"passive","description": "Beginning when you select this school at 2nd level, the gold and time you must spend to copy an evocation spell into your spellbook is halved." },
+            { "level": 2,  "name": "Sculpt Spells",  "type": "passive","description": "Beginning at 2nd level, you can create pockets of relative safety within the effects of your evocation spells. When you cast an evocation spell that affects other creatures that you can see, you can choose a number of them equal to 1 + the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save." },
+            { "level": 6,  "name": "Potent Cantrip", "type": "passive","description": "Starting at 6th level, your damaging cantrips affect even creatures that avoid the brunt of the effect. When a creature succeeds on a saving throw against your cantrip, the creature takes half the cantrip's damage (if any) but suffers no additional effect from the cantrip." },
+            { "level": 10, "name": "Empowered Evocation","type":"passive","description": "Beginning at 10th level, you can add your Intelligence modifier to one damage roll of any wizard evocation spell you cast." }
+          ]
+        },
+        "School of Abjuration": {
+          "features": [
+            { "level": 2,  "name": "Abjuration Savant","type":"passive","description": "The gold and time you must spend to copy an abjuration spell into your spellbook is halved." },
+            { "level": 2,  "name": "Arcane Ward",    "type": "passive","description": "Starting at 2nd level, you can weave magic around yourself for protection. When you cast an abjuration spell of 1st level or higher, you can simultaneously use a strand of the spell's magic to create a magical ward on yourself that lasts until you finish a long rest. The ward has hit points equal to twice your wizard level + your Intelligence modifier." },
+            { "level": 6,  "name": "Projected Ward", "type": "passive","description": "Starting at 6th level, when a creature that you can see within 30 feet of you takes damage, you can use your reaction to cause your Arcane Ward to absorb that damage." },
+            { "level": 10, "name": "Improved Abjuration","type":"passive","description": "Beginning at 10th level, when you cast an abjuration spell that requires you to make an ability check as a part of casting that spell, you add your proficiency bonus to that ability check." }
+          ]
+        }
+      }
+    },
+
+    "Cleric": {
+      "hitDie": 8,
+      "primaryAbility": "wis",
+      "savingThrows": ["wis","cha"],
+      "armorProficiencies": ["Light","Medium","Shields"],
+      "weaponProficiencies": ["Simple"],
+      "toolProficiencies": [],
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Cleric level. HP at 1st level: 8 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light, Medium, Shields. Weapons: Simple. Saving Throws: Wisdom, Charisma." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["History","Insight","Medicine","Persuasion","Religion"], "description": "Choose 2 skills from the Cleric list." },
+        { "level": 1, "name": "Spellcasting",       "type": "passive", "description": "As a conduit for divine power, you can cast cleric spells. Your spellcasting ability is Wisdom." },
+        { "level": 1, "name": "Divine Domain",      "type": "subclass_choice", "description": "Choose one domain related to your deity. Your choice grants you domain spells and other features when you choose it at 1st level." },
+        { "level": 2, "name": "Channel Divinity",   "type": "passive", "description": "At 2nd level, you gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects. You start with two such effects: Turn Undead and an effect determined by your domain. You can use Channel Divinity once between short rests (twice at 6th, three times at 18th)." },
+        { "level": 5, "name": "Destroy Undead",     "type": "passive", "description": "Starting at 5th level, when an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold." },
+        { "level": 10, "name": "Divine Intervention","type":"passive","description": "Beginning at 10th level, you can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes." }
+      ],
+      "subclasses": {
+        "Life Domain": {
+          "features": [
+            { "level": 1,  "name": "Bonus Proficiency","type":"passive","description": "When you choose this domain at 1st level, you gain proficiency with heavy armor." },
+            { "level": 1,  "name": "Disciple of Life","type":"passive","description": "Also starting at 1st level, your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level." },
+            { "level": 2,  "name": "Channel Divinity: Preserve Life","type":"passive","description": "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured. As an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level." },
+            { "level": 6,  "name": "Blessed Healer", "type": "passive","description": "Beginning at 6th level, the healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level." },
+            { "level": 8,  "name": "Divine Strike",  "type": "passive","description": "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target." },
+            { "level": 17, "name": "Supreme Healing","type":"passive","description": "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die." }
+          ]
+        }
+      }
+    },
+
+    "Bard": {
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "savingThrows": ["dex","cha"],
+      "armorProficiencies": ["Light"],
+      "weaponProficiencies": ["Simple","Hand Crossbows","Longswords","Rapiers","Shortswords"],
+      "toolProficiencies": ["Three musical instruments of your choice"],
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Bard level. HP at 1st level: 8 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light. Weapons: Simple, Hand Crossbows, Longswords, Rapiers, Shortswords. Tools: Three musical instruments. Saving Throws: Dexterity, Charisma." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 3, "from": "all", "description": "Choose any 3 skills." },
+        { "level": 1, "name": "Spellcasting",       "type": "passive", "description": "You have learned to untangle and reshape the fabric of reality in harmony with your wishes and music. Your spellcasting ability is Charisma." },
+        { "level": 1, "name": "Bardic Inspiration", "type": "passive", "description": "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6. This increases to d8 at 5th level, d10 at 10th, and d12 at 15th." },
+        { "level": 2, "name": "Jack of All Trades", "type": "passive", "description": "Starting at 2nd level, you can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus." },
+        { "level": 3, "name": "Expertise",          "type": "expertise_choice", "count": 2, "description": "At 3rd level, choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies." },
+        { "level": 3, "name": "Bard College",       "type": "subclass_choice", "description": "At 3rd level, you delve into the advanced techniques of a bard college of your choice." },
+        { "level": 4, "name": "Ability Score Improvement","type":"asi","description": "You can increase one ability score by 2, or two ability scores by 1 each." },
+        { "level": 5, "name": "Font of Inspiration","type":"passive","description": "Beginning when you reach 5th level, you regain all of your expended uses of Bardic Inspiration when you finish a short or long rest." },
+        { "level": 6, "name": "Countercharm",       "type": "passive","description": "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed." }
+      ],
+      "subclasses": {
+        "College of Lore": {
+          "features": [
+            { "level": 3,  "name": "Bonus Proficiencies","type":"proficiency_choice","count":3,"from":"all","description": "When you join the College of Lore at 3rd level, you gain proficiency with three skills of your choice." },
+            { "level": 3,  "name": "Cutting Words",  "type": "passive","description": "Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others." },
+            { "level": 6,  "name": "Additional Magical Secrets","type":"passive","description": "At 6th level, you learn two spells of your choice from any class. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip." },
+            { "level": 14, "name": "Peerless Skill", "type": "passive","description": "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check." }
+          ]
+        },
+        "College of Valor": {
+          "features": [
+            { "level": 3,  "name": "Bonus Proficiencies","type":"passive","description": "When you join the College of Valor at 3rd level, you gain proficiency with medium armor, shields, and martial weapons." },
+            { "level": 3,  "name": "Combat Inspiration","type":"passive","description": "Also at 3rd level, you learn to inspire others in battle. A creature that has a Bardic Inspiration die from you can roll that die and add the number rolled to a weapon damage roll it just made." },
+            { "level": 6,  "name": "Extra Attack",   "type": "passive","description": "Starting at 6th level, you can attack twice, instead of once, whenever you take the Attack action on your turn." },
+            { "level": 14, "name": "Battle Magic",   "type": "passive","description": "At 14th level, you have mastered the art of weaving spellcasting and weapon use into a single harmonious act. When you use your action to cast a bard spell, you can make one weapon attack as a bonus action." }
+          ]
+        }
+      }
+    },
+
+    "Paladin": {
+      "hitDie": 10,
+      "primaryAbility": "str",
+      "savingThrows": ["wis","cha"],
+      "armorProficiencies": ["All Armor","Shields"],
+      "weaponProficiencies": ["Simple","Martial"],
+      "toolProficiencies": [],
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d10 per Paladin level. HP at 1st level: 10 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: All armor, Shields. Weapons: Simple, Martial. Saving Throws: Wisdom, Charisma." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Athletics","Insight","Intimidation","Medicine","Persuasion","Religion"], "description": "Choose 2 skills from the Paladin list." },
+        { "level": 1, "name": "Divine Sense",       "type": "passive", "description": "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces until the end of your next turn." },
+        { "level": 1, "name": "Lay on Hands",       "type": "passive", "description": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5." },
+        { "level": 2, "name": "Fighting Style",     "type": "choice", "description": "At 2nd level, you adopt a style of fighting as your specialty.", "options": ["Defense — +1 to AC in armor","Dueling — +2 damage with one-handed melee weapon","Great Weapon Fighting — Reroll 1s and 2s on damage for two-handed weapons","Protection — Impose disadvantage on attacks against adjacent allies"] },
+        { "level": 2, "name": "Spellcasting",       "type": "passive", "description": "By 2nd level, you have learned to draw on divine magic through meditation and prayer to cast spells as a cleric does. Your spellcasting ability is Charisma." },
+        { "level": 2, "name": "Divine Smite",       "type": "passive", "description": "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8." },
+        { "level": 3, "name": "Sacred Oath",        "type": "subclass_choice", "description": "When you reach 3rd level, you swear the oath that binds you as a paladin forever. Up to this time you have been in a preparatory stage, committed to the path but not yet sworn to it." },
+        { "level": 5, "name": "Extra Attack",       "type": "passive", "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn." },
+        { "level": 6, "name": "Aura of Protection", "type": "passive", "description": "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus." },
+        { "level": 10, "name": "Aura of Courage",   "type": "passive", "description": "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious." }
+      ],
+      "subclasses": {
+        "Oath of Devotion": {
+          "features": [
+            { "level": 3,  "name": "Sacred Weapon",  "type": "passive","description": "As an action, you can imbue one weapon that you are holding with positive energy, using your Channel Divinity. For 1 minute, you add your Charisma modifier to attack rolls made with that weapon (with a minimum bonus of +1)." },
+            { "level": 3,  "name": "Turn the Unholy","type":"passive","description": "As an action, you present your holy symbol and speak a prayer censuring fiends and undead, using your Channel Divinity. Each fiend or undead that can see or hear you within 30 feet of you must make a Wisdom saving throw." },
+            { "level": 7,  "name": "Aura of Devotion","type":"passive","description": "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious." }
+          ]
+        }
+      }
+    },
+
+    "Ranger": {
+      "hitDie": 10,
+      "primaryAbility": "dex",
+      "savingThrows": ["str","dex"],
+      "armorProficiencies": ["Light","Medium","Shields"],
+      "weaponProficiencies": ["Simple","Martial"],
+      "toolProficiencies": [],
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d10 per Ranger level. HP at 1st level: 10 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light, Medium, Shields. Weapons: Simple, Martial. Saving Throws: Strength, Dexterity." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 3, "from": ["Animal Handling","Athletics","Insight","Investigation","Nature","Perception","Stealth","Survival"], "description": "Choose 3 skills from the Ranger list." },
+        { "level": 1, "name": "Favored Enemy",      "type": "choice", "description": "Beginning at 1st level, you have significant experience studying, tracking, hunting, and even talking to a certain type of enemy. Choose a type of favored enemy.", "options": ["Aberrations","Beasts","Celestials","Constructs","Dragons","Elementals","Fey","Fiends","Giants","Monstrosities","Oozes","Plants","Undead","Two humanoid races of your choice"] },
+        { "level": 1, "name": "Natural Explorer",   "type": "choice", "description": "You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions.", "options": ["Arctic","Coast","Desert","Forest","Grassland","Mountain","Swamp","Underdark"] },
+        { "level": 2, "name": "Fighting Style",     "type": "choice", "description": "At 2nd level, you adopt a particular style of fighting as your specialty.", "options": ["Archery — +2 to ranged attack rolls","Defense — +1 to AC in armor","Dueling — +2 damage with one-handed melee weapon","Two-Weapon Fighting — Add ability modifier to off-hand attack"] },
+        { "level": 2, "name": "Spellcasting",       "type": "passive", "description": "By the time you reach 2nd level, you have learned to use the magical essence of nature to cast spells, much as a druid does. Your spellcasting ability is Wisdom." },
+        { "level": 3, "name": "Ranger Archetype",   "type": "subclass_choice", "description": "At 3rd level, you choose an archetype that you strive to emulate: Hunter or Beast Master." },
+        { "level": 5, "name": "Extra Attack",       "type": "passive", "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn." }
+      ],
+      "subclasses": {
+        "Hunter": {
+          "features": [
+            { "level": 3,  "name": "Hunter's Prey",  "type": "choice","description": "At 3rd level, you gain one of the following features of your choice.", "options": ["Colossus Slayer — Extra 1d8 damage to damaged creatures once per turn","Giant Killer — Reaction attack when an adjacent Large+ creature misses you","Horde Breaker — Attack a second adjacent creature with the same weapon once per turn"] },
+            { "level": 7,  "name": "Defensive Tactics","type":"choice","description": "At 7th level, you gain one of the following features of your choice.", "options": ["Escape the Horde — Opportunity attacks against you have disadvantage","Multiattack Defense — +4 to AC after being hit until the end of the attacker's turn","Steel Will — Advantage on saves against being frightened"] },
+            { "level": 11, "name": "Multiattack",    "type": "choice","description": "At 11th level, you gain one of the following features of your choice.", "options": ["Volley — Attack every creature in a 10-ft radius you can see (ranged)","Whirlwind Attack — Melee attack against any number of adjacent creatures"] }
+          ]
+        }
+      }
+    },
+
+    "Druid": {
+      "hitDie": 8,
+      "primaryAbility": "wis",
+      "savingThrows": ["int","wis"],
+      "armorProficiencies": ["Light","Medium","Shields (non-metal)"],
+      "weaponProficiencies": ["Clubs","Daggers","Darts","Javelins","Maces","Quarterstaffs","Scimitars","Slings","Spears"],
+      "toolProficiencies": ["Herbalism Kit"],
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Druid level. HP at 1st level: 8 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light, Medium, Shields (non-metal). Weapons: Clubs, Daggers, Darts, Javelins, Maces, Quarterstaffs, Scimitars, Slings, Spears. Tools: Herbalism Kit. Saving Throws: Intelligence, Wisdom." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Arcana","Animal Handling","Insight","Medicine","Nature","Perception","Religion","Survival"], "description": "Choose 2 skills from the Druid list." },
+        { "level": 1, "name": "Druidic",            "type": "passive", "description": "You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages." },
+        { "level": 1, "name": "Spellcasting",       "type": "passive", "description": "Drawing on the divine essence of nature itself, you can cast spells to shape that essence to your will. Your spellcasting ability is Wisdom." },
+        { "level": 2, "name": "Wild Shape",         "type": "passive", "description": "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice, regaining uses on a short or long rest." },
+        { "level": 2, "name": "Druid Circle",       "type": "subclass_choice", "description": "At 2nd level, you choose to identify with a circle of druids." },
+        { "level": 18, "name": "Timeless Body",     "type": "passive", "description": "Starting at 18th level, the primal magic that you wield causes you to age more slowly. For every 10 years that pass, your body ages only 1 year." },
+        { "level": 18, "name": "Beast Spells",      "type": "passive", "description": "Beginning at 18th level, you can cast many of your druid spells in any shape you assume using Wild Shape." },
+        { "level": 20, "name": "Archdruid",         "type": "passive", "description": "At 20th level, you can use your Wild Shape an unlimited number of times." }
+      ],
+      "subclasses": {
+        "Circle of the Land": {
+          "features": [
+            { "level": 2,  "name": "Bonus Cantrip",  "type": "passive","description": "When you choose this circle at 2nd level, you learn one additional druid cantrip of your choice." },
+            { "level": 2,  "name": "Natural Recovery","type":"passive","description": "Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up)." },
+            { "level": 3,  "name": "Circle Spells",  "type": "choice","description": "Your mystical connection to the land infuses you with the ability to cast certain spells. Choose the type of land.", "options": ["Arctic","Coast","Desert","Forest","Grassland","Mountain","Swamp","Underdark"] }
+          ]
+        }
+      }
+    },
+
+    "Monk": {
+      "hitDie": 8,
+      "primaryAbility": "dex",
+      "savingThrows": ["str","dex"],
+      "armorProficiencies": [],
+      "weaponProficiencies": ["Simple","Shortswords"],
+      "toolProficiencies": ["One type of artisan's tools or one musical instrument"],
+      "spellcaster": false,
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Monk level. HP at 1st level: 8 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Weapons: Simple weapons, Shortswords. Tools: One artisan's tool or musical instrument. Saving Throws: Strength, Dexterity." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Acrobatics","Athletics","History","Insight","Religion","Stealth"], "description": "Choose 2 skills from the Monk list." },
+        { "level": 1, "name": "Unarmored Defense", "type": "passive", "description": "Beginning at 1st level, while you are wearing no armor and not wielding a shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier." },
+        { "level": 1, "name": "Martial Arts",       "type": "passive", "description": "At 1st level, your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons. You can use Dexterity instead of Strength for attack and damage rolls, and your unarmed strike deals 1d4 (increasing with level)." },
+        { "level": 2, "name": "Ki",                 "type": "passive", "description": "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. You have ki points equal to your monk level." },
+        { "level": 3, "name": "Monastic Tradition", "type": "subclass_choice", "description": "When you reach 3rd level, you commit yourself to a monastic tradition." },
+        { "level": 4, "name": "Ability Score Improvement","type":"asi","description": "You can increase one ability score by 2, or two ability scores by 1 each." },
+        { "level": 5, "name": "Extra Attack",       "type": "passive", "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn." },
+        { "level": 5, "name": "Stunning Strike",    "type": "passive", "description": "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike." }
+      ],
+      "subclasses": {
+        "Way of the Open Hand": {
+          "features": [
+            { "level": 3,  "name": "Open Hand Technique","type":"passive","description": "Starting when you choose this tradition at 3rd level, you can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target." },
+            { "level": 6,  "name": "Wholeness of Body","type":"passive","description": "At 6th level, you gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again." },
+            { "level": 11, "name": "Tranquility",   "type": "passive","description": "Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace." },
+            { "level": 17, "name": "Quivering Palm","type":"passive","description": "At 17th level, you gain the ability to set up lethal vibrations in someone's body." }
+          ]
+        }
+      }
+    },
+
+    "Sorcerer": {
+      "hitDie": 6,
+      "primaryAbility": "cha",
+      "savingThrows": ["con","cha"],
+      "armorProficiencies": [],
+      "weaponProficiencies": ["Daggers","Darts","Slings","Quarterstaffs","Light Crossbows"],
+      "toolProficiencies": [],
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d6 per Sorcerer level. HP at 1st level: 6 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Weapons: Daggers, Darts, Slings, Quarterstaffs, Light Crossbows. Saving Throws: Constitution, Charisma." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Arcana","Deception","Insight","Intimidation","Persuasion","Religion"], "description": "Choose 2 skills from the Sorcerer list." },
+        { "level": 1, "name": "Spellcasting",       "type": "passive", "description": "An event in your past, or in the life of a parent or ancestor, left an indelible mark on you, infusing you with arcane magic. Your spellcasting ability is Charisma." },
+        { "level": 1, "name": "Sorcerous Origin",   "type": "subclass_choice", "description": "Choose a sorcerous origin, which describes the source of your innate magical power." },
+        { "level": 2, "name": "Font of Magic",      "type": "passive", "description": "At 2nd level, you tap into a deep wellspring of magic within yourself. This wellspring is represented by sorcery points, which allow you to create a variety of magical effects. You have 2 sorcery points at 2nd level, and you gain one more sorcery point every time you level up, to a maximum of 20 at level 20." },
+        { "level": 3, "name": "Metamagic",          "type": "choice", "description": "At 3rd level, you gain the ability to twist your spells to suit your needs. Choose two Metamagic options.", "options": ["Careful Spell","Distant Spell","Empowered Spell","Extended Spell","Heightened Spell","Quickened Spell","Subtle Spell","Twinned Spell"] }
+      ],
+      "subclasses": {
+        "Draconic Bloodline": {
+          "features": [
+            { "level": 1,  "name": "Dragon Ancestor","type": "choice","description": "At 1st level, you choose one type of dragon as your ancestor. The damage type associated with each dragon is used by features you gain later.", "options": ["Black (Acid)","Blue (Lightning)","Brass (Fire)","Bronze (Lightning)","Copper (Acid)","Gold (Fire)","Green (Poison)","Red (Fire)","Silver (Cold)","White (Cold)"] },
+            { "level": 1,  "name": "Draconic Resilience","type":"passive","description": "As magic flows through your body, it causes physical traits of your dragon ancestors to emerge. At 1st level, your hit point maximum increases by 1 and increases by 1 again whenever you gain a level in this class. Additionally, parts of your skin are covered by a thin sheen of dragon-like scales. When you aren't wearing armor, your AC equals 13 + your Dexterity modifier." },
+            { "level": 6,  "name": "Elemental Affinity","type":"passive","description": "Starting at 6th level, when you cast a spell that deals damage of the type associated with your draconic ancestry, you can add your Charisma modifier to one damage roll of that spell." },
+            { "level": 14, "name": "Dragon Wings",  "type": "passive","description": "At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed." }
+          ]
+        },
+        "Wild Magic": {
+          "features": [
+            { "level": 1,  "name": "Wild Magic Surge","type":"passive","description": "Starting when you choose this origin at 1st level, your spellcasting can unleash surges of untamed magic. Immediately after you cast a sorcerer spell of 1st level or higher, the DM can have you roll a d20. If you roll a 1, roll on the Wild Magic Surge table." },
+            { "level": 1,  "name": "Tides of Chaos", "type": "passive","description": "Starting at 1st level, you can manipulate the forces of chance and chaos to gain advantage on one attack roll, ability check, or saving throw. Once you do so, you must finish a long rest before you can use this feature again." },
+            { "level": 6,  "name": "Bend Luck",      "type": "passive","description": "Starting at 6th level, you have the ability to twist fate using your wild magic. When another creature you can see makes an attack roll, an ability check, or a saving throw, you can use your reaction and spend 2 sorcery points to roll 1d4 and apply the number rolled as a bonus or penalty (your choice) to the creature's roll." }
+          ]
+        }
+      }
+    },
+
+    "Warlock": {
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "savingThrows": ["wis","cha"],
+      "armorProficiencies": ["Light"],
+      "weaponProficiencies": ["Simple"],
+      "toolProficiencies": [],
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": [
+        { "level": 1, "name": "Hit Points",         "type": "passive", "description": "Hit Dice: 1d8 per Warlock level. HP at 1st level: 8 + Constitution modifier." },
+        { "level": 1, "name": "Proficiencies",      "type": "passive", "description": "Armor: Light. Weapons: Simple. Saving Throws: Wisdom, Charisma." },
+        { "level": 1, "name": "Skill Proficiencies","type": "proficiency_choice", "count": 2, "from": ["Arcana","Deception","History","Intimidation","Investigation","Nature","Religion"], "description": "Choose 2 skills from the Warlock list." },
+        { "level": 1, "name": "Otherworldly Patron","type": "subclass_choice", "description": "At 1st level, you have struck a bargain with an otherworldly being of your choice." },
+        { "level": 1, "name": "Pact Magic",         "type": "passive", "description": "Your arcane research and the magic bestowed on you by your patron have given you facility with spells. You have two 1st-level spell slots that refresh on a short rest. Your spellcasting ability is Charisma." },
+        { "level": 2, "name": "Eldritch Invocations","type":"passive","description": "In your study of occult lore, you have unearthed eldritch invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability. You gain 2 invocations at 2nd level, gaining more as you level up." },
+        { "level": 3, "name": "Pact Boon",          "type": "choice","description": "At 3rd level, your otherworldly patron bestows a gift upon you for your loyal service.", "options": ["Pact of the Chain — You learn Find Familiar and can summon a special familiar","Pact of the Blade — You can create a pact weapon in your hand as an action","Pact of the Tome — Your patron gives you a grimoire with 3 cantrips from any class list"] }
+      ],
+      "subclasses": {
+        "The Fiend": {
+          "features": [
+            { "level": 1,  "name": "Dark One's Blessing","type":"passive","description": "Starting at 1st level, when you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier + your warlock level (minimum of 1)." },
+            { "level": 6,  "name": "Dark One's Own Luck","type":"passive","description": "Starting at 6th level, you can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur." },
+            { "level": 10, "name": "Fiendish Resilience","type":"passive","description": "Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature." }
+          ]
+        },
+        "The Archfey": {
+          "features": [
+            { "level": 1,  "name": "Fey Presence",  "type": "passive","description": "Starting at 1st level, your patron bestows upon you the ability to project the beguiling and fearsome presence of the fey. As an action, you can cause each creature in a 10-foot cube originating from you to make a Wisdom saving throw against your warlock spell save DC." },
+            { "level": 6,  "name": "Misty Escape",  "type": "passive","description": "Starting at 6th level, you can vanish in a puff of mist in response to harm. When you take damage, you can use your reaction to turn invisible and teleport up to 60 feet to an unoccupied space you can see." }
+          ]
+        }
       }
     }
   },
 
   "backgrounds": {
-    "_notes": "skills: exactly 2 skill names. tools: optional array of tool proficiencies. languages: optional integer number of bonus languages. feature: name of the background feature (display only).",
-
-    "Acolyte":    { "skills": ["Insight", "Religion"],              "languages": 2,                                            "feature": "Shelter of the Faithful" },
-    "Charlatan":  { "skills": ["Deception", "Sleight of Hand"],     "tools": ["Disguise Kit", "Forgery Kit"],                  "feature": "False Identity" },
-    "Criminal":   { "skills": ["Deception", "Stealth"],             "tools": ["Thieves' Tools", "Gaming Set"],                 "feature": "Criminal Contact" },
-    "Entertainer":{ "skills": ["Acrobatics", "Performance"],        "tools": ["Disguise Kit", "Musical Instrument"],           "feature": "By Popular Demand" },
-    "Folk Hero":  { "skills": ["Animal Handling", "Survival"],      "tools": ["Artisan's Tools", "Vehicles (Land)"],           "feature": "Rustic Hospitality" },
-    "Hermit":     { "skills": ["Medicine", "Religion"],             "tools": ["Herbalism Kit"],          "languages": 1,       "feature": "Discovery" },
-    "Noble":      { "skills": ["History", "Persuasion"],            "tools": ["Gaming Set"],             "languages": 1,       "feature": "Position of Privilege" },
-    "Outlander":  { "skills": ["Athletics", "Survival"],            "tools": ["Musical Instrument"],     "languages": 1,       "feature": "Wanderer" },
-    "Sage":       { "skills": ["Arcana", "History"],                "languages": 2,                                            "feature": "Researcher" },
-    "Sailor":     { "skills": ["Athletics", "Perception"],          "tools": ["Navigator's Tools", "Vehicles (Water)"],        "feature": "Ship's Passage" },
-    "Soldier":    { "skills": ["Athletics", "Intimidation"],        "tools": ["Gaming Set", "Vehicles (Land)"],                "feature": "Military Rank" },
-    "Urchin":     { "skills": ["Sleight of Hand", "Stealth"],       "tools": ["Thieves' Tools", "Disguise Kit"],               "feature": "City Secrets" }
+    "Acolyte":     { "skills": ["Insight","Religion"],            "languages": 2,                                      "feature": "Shelter of the Faithful",    "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods. You act as an intermediary between the realm of the holy and the mortal world." },
+    "Charlatan":   { "skills": ["Deception","Sleight of Hand"],   "tools": ["Disguise Kit","Forgery Kit"],              "feature": "False Identity",             "description": "You have always had a way with people. You know what makes them tick, you can tease out their hearts' desires after a few minutes of conversation, and with a few leading questions you can read them like they were children's books." },
+    "Criminal":    { "skills": ["Deception","Stealth"],           "tools": ["Thieves' Tools","Gaming Set"],             "feature": "Criminal Contact",           "description": "You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld." },
+    "Entertainer": { "skills": ["Acrobatics","Performance"],      "tools": ["Disguise Kit","Musical Instrument"],       "feature": "By Popular Demand",          "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them. Your poetics can stir the hearts of those who hear you." },
+    "Folk Hero":   { "skills": ["Animal Handling","Survival"],    "tools": ["Artisan's Tools","Vehicles (Land)"],       "feature": "Rustic Hospitality",         "description": "You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion." },
+    "Hermit":      { "skills": ["Medicine","Religion"],           "tools": ["Herbalism Kit"],    "languages": 1,        "feature": "Discovery",                  "description": "You lived in seclusion — either in a sheltered community such as a monastery, or entirely alone — for a formative part of your life." },
+    "Noble":       { "skills": ["History","Persuasion"],          "tools": ["Gaming Set"],       "languages": 1,        "feature": "Position of Privilege",      "description": "You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence." },
+    "Outlander":   { "skills": ["Athletics","Survival"],          "tools": ["Musical Instrument"],"languages": 1,       "feature": "Wanderer",                   "description": "You grew up in the wilds, far from civilization and the comforts of town and technology. You've witnessed the migration of herds larger than forests, survived weather more extreme than any city-dweller could comprehend." },
+    "Sage":        { "skills": ["Arcana","History"],              "languages": 2,                                       "feature": "Researcher",                 "description": "You spent years learning the lore of the multiverse. You scoured manuscripts, studied under sages, and pored over anything you could get your hands on." },
+    "Sailor":      { "skills": ["Athletics","Perception"],        "tools": ["Navigator's Tools","Vehicles (Water)"],    "feature": "Ship's Passage",             "description": "You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft to the bottomless depths." },
+    "Soldier":     { "skills": ["Athletics","Intimidation"],      "tools": ["Gaming Set","Vehicles (Land)"],            "feature": "Military Rank",              "description": "War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, and learned basic survival techniques." },
+    "Urchin":      { "skills": ["Sleight of Hand","Stealth"],     "tools": ["Thieves' Tools","Disguise Kit"],           "feature": "City Secrets",               "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you or to provide for you, so you learned to provide for yourself." }
   },
 
   "spells": {
-    "_notes": "Each entry is an array of spells for that class. The key MUST exactly match a class name in 'classes'. level: 0=cantrip, 1-9=spell level. school: spell school (display only). castingTime/range/components/duration/description: all display strings.",
-
     "Wizard": [
-      {
-        "name": "Fire Bolt",
-        "level": 0,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A mote of fire hurls toward a creature or object within range. Make a ranged spell attack. On a hit, deals 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)."
-      },
-      {
-        "name": "Mage Hand",
-        "level": 0,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "30 ft",
-        "components": "V, S",
-        "duration": "1 minute",
-        "description": "A spectral floating hand appears at a point you choose within range. You can use it to manipulate an object, open an unlocked door or container, stow or retrieve an item, or pour the contents of a vial."
-      },
-      {
-        "name": "Prestidigitation",
-        "level": 0,
-        "school": "Transmutation",
-        "castingTime": "1 action",
-        "range": "10 ft",
-        "components": "V, S",
-        "duration": "Up to 1 hour",
-        "description": "Create minor magical effects: light a candle, clean an object, soil an object, warm/cool a small area, make a colour or simple mark appear, create a small non-magical trinket or illusion."
-      },
-      {
-        "name": "Magic Missile",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "Create three glowing darts of magical force. Each dart hits a creature of your choice automatically, dealing 1d4+1 force damage. Darts can target the same creature or different ones. +1 dart per slot level above 1st."
-      },
-      {
-        "name": "Shield",
-        "level": 1,
-        "school": "Abjuration",
-        "castingTime": "1 reaction (when hit or targeted by Magic Missile)",
-        "range": "Self",
-        "components": "V, S",
-        "duration": "1 round",
-        "description": "An invisible barrier of magical force appears and protects you. You gain a +5 bonus to AC (including against the triggering attack) until the start of your next turn. You also take no damage from Magic Missile."
-      },
-      {
-        "name": "Detect Magic",
-        "level": 1,
-        "school": "Divination",
-        "castingTime": "1 action (ritual)",
-        "range": "Self",
-        "components": "V, S",
-        "duration": "Concentration, 10 minutes",
-        "description": "For the duration, you sense the presence of magic within 30 feet. You can use your action to see a faint aura around any visible creature or object that bears magic, and you learn its school of magic."
-      },
-      {
-        "name": "Misty Step",
-        "level": 2,
-        "school": "Conjuration",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V",
-        "duration": "Instantaneous",
-        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
-      },
-      {
-        "name": "Invisibility",
-        "level": 2,
-        "school": "Illusion",
-        "castingTime": "1 action",
-        "range": "Touch",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 hour",
-        "description": "A creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. The spell ends if the target attacks or casts a spell."
-      },
-      {
-        "name": "Fireball",
-        "level": 3,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "150 ft",
-        "components": "V, S, M (a ball of bat guano and sulfur)",
-        "duration": "Instantaneous",
-        "description": "A bright streak flashes from your pointing finger to a 20-foot-radius sphere. Each creature must make a Dexterity saving throw, taking 8d6 fire damage on failure, half on success. +1d6 damage per slot level above 3rd."
-      },
-      {
-        "name": "Counterspell",
-        "level": 3,
-        "school": "Abjuration",
-        "castingTime": "1 reaction (when a creature within 60 ft casts a spell)",
-        "range": "60 ft",
-        "components": "S",
-        "duration": "Instantaneous",
-        "description": "Attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, it fails. For higher-level spells, make an ability check: DC 10 + spell level."
-      },
-      {
-        "name": "Polymorph",
-        "level": 4,
-        "school": "Transmutation",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, up to 1 hour",
-        "description": "This spell transforms a creature you can see into a new form. An unwilling creature must make a Wisdom saving throw. The new form can be any beast with a CR no greater than the target's level/CR."
-      },
-      {
-        "name": "Dimension Door",
-        "level": 4,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "500 ft",
-        "components": "V",
-        "duration": "Instantaneous",
-        "description": "Teleport yourself from your current location to any other spot within range. You arrive at the exact spot desired. You can bring along objects up to 500 pounds. You can also bring one willing creature of your size or smaller."
-      },
-      {
-        "name": "Cone of Cold",
-        "level": 5,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Self (60-ft cone)",
-        "components": "V, S, M",
-        "duration": "Instantaneous",
-        "description": "A blast of cold air erupts from your hands. Each creature in a 60-foot cone must make a Constitution saving throw. A creature takes 8d8 cold damage on a failed save, or half as much on success."
-      }
+      { "name": "Fire Bolt",       "level": 0, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On hit, 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)." },
+      { "name": "Mage Hand",       "level": 0, "school": "Conjuration",  "castingTime": "1 action",         "range": "30 ft",  "components": "V, S",    "duration": "1 minute",         "description": "A spectral floating hand appears that you can use to manipulate objects, open unlocked doors, or stow items." },
+      { "name": "Prestidigitation","level": 0, "school": "Transmutation","castingTime": "1 action",         "range": "10 ft",  "components": "V, S",    "duration": "Up to 1 hour",     "description": "Create minor magical effects." },
+      { "name": "Magic Missile",   "level": 1, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "Three darts of magical force each automatically hit for 1d4+1 force damage. +1 dart per slot above 1st." },
+      { "name": "Shield",          "level": 1, "school": "Abjuration",   "castingTime": "1 reaction",       "range": "Self",   "components": "V, S",    "duration": "1 round",          "description": "+5 bonus to AC until the start of your next turn. Also negates Magic Missile." },
+      { "name": "Misty Step",      "level": 2, "school": "Conjuration",  "castingTime": "1 bonus action",   "range": "Self",   "components": "V",       "duration": "Instantaneous",    "description": "Teleport up to 30 feet to an unoccupied space you can see." },
+      { "name": "Fireball",        "level": 3, "school": "Evocation",    "castingTime": "1 action",         "range": "150 ft", "components": "V, S, M", "duration": "Instantaneous",    "description": "20-ft radius explosion. Dex save or 8d6 fire damage, half on success. +1d6 per slot above 3rd." },
+      { "name": "Counterspell",    "level": 3, "school": "Abjuration",   "castingTime": "1 reaction",       "range": "60 ft",  "components": "S",       "duration": "Instantaneous",    "description": "Interrupt a spell being cast. Auto-counters spells of 3rd level or lower." },
+      { "name": "Polymorph",       "level": 4, "school": "Transmutation","castingTime": "1 action",         "range": "60 ft",  "components": "V, S, M", "duration": "Conc., 1 hour",    "description": "Transform a creature into a beast. Unwilling targets make a Wisdom save." }
     ],
-
     "Cleric": [
-      {
-        "name": "Sacred Flame",
-        "level": 0,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "Flame-like radiance descends on a creature you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage (2d8 at level 5, 3d8 at 11, 4d8 at 17). The target gains no benefit from cover for this saving throw."
-      },
-      {
-        "name": "Guidance",
-        "level": 0,
-        "school": "Divination",
-        "castingTime": "1 action",
-        "range": "Touch",
-        "components": "V, S",
-        "duration": "Concentration, 1 minute",
-        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check."
-      },
-      {
-        "name": "Spare the Dying",
-        "level": 0,
-        "school": "Necromancy",
-        "castingTime": "1 action",
-        "range": "Touch",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs."
-      },
-      {
-        "name": "Cure Wounds",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Touch",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. +1d8 per slot level above 1st. This spell has no effect on undead or constructs."
-      },
-      {
-        "name": "Bless",
-        "level": 1,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "30 ft",
-        "components": "V, S, M (a sprinkling of holy water)",
-        "duration": "Concentration, 1 minute",
-        "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw."
-      },
-      {
-        "name": "Healing Word",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 bonus action",
-        "range": "60 ft",
-        "components": "V",
-        "duration": "Instantaneous",
-        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot level above 1st. No effect on undead or constructs."
-      },
-      {
-        "name": "Spiritual Weapon",
-        "level": 2,
-        "school": "Evocation",
-        "castingTime": "1 bonus action",
-        "range": "60 ft",
-        "components": "V, S",
-        "duration": "1 minute",
-        "description": "Create a floating, spectral weapon. As a bonus action you can move it and attack with it, dealing 1d8 + spellcasting ability modifier force damage on a hit. +1d8 per two slot levels above 2nd."
-      },
-      {
-        "name": "Hold Person",
-        "level": 2,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 minute",
-        "description": "Choose a humanoid within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, it can make another Wisdom saving throw."
-      },
-      {
-        "name": "Spirit Guardians",
-        "level": 3,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "Self (15-ft radius)",
-        "components": "V, S, M (a holy symbol)",
-        "duration": "Concentration, 10 minutes",
-        "description": "Call forth spirits. Creatures of your choice within 15 feet of you must make a Wisdom saving throw, taking 3d8 radiant (or necrotic) damage on failure and having their speed halved. +1d8 per slot level above 3rd."
-      },
-      {
-        "name": "Mass Cure Wounds",
-        "level": 5,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A wave of healing energy washes out from a point. Choose up to 6 creatures in a 30-foot-radius sphere. Each target regains hit points equal to 3d8 + your spellcasting ability modifier. +1d8 per slot level above 5th."
-      }
+      { "name": "Sacred Flame",    "level": 0, "school": "Evocation",    "castingTime": "1 action",         "range": "60 ft",  "components": "V, S",    "duration": "Instantaneous",    "description": "Dex save or 1d8 radiant damage. No benefit from cover." },
+      { "name": "Guidance",        "level": 0, "school": "Divination",   "castingTime": "1 action",         "range": "Touch",  "components": "V, S",    "duration": "Conc., 1 minute",  "description": "Touch one willing creature. Add 1d4 to one ability check of its choice." },
+      { "name": "Cure Wounds",     "level": 1, "school": "Evocation",    "castingTime": "1 action",         "range": "Touch",  "components": "V, S",    "duration": "Instantaneous",    "description": "Regain 1d8 + spellcasting modifier HP. +1d8 per slot above 1st." },
+      { "name": "Bless",           "level": 1, "school": "Enchantment",  "castingTime": "1 action",         "range": "30 ft",  "components": "V, S, M", "duration": "Conc., 1 minute",  "description": "Up to 3 creatures add 1d4 to attack rolls and saving throws." },
+      { "name": "Spiritual Weapon","level": 2, "school": "Evocation",    "castingTime": "1 bonus action",   "range": "60 ft",  "components": "V, S",    "duration": "1 minute",         "description": "Spectral weapon attacks for 1d8 + spellcasting modifier force damage." },
+      { "name": "Spirit Guardians","level": 3, "school": "Conjuration",  "castingTime": "1 action",         "range": "Self",   "components": "V, S, M", "duration": "Conc., 10 min",    "description": "Wis save or 3d8 radiant/necrotic damage and speed halved for creatures within 15 ft." }
     ],
-
     "Bard": [
-      {
-        "name": "Vicious Mockery",
-        "level": 0,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V",
-        "duration": "Instantaneous",
-        "description": "Unleash a string of insults laced with subtle enchantments at a creature you can see. If it can hear you (it need not understand), it must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll before the end of its next turn."
-      },
-      {
-        "name": "Minor Illusion",
-        "level": 0,
-        "school": "Illusion",
-        "castingTime": "1 action",
-        "range": "30 ft",
-        "components": "S, M",
-        "duration": "1 minute",
-        "description": "Create a sound or an image of an object. You can make it seem like it's coming from a point within range. A creature that sees through the illusion recognizes it as illusory, and the spell ends."
-      },
-      {
-        "name": "Thunderwave",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Self (15-ft cube)",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube must make a Constitution saving throw. On a failed save, take 2d8 thunder damage and be pushed 10 feet away. On success, half damage and no push. +1d8 per slot level above 1st."
-      },
-      {
-        "name": "Charm Person",
-        "level": 1,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "30 ft",
-        "components": "V, S",
-        "duration": "1 hour",
-        "description": "Attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw (advantage if you or your companions are fighting it). On failure, the charmed creature regards you as a friendly acquaintance. One extra target per slot level above 1st."
-      },
-      {
-        "name": "Dissonant Whispers",
-        "level": 1,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V",
-        "duration": "Instantaneous",
-        "description": "Whisper a discordant melody that only one creature of your choice can hear. The target must make a Wisdom save or take 3d6 psychic damage and immediately move as far away as it can. On success, half damage and no movement."
-      },
-      {
-        "name": "Hypnotic Pattern",
-        "level": 3,
-        "school": "Illusion",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "S, M",
-        "duration": "Concentration, 1 minute",
-        "description": "A twisting pattern of colors weaves through the air in a 30-foot cube. Each creature in the area that can see the pattern must succeed on a Wisdom saving throw or become charmed and incapacitated with speed 0."
-      },
-      {
-        "name": "Polymorph",
-        "level": 4,
-        "school": "Transmutation",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 hour",
-        "description": "Transform a creature you can see into a new form. An unwilling creature must succeed on a Wisdom saving throw. The spell can't affect a target that has 0 hp. The new form can be any beast with CR ≤ target's level/CR."
-      }
+      { "name": "Vicious Mockery", "level": 0, "school": "Enchantment",  "castingTime": "1 action",         "range": "60 ft",  "components": "V",       "duration": "Instantaneous",    "description": "Wis save or 1d4 psychic damage and disadvantage on next attack roll." },
+      { "name": "Thunderwave",     "level": 1, "school": "Evocation",    "castingTime": "1 action",         "range": "Self",   "components": "V, S",    "duration": "Instantaneous",    "description": "Con save or 2d8 thunder damage and pushed 10 feet. +1d8 per slot above 1st." },
+      { "name": "Charm Person",    "level": 1, "school": "Enchantment",  "castingTime": "1 action",         "range": "30 ft",  "components": "V, S",    "duration": "1 hour",           "description": "One humanoid regards you as a friendly acquaintance on a failed Wis save." },
+      { "name": "Hypnotic Pattern","level": 3, "school": "Illusion",     "castingTime": "1 action",         "range": "120 ft", "components": "S, M",    "duration": "Conc., 1 minute",  "description": "Creatures in a 30-ft cube must make a Wis save or become charmed and incapacitated." }
     ],
-
     "Druid": [
-      {
-        "name": "Shillelagh",
-        "level": 0,
-        "school": "Transmutation",
-        "castingTime": "1 bonus action",
-        "range": "Touch",
-        "components": "V, S, M (mistletoe, shamrock leaf, and a club or quarterstaff)",
-        "duration": "1 minute",
-        "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for attack and damage rolls, and the weapon's damage die becomes a d8."
-      },
-      {
-        "name": "Entangle",
-        "level": 1,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "90 ft",
-        "components": "V, S",
-        "duration": "Concentration, 1 minute",
-        "description": "Grasping weeds and vines sprout from the ground in a 20-foot square originating from a point within range. For the duration, these plants turn the ground into difficult terrain. A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained."
-      },
-      {
-        "name": "Thunderwave",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Self (15-ft cube)",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A wave of thunderous force sweeps out. Each creature in a 15-foot cube makes a Constitution save, taking 2d8 thunder damage and being pushed 10 feet on failure. +1d8 per slot level above 1st."
-      },
-      {
-        "name": "Moonbeam",
-        "level": 2,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 minute",
-        "description": "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high cylinder. Creatures take 2d10 radiant damage (half on save). Shapechangers have disadvantage. As an action you can move the beam 60 feet. +1d10 per slot level above 2nd."
-      },
-      {
-        "name": "Call Lightning",
-        "level": 3,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Concentration, 10 minutes",
-        "description": "A storm cloud appears in a 10-foot-radius, 20-foot-high cylinder. Each round as an action, you can call down lightning: choose a point below the cloud, each creature within 5 feet makes a Dex save or takes 3d10 lightning damage (half on success)."
-      },
-      {
-        "name": "Conjure Animals",
-        "level": 3,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S",
-        "duration": "Concentration, 1 hour",
-        "description": "You summon fey spirits that take the form of beasts and appear in unoccupied spaces within range. Choose one of: 1 beast of CR 2, 2 beasts of CR 1, 4 beasts of CR 1/2, or 8 beasts of CR 1/4. Each beast is also considered fey."
-      }
+      { "name": "Shillelagh",      "level": 0, "school": "Transmutation","castingTime": "1 bonus action",   "range": "Touch",  "components": "V, S, M", "duration": "1 minute",         "description": "Club/quarterstaff uses spellcasting ability for attacks and deals 1d8 damage." },
+      { "name": "Entangle",        "level": 1, "school": "Conjuration",  "castingTime": "1 action",         "range": "90 ft",  "components": "V, S",    "duration": "Conc., 1 minute",  "description": "Vines erupt in a 20-ft square. Str save or be restrained." },
+      { "name": "Moonbeam",        "level": 2, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S, M", "duration": "Conc., 1 minute",  "description": "5-ft cylinder of light. Con save or 2d10 radiant damage, half on success." },
+      { "name": "Call Lightning",  "level": 3, "school": "Conjuration",  "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Conc., 10 min",    "description": "Storm cloud appears. Each round call a bolt: 3d10 lightning damage (Dex save halves)." }
     ],
-
     "Sorcerer": [
-      {
-        "name": "Fire Bolt",
-        "level": 0,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, deals 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)."
-      },
-      {
-        "name": "Prestidigitation",
-        "level": 0,
-        "school": "Transmutation",
-        "castingTime": "1 action",
-        "range": "10 ft",
-        "components": "V, S",
-        "duration": "Up to 1 hour",
-        "description": "Create minor magical effects for various purposes."
-      },
-      {
-        "name": "Burning Hands",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Self (15-ft cone)",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth. Each creature in a 15-foot cone must make a Dexterity saving throw, taking 3d6 fire damage on failure, half on success. +1d6 per slot level above 1st."
-      },
-      {
-        "name": "Chromatic Orb",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "90 ft",
-        "components": "V, S, M (a diamond worth at least 50 gp)",
-        "duration": "Instantaneous",
-        "description": "Hurl a 4-inch-diameter sphere of energy. Choose acid, cold, fire, lightning, poison, or thunder. Make a ranged spell attack; on hit, the target takes 3d8 damage of the chosen type. +1d8 per slot level above 1st."
-      },
-      {
-        "name": "Scorching Ray",
-        "level": 2,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "You create three rays of fire and hurl them at targets within range. Make a ranged spell attack for each ray; on hit, deals 2d6 fire damage. +1 ray per slot level above 2nd."
-      },
-      {
-        "name": "Haste",
-        "level": 3,
-        "school": "Transmutation",
-        "castingTime": "1 action",
-        "range": "30 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 minute",
-        "description": "Choose a willing creature. Its speed is doubled, it gains +2 AC, advantage on Dexterity saving throws, and it gains one additional action on each of its turns. When the spell ends, the target can't move or take actions until after its next turn."
-      }
+      { "name": "Fire Bolt",       "level": 0, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "Ranged spell attack for 1d10 fire damage." },
+      { "name": "Burning Hands",   "level": 1, "school": "Evocation",    "castingTime": "1 action",         "range": "Self",   "components": "V, S",    "duration": "Instantaneous",    "description": "Dex save or 3d6 fire damage in 15-ft cone. +1d6 per slot above 1st." },
+      { "name": "Scorching Ray",   "level": 2, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "Three rays, each a ranged spell attack for 2d6 fire damage. +1 ray per slot above 2nd." },
+      { "name": "Haste",           "level": 3, "school": "Transmutation","castingTime": "1 action",         "range": "30 ft",  "components": "V, S, M", "duration": "Conc., 1 minute",  "description": "Doubled speed, +2 AC, advantage on Dex saves, and an extra action each turn." }
     ],
-
     "Warlock": [
-      {
-        "name": "Eldritch Blast",
-        "level": 0,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "Instantaneous",
-        "description": "A beam of crackling energy streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage. +1 beam at levels 5, 11, and 17 (each requiring its own attack roll)."
-      },
-      {
-        "name": "Chill Touch",
-        "level": 0,
-        "school": "Necromancy",
-        "castingTime": "1 action",
-        "range": "120 ft",
-        "components": "V, S",
-        "duration": "1 round",
-        "description": "Create a ghostly, skeletal hand. Make a ranged spell attack; on hit, the target takes 1d8 necrotic damage and can't regain hit points until the start of your next turn. If the target is undead, it also has disadvantage on attack rolls."
-      },
-      {
-        "name": "Hex",
-        "level": 1,
-        "school": "Enchantment",
-        "castingTime": "1 bonus action",
-        "range": "90 ft",
-        "components": "V, S, M (the petrified eye of a newt)",
-        "duration": "Concentration, 1 hour",
-        "description": "Place a curse on a creature. Until the spell ends, you deal an extra 1d6 necrotic damage whenever you hit the cursed target with an attack. Also choose an ability: the target has disadvantage on ability checks with that ability. If the target drops to 0 hp, you can use a bonus action to move the hex to a new creature."
-      },
-      {
-        "name": "Hunger of Hadar",
-        "level": 3,
-        "school": "Conjuration",
-        "castingTime": "1 action",
-        "range": "150 ft",
-        "components": "V, S, M (a pickled octopus tentacle)",
-        "duration": "Concentration, 1 minute",
-        "description": "Open a gateway to the dark between the stars in a 20-foot-radius sphere. A creature that starts its turn in the area takes 2d6 cold damage. A creature that ends its turn in the area must succeed on a Dexterity saving throw or take 2d6 acid damage."
-      },
-      {
-        "name": "Banishment",
-        "level": 4,
-        "school": "Abjuration",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 minute",
-        "description": "Attempt to send one creature to another plane. The target must succeed on a Charisma saving throw or be banished. If it originated from a different plane of existence, it is instead returned there permanently if it fails the save."
-      }
+      { "name": "Eldritch Blast",  "level": 0, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "Ranged spell attack for 1d10 force damage. +1 beam at levels 5, 11, and 17." },
+      { "name": "Hex",             "level": 1, "school": "Enchantment",  "castingTime": "1 bonus action",   "range": "90 ft",  "components": "V, S, M", "duration": "Conc., 1 hour",    "description": "+1d6 necrotic damage when you hit the target. Disadvantage on one chosen ability." },
+      { "name": "Hunger of Hadar", "level": 3, "school": "Conjuration",  "castingTime": "1 action",         "range": "150 ft", "components": "V, S, M", "duration": "Conc., 1 minute",  "description": "20-ft sphere of void. 2d6 cold at start of turn; 2d6 acid on failed Dex save at end." }
     ],
-
     "Paladin": [
-      {
-        "name": "Divine Favor",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V, S",
-        "duration": "Concentration, 1 minute",
-        "description": "Your prayer empowers you with divine radiance. Until the spell ends, your weapon attacks deal an extra 1d4 radiant damage on a hit."
-      },
-      {
-        "name": "Wrathful Smite",
-        "level": 1,
-        "school": "Evocation",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V",
-        "duration": "Concentration, 1 minute",
-        "description": "The next time you hit with a melee weapon attack during this spell's duration, your attack deals an extra 1d6 psychic damage. Additionally, if the target is a creature, it must make a Wisdom saving throw or be frightened of you until the spell ends."
-      },
-      {
-        "name": "Zone of Truth",
-        "level": 2,
-        "school": "Enchantment",
-        "castingTime": "1 action",
-        "range": "60 ft",
-        "components": "V, S",
-        "duration": "10 minutes",
-        "description": "Create a magical zone that guards against deception in a 15-foot-radius sphere. Creatures that fail their Charisma saving throw can't speak a deliberate lie while in the zone, though they can choose to remain silent."
-      },
-      {
-        "name": "Aura of Vitality",
-        "level": 3,
-        "school": "Evocation",
-        "castingTime": "1 action",
-        "range": "Self (30-ft radius)",
-        "components": "V",
-        "duration": "Concentration, 1 minute",
-        "description": "Healing energy radiates from you in an aura with a 30-foot radius. Until the spell ends, you can use a bonus action to cause one creature in the aura (including you) to regain 2d6 hit points."
-      }
+      { "name": "Divine Favor",    "level": 1, "school": "Evocation",    "castingTime": "1 bonus action",   "range": "Self",   "components": "V, S",    "duration": "Conc., 1 minute",  "description": "Your weapon attacks deal an extra 1d4 radiant damage." },
+      { "name": "Wrathful Smite",  "level": 1, "school": "Evocation",    "castingTime": "1 bonus action",   "range": "Self",   "components": "V",       "duration": "Conc., 1 minute",  "description": "Next melee hit deals +1d6 psychic damage. Wis save or target is frightened." },
+      { "name": "Zone of Truth",   "level": 2, "school": "Enchantment",  "castingTime": "1 action",         "range": "60 ft",  "components": "V, S",    "duration": "10 minutes",       "description": "15-ft sphere. Failed Cha save means creatures can't speak deliberate lies." }
     ],
-
     "Ranger": [
-      {
-        "name": "Hunter's Mark",
-        "level": 1,
-        "school": "Divination",
-        "castingTime": "1 bonus action",
-        "range": "90 ft",
-        "components": "V",
-        "duration": "Concentration, 1 hour",
-        "description": "Choose a creature you can see within range. Until the spell ends, you deal an extra 1d6 damage to the target whenever you hit it with a weapon attack, and you have advantage on any Wisdom (Perception) or Wisdom (Survival) check you make to find it."
-      },
-      {
-        "name": "Ensnaring Strike",
-        "level": 1,
-        "school": "Conjuration",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V",
-        "duration": "Concentration, 1 minute",
-        "description": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact. The target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends."
-      },
-      {
-        "name": "Hail of Thorns",
-        "level": 1,
-        "school": "Conjuration",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V",
-        "duration": "Concentration, 1 minute",
-        "description": "The next time you hit a creature with a ranged weapon attack before the spell ends, this spell creates a rain of thorns. The target and each creature within 5 feet of it must make a Dexterity saving throw, taking 1d10 piercing damage on failure."
-      },
-      {
-        "name": "Pass without Trace",
-        "level": 2,
-        "school": "Abjuration",
-        "castingTime": "1 action",
-        "range": "Self",
-        "components": "V, S, M",
-        "duration": "Concentration, 1 hour",
-        "description": "A veil of shadows and silence radiates from you, masking you and your companions from detection. For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can't be tracked except by magical means."
-      },
-      {
-        "name": "Lightning Arrow",
-        "level": 3,
-        "school": "Transmutation",
-        "castingTime": "1 bonus action",
-        "range": "Self",
-        "components": "V, S",
-        "duration": "Concentration, 1 minute",
-        "description": "The next time you make a ranged weapon attack during the spell's duration, the weapon's ammunition, or the weapon itself if it's a thrown weapon, transforms into a bolt of lightning. Make the attack roll normally. On hit, the target takes 4d8 lightning damage instead of the weapon's normal damage, and each creature within 10 feet must make a Dexterity save or take 2d8 lightning damage."
-      }
+      { "name": "Hunter's Mark",   "level": 1, "school": "Divination",   "castingTime": "1 bonus action",   "range": "90 ft",  "components": "V",       "duration": "Conc., 1 hour",    "description": "+1d6 damage against the marked creature. Advantage on Perception/Survival to find it." },
+      { "name": "Ensnaring Strike","level": 1, "school": "Conjuration",  "castingTime": "1 bonus action",   "range": "Self",   "components": "V",       "duration": "Conc., 1 minute",  "description": "Next weapon hit: Str save or target is restrained by magical vines." },
+      { "name": "Pass without Trace","level": 2,"school": "Abjuration",  "castingTime": "1 action",         "range": "Self",   "components": "V, S, M", "duration": "Conc., 1 hour",    "description": "+10 to Stealth checks for you and chosen companions within 30 feet." }
     ]
   },
 
   "themes": {
-    "_notes": "All color values accept any valid CSS color string. fontDisplay and fontBody must be valid Google Fonts names (loaded automatically). gradientHero is the CSS background value for the character sheet header.",
-
-    "dungeon": {
-      "name": "Dungeon Stone",
-      "bg": "#0d0d0f",
-      "surface": "#1a1a1f",
-      "card": "#222228",
-      "border": "#3a3a45",
-      "accent": "#c9a227",
-      "accentSecondary": "#8b6914",
-      "text": "#e8e0d0",
-      "textMuted": "#8a8070",
-      "textDim": "#554f45",
-      "highlight": "#d4a843",
-      "danger": "#c0392b",
-      "success": "#27ae60",
-      "info": "#2980b9",
-      "fontDisplay": "'Cinzel Decorative', serif",
-      "fontBody": "'Crimson Pro', serif",
-      "gradientHero": "linear-gradient(135deg, #1a1208 0%, #0d0d0f 50%, #08080d 100%)"
-    },
-
-    "arcane": {
-      "name": "Arcane Nexus",
-      "bg": "#050510",
-      "surface": "#0a0a20",
-      "card": "#0f0f2a",
-      "border": "#2a2a5a",
-      "accent": "#7b2fff",
-      "accentSecondary": "#4a1f99",
-      "text": "#e0d8ff",
-      "textMuted": "#8070c0",
-      "textDim": "#404070",
-      "highlight": "#a855f7",
-      "danger": "#e53e3e",
-      "success": "#38a169",
-      "info": "#4299e1",
-      "fontDisplay": "'Cinzel Decorative', serif",
-      "fontBody": "'Philosopher', serif",
-      "gradientHero": "linear-gradient(135deg, #050510 0%, #0d0525 50%, #10052a 100%)"
-    },
-
-    "forest": {
-      "name": "Elven Forest",
-      "bg": "#060d06",
-      "surface": "#0d1a0d",
-      "card": "#122012",
-      "border": "#2a4a2a",
-      "accent": "#4caf50",
-      "accentSecondary": "#2d7a30",
-      "text": "#d0e8d0",
-      "textMuted": "#6a906a",
-      "textDim": "#3a5a3a",
-      "highlight": "#66bb6a",
-      "danger": "#e53e3e",
-      "success": "#4caf50",
-      "info": "#29b6f6",
-      "fontDisplay": "'Cinzel Decorative', serif",
-      "fontBody": "'Lora', serif",
-      "gradientHero": "linear-gradient(135deg, #061006 0%, #0a1a0a 50%, #081408 100%)"
-    },
-
-    "infernal": {
-      "name": "Infernal Pact",
-      "bg": "#0d0500",
-      "surface": "#1a0a00",
-      "card": "#241000",
-      "border": "#5a2000",
-      "accent": "#ff6b00",
-      "accentSecondary": "#c04800",
-      "text": "#ffe0c0",
-      "textMuted": "#996040",
-      "textDim": "#5a3010",
-      "highlight": "#ff8c42",
-      "danger": "#ff1a1a",
-      "success": "#52b788",
-      "info": "#4cc9f0",
-      "fontDisplay": "'Cinzel Decorative', serif",
-      "fontBody": "'Spectral', serif",
-      "gradientHero": "linear-gradient(135deg, #1a0500 0%, #0d0300 50%, #100800 100%)"
-    },
-
-    "ice": {
-      "name": "Frozen Wastes",
-      "bg": "#020810",
-      "surface": "#05101c",
-      "card": "#081828",
-      "border": "#1a3a5a",
-      "accent": "#4ecdc4",
-      "accentSecondary": "#2980b9",
-      "text": "#d0ecff",
-      "textMuted": "#5080a0",
-      "textDim": "#203040",
-      "highlight": "#74d7cf",
-      "danger": "#e53e3e",
-      "success": "#48bb78",
-      "info": "#63b3ed",
-      "fontDisplay": "'Cinzel Decorative', serif",
-      "fontBody": "'Libre Baskerville', serif",
-      "gradientHero": "linear-gradient(135deg, #020810 0%, #05101c 50%, #03080f 100%)"
-    }
+    "dungeon":  { "name": "Dungeon Stone", "bg": "#0d0d0f", "surface": "#1a1a1f", "card": "#222228", "border": "#3a3a45", "accent": "#c9a227", "accentSecondary": "#8b6914", "text": "#e8e0d0", "textMuted": "#8a8070", "textDim": "#554f45", "danger": "#c0392b", "success": "#27ae60", "info": "#2980b9", "fontDisplay": "'Cinzel Decorative', serif", "fontBody": "'Crimson Pro', serif", "gradientHero": "linear-gradient(135deg, #1a1208 0%, #0d0d0f 50%, #08080d 100%)" },
+    "arcane":   { "name": "Arcane Nexus",  "bg": "#050510", "surface": "#0a0a20", "card": "#0f0f2a", "border": "#2a2a5a", "accent": "#7b2fff", "accentSecondary": "#4a1f99", "text": "#e0d8ff", "textMuted": "#8070c0", "textDim": "#404070", "danger": "#e53e3e", "success": "#38a169", "info": "#4299e1", "fontDisplay": "'Cinzel Decorative', serif", "fontBody": "'Philosopher', serif", "gradientHero": "linear-gradient(135deg, #050510 0%, #0d0525 50%, #10052a 100%)" },
+    "forest":   { "name": "Elven Forest",  "bg": "#060d06", "surface": "#0d1a0d", "card": "#122012", "border": "#2a4a2a", "accent": "#4caf50", "accentSecondary": "#2d7a30", "text": "#d0e8d0", "textMuted": "#6a906a", "textDim": "#3a5a3a", "danger": "#e53e3e", "success": "#4caf50", "info": "#29b6f6", "fontDisplay": "'Cinzel Decorative', serif", "fontBody": "'Lora', serif", "gradientHero": "linear-gradient(135deg, #061006 0%, #0a1a0a 50%, #081408 100%)" },
+    "infernal": { "name": "Infernal Pact", "bg": "#0d0500", "surface": "#1a0a00", "card": "#241000", "border": "#5a2000", "accent": "#ff6b00", "accentSecondary": "#c04800", "text": "#ffe0c0", "textMuted": "#996040", "textDim": "#5a3010", "danger": "#ff1a1a", "success": "#52b788", "info": "#4cc9f0", "fontDisplay": "'Cinzel Decorative', serif", "fontBody": "'Spectral', serif", "gradientHero": "linear-gradient(135deg, #1a0500 0%, #0d0300 50%, #100800 100%)" },
+    "ice":      { "name": "Frozen Wastes", "bg": "#020810", "surface": "#05101c", "card": "#081828", "border": "#1a3a5a", "accent": "#4ecdc4", "accentSecondary": "#2980b9", "text": "#d0ecff", "textMuted": "#5080a0", "textDim": "#203040", "danger": "#e53e3e", "success": "#48bb78", "info": "#63b3ed", "fontDisplay": "'Cinzel Decorative', serif", "fontBody": "'Libre Baskerville', serif", "gradientHero": "linear-gradient(135deg, #020810 0%, #05101c 50%, #03080f 100%)" }
   },
 
   "music": {
-    "_notes": "id must be unique. name is displayed in the UI. url: a direct link to an mp3 or ogg file, or null. Set id 'none' always present (no music option). Do not remove the 'none' entry.",
-
     "tracks": [
-      { "id": "none",    "name": "No Music",         "url": null },
-      { "id": "tavern",  "name": "Tavern Ambience",   "url": null,
-        "_note": "Replace null with a direct .mp3 URL, e.g. https://yourserver.com/tavern.mp3" },
-      { "id": "dungeon", "name": "Dungeon Depths",    "url": null },
-      { "id": "battle",  "name": "Epic Battle",       "url": null },
-      { "id": "forest",  "name": "Enchanted Forest",  "url": null },
-      { "id": "peaceful","name": "Peaceful Village",  "url": null },
-      { "id": "sea",     "name": "Sea Voyage",        "url": null }
+      { "id": "none",     "name": "No Music",        "url": null },
+      { "id": "tavern",   "name": "Tavern Ambience",  "url": null },
+      { "id": "dungeon",  "name": "Dungeon Depths",   "url": null },
+      { "id": "battle",   "name": "Epic Battle",      "url": null },
+      { "id": "forest",   "name": "Enchanted Forest", "url": null },
+      { "id": "peaceful", "name": "Peaceful Village", "url": null }
     ]
   },
 
-  "alignments": [
-    "Lawful Good", "Neutral Good", "Chaotic Good",
-    "Lawful Neutral", "True Neutral", "Chaotic Neutral",
-    "Lawful Evil", "Neutral Evil", "Chaotic Evil"
-  ],
+  "alignments": ["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral","Chaotic Neutral","Lawful Evil","Neutral Evil","Chaotic Evil"],
+
+  "languages": ["Common","Dwarvish","Elvish","Giant","Gnomish","Goblin","Halfling","Orc","Abyssal","Celestial","Draconic","Deep Speech","Infernal","Primordial","Sylvan","Undercommon"],
+
+  "skills": ["Acrobatics","Animal Handling","Arcana","Athletics","Deception","History","Insight","Intimidation","Investigation","Medicine","Nature","Perception","Performance","Persuasion","Religion","Sleight of Hand","Stealth","Survival"],
 
   "itemTypes": {
-    "_notes": "These are the item type options available when adding inventory. Add/remove as needed. Each entry: key = internal id, label = display name, color = CSS color for the dot.",
-    "weapon":    { "label": "Weapon",     "color": "#c0392b" },
-    "armor":     { "label": "Armor",      "color": "#2980b9" },
-    "shield":    { "label": "Shield",     "color": "#2980b9" },
-    "potion":    { "label": "Potion",     "color": "#27ae60" },
-    "magic":     { "label": "Magic Item", "color": "#9b59b6" },
-    "tool":      { "label": "Tool",       "color": "#f39c12" },
-    "treasure":  { "label": "Treasure",   "color": "#ffd700" },
-    "misc":      { "label": "Misc",       "color": "#7f8c8d" }
+    "weapon":   { "label": "Weapon",     "color": "#c0392b" },
+    "armor":    { "label": "Armor",      "color": "#2980b9" },
+    "shield":   { "label": "Shield",     "color": "#2980b9" },
+    "potion":   { "label": "Potion",     "color": "#27ae60" },
+    "magic":    { "label": "Magic Item", "color": "#9b59b6" },
+    "tool":     { "label": "Tool",       "color": "#f39c12" },
+    "treasure": { "label": "Treasure",   "color": "#ffd700" },
+    "misc":     { "label": "Misc",       "color": "#7f8c8d" }
   }
 }

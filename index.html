@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tome of Heroes — D&D 5e Character Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Courier+Prime&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; }
@@ -21,36 +21,30 @@
 
 <!-- ============================================================
   Game data lives in tome-data.json in the same folder.
-  Edit that file to customise races, classes, spells, themes etc.
+  Edit that file to customise species, classes, backgrounds,
+  spells, themes, music and more.
 
-  RUNNING LOCALLY (required — browsers block fetch() on file://)
-  Pick any one of these one-liners, run it in this folder:
-
+  RUNNING LOCALLY (browsers block fetch() on file://)
     Python  : python -m http.server 8000
     Node.js : npx serve .
-    VS Code : install "Live Server" extension, click "Go Live"
-
-  Then open http://localhost:8000 in your browser.
-  GitHub Pages works with no extra steps at all.
+    VS Code : Live Server extension → "Go Live"
+  Then open http://localhost:8000
+  GitHub Pages needs no extra steps.
   ============================================================ -->
-<!-- React + Babel from CDN (no npm needed) -->
+
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
 <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
 
-// ── Load game data from tome-data.json in the same folder ──
+// ── Data loader ──
 const useGameData = () => {
-  const [data,  setData]  = useState(null);
+  const [data, setData]   = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
     fetch("./tome-data.json")
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status} — could not load tome-data.json`);
-        return r.json();
-      })
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} — could not load tome-data.json`); return r.json(); })
       .then(setData)
       .catch(err => setError(err.message));
   }, []);
@@ -58,8 +52,8 @@ const useGameData = () => {
 };
 
 // ── Constants ──
-const ABILITY_NAMES = { str:"Strength", dex:"Dexterity", con:"Constitution", int:"Intelligence", wis:"Wisdom", cha:"Charisma" };
-const ABILITY_SHORT = { str:"STR", dex:"DEX", con:"CON", int:"INT", wis:"WIS", cha:"CHA" };
+const ABILITY_NAMES = { str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma" };
+const ABILITY_SHORT = { str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA" };
 const SKILLS_MAP = {
   Acrobatics:"dex","Animal Handling":"wis",Arcana:"int",Athletics:"str",
   Deception:"cha",History:"int",Insight:"wis",Intimidation:"cha",
@@ -69,296 +63,873 @@ const SKILLS_MAP = {
 };
 
 // ── Math helpers ──
-const calcMod   = s => Math.floor((s-10)/2);
+const calcMod   = s => Math.floor((s - 10) / 2);
 const modStr    = m => m >= 0 ? `+${m}` : `${m}`;
-const profBonus = l => Math.ceil(l/4)+1;
-const calcHP    = (cd,level,conMod) => Math.max(1,(cd.hitDie+conMod)+Math.floor((cd.hitDie/2)+1+conMod)*(level-1));
+const profBonus = l => Math.ceil(l / 4) + 1;
+const calcHP    = (cd, level, conMod) => Math.max(1, (cd.hitDie + conMod) + Math.floor((cd.hitDie / 2) + 1 + conMod) * (level - 1));
 const calcAC    = char => {
-  const dex=calcMod(char.abilities.dex), con=calcMod(char.abilities.con), wis=calcMod(char.abilities.wis);
-  const hasArmor=char.inventory?.some(i=>i.type==="armor"&&i.equipped);
-  if(char.class==="Barbarian"&&!hasArmor) return 10+dex+con;
-  if(char.class==="Monk"&&!hasArmor) return 10+dex+wis;
-  return 10+dex;
+  const dex = calcMod(char.abilities.dex), con = calcMod(char.abilities.con), wis = calcMod(char.abilities.wis);
+  const hasArmor = char.inventory?.some(i => i.type === "armor" && i.equipped);
+  if (char.class === "Barbarian" && !hasArmor) return 10 + dex + con;
+  if (char.class === "Monk"      && !hasArmor) return 10 + dex + wis;
+  return 10 + dex;
 };
-const calcSpellDC  =(char,classes)=>{ const cd=classes?.[char.class]; return cd?.spellcaster ? 8+profBonus(char.level)+calcMod(char.abilities[cd.spellcastingAbility]) : null; };
-const calcSpellAtk =(char,classes)=>{ const cd=classes?.[char.class]; return cd?.spellcaster ? profBonus(char.level)+calcMod(char.abilities[cd.spellcastingAbility]) : null; };
-const getSavingThrows=(char,classes)=>{
-  const cd=classes?.[char.class], pb=profBonus(char.level);
-  return Object.keys(ABILITY_NAMES).reduce((acc,ab)=>{
-    const mod=calcMod(char.abilities[ab]), prof=cd?.savingThrows?.includes(ab)||false;
-    acc[ab]={value:mod+(prof?pb:0),proficient:prof}; return acc;
-  },{});
+const calcSpellDC  = (char, classes) => { const cd = classes?.[char.class]; return cd?.spellcaster ? 8 + profBonus(char.level) + calcMod(char.abilities[cd.spellcastingAbility]) : null; };
+const calcSpellAtk = (char, classes) => { const cd = classes?.[char.class]; return cd?.spellcaster ? profBonus(char.level) + calcMod(char.abilities[cd.spellcastingAbility]) : null; };
+const getSavingThrows = (char, classes) => {
+  const cd = classes?.[char.class], pb = profBonus(char.level);
+  return Object.keys(ABILITY_NAMES).reduce((acc, ab) => {
+    const mod = calcMod(char.abilities[ab]), prof = cd?.savingThrows?.includes(ab) || false;
+    acc[ab] = { value: mod + (prof ? pb : 0), proficient: prof };
+    return acc;
+  }, {});
 };
-const getSkillBonuses=char=>{
-  const pb=profBonus(char.level);
-  return Object.keys(SKILLS_MAP).reduce((acc,skill)=>{
-    const ab=SKILLS_MAP[skill],mod=calcMod(char.abilities[ab]);
-    const prof=char.skillProficiencies?.includes(skill)||false;
-    const exp=char.skillExpertise?.includes(skill)||false;
-    acc[skill]={value:mod+(exp?pb*2:prof?pb:0),proficient:prof,expertise:exp}; return acc;
-  },{});
+const getSkillBonuses = char => {
+  const pb = profBonus(char.level);
+  return Object.keys(SKILLS_MAP).reduce((acc, skill) => {
+    const ab = SKILLS_MAP[skill], mod = calcMod(char.abilities[ab]);
+    const prof = char.skillProficiencies?.includes(skill) || false;
+    const exp  = char.skillExpertise?.includes(skill) || false;
+    acc[skill] = { value: mod + (exp ? pb * 2 : prof ? pb : 0), proficient: prof, expertise: exp };
+    return acc;
+  }, {});
 };
 
 // ── Storage ──
-const SK="tome_of_heroes_v1";
-const loadChars=()=>{ try{const d=localStorage.getItem(SK);return d?JSON.parse(d):[]}catch{return[]} };
-const saveChars=chars=>localStorage.setItem(SK,JSON.stringify(chars));
+const SK = "tome_of_heroes_v1";
+const loadChars = () => { try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : []; } catch { return []; } };
+const saveChars = chars => localStorage.setItem(SK, JSON.stringify(chars));
 
-// ── Default character template ──
-const DEFAULT_CHAR={
-  id:null,name:"",race:"",class:"",background:"",level:1,experience:0,
-  abilities:{str:10,dex:10,con:10,int:10,wis:10,cha:10},
-  skillProficiencies:[],skillExpertise:[],alignment:"True Neutral",
-  personalityTraits:"",ideals:"",bonds:"",flaws:"",notes:"",appearance:"",
-  inventory:[],spells:[],hp:{current:8,max:8,temp:0},
-  hitDice:{current:1,max:1},deathSaves:{successes:0,failures:0},
-  inspiration:false,conditions:[],currencies:{cp:0,sp:0,ep:0,gp:0,pp:0},
-  theme:"dungeon",music:"none",customMusicUrl:"",portrait:null,
-  createdAt:null,updatedAt:null
+// ── Default character ──
+const DEFAULT_CHAR = {
+  id:null, name:"", species:"", class:"", subclass:"", background:"", level:1,
+  abilities:{ str:10, dex:10, con:10, int:10, wis:10, cha:10 },
+  speciesAbilityChoices:{},
+  skillProficiencies:[], skillExpertise:[],
+  featureChoices:{},
+  languages:[],
+  alignment:"True Neutral",
+  personalityTraits:"", ideals:"", bonds:"", flaws:"", notes:"", appearance:"",
+  inventory:[], spells:[],
+  hp:{ current:8, max:8, temp:0 },
+  hitDice:{ current:1, max:1 },
+  deathSaves:{ successes:0, failures:0 },
+  inspiration:false, conditions:[],
+  currencies:{ cp:0, sp:0, ep:0, gp:0, pp:0 },
+  theme:"dungeon", music:"none", customMusicUrl:"",
+  createdAt:null, updatedAt:null
 };
 
 // ── Theme wrapper ──
-const TW=({themeKey,themes,children})=>{
-  const t=themes?.[themeKey]||themes?.[Object.keys(themes||{})[0]]||{};
-  return <div style={{"--bg":t.bg,"--surface":t.surface,"--card":t.card,"--border":t.border,"--accent":t.accent,"--accent2":t.accentSecondary,"--text":t.text,"--text-muted":t.textMuted,"--text-dim":t.textDim,"--danger":t.danger,"--success":t.success,"--info":t.info,"--font-display":t.fontDisplay,"--font-body":t.fontBody,"--gradient-hero":t.gradientHero,background:t.bg||"#0d0d0f",color:t.text||"#e8e0d0",minHeight:"100vh",fontFamily:t.fontBody||"serif"}}>{children}</div>;
+const TW = ({ themeKey, themes, children }) => {
+  const t = themes?.[themeKey] || themes?.[Object.keys(themes || {})[0]] || {};
+  return (
+    <div style={{
+      "--bg":t.bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
+      "--accent":t.accent,"--accent2":t.accentSecondary,"--text":t.text,
+      "--text-muted":t.textMuted,"--text-dim":t.textDim,
+      "--danger":t.danger,"--success":t.success,"--info":t.info,
+      "--font-display":t.fontDisplay,"--font-body":t.fontBody,"--gradient-hero":t.gradientHero,
+      background:t.bg||"#0d0d0f", color:t.text||"#e8e0d0",
+      minHeight:"100vh", fontFamily:t.fontBody||"serif"
+    }}>{children}</div>
+  );
 };
+
+// ── Shared wizard styles ──
+const ws = {
+  page:    { maxWidth:820, margin:"0 auto", padding:"24px 16px" },
+  title:   { fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:28, marginBottom:24, textAlign:"center" },
+  card:    { background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:18, marginBottom:14 },
+  label:   { display:"block", color:"var(--text-muted)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:6 },
+  input:   { width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"10px 14px", borderRadius:8, fontSize:15, fontFamily:"var(--font-body)", boxSizing:"border-box" },
+  optGrid: { display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))", gap:10 },
+  optCard: sel => ({ padding:"13px 14px", borderRadius:8, cursor:"pointer", transition:"all 0.18s", textAlign:"center",
+    border:`2px solid ${sel ? "var(--accent)" : "var(--border)"}`,
+    background: sel ? "rgba(201,162,39,0.08)" : "var(--surface)" }),
+  tag:     { display:"inline-block", padding:"3px 10px", background:"var(--bg)", border:"1px solid var(--accent2)", borderRadius:12, color:"var(--accent)", fontSize:12, margin:"3px 4px 3px 0" },
+  secTitle:{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:10, marginTop:20 },
+  fCard:   locked => ({ padding:"14px 16px", borderRadius:8, border:"1px solid var(--border)", marginBottom:10,
+    background: locked ? "rgba(0,0,0,0.2)" : "var(--surface)", opacity: locked ? 0.55 : 1 }),
+  lockBadge: { display:"inline-block", padding:"1px 8px", borderRadius:10, background:"rgba(255,255,255,0.06)", border:"1px solid var(--border)", color:"var(--text-dim)", fontSize:10, marginLeft:8 },
+  navBtn:  p => ({ padding:"12px 28px", borderRadius:8, fontSize:14, letterSpacing:1, cursor:"pointer",
+    fontFamily:"var(--font-display)", transition:"all 0.2s",
+    border:`1px solid ${p ? "var(--accent)" : "var(--border)"}`,
+    background: p ? "var(--accent)" : "transparent",
+    color: p ? "var(--bg)" : "var(--text)" }),
+};
+
+// ============================================================
+// SKILL PICKER — reusable for class & species proficiency choices
+// ============================================================
+function SkillPicker({ title, count, from, allSkills, current, onToggle }) {
+  const pool = from === "all" ? allSkills : (from || []);
+  const sel  = current || [];
+  const remaining = count - sel.length;
+  return (
+    <div>
+      <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+        {title} — choose <strong style={{ color:"var(--accent)" }}>{count}</strong>
+        {remaining > 0
+          ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({remaining} remaining)</span>
+          : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
+        {pool.map(skill => {
+          const isSel = sel.includes(skill);
+          const canAdd = isSel || sel.length < count;
+          return (
+            <div key={skill} onClick={() => canAdd && onToggle(skill)} style={{
+              display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
+              transition:"all 0.15s", cursor: canAdd ? "pointer" : "not-allowed",
+              background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)",
+              border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+              opacity: !canAdd ? 0.4 : 1
+            }}>
+              <span style={{ width:12, height:12, borderRadius:"50%", flexShrink:0, display:"inline-block",
+                background: isSel ? "var(--accent)" : "transparent",
+                border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
+              <span style={{ fontSize:13, flex:1 }}>{skill}</span>
+              <span style={{ fontSize:10, color:"var(--text-muted)" }}>({ABILITY_SHORT[SKILLS_MAP[skill] || "str"]})</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// FEATURE PANEL — renders a single class or species feature
+// with interactive controls based on feature.type
+// ============================================================
+function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillToggle,
+    expertiseProfs, onExpertiseToggle, allSkills, languages, onLanguageChoice,
+    languageList, subclass, onSubclassChoice, subclasses }) {
+
+  const [open, setOpen] = useState(!locked);
+  const chosen = choices?.[feature.name];
+
+  return (
+    <div style={ws.fCard(locked)}>
+      <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => setOpen(o => !o)}>
+        <span style={{ fontFamily:"var(--font-display)", color: locked ? "var(--text-dim)" : "var(--accent)", fontSize:14, flex:1 }}>
+          {feature.name}
+        </span>
+        {locked && <span style={ws.lockBadge}>Lvl {feature.level}</span>}
+        {!locked && feature.type === "choice" &&
+          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10,
+            border:`1px solid ${chosen ? "var(--success)" : "var(--accent2)"}`,
+            color: chosen ? "var(--success)" : "var(--accent2)" }}>
+            {chosen ? "✓ chosen" : "Choose"}
+          </span>}
+        {!locked && feature.type === "subclass_choice" &&
+          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10,
+            border:`1px solid ${subclass ? "var(--success)" : "var(--accent2)"}`,
+            color: subclass ? "var(--success)" : "var(--accent2)" }}>
+            {subclass || "Choose subclass"}
+          </span>}
+        {!locked && feature.type === "proficiency_choice" &&
+          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, border:"1px solid var(--accent2)", color:"var(--accent2)" }}>
+            Choose skills
+          </span>}
+        {!locked && feature.type === "expertise_choice" &&
+          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, border:"1px solid var(--accent2)", color:"var(--accent2)" }}>
+            Choose expertise
+          </span>}
+        <span style={{ color:"var(--text-dim)", fontSize:11 }}>{open ? "▲" : "▼"}</span>
+      </div>
+
+      {open && (
+        <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid var(--border)" }}>
+          <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{feature.description}</p>
+
+          {/* Simple pick-one choice */}
+          {!locked && feature.type === "choice" && feature.options && (
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
+              {feature.options.map(opt => (
+                <div key={opt} onClick={() => onChoice(feature.name, opt)} style={{
+                  padding:"8px 12px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                  border:`1px solid ${chosen === opt ? "var(--accent)" : "var(--border)"}`,
+                  background: chosen === opt ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                  color: chosen === opt ? "var(--accent)" : "var(--text)"
+                }}>
+                  {chosen === opt && <span style={{ marginRight:6 }}>✓</span>}{opt}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Subclass choice */}
+          {!locked && feature.type === "subclass_choice" && subclasses && (
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:8 }}>
+              {Object.entries(subclasses).map(([sc, scData]) => (
+                <div key={sc} onClick={() => onSubclassChoice(sc)} style={{
+                  padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                  border:`1px solid ${subclass === sc ? "var(--accent)" : "var(--border)"}`,
+                  background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                  color: subclass === sc ? "var(--accent)" : "var(--text)"
+                }}>
+                  {subclass === sc && <span style={{ marginRight:6 }}>✓</span>}{sc}
+                  {scData?.features?.[0] && (
+                    <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Skill proficiency picker */}
+          {!locked && feature.type === "proficiency_choice" && (
+            <SkillPicker title="Skill proficiencies" count={feature.count}
+              from={feature.from} allSkills={allSkills}
+              current={skillProfs} onToggle={onSkillToggle} />
+          )}
+
+          {/* Expertise picker (double prof) */}
+          {!locked && feature.type === "expertise_choice" && (
+            <div>
+              <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> known skills to gain expertise (×2 proficiency bonus).
+                {(expertiseProfs || []).length >= feature.count &&
+                  <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
+                {(skillProfs || []).map(skill => {
+                  const isSel = (expertiseProfs || []).includes(skill);
+                  const canAdd = isSel || (expertiseProfs || []).length < feature.count;
+                  return (
+                    <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill)} style={{
+                      display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
+                      cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
+                      background: isSel ? "rgba(201,162,39,0.12)" : "var(--surface)",
+                      border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                      opacity: !canAdd ? 0.4 : 1
+                    }}>
+                      <span style={{ width:12, height:12, borderRadius:0, transform:"rotate(45deg)", flexShrink:0, display:"inline-block",
+                        background: isSel ? "var(--accent)" : "transparent",
+                        border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
+                      <span style={{ fontSize:13 }}>{skill} ×2</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Language choice */}
+          {!locked && feature.type === "language_choice" && (
+            <div>
+              <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> language(s).
+                {(languages || []).length >= feature.count &&
+                  <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
+                {(languageList || []).map(lang => {
+                  const isSel = (languages || []).includes(lang);
+                  const canAdd = isSel || (languages || []).length < feature.count;
+                  return (
+                    <div key={lang} onClick={() => canAdd && onLanguageChoice(lang)} style={{
+                      padding:"6px 10px", borderRadius:6, cursor: canAdd ? "pointer" : "not-allowed",
+                      transition:"all 0.15s", fontSize:13,
+                      background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)",
+                      border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                      opacity: !canAdd ? 0.4 : 1
+                    }}>
+                      {isSel && "✓ "}{lang}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ============================================================
 // ABILITY ROLLER
 // ============================================================
-function AbilityRoller({abilities,onChange}){
-  const [method,setMethod]=useState("standard");
-  const [rolls,setRolls]=useState({});
-  const [pb,setPb]=useState({str:8,dex:8,con:8,int:8,wis:8,cha:8});
-  const STANDARD=[15,14,13,12,10,8];
-  const PB_COST={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
-  const MAX_PTS=27;
-  const usedPts=Object.values(pb).reduce((s,v)=>s+(PB_COST[v]||0),0);
-  const rollAll=()=>{
-    const nr={},na={};
-    Object.keys(abilities).forEach(ab=>{
-      const dice=[1,2,3,4].map(()=>Math.floor(Math.random()*6)+1).sort((a,b)=>a-b);
-      nr[ab]={rolls:dice,total:dice.slice(1).reduce((a,b)=>a+b,0)};
-      na[ab]=nr[ab].total;
+function AbilityRoller({ abilities, onChange }) {
+  const [method, setMethod] = useState("standard");
+  const [rolls,  setRolls]  = useState({});
+  const [pb, setPb] = useState({ str:8, dex:8, con:8, int:8, wis:8, cha:8 });
+  const STANDARD = [15, 14, 13, 12, 10, 8];
+  const PB_COST  = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
+  const MAX_PTS  = 27;
+  const usedPts  = Object.values(pb).reduce((s, v) => s + (PB_COST[v] || 0), 0);
+
+  const rollAll = () => {
+    const nr = {}, na = {};
+    Object.keys(abilities).forEach(ab => {
+      const dice = [1,2,3,4].map(() => Math.floor(Math.random() * 6) + 1).sort((a,b) => a-b);
+      nr[ab] = { rolls:dice, total:dice.slice(1).reduce((a,b) => a+b, 0) };
+      na[ab] = nr[ab].total;
     });
     setRolls(nr); onChange(na);
   };
-  const mBtn=a=>({padding:"6px 16px",borderRadius:6,marginRight:8,cursor:"pointer",fontSize:14,fontFamily:"var(--font-body)",transition:"all 0.2s",border:`1px solid ${a?"var(--accent)":"var(--border)"}`,background:a?"var(--accent)":"transparent",color:a?"var(--bg)":"var(--text)"});
-  const card={background:"var(--card)",border:"1px solid var(--border)",borderRadius:8,padding:14,marginBottom:10};
-  const grid={display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12};
-  const lbl={fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1};
-  const mod={display:"inline-block",padding:"2px 8px",borderRadius:4,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--accent)",fontSize:13,marginLeft:6};
-  const sel={width:"100%",background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"8px 10px",borderRadius:6,fontSize:16,fontFamily:"var(--font-display)",marginTop:6,cursor:"pointer"};
-  const pbB={width:28,height:28,borderRadius:4,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:18,lineHeight:"1",display:"flex",alignItems:"center",justifyContent:"center"};
-  return(
+
+  const mBtn = a => ({ padding:"6px 16px", borderRadius:6, marginRight:8, cursor:"pointer", fontSize:13,
+    fontFamily:"var(--font-body)", transition:"all 0.2s",
+    border:`1px solid ${a ? "var(--accent)" : "var(--border)"}`,
+    background: a ? "var(--accent)" : "transparent", color: a ? "var(--bg)" : "var(--text)" });
+  const grid = { display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12 };
+  const card = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:8, padding:14, marginBottom:10 };
+  const lbl  = { fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 };
+  const mod  = { display:"inline-block", padding:"2px 8px", borderRadius:4, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--accent)", fontSize:13, marginLeft:6 };
+  const pbB  = { width:28, height:28, borderRadius:4, border:"1px solid var(--border)", background:"var(--surface)", color:"var(--text)", cursor:"pointer", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" };
+
+  return (
     <div>
-      <div style={{marginBottom:16}}>
-        {[["standard","Standard Array"],["pointbuy","Point Buy"],["roll","Roll Dice"]].map(([m,l])=>
-          <button key={m} style={mBtn(method===m)} onClick={()=>setMethod(m)}>{l}</button>)}
+      <div style={{ marginBottom:16 }}>
+        {[["standard","Standard Array"],["pointbuy","Point Buy"],["roll","Roll Dice"]].map(([m,l]) =>
+          <button key={m} style={mBtn(method === m)} onClick={() => setMethod(m)}>{l}</button>)}
       </div>
-      {method==="standard"&&<div>
-        <p style={{color:"var(--text-muted)",fontSize:13,marginBottom:12}}>Assign: <strong style={{color:"var(--accent)"}}>15, 14, 13, 12, 10, 8</strong></p>
-        <div style={grid}>{Object.keys(abilities).map(ab=><div key={ab} style={card}>
-          <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-          <select value={abilities[ab]} style={sel} onChange={e=>onChange({...abilities,[ab]:+e.target.value})}>
-            {STANDARD.map(v=><option key={v} value={v}>{v}</option>)}
-          </select>
-          <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
-        </div>)}</div>
-      </div>}
-      {method==="pointbuy"&&<div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <p style={{color:"var(--text-muted)",fontSize:13,margin:0}}>Scores 8–15. Costs: 14=7pts, 15=9pts.</p>
-          <span style={{fontFamily:"var(--font-display)",color:usedPts>MAX_PTS?"var(--danger)":"var(--success)"}}>{usedPts}/{MAX_PTS} pts</span>
+
+      {method === "standard" && (
+        <div>
+          <p style={{ color:"var(--text-muted)", fontSize:13, marginBottom:12 }}>
+            Assign: <strong style={{ color:"var(--accent)" }}>15, 14, 13, 12, 10, 8</strong>
+          </p>
+          <div style={grid}>{Object.keys(abilities).map(ab => (
+            <div key={ab} style={card}>
+              <div style={lbl}>{ABILITY_SHORT[ab]}</div>
+              <select value={abilities[ab]} onChange={e => onChange({ ...abilities, [ab]:+e.target.value })}
+                style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:16, fontFamily:"var(--font-display)", marginTop:6, cursor:"pointer" }}>
+                {STANDARD.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+              <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
+            </div>
+          ))}</div>
         </div>
-        <div style={grid}>{Object.keys(pb).map(ab=><div key={ab} style={card}>
-          <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
-            <button style={pbB} onClick={()=>{const v=Math.max(8,pb[ab]-1);const n={...pb,[ab]:v};setPb(n);onChange(n);}}>−</button>
-            <span style={{fontSize:22,fontFamily:"var(--font-display)",color:"var(--accent)",minWidth:30,textAlign:"center"}}>{pb[ab]}</span>
-            <button style={pbB} onClick={()=>{const nv=Math.min(15,pb[ab]+1);const c=Object.entries({...pb,[ab]:nv}).reduce((s,[,v])=>s+(PB_COST[v]||0),0);if(c<=MAX_PTS){const n={...pb,[ab]:nv};setPb(n);onChange(n);}}}>+</button>
+      )}
+
+      {method === "pointbuy" && (
+        <div>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+            <p style={{ color:"var(--text-muted)", fontSize:13, margin:0 }}>Scores 8–15. Cost: 14=7pts, 15=9pts.</p>
+            <span style={{ fontFamily:"var(--font-display)", color: usedPts > MAX_PTS ? "var(--danger)" : "var(--success)" }}>{usedPts}/{MAX_PTS} pts</span>
           </div>
-          <span style={mod}>{modStr(calcMod(pb[ab]))}</span>
-        </div>)}</div>
-      </div>}
-      {method==="roll"&&<div>
-        <button onClick={rollAll} style={{...mBtn(false),background:"var(--accent)",color:"var(--bg)",marginBottom:16}}>🎲 Roll All Abilities</button>
-        <div style={grid}>{Object.keys(abilities).map(ab=><div key={ab} style={card}>
-          <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-          <div style={{fontSize:26,fontFamily:"var(--font-display)",color:"var(--accent)",marginTop:4}}>{abilities[ab]}</div>
-          {rolls[ab]&&<div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
-          <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
-        </div>)}</div>
-      </div>}
+          <div style={grid}>{Object.keys(pb).map(ab => (
+            <div key={ab} style={card}>
+              <div style={lbl}>{ABILITY_SHORT[ab]}</div>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:8 }}>
+                <button style={pbB} onClick={() => { const v = Math.max(8, pb[ab]-1); const n = {...pb,[ab]:v}; setPb(n); onChange(n); }}>−</button>
+                <span style={{ fontSize:22, fontFamily:"var(--font-display)", color:"var(--accent)", minWidth:30, textAlign:"center" }}>{pb[ab]}</span>
+                <button style={pbB} onClick={() => {
+                  const nv = Math.min(15, pb[ab]+1);
+                  const cost = Object.entries({...pb,[ab]:nv}).reduce((s,[,v]) => s + (PB_COST[v] || 0), 0);
+                  if (cost <= MAX_PTS) { const n = {...pb,[ab]:nv}; setPb(n); onChange(n); }
+                }}>+</button>
+              </div>
+              <span style={mod}>{modStr(calcMod(pb[ab]))}</span>
+            </div>
+          ))}</div>
+        </div>
+      )}
+
+      {method === "roll" && (
+        <div>
+          <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)", marginBottom:16 }}>🎲 Roll All</button>
+          <div style={grid}>{Object.keys(abilities).map(ab => (
+            <div key={ab} style={card}>
+              <div style={lbl}>{ABILITY_SHORT[ab]}</div>
+              <div style={{ fontSize:26, fontFamily:"var(--font-display)", color:"var(--accent)", marginTop:4 }}>{abilities[ab]}</div>
+              {rolls[ab] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:2 }}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
+              <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
+            </div>
+          ))}</div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ============================================================
 // CHARACTER CREATION WIZARD
+// Steps: Identity → Background → Species → Class → Abilities
+//        → Equipment & Spells → Finalise
 // ============================================================
-function CharacterCreationWizard({gameData,onSave,onCancel}){
-  const [step,setStep]=useState(0);
-  const [char,setChar]=useState({...DEFAULT_CHAR});
-  const {races,classes,backgrounds,themes,alignments}=gameData;
-  const STEPS=["Identity","Race","Class","Background","Abilities","Skills","Finalise"];
-  const raceData=races?.[char.race];
-  const classData=classes?.[char.class];
-  const bgData=backgrounds?.[char.background];
-  const totalAb=ab=>(char.abilities[ab]||10)+(raceData?.abilityBonuses?.[ab]||0);
-  const maxHP=classData?calcHP(classData,char.level,calcMod(totalAb("con"))):0;
-  const finalize=()=>{
-    const fa=Object.keys(char.abilities).reduce((acc,ab)=>{acc[ab]=totalAb(ab);return acc;},{});
-    onSave({...char,id:Date.now().toString(),abilities:fa,hp:{current:maxHP,max:maxHP,temp:0},hitDice:{current:char.level,max:char.level},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+function CharacterCreationWizard({ gameData, onSave, onCancel }) {
+  const [step, setStep] = useState(0);
+  const [char, setChar] = useState({ ...DEFAULT_CHAR });
+  const { species:speciesDb, classes, backgrounds, themes, alignments, languages:languageList, skills:allSkills } = gameData;
+
+  const STEPS = ["Identity","Background","Species","Class","Abilities","Equipment & Spells","Finalise"];
+  const speciesData = speciesDb?.[char.species];
+  const classData   = classes?.[char.class];
+  const bgData      = backgrounds?.[char.background];
+
+  // Effective ability = base + fixed species bonus + chosen species bonus
+  const totalAb = ab => {
+    const base   = char.abilities[ab] || 10;
+    const fixed  = speciesData?.abilityBonuses?.[ab] || 0;
+    const chosen = char.speciesAbilityChoices?.[ab] || 0;
+    return base + fixed + chosen;
   };
-  const s={
-    card:{background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:18,marginBottom:14},
-    lbl:{display:"block",color:"var(--text-muted)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:6},
-    inp:{width:"100%",background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"10px 14px",borderRadius:8,fontSize:15,fontFamily:"var(--font-body)",boxSizing:"border-box"},
-    og:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10},
-    oc:sel=>({padding:"13px 14px",borderRadius:8,border:`2px solid ${sel?"var(--accent)":"var(--border)"}`,background:sel?"rgba(201,162,39,0.08)":"var(--surface)",cursor:"pointer",transition:"all 0.18s",textAlign:"center"}),
-    tag:{display:"inline-block",padding:"3px 10px",background:"var(--bg)",border:"1px solid var(--accent2)",borderRadius:12,color:"var(--accent)",fontSize:12,margin:"3px 4px 3px 0"},
-    dot:i=>({padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:"bold",letterSpacing:0.5,transition:"all 0.2s",cursor:i<step?"pointer":"default",border:`1px solid ${i===step?"var(--accent)":"var(--border)"}`,background:i===step?"var(--accent)":i<step?"var(--accent2)":"var(--surface)",color:i<=step?"var(--bg)":"var(--text-muted)"}),
-    nb:p=>({padding:"12px 28px",borderRadius:8,fontSize:14,letterSpacing:1,cursor:"pointer",fontFamily:"var(--font-display)",transition:"all 0.2s",border:`1px solid ${p?"var(--accent)":"var(--border)"}`,background:p?"var(--accent)":"transparent",color:p?"var(--bg)":"var(--text)"}),
+  const maxHP = classData ? calcHP(classData, char.level || 1, calcMod(totalAb("con"))) : 0;
+
+  // Helpers to mutate char state
+  const setChoice      = (name, val)  => setChar(c => ({ ...c, featureChoices:{ ...c.featureChoices, [name]:val } }));
+  const setSubclass    = sc           => setChar(c => ({ ...c, subclass:sc }));
+  const toggleSkill    = skill        => setChar(c => {
+    const cur = c.skillProficiencies;
+    return { ...c, skillProficiencies: cur.includes(skill) ? cur.filter(s => s !== skill) : [...cur, skill] };
+  });
+  const toggleExpertise = skill       => setChar(c => {
+    const cur = c.skillExpertise || [];
+    return { ...c, skillExpertise: cur.includes(skill) ? cur.filter(s => s !== skill) : [...cur, skill] };
+  });
+  const toggleLanguage  = lang        => setChar(c => {
+    const cur = c.languages || [];
+    return { ...c, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] };
+  });
+
+  const finalize = () => {
+    const fa = Object.keys(char.abilities).reduce((acc, ab) => { acc[ab] = totalAb(ab); return acc; }, {});
+    const lvl = char.level || 1;
+    onSave({
+      ...char, id: Date.now().toString(), abilities: fa,
+      hp: { current: maxHP, max: maxHP, temp:0 },
+      hitDice: { current: lvl, max: lvl },
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    });
   };
-  return(
+
+  // All class features (base + subclass) sorted by level
+  const allClassFeatures = [
+    ...(classData?.features || []),
+    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
+  ].sort((a, b) => a.level - b.level);
+
+  // Step indicator dots
+  const StepBar = () => (
+    <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
+      {STEPS.map((name, i) => (
+        <div key={i} onClick={() => i < step && setStep(i)} style={{
+          padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
+          letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s",
+          cursor: i < step ? "pointer" : "default",
+          border: i === step ? "1px solid var(--accent)" : "1px solid var(--border)",
+          background: i === step ? "var(--accent)" : i < step ? "var(--accent2)" : "var(--surface)",
+          color: i <= step ? "var(--bg)" : "var(--text-muted)"
+        }}>{i+1}. {name}</div>
+      ))}
+    </div>
+  );
+
+  return (
     <TW themeKey={char.theme} themes={themes}>
-      <div style={{maxWidth:780,margin:"0 auto",padding:"24px 16px"}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:28,marginBottom:24,textAlign:"center"}}>⚔️ Create Your Character</div>
-        <div style={{display:"flex",gap:6,marginBottom:28,justifyContent:"center",flexWrap:"wrap"}}>
-          {STEPS.map((n,i)=><div key={i} style={s.dot(i)} onClick={()=>i<step&&setStep(i)}>{i+1}. {n}</div>)}
-        </div>
+      <div style={ws.page}>
+        <div style={ws.title}>⚔️ Create Your Character</div>
+        <StepBar />
 
-        {step===0&&<div>
-          <div style={s.card}><label style={s.lbl}>Character Name</label><input style={s.inp} value={char.name} placeholder="Enter your hero's name…" onChange={e=>setChar({...char,name:e.target.value})}/></div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-            <div style={s.card}><label style={s.lbl}>Level (1–20)</label><input style={s.inp} type="number" min={1} max={20} value={char.level} onChange={e=>setChar({...char,level:Math.min(20,Math.max(1,+e.target.value))})}/></div>
-            <div style={s.card}><label style={s.lbl}>Alignment</label><select style={s.inp} value={char.alignment} onChange={e=>setChar({...char,alignment:e.target.value})}>{(alignments||[]).map(a=><option key={a} value={a}>{a}</option>)}</select></div>
-          </div>
-          <div style={s.card}><label style={s.lbl}>Appearance</label><textarea style={{...s.inp,minHeight:80,resize:"vertical"}} value={char.appearance} placeholder="Age, hair, eyes, features…" onChange={e=>setChar({...char,appearance:e.target.value})}/></div>
-          <div style={s.card}><label style={s.lbl}>Visual Theme</label>
-            <div style={s.og}>{Object.entries(themes||{}).map(([key,t])=><div key={key} style={s.oc(char.theme===key)} onClick={()=>setChar({...char,theme:key})}>
-              <div style={{width:24,height:24,borderRadius:"50%",background:t.accent,margin:"0 auto 6px",border:`3px solid ${t.accentSecondary||t.accent}`}}/>
-              <div style={{fontSize:13}}>{t.name}</div>
-            </div>)}</div>
-          </div>
-        </div>}
-
-        {step===1&&<div>
-          <div style={s.og}>{Object.entries(races||{}).map(([n,d])=><div key={n} style={s.oc(char.race===n)} onClick={()=>setChar({...char,race:n})}>
-            <div style={{fontFamily:"var(--font-display)",fontSize:14,color:"var(--text)",marginBottom:4}}>{n}</div>
-            <div style={{fontSize:11,color:"var(--text-muted)"}}>{Object.entries(d.abilityBonuses||{}).map(([ab,v])=>`+${v} ${ABILITY_SHORT[ab]}`).join(", ")}</div>
-            <div style={{fontSize:11,color:"var(--text-dim)",marginTop:3}}>{d.speed}ft • {d.size}</div>
-          </div>)}</div>
-          {raceData&&<div style={{...s.card,marginTop:16}}><div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:10}}>{char.race} Traits</div>{(raceData.traits||[]).map(t=><span key={t} style={s.tag}>{t}</span>)}</div>}
-        </div>}
-
-        {step===2&&<div>
-          <div style={s.og}>{Object.entries(classes||{}).map(([n,d])=><div key={n} style={s.oc(char.class===n)} onClick={()=>setChar({...char,class:n})}>
-            <div style={{fontFamily:"var(--font-display)",fontSize:14,color:"var(--text)",marginBottom:4}}>{n}</div>
-            <div style={{fontSize:11,color:"var(--text-muted)"}}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
-            <div style={{fontSize:11,color:"var(--text-dim)",marginTop:3}}>{d.spellcaster?"✨ Spellcaster":"⚔️ Martial"}</div>
-          </div>)}</div>
-          {classData&&<div style={{...s.card,marginTop:16}}>
-            <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:10}}>{char.class} at Level {char.level}</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,fontSize:13,marginBottom:10}}>
-              <div><span style={{color:"var(--text-muted)"}}>Hit Die: </span><span style={{color:"var(--accent)"}}>d{classData.hitDie}</span></div>
-              <div><span style={{color:"var(--text-muted)"}}>Saves: </span>{(classData.savingThrows||[]).map(ab=>ABILITY_SHORT[ab]).join(", ")}</div>
-              <div><span style={{color:"var(--text-muted)"}}>Armor: </span>{(classData.armorProficiencies||[]).join(", ")||"None"}</div>
-              <div><span style={{color:"var(--text-muted)"}}>Weapons: </span>{(classData.weaponProficiencies||[]).slice(0,3).join(", ")}</div>
+        {/* ── STEP 0: Identity ── */}
+        {step === 0 && (
+          <div>
+            <div style={ws.card}>
+              <label style={ws.label}>Character Name</label>
+              <input style={ws.input} value={char.name} placeholder="Enter your hero's name…"
+                onChange={e => setChar({ ...char, name:e.target.value })} />
             </div>
-            <div style={{color:"var(--text-muted)",fontSize:11,marginBottom:6}}>FEATURES UP TO LEVEL {char.level}</div>
-            {Object.entries(classData.features||{}).filter(([lvl])=>+lvl<=char.level).flatMap(([,f])=>f).filter(Boolean).map(f=><span key={f} style={s.tag}>{f}</span>)}
-          </div>}
-        </div>}
-
-        {step===3&&<div>
-          <div style={s.og}>{Object.entries(backgrounds||{}).map(([n,d])=><div key={n} style={s.oc(char.background===n)} onClick={()=>setChar({...char,background:n})}>
-            <div style={{fontFamily:"var(--font-display)",fontSize:14,color:"var(--text)",marginBottom:4}}>{n}</div>
-            <div style={{fontSize:11,color:"var(--text-muted)"}}>{(d.skills||[]).join(", ")}</div>
-          </div>)}</div>
-          {bgData&&<div style={{...s.card,marginTop:16}}>
-            <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:10}}>{char.background} — {bgData.feature}</div>
-            <div style={{fontSize:13}}>
-              <span style={{color:"var(--text-muted)"}}>Skills: </span>{(bgData.skills||[]).map(sk=><span key={sk} style={s.tag}>{sk}</span>)}
-              {bgData.tools&&<><span style={{color:"var(--text-muted)",marginLeft:8}}>Tools: </span>{bgData.tools.map(t=><span key={t} style={s.tag}>{t}</span>)}</>}
-              {bgData.languages&&<span style={{color:"var(--text-muted)",marginLeft:8}}>+{bgData.languages} language(s)</span>}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+              <div style={ws.card}>
+                <label style={ws.label}>Alignment</label>
+                <select style={ws.input} value={char.alignment} onChange={e => setChar({ ...char, alignment:e.target.value })}>
+                  {(alignments || []).map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+              <div style={ws.card}>
+                <label style={ws.label}>Visual Theme</label>
+                <select style={ws.input} value={char.theme} onChange={e => setChar({ ...char, theme:e.target.value })}>
+                  {Object.entries(themes || {}).map(([k, t]) => <option key={k} value={k}>{t.name}</option>)}
+                </select>
+              </div>
             </div>
-          </div>}
-          <div style={{...s.card,marginTop:14}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-              {[["personalityTraits","Personality Traits"],["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"]].map(([f,l])=><div key={f}>
-                <label style={s.lbl}>{l}</label>
-                <textarea style={{...s.inp,minHeight:65,resize:"vertical",fontSize:13}} value={char[f]} placeholder={`Your character's ${l.toLowerCase()}…`} onChange={e=>setChar({...char,[f]:e.target.value})}/>
-              </div>)}
+            <div style={ws.card}>
+              <label style={ws.label}>Appearance / Description</label>
+              <textarea style={{ ...ws.input, minHeight:80, resize:"vertical" }} value={char.appearance}
+                placeholder="Age, hair, eyes, notable features…" onChange={e => setChar({ ...char, appearance:e.target.value })} />
             </div>
           </div>
-        </div>}
+        )}
 
-        {step===4&&<div>
-          {raceData&&<div style={{...s.card,marginBottom:14,fontSize:13}}><span style={{color:"var(--text-muted)"}}>Racial bonuses applied after: </span>{Object.entries(raceData.abilityBonuses||{}).map(([ab,v])=><span key={ab} style={{color:"var(--accent)",marginRight:8}}>+{v} {ABILITY_SHORT[ab]}</span>)}</div>}
-          <AbilityRoller abilities={char.abilities} onChange={abs=>setChar({...char,abilities:abs})}/>
-          <div style={{...s.card,marginTop:18}}>
-            <div style={{color:"var(--text-muted)",fontSize:11,marginBottom:10}}>FINAL SCORES WITH RACIAL BONUSES</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
-              {Object.keys(char.abilities).map(ab=>{const t=totalAb(ab);return(
-                <div key={ab} style={{textAlign:"center",padding:10,background:"var(--surface)",borderRadius:8,border:"1px solid var(--border)"}}>
-                  <div style={{fontSize:10,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>{ABILITY_SHORT[ab]}</div>
-                  <div style={{fontSize:22,fontFamily:"var(--font-display)",color:"var(--accent)"}}>{t}</div>
-                  <div style={{fontSize:12,color:"var(--text-muted)"}}>{modStr(calcMod(t))}</div>
-                </div>);})}
+        {/* ── STEP 1: Background ── */}
+        {step === 1 && (
+          <div>
+            <div style={ws.optGrid}>
+              {Object.entries(backgrounds || {}).map(([n, d]) => (
+                <div key={n} style={ws.optCard(char.background === n)} onClick={() => setChar({ ...char, background:n })}>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>{(d.skills || []).join(", ")}</div>
+                </div>
+              ))}
             </div>
-            {classData&&<div style={{marginTop:10,fontSize:13,color:"var(--text-muted)"}}>Max HP: <strong style={{color:"var(--success)"}}>{maxHP}</strong> • Prof Bonus: <strong style={{color:"var(--accent)"}}>+{profBonus(char.level)}</strong></div>}
+            {bgData && (
+              <div style={{ ...ws.card, marginTop:16 }}>
+                <div style={ws.secTitle}>{char.background} — {bgData.feature}</div>
+                {bgData.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{bgData.description}</p>}
+                <div style={{ fontSize:13, marginBottom:14 }}>
+                  <span style={{ color:"var(--text-muted)" }}>Skills: </span>
+                  {(bgData.skills || []).map(sk => <span key={sk} style={ws.tag}>{sk}</span>)}
+                  {bgData.tools && <><span style={{ color:"var(--text-muted)", marginLeft:8 }}>Tools: </span>{bgData.tools.map(t => <span key={t} style={ws.tag}>{t}</span>)}</>}
+                  {bgData.languages && <span style={{ color:"var(--text-muted)", marginLeft:8 }}>+{bgData.languages} language(s)</span>}
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                  {[["personalityTraits","Personality Traits"],["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"]].map(([f, l]) => (
+                    <div key={f}>
+                      <label style={ws.label}>{l}</label>
+                      <textarea style={{ ...ws.input, minHeight:65, resize:"vertical", fontSize:13 }} value={char[f]}
+                        placeholder={`Your character's ${l.toLowerCase()}…`} onChange={e => setChar({ ...char, [f]:e.target.value })} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>}
+        )}
 
-        {step===5&&<div style={s.card}>
-          <div style={{color:"var(--text-muted)",fontSize:13,marginBottom:12}}>
-            Choose <strong style={{color:"var(--accent)"}}>{classData?.skillCount||2}</strong> class skills.
-            {bgData&&<span style={{color:"var(--accent)",marginLeft:8}}>Background grants: {bgData.skills.join(", ")}</span>}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:7}}>
-            {Object.keys(SKILLS_MAP).map(skill=>{
-              const bgs=bgData?.skills||[], isBg=bgs.includes(skill);
-              const isSel=char.skillProficiencies.includes(skill);
-              const isCS=(classData?.skills||[]).includes(skill);
-              const cc=char.skillProficiencies.filter(sk=>!bgs.includes(sk)).length;
-              return <div key={skill} onClick={()=>{
-                if(isBg||!isCS) return;
-                if(isSel) setChar({...char,skillProficiencies:char.skillProficiencies.filter(sk=>sk!==skill)});
-                else if(cc<(classData?.skillCount||2)) setChar({...char,skillProficiencies:[...char.skillProficiencies,skill]});
-              }} style={{display:"flex",alignItems:"center",padding:"8px 12px",borderRadius:6,transition:"all 0.15s",background:isSel||isBg?"rgba(201,162,39,0.08)":"var(--surface)",border:`1px solid ${isSel||isBg?"var(--accent)":"var(--border)"}`,cursor:isBg?"default":isCS?"pointer":"not-allowed",opacity:!isCS&&!isBg?0.35:1}}>
-                <span style={{width:12,height:12,borderRadius:"50%",flexShrink:0,marginRight:10,display:"inline-block",background:isSel||isBg?"var(--accent)":"transparent",border:`2px solid ${isSel||isBg?"var(--accent)":"var(--border)"}`}}/>
-                <span style={{fontSize:13,flex:1}}>{skill}</span>
-                <span style={{fontSize:11,color:"var(--text-muted)"}}>({ABILITY_SHORT[SKILLS_MAP[skill]]})</span>
-                {isBg&&<span style={{fontSize:10,color:"var(--accent2)",marginLeft:6}}>BG</span>}
-              </div>;
-            })}
-          </div>
-        </div>}
+        {/* ── STEP 2: Species ── */}
+        {step === 2 && (
+          <div>
+            <div style={ws.optGrid}>
+              {Object.entries(speciesDb || {}).map(([n, d]) => (
+                <div key={n} style={ws.optCard(char.species === n)}
+                  onClick={() => setChar({ ...char, species:n, speciesAbilityChoices:{} })}>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>
+                    {[
+                      ...Object.entries(d.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`),
+                      ...(d.abilityBonusChoices ? [`+${d.abilityBonusChoices.amount}×${d.abilityBonusChoices.count} (choice)`] : [])
+                    ].join(", ")}
+                  </div>
+                  <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.speed}ft • {d.size}</div>
+                </div>
+              ))}
+            </div>
 
-        {step===6&&<div style={s.card}>
-          <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:22,marginBottom:18,textAlign:"center"}}>{char.name||"Unnamed Hero"}</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
-            {[["Race",char.race||"—"],["Class",char.class||"—"],["Background",char.background||"—"],["Level",char.level],["Alignment",char.alignment],["Max HP",maxHP]].map(([l,v])=>
-              <div key={l} style={{textAlign:"center",padding:12,background:"var(--surface)",borderRadius:8,border:"1px solid var(--border)"}}>
-                <div style={{color:"var(--text-muted)",fontSize:10,textTransform:"uppercase",letterSpacing:1}}>{l}</div>
-                <div style={{color:"var(--accent)",fontFamily:"var(--font-display)",fontSize:16,marginTop:4}}>{v}</div>
-              </div>)}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
-            {Object.keys(char.abilities).map(ab=>{const t=totalAb(ab);return(
-              <div key={ab} style={{textAlign:"center",padding:10,background:"var(--surface)",borderRadius:8,border:"1px solid var(--border)"}}>
-                <div style={{fontSize:10,color:"var(--text-muted)",textTransform:"uppercase"}}>{ABILITY_SHORT[ab]}</div>
-                <div style={{fontSize:20,fontFamily:"var(--font-display)",color:"var(--accent)"}}>{t}</div>
-                <div style={{fontSize:12,color:"var(--text-muted)"}}>{modStr(calcMod(t))}</div>
-              </div>);})}
-          </div>
-        </div>}
+            {speciesData && (
+              <div style={{ marginTop:20 }}>
+                {/* Fixed ability bonuses */}
+                {Object.keys(speciesData.abilityBonuses || {}).length > 0 && (
+                  <div style={{ ...ws.card, fontSize:13 }}>
+                    <span style={{ color:"var(--text-muted)" }}>Fixed ability bonuses: </span>
+                    {Object.entries(speciesData.abilityBonuses).map(([ab, v]) => (
+                      <span key={ab} style={{ color:"var(--accent)", marginRight:10 }}>+{v} {ABILITY_NAMES[ab]}</span>
+                    ))}
+                  </div>
+                )}
 
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:28}}>
-          <button style={s.nb(false)} onClick={()=>step===0?onCancel():setStep(step-1)}>{step===0?"Cancel":"← Back"}</button>
-          {step<STEPS.length-1?<button style={s.nb(true)} onClick={()=>setStep(step+1)}>Next →</button>:<button style={s.nb(true)} onClick={finalize}>⚔️ Create Character</button>}
+                {/* Flexible ability bonus choices e.g. Half-Elf +1/+1 */}
+                {speciesData.abilityBonusChoices && (() => {
+                  const cfg = speciesData.abilityBonusChoices;
+                  const choices = char.speciesAbilityChoices || {};
+                  const chosen  = Object.keys(choices).filter(k => choices[k] > 0);
+                  return (
+                    <div style={ws.card}>
+                      <div style={ws.secTitle}>{cfg.description || `Choose ${cfg.count} abilities (+${cfg.amount} each)`}</div>
+                      <p style={{ fontSize:13, color:"var(--text-muted)", margin:"0 0 12px" }}>{chosen.length}/{cfg.count} chosen</p>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+                        {Object.keys(ABILITY_NAMES)
+                          .filter(ab => !cfg.exclude || !cfg.exclude.includes(ab))
+                          .map(ab => {
+                            const isSel = !!choices[ab];
+                            const canAdd = isSel || chosen.length < cfg.count;
+                            return (
+                              <div key={ab} onClick={() => {
+                                if (!canAdd) return;
+                                const newC = { ...choices };
+                                if (isSel) delete newC[ab]; else newC[ab] = cfg.amount;
+                                setChar(c => ({ ...c, speciesAbilityChoices:newC }));
+                              }} style={{
+                                padding:10, borderRadius:8, textAlign:"center",
+                                cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
+                                border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                                background: isSel ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                                opacity: !canAdd ? 0.4 : 1
+                              }}>
+                                <div style={{ fontSize:12, color:"var(--text-muted)", textTransform:"uppercase" }}>{ABILITY_SHORT[ab]}</div>
+                                <div style={{ fontFamily:"var(--font-display)", color: isSel ? "var(--accent)" : "var(--text)", fontSize:18 }}>
+                                  {isSel ? `+${cfg.amount}` : "—"}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Species feature list */}
+                <div style={ws.secTitle}>Species Features</div>
+                {(speciesData.features || []).map(feat => (
+                  <FeaturePanel key={feat.name} feature={feat} locked={false}
+                    choices={char.featureChoices} onChoice={setChoice}
+                    skillProfs={char.skillProficiencies} onSkillToggle={toggleSkill}
+                    expertiseProfs={char.skillExpertise} onExpertiseToggle={toggleExpertise}
+                    allSkills={allSkills || []}
+                    languages={char.languages} onLanguageChoice={toggleLanguage}
+                    languageList={languageList || []} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── STEP 3: Class ── */}
+        {step === 3 && (
+          <div>
+            <div style={ws.optGrid}>
+              {Object.entries(classes || {}).map(([n, d]) => (
+                <div key={n} style={ws.optCard(char.class === n)}
+                  onClick={() => setChar({ ...char, class:n, subclass:"" })}>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
+                  <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.spellcaster ? "✨ Spellcaster" : "⚔️ Martial"}</div>
+                </div>
+              ))}
+            </div>
+
+            {classData && (
+              <div style={{ marginTop:20 }}>
+                {/* Level input — free typing */}
+                <div style={{ ...ws.card, display:"flex", alignItems:"center", gap:24 }}>
+                  <div>
+                    <label style={ws.label}>Character Level</label>
+                    <input
+                      type="number" min={1} max={20}
+                      value={char.level === 0 ? "" : char.level}
+                      onChange={e => {
+                        const raw = e.target.value;
+                        if (raw === "") { setChar(c => ({ ...c, level:0 })); return; }
+                        const n = parseInt(raw, 10);
+                        if (!isNaN(n)) setChar(c => ({ ...c, level: Math.min(20, Math.max(1, n)) }));
+                      }}
+                      onBlur={e => { if (!e.target.value || +e.target.value < 1) setChar(c => ({ ...c, level:1 })); }}
+                      style={{ ...ws.input, width:100, fontSize:28, fontFamily:"var(--font-display)", textAlign:"center", padding:"8px" }}
+                    />
+                  </div>
+                  <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:2 }}>
+                    <div>Proficiency Bonus: <strong style={{ color:"var(--accent)" }}>+{profBonus(char.level || 1)}</strong></div>
+                    <div>Max HP: <strong style={{ color:"var(--success)" }}>{maxHP}</strong></div>
+                    <div>Hit Die: <strong style={{ color:"var(--accent)" }}>d{classData.hitDie}</strong></div>
+                  </div>
+                </div>
+
+                {/* All class features — unlocked up to level, locked above */}
+                <div style={ws.secTitle}>Class Features</div>
+                {allClassFeatures.map((feat, idx) => {
+                  const locked = (char.level || 1) < feat.level;
+                  return (
+                    <FeaturePanel key={`${feat.name}-${idx}`} feature={feat} locked={locked}
+                      choices={char.featureChoices} onChoice={setChoice}
+                      skillProfs={char.skillProficiencies} onSkillToggle={toggleSkill}
+                      expertiseProfs={char.skillExpertise} onExpertiseToggle={toggleExpertise}
+                      allSkills={allSkills || []}
+                      languages={char.languages} onLanguageChoice={toggleLanguage}
+                      languageList={languageList || []}
+                      subclass={char.subclass} onSubclassChoice={setSubclass}
+                      subclasses={classData.subclasses} />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── STEP 4: Abilities ── */}
+        {step === 4 && (
+          <div>
+            {speciesData && (
+              <div style={{ ...ws.card, fontSize:13, marginBottom:16 }}>
+                <span style={{ color:"var(--text-muted)" }}>Species bonuses applied: </span>
+                {Object.entries(speciesData.abilityBonuses || {}).map(([ab, v]) => (
+                  <span key={ab} style={{ color:"var(--accent)", marginRight:8 }}>+{v} {ABILITY_SHORT[ab]}</span>
+                ))}
+                {Object.entries(char.speciesAbilityChoices || {}).filter(([,v]) => v > 0).map(([ab, v]) => (
+                  <span key={ab+"-c"} style={{ color:"var(--accent)", marginRight:8 }}>+{v} {ABILITY_SHORT[ab]} (choice)</span>
+                ))}
+              </div>
+            )}
+            <AbilityRoller abilities={char.abilities} onChange={abs => setChar({ ...char, abilities:abs })} />
+            <div style={{ ...ws.card, marginTop:18 }}>
+              <div style={{ color:"var(--text-muted)", fontSize:11, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>
+                Final Scores (with species bonuses)
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:8 }}>
+                {Object.keys(char.abilities).map(ab => {
+                  const t = totalAb(ab);
+                  return (
+                    <div key={ab} style={{ textAlign:"center", padding:10, background:"var(--surface)", borderRadius:8, border:"1px solid var(--border)" }}>
+                      <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                      <div style={{ fontSize:22, fontFamily:"var(--font-display)", color:"var(--accent)" }}>{t}</div>
+                      <div style={{ fontSize:12, color:"var(--text-muted)" }}>{modStr(calcMod(t))}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP 5: Equipment & Spells ── */}
+        {step === 5 && (
+          <div>
+            <div style={ws.card}>
+              <div style={ws.secTitle}>Starting Equipment</div>
+              <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 14px" }}>
+                Add your starting gear. You can always edit inventory on the character sheet later.
+              </p>
+              {/* Quick inventory adder */}
+              {(() => {
+                const { itemTypes } = gameData;
+                const inv = char.inventory || [];
+                const [name, setName] = useState("");
+                const [type, setType] = useState("weapon");
+                const addItem = () => {
+                  if (!name) return;
+                  setChar(c => ({ ...c, inventory:[...c.inventory, { id:Date.now(), name, type, quantity:1, weight:0, description:"", equipped:false }] }));
+                  setName("");
+                };
+                return (
+                  <div>
+                    <div style={{ display:"grid", gridTemplateColumns:"3fr 1fr auto", gap:8, marginBottom:8 }}>
+                      <input style={{ ...ws.input, fontSize:13 }} value={name} onChange={e => setName(e.target.value)}
+                        placeholder="Item name…" onKeyDown={e => e.key === "Enter" && addItem()} />
+                      <select style={{ ...ws.input, fontSize:13 }} value={type} onChange={e => setType(e.target.value)}>
+                        {Object.entries(itemTypes || {}).map(([k, v]) => <option key={k} value={k}>{v.label || k}</option>)}
+                      </select>
+                      <button onClick={addItem} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13, whiteSpace:"nowrap" }}>Add</button>
+                    </div>
+                    {inv.length > 0 && (
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                        {inv.map(item => (
+                          <span key={item.id} onClick={() => setChar(c => ({ ...c, inventory:c.inventory.filter(i => i.id !== item.id) }))}
+                            style={{ ...ws.tag, cursor:"pointer" }}>{item.name} ×</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {classData?.spellcaster && (
+              <div style={{ ...ws.card, marginTop:14 }}>
+                <div style={ws.secTitle}>Starting Spells</div>
+                <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 14px" }}>
+                  Pick spells from your class list. You can add more later on the sheet.
+                </p>
+                {(() => {
+                  const classSpells = gameData.spells?.[char.class] || [];
+                  const [filter, setFilter] = useState("all");
+                  const known = char.spells || [];
+                  const displayed = classSpells.filter(sp => filter === "all" || sp.level === +filter);
+                  const toggleKnown = spell => {
+                    const isK = known.some(s => s.name === spell.name);
+                    setChar(c => ({ ...c, spells: isK ? c.spells.filter(s => s.name !== spell.name) : [...c.spells, { ...spell, prepared:false }] }));
+                  };
+                  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+                    border:`1px solid ${a ? "var(--accent)" : "var(--border)"}`,
+                    background: a ? "var(--accent)" : "transparent", color: a ? "var(--bg)" : "var(--text-muted)" });
+                  if (classSpells.length === 0) return <p style={{ fontSize:13, color:"var(--text-muted)" }}>No spells listed for {char.class} in tome-data.json yet.</p>;
+                  return (
+                    <div>
+                      {known.length > 0 && (
+                        <div style={{ marginBottom:12 }}>
+                          <span style={{ fontSize:12, color:"var(--text-muted)" }}>Chosen: </span>
+                          {known.map(s => <span key={s.name} onClick={() => toggleKnown(s)} style={{ ...ws.tag, cursor:"pointer" }}>{s.name} ×</span>)}
+                        </div>
+                      )}
+                      <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
+                        {["all","0","1","2","3","4","5"].map(l =>
+                          <button key={l} style={fBtn(filter === l)} onClick={() => setFilter(l)}>
+                            {l === "all" ? "All" : l === "0" ? "Cantrips" : `Lvl ${l}`}
+                          </button>)}
+                      </div>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(175px,1fr))", gap:6 }}>
+                        {displayed.map(spell => {
+                          const isK = known.some(s => s.name === spell.name);
+                          return (
+                            <div key={spell.name} onClick={() => toggleKnown(spell)} style={{
+                              padding:"8px 12px", borderRadius:6, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                              border:`1px solid ${isK ? "var(--accent)" : "var(--border)"}`,
+                              background: isK ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                              color: isK ? "var(--accent)" : "var(--text)"
+                            }}>
+                              {isK ? "✓ " : ""}{spell.name}
+                              <span style={{ fontSize:10, color:"var(--text-muted)", marginLeft:6 }}>{spell.level === 0 ? "C" : `L${spell.level}`}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── STEP 6: Finalise ── */}
+        {step === 6 && (
+          <div style={ws.card}>
+            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:22, marginBottom:18, textAlign:"center" }}>
+              {char.name || "Unnamed Hero"}
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:16 }}>
+              {[
+                ["Species", char.species || "—"],
+                ["Class",   char.subclass ? `${char.class} (${char.subclass})` : char.class || "—"],
+                ["Background", char.background || "—"],
+                ["Level",   char.level || 1],
+                ["Alignment", char.alignment],
+                ["Max HP",  maxHP]
+              ].map(([l, v]) => (
+                <div key={l} style={{ textAlign:"center", padding:12, background:"var(--surface)", borderRadius:8, border:"1px solid var(--border)" }}>
+                  <div style={{ color:"var(--text-muted)", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>{l}</div>
+                  <div style={{ color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:14, marginTop:4 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:8 }}>
+              {Object.keys(char.abilities).map(ab => {
+                const t = totalAb(ab);
+                return (
+                  <div key={ab} style={{ textAlign:"center", padding:10, background:"var(--surface)", borderRadius:8, border:"1px solid var(--border)" }}>
+                    <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase" }}>{ABILITY_SHORT[ab]}</div>
+                    <div style={{ fontSize:20, fontFamily:"var(--font-display)", color:"var(--accent)" }}>{t}</div>
+                    <div style={{ fontSize:12, color:"var(--text-muted)" }}>{modStr(calcMod(t))}</div>
+                  </div>
+                );
+              })}
+            </div>
+            {(char.skillProficiencies || []).length > 0 && (
+              <div style={{ marginTop:14, fontSize:13 }}>
+                <span style={{ color:"var(--text-muted)" }}>Skill Proficiencies: </span>
+                {char.skillProficiencies.map(s => <span key={s} style={ws.tag}>{s}</span>)}
+              </div>
+            )}
+            {(char.skillExpertise || []).length > 0 && (
+              <div style={{ marginTop:8, fontSize:13 }}>
+                <span style={{ color:"var(--text-muted)" }}>Expertise: </span>
+                {char.skillExpertise.map(s => <span key={s} style={{ ...ws.tag, border:"1px solid var(--accent)" }}>{s} ×2</span>)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Nav buttons */}
+        <div style={{ display:"flex", justifyContent:"space-between", marginTop:28 }}>
+          <button style={ws.navBtn(false)} onClick={() => step === 0 ? onCancel() : setStep(step - 1)}>
+            {step === 0 ? "Cancel" : "← Back"}
+          </button>
+          {step < STEPS.length - 1
+            ? <button style={ws.navBtn(true)} onClick={() => setStep(step + 1)}>Next →</button>
+            : <button style={ws.navBtn(true)} onClick={finalize}>⚔️ Create Character</button>}
         </div>
       </div>
     </TW>
@@ -368,34 +939,44 @@ function CharacterCreationWizard({gameData,onSave,onCancel}){
 // ============================================================
 // HP TRACKER
 // ============================================================
-function HPTracker({hp,onUpdate}){
-  const [delta,setDelta]=useState("");
-  const pct=Math.max(0,Math.min(100,((hp.current+hp.temp)/Math.max(1,hp.max))*100));
-  const bc=pct>50?"var(--success)":pct>25?"#f39c12":"var(--danger)";
-  const apply=heal=>{const v=parseInt(delta);if(isNaN(v))return;onUpdate({...hp,current:Math.min(hp.max,Math.max(0,hp.current+(heal?v:-v)))});setDelta("");};
-  const iBtn=(bg,br)=>({padding:"8px 12px",background:bg,border:`1px solid ${br}`,color:br,borderRadius:6,cursor:"pointer",fontSize:13,fontFamily:"var(--font-body)"});
-  return(
-    <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:12,padding:16}}>
-      <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Hit Points</div>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-        <span style={{fontSize:34,fontFamily:"var(--font-display)",color:pct>25?"var(--text)":"var(--danger)"}}>{hp.current}</span>
-        <span style={{color:"var(--text-dim)",fontSize:22}}>/</span>
-        <span style={{fontSize:26,fontFamily:"var(--font-display)",color:"var(--text-muted)"}}>{hp.max}</span>
-        {hp.temp>0&&<span style={{fontSize:15,color:"var(--info)",marginLeft:6}}>+{hp.temp} temp</span>}
+function HPTracker({ hp, onUpdate }) {
+  const [delta, setDelta] = useState("");
+  const pct = Math.max(0, Math.min(100, ((hp.current + hp.temp) / Math.max(1, hp.max)) * 100));
+  const bc  = pct > 50 ? "var(--success)" : pct > 25 ? "#f39c12" : "var(--danger)";
+  const apply = heal => {
+    const v = parseInt(delta);
+    if (isNaN(v)) return;
+    onUpdate({ ...hp, current: Math.min(hp.max, Math.max(0, hp.current + (heal ? v : -v))) });
+    setDelta("");
+  };
+  const iBtn = (bg, br) => ({ padding:"8px 12px", background:bg, border:`1px solid ${br}`, color:br, borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"var(--font-body)" });
+  return (
+    <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:12, padding:16 }}>
+      <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Hit Points</div>
+      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
+        <span style={{ fontSize:34, fontFamily:"var(--font-display)", color: pct > 25 ? "var(--text)" : "var(--danger)" }}>{hp.current}</span>
+        <span style={{ color:"var(--text-dim)", fontSize:22 }}>/</span>
+        <span style={{ fontSize:26, fontFamily:"var(--font-display)", color:"var(--text-muted)" }}>{hp.max}</span>
+        {hp.temp > 0 && <span style={{ fontSize:15, color:"var(--info)", marginLeft:6 }}>+{hp.temp} temp</span>}
       </div>
-      <div style={{height:8,background:"var(--bg)",borderRadius:4,marginBottom:12,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:bc,borderRadius:4,transition:"all 0.3s"}}/>
+      <div style={{ height:8, background:"var(--bg)", borderRadius:4, marginBottom:12, overflow:"hidden" }}>
+        <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:4, transition:"all 0.3s" }} />
       </div>
-      <div style={{display:"flex",gap:8,alignItems:"center"}}>
-        <input value={delta} onChange={e=>setDelta(e.target.value)} placeholder="Amount…" onKeyDown={e=>e.key==="Enter"&&apply(false)} style={{flex:1,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"8px 10px",borderRadius:6,fontSize:14,fontFamily:"var(--font-body)"}}/>
-        <button onClick={()=>apply(false)} style={iBtn("rgba(192,57,43,0.15)","var(--danger)")}>Damage</button>
-        <button onClick={()=>apply(true)} style={iBtn("rgba(39,174,96,0.15)","var(--success)")}>Heal</button>
+      <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+        <input value={delta} onChange={e => setDelta(e.target.value)} placeholder="Amount…"
+          onKeyDown={e => e.key === "Enter" && apply(false)}
+          style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:14, fontFamily:"var(--font-body)" }} />
+        <button onClick={() => apply(false)} style={iBtn("rgba(192,57,43,0.15)", "var(--danger)")}>Damage</button>
+        <button onClick={() => apply(true)}  style={iBtn("rgba(39,174,96,0.15)",  "var(--success)")}>Heal</button>
       </div>
-      <div style={{display:"flex",gap:8,marginTop:8,alignItems:"center"}}>
-        <button onClick={()=>onUpdate({...hp,current:hp.max})} style={{flex:1,padding:"6px",background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text-muted)",borderRadius:6,cursor:"pointer",fontSize:12}}>Short Rest</button>
-        <button onClick={()=>onUpdate({...hp,current:hp.max,temp:0})} style={{flex:1,padding:"6px",background:"var(--surface)",border:"1px solid var(--accent2)",color:"var(--accent)",borderRadius:6,cursor:"pointer",fontSize:12}}>Long Rest</button>
-        <span style={{fontSize:11,color:"var(--text-muted)"}}>Temp:</span>
-        <input type="number" value={hp.temp} min={0} onChange={e=>onUpdate({...hp,temp:Math.max(0,+e.target.value)})} style={{width:54,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--info)",padding:"4px 6px",borderRadius:6,fontSize:13,textAlign:"center",fontFamily:"var(--font-body)"}}/>
+      <div style={{ display:"flex", gap:8, marginTop:8, alignItems:"center" }}>
+        <button onClick={() => onUpdate({ ...hp, current:hp.max })}
+          style={{ flex:1, padding:"6px", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", borderRadius:6, cursor:"pointer", fontSize:12 }}>Short Rest</button>
+        <button onClick={() => onUpdate({ ...hp, current:hp.max, temp:0 })}
+          style={{ flex:1, padding:"6px", background:"var(--surface)", border:"1px solid var(--accent2)", color:"var(--accent)", borderRadius:6, cursor:"pointer", fontSize:12 }}>Long Rest</button>
+        <span style={{ fontSize:11, color:"var(--text-muted)" }}>Temp:</span>
+        <input type="number" value={hp.temp} min={0} onChange={e => onUpdate({ ...hp, temp: Math.max(0, +e.target.value) })}
+          style={{ width:54, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--info)", padding:"4px 6px", borderRadius:6, fontSize:13, textAlign:"center", fontFamily:"var(--font-body)" }} />
       </div>
     </div>
   );
@@ -404,58 +985,109 @@ function HPTracker({hp,onUpdate}){
 // ============================================================
 // SPELLS TAB
 // ============================================================
-function SpellsTab({char,gameData,onUpdate}){
-  const {classes,spells:spellDb}=gameData;
-  const [filter,setFilter]=useState("all");
-  const [expanded,setExpanded]=useState(null);
-  const classData=classes?.[char.class];
-  const known=char.spells||[];
-  const classSpells=spellDb?.[char.class]||[];
-  const spellDC=calcSpellDC(char,classes);
-  const spellAtk=calcSpellAtk(char,classes);
-  const displayed=classSpells.filter(sp=>filter==="all"||sp.level===+filter);
-  const toggleKnown=spell=>{const k=known.some(s=>s.name===spell.name);onUpdate({...char,spells:k?known.filter(s=>s.name!==spell.name):[...known,{...spell,prepared:false}]});};
-  const lvlB=lvl=>({display:"inline-block",padding:"2px 8px",borderRadius:12,fontSize:11,background:lvl===0?"rgba(100,100,100,0.2)":"rgba(201,162,39,0.12)",border:`1px solid ${lvl===0?"var(--border)":"var(--accent2)"}`,color:lvl===0?"var(--text-muted)":"var(--accent)"});
-  const fBtn=a=>({padding:"4px 10px",borderRadius:20,cursor:"pointer",fontSize:12,transition:"all 0.15s",border:`1px solid ${a?"var(--accent)":"var(--border)"}`,background:a?"var(--accent)":"transparent",color:a?"var(--bg)":"var(--text-muted)"});
-  if(!classData?.spellcaster) return <div style={{textAlign:"center",padding:50,color:"var(--text-muted)"}}><div style={{fontSize:48,marginBottom:14}}>⚔️</div><div style={{fontFamily:"var(--font-display)",color:"var(--text)",fontSize:18}}>Non-Spellcaster</div><div style={{marginTop:6}}>{char.class||"This class"} doesn't use spells.</div></div>;
-  return(
+function SpellsTab({ char, gameData, onUpdate }) {
+  const { classes, spells:spellDb } = gameData;
+  const [filter, setFilter]     = useState("all");
+  const [expanded, setExpanded] = useState(null);
+  const classData   = classes?.[char.class];
+  const known       = char.spells || [];
+  const classSpells = spellDb?.[char.class] || [];
+  const spellDC     = calcSpellDC(char, classes);
+  const spellAtk    = calcSpellAtk(char, classes);
+  const displayed   = classSpells.filter(sp => filter === "all" || sp.level === +filter);
+
+  const toggleKnown = spell => {
+    const k = known.some(s => s.name === spell.name);
+    onUpdate({ ...char, spells: k ? known.filter(s => s.name !== spell.name) : [...known, { ...spell, prepared:false }] });
+  };
+
+  const lvlB = lvl => ({ display:"inline-block", padding:"2px 8px", borderRadius:12, fontSize:11,
+    background: lvl === 0 ? "rgba(100,100,100,0.2)" : "rgba(201,162,39,0.12)",
+    border:`1px solid ${lvl === 0 ? "var(--border)" : "var(--accent2)"}`,
+    color: lvl === 0 ? "var(--text-muted)" : "var(--accent)" });
+  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+    border:`1px solid ${a ? "var(--accent)" : "var(--border)"}`,
+    background: a ? "var(--accent)" : "transparent", color: a ? "var(--bg)" : "var(--text-muted)" });
+
+  const isSpellcaster = classData?.spellcaster || (char.subclass && classData?.subclasses?.[char.subclass]?.spellcaster);
+  if (!isSpellcaster) return (
+    <div style={{ textAlign:"center", padding:50, color:"var(--text-muted)" }}>
+      <div style={{ fontSize:48, marginBottom:14 }}>⚔️</div>
+      <div style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:18 }}>Non-Spellcaster</div>
+      <div style={{ marginTop:6 }}>{char.class || "This class"} doesn't use spells.</div>
+    </div>
+  );
+
+  return (
     <div>
-      <div style={{display:"flex",gap:10,marginBottom:18,flexWrap:"wrap"}}>
-        {[["Spell DC",spellDC],["Spell Atk",modStr(spellAtk||0)],["Known",known.length],["Ability",classData.spellcastingAbility?ABILITY_SHORT[classData.spellcastingAbility]:"—"]].map(([l,v])=>
-          <div key={l} style={{padding:"6px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8,textAlign:"center",minWidth:72}}>
-            <div style={{fontSize:10,color:"var(--text-muted)",textTransform:"uppercase"}}>{l}</div>
-            <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:20}}>{v}</div>
-          </div>)}
-      </div>
-      {known.length>0&&<div style={{marginBottom:22}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13,marginBottom:10}}>YOUR SPELLS ({known.length})</div>
-        {known.map(spell=><div key={spell.name} style={{background:"var(--card)",border:"1px solid var(--accent2)",borderRadius:10,padding:12,marginBottom:8}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div><span style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginRight:8}}>{spell.name}</span><span style={lvlB(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span><span style={{marginLeft:8,fontSize:11,color:"var(--text-dim)"}}>{spell.school}</span></div>
-            <button onClick={()=>toggleKnown(spell)} style={{padding:"4px 10px",borderRadius:6,border:"1px solid var(--danger)",background:"transparent",color:"var(--danger)",cursor:"pointer",fontSize:12}}>Remove</button>
+      <div style={{ display:"flex", gap:10, marginBottom:18, flexWrap:"wrap" }}>
+        {[["Spell DC", spellDC], ["Spell Atk", modStr(spellAtk || 0)], ["Known", known.length],
+          ["Ability", classData?.spellcastingAbility ? ABILITY_SHORT[classData.spellcastingAbility] : "—"]
+        ].map(([l, v]) => (
+          <div key={l} style={{ padding:"6px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, textAlign:"center", minWidth:72 }}>
+            <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase" }}>{l}</div>
+            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:20 }}>{v}</div>
           </div>
-          <div style={{fontSize:12,color:"var(--text-muted)",marginTop:5}}>{spell.castingTime} • {spell.range} • {spell.duration}</div>
-        </div>)}
-      </div>}
-      <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13,marginBottom:10}}>
-        {(char.class||"").toUpperCase()} SPELL LIST
-        {classSpells.length===0&&<span style={{fontFamily:"var(--font-body)",fontSize:12,color:"var(--text-muted)",marginLeft:8,fontStyle:"italic"}}>— add spells for this class in the game data above</span>}
+        ))}
       </div>
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
-        {["all","0","1","2","3","4","5","6","7","8","9"].map(l=><button key={l} style={fBtn(filter===l)} onClick={()=>setFilter(l)}>{l==="all"?"All":l==="0"?"Cantrips":`Lvl ${l}`}</button>)}
+
+      {known.length > 0 && (
+        <div style={{ marginBottom:22 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>YOUR SPELLS ({known.length})</div>
+          {known.map(spell => (
+            <div key={spell.name} style={{ background:"var(--card)", border:"1px solid var(--accent2)", borderRadius:10, padding:12, marginBottom:8 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <div>
+                  <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginRight:8 }}>{spell.name}</span>
+                  <span style={lvlB(spell.level)}>{spell.level === 0 ? "Cantrip" : `Lvl ${spell.level}`}</span>
+                </div>
+                <button onClick={() => toggleKnown(spell)} style={{ padding:"4px 10px", borderRadius:6, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:12 }}>Remove</button>
+              </div>
+              <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:5 }}>{spell.castingTime} • {spell.range} • {spell.duration}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>
+        {(char.class || "").toUpperCase()} SPELL LIST
+        {classSpells.length === 0 && <span style={{ fontFamily:"var(--font-body)", fontSize:12, color:"var(--text-muted)", marginLeft:8, fontStyle:"italic" }}>— no spells in tome-data.json for this class</span>}
       </div>
-      {displayed.map(spell=>{
-        const isK=known.some(s=>s.name===spell.name), isE=expanded===spell.name;
-        return <div key={spell.name} style={{background:"var(--card)",border:`1px solid ${isK?"var(--accent2)":"var(--border)"}`,borderRadius:10,padding:12,marginBottom:8}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setExpanded(isE?null:spell.name)}>
-            <div><span style={{fontFamily:"var(--font-display)",color:isK?"var(--accent)":"var(--text)",marginRight:8}}>{spell.name}</span><span style={lvlB(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span><span style={{marginLeft:8,fontSize:11,color:"var(--text-dim)"}}>{spell.school}</span></div>
-            <button onClick={e=>{e.stopPropagation();toggleKnown(spell);}} style={{padding:"4px 12px",borderRadius:6,fontSize:12,cursor:"pointer",border:`1px solid ${isK?"var(--border)":"var(--accent)"}`,background:isK?"var(--surface)":"var(--accent)",color:isK?"var(--text-muted)":"var(--bg)"}}>{isK?"Known ✓":"+ Learn"}</button>
+      <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:12 }}>
+        {["all","0","1","2","3","4","5","6","7","8","9"].map(l =>
+          <button key={l} style={fBtn(filter === l)} onClick={() => setFilter(l)}>
+            {l === "all" ? "All" : l === "0" ? "Cantrips" : `Lvl ${l}`}
+          </button>)}
+      </div>
+      {displayed.map(spell => {
+        const isK = known.some(s => s.name === spell.name);
+        const isE = expanded === spell.name;
+        return (
+          <div key={spell.name} style={{ background:"var(--card)", border:`1px solid ${isK ? "var(--accent2)" : "var(--border)"}`, borderRadius:10, padding:12, marginBottom:8 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
+              <div>
+                <span style={{ fontFamily:"var(--font-display)", color: isK ? "var(--accent)" : "var(--text)", marginRight:8 }}>{spell.name}</span>
+                <span style={lvlB(spell.level)}>{spell.level === 0 ? "Cantrip" : `Lvl ${spell.level}`}</span>
+                <span style={{ marginLeft:8, fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
+              </div>
+              <button onClick={e => { e.stopPropagation(); toggleKnown(spell); }} style={{
+                padding:"4px 12px", borderRadius:6, fontSize:12, cursor:"pointer",
+                border:`1px solid ${isK ? "var(--border)" : "var(--accent)"}`,
+                background: isK ? "var(--surface)" : "var(--accent)",
+                color: isK ? "var(--text-muted)" : "var(--bg)"
+              }}>{isK ? "Known ✓" : "+ Learn"}</button>
+            </div>
+            {isE && (
+              <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
+                <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:6, display:"flex", gap:14, flexWrap:"wrap" }}>
+                  <span>⏱ {spell.castingTime}</span><span>📏 {spell.range}</span>
+                  <span>🔮 {spell.components}</span><span>⌛ {spell.duration}</span>
+                </div>
+                <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.6, margin:0 }}>{spell.description}</p>
+              </div>
+            )}
           </div>
-          {isE&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--border)"}}>
-            <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:6,display:"flex",gap:14,flexWrap:"wrap"}}><span>⏱ {spell.castingTime}</span><span>📏 {spell.range}</span><span>🔮 {spell.components}</span><span>⌛ {spell.duration}</span></div>
-            <p style={{fontSize:13,color:"var(--text)",lineHeight:1.6,margin:0}}>{spell.description}</p>
-          </div>}
-        </div>;
+        );
       })}
     </div>
   );
@@ -464,99 +1096,178 @@ function SpellsTab({char,gameData,onUpdate}){
 // ============================================================
 // INVENTORY TAB
 // ============================================================
-function InventoryTab({char,gameData,onUpdate}){
-  const {itemTypes}=gameData;
-  const [showAdd,setShowAdd]=useState(false);
-  const [ni,setNi]=useState({name:"",type:"misc",quantity:1,weight:0,description:"",equipped:false});
-  const inv=char.inventory||[], curr=char.currencies||{cp:0,sp:0,ep:0,gp:0,pp:0};
-  const tw=inv.reduce((s,i)=>s+(i.weight||0)*(i.quantity||1),0);
-  const cap=char.abilities.str*15;
-  const addItem=()=>{if(!ni.name)return;onUpdate({...char,inventory:[...inv,{...ni,id:Date.now()}]});setNi({name:"",type:"misc",quantity:1,weight:0,description:"",equipped:false});setShowAdd(false);};
-  const rem=id=>onUpdate({...char,inventory:inv.filter(i=>i.id!==id)});
-  const teq=id=>onUpdate({...char,inventory:inv.map(i=>i.id===id?{...i,equipped:!i.equipped}:i)});
-  const uq=(id,qty)=>onUpdate({...char,inventory:inv.map(i=>i.id===id?{...i,quantity:Math.max(1,qty)}:i)});
-  const ucu=(t,v)=>onUpdate({...char,currencies:{...curr,[t]:Math.max(0,+v||0)}});
-  const inp={background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"8px 10px",borderRadius:6,fontSize:14,fontFamily:"var(--font-body)",width:"100%",boxSizing:"border-box"};
-  const lbl={display:"block",color:"var(--text-muted)",fontSize:11,textTransform:"uppercase",letterSpacing:1,marginBottom:4};
-  const tc=t=>itemTypes?.[t]?.color||"var(--text-muted)";
-  const tl=t=>itemTypes?.[t]?.label||t;
-  const grouped={};
-  inv.forEach(item=>{const g=item.type||"misc";if(!grouped[g])grouped[g]=[];grouped[g].push(item);});
-  return(
+function InventoryTab({ char, gameData, onUpdate }) {
+  const { itemTypes } = gameData;
+  const [showAdd, setShowAdd] = useState(false);
+  const [ni, setNi] = useState({ name:"", type:"misc", quantity:1, weight:0, description:"", equipped:false });
+  const inv  = char.inventory || [];
+  const curr = char.currencies || { cp:0, sp:0, ep:0, gp:0, pp:0 };
+  const tw   = inv.reduce((s, i) => s + (i.weight || 0) * (i.quantity || 1), 0);
+  const cap  = char.abilities.str * 15;
+
+  const addItem  = () => { if (!ni.name) return; onUpdate({ ...char, inventory:[...inv, { ...ni, id:Date.now() }] }); setNi({ name:"", type:"misc", quantity:1, weight:0, description:"", equipped:false }); setShowAdd(false); };
+  const rem      = id   => onUpdate({ ...char, inventory:inv.filter(i => i.id !== id) });
+  const teq      = id   => onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, equipped:!i.equipped } : i) });
+  const uq       = (id, qty) => onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, quantity:Math.max(1, qty) } : i) });
+  const ucu      = (t, v) => onUpdate({ ...char, currencies:{ ...curr, [t]:Math.max(0, +v || 0) } });
+
+  const inp  = { background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:14, fontFamily:"var(--font-body)", width:"100%", boxSizing:"border-box" };
+  const lbl  = { display:"block", color:"var(--text-muted)", fontSize:11, textTransform:"uppercase", letterSpacing:1, marginBottom:4 };
+  const tc   = t => itemTypes?.[t]?.color || "var(--text-muted)";
+  const tl   = t => itemTypes?.[t]?.label || t;
+
+  const grouped = {};
+  inv.forEach(item => { const g = item.type || "misc"; if (!grouped[g]) grouped[g] = []; grouped[g].push(item); });
+
+  return (
     <div>
-      <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:16,marginBottom:18}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12,fontSize:13}}>CURRENCY</div>
-        <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([t,n,c])=>
-            <div key={t} style={{textAlign:"center",minWidth:64}}>
-              <div style={{width:30,height:30,borderRadius:"50%",background:c,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{t.toUpperCase()}</div>
-              <input type="number" value={curr[t]} onChange={e=>ucu(t,e.target.value)} style={{...inp,width:64,textAlign:"center",fontSize:16,padding:"4px 0"}}/>
-              <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{n}</div>
-            </div>)}
-        </div>
-      </div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <span style={{fontSize:13,color:"var(--text-muted)"}}>Weight: <strong style={{color:tw>cap?"var(--danger)":"var(--text)"}}>{tw} lbs</strong><span style={{color:"var(--text-dim)"}}> / {cap} lbs</span></span>
-        <button onClick={()=>setShowAdd(!showAdd)} style={{padding:"8px 16px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:13}}>+ Add Item</button>
-      </div>
-      {showAdd&&<div style={{background:"var(--card)",border:"1px solid var(--accent)",borderRadius:10,padding:16,marginBottom:14}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12}}>New Item</div>
-        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
-          <div><label style={lbl}>Name</label><input style={inp} value={ni.name} onChange={e=>setNi({...ni,name:e.target.value})} placeholder="Item name…"/></div>
-          <div><label style={lbl}>Type</label><select style={inp} value={ni.type} onChange={e=>setNi({...ni,type:e.target.value})}>{Object.entries(itemTypes||{}).map(([k,v])=><option key={k} value={k}>{v.label||k}</option>)}</select></div>
-          <div><label style={lbl}>Qty</label><input type="number" style={inp} value={ni.quantity} min={1} onChange={e=>setNi({...ni,quantity:+e.target.value})}/></div>
-          <div><label style={lbl}>Weight (lbs)</label><input type="number" style={inp} value={ni.weight} min={0} onChange={e=>setNi({...ni,weight:+e.target.value})}/></div>
-        </div>
-        <div style={{marginBottom:10}}><label style={lbl}>Description</label><input style={inp} value={ni.description} onChange={e=>setNi({...ni,description:e.target.value})} placeholder="Optional…"/></div>
-        <div style={{display:"flex",gap:8}}>
-          <button onClick={addItem} style={{padding:"8px 20px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:6,cursor:"pointer",fontFamily:"var(--font-display)"}}>Add</button>
-          <button onClick={()=>setShowAdd(false)} style={{padding:"8px 20px",background:"transparent",border:"1px solid var(--border)",color:"var(--text)",borderRadius:6,cursor:"pointer"}}>Cancel</button>
-        </div>
-      </div>}
-      {inv.length===0&&!showAdd&&<div style={{textAlign:"center",padding:44,color:"var(--text-muted)"}}><div style={{fontSize:44,marginBottom:12}}>🎒</div><div>Your pack is empty.</div></div>}
-      {Object.entries(grouped).map(([type,items])=><div key={type} style={{marginBottom:16}}>
-        <div style={{fontSize:11,color:tc(type),textTransform:"uppercase",letterSpacing:1,marginBottom:7,paddingBottom:4,borderBottom:"1px solid var(--border)"}}>{tl(type)} ({items.length})</div>
-        {items.map(item=><div key={item.id} style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:12,marginBottom:7,display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:tc(item.type),flexShrink:0}}/>
-          <div style={{flex:1}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontFamily:"var(--font-display)",fontSize:14}}>{item.name}</span>
-              {item.equipped&&<span style={{fontSize:10,padding:"2px 6px",background:"rgba(39,174,96,0.15)",border:"1px solid var(--success)",borderRadius:4,color:"var(--success)"}}>Equipped</span>}
+      {/* Currency */}
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:18 }}>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12, fontSize:13 }}>CURRENCY</div>
+        <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
+          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([t, n, c]) => (
+            <div key={t} style={{ textAlign:"center", minWidth:64 }}>
+              <div style={{ width:30, height:30, borderRadius:"50%", background:c, margin:"0 auto 4px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:"bold", color:"#333" }}>{t.toUpperCase()}</div>
+              <input type="number" value={curr[t]} onChange={e => ucu(t, e.target.value)}
+                style={{ ...inp, width:64, textAlign:"center", fontSize:16, padding:"4px 0" }} />
+              <div style={{ fontSize:10, color:"var(--text-muted)", marginTop:2 }}>{n}</div>
             </div>
-            {item.description&&<div style={{fontSize:12,color:"var(--text-muted)",marginTop:2}}>{item.description}</div>}
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+        <span style={{ fontSize:13, color:"var(--text-muted)" }}>
+          Weight: <strong style={{ color: tw > cap ? "var(--danger)" : "var(--text)" }}>{tw} lbs</strong>
+          <span style={{ color:"var(--text-dim)" }}> / {cap} lbs</span>
+        </span>
+        <button onClick={() => setShowAdd(!showAdd)} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>+ Add Item</button>
+      </div>
+
+      {showAdd && (
+        <div style={{ background:"var(--card)", border:"1px solid var(--accent)", borderRadius:10, padding:16, marginBottom:14 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>New Item</div>
+          <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:10, marginBottom:10 }}>
+            <div><label style={lbl}>Name</label><input style={inp} value={ni.name} onChange={e => setNi({ ...ni, name:e.target.value })} placeholder="Item name…" /></div>
+            <div><label style={lbl}>Type</label>
+              <select style={inp} value={ni.type} onChange={e => setNi({ ...ni, type:e.target.value })}>
+                {Object.entries(itemTypes || {}).map(([k, v]) => <option key={k} value={k}>{v.label || k}</option>)}
+              </select>
+            </div>
+            <div><label style={lbl}>Qty</label><input type="number" style={inp} value={ni.quantity} min={1} onChange={e => setNi({ ...ni, quantity:+e.target.value })} /></div>
+            <div><label style={lbl}>Weight</label><input type="number" style={inp} value={ni.weight} min={0} onChange={e => setNi({ ...ni, weight:+e.target.value })} /></div>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <input type="number" value={item.quantity} min={1} onChange={e=>uq(item.id,+e.target.value)} style={{...inp,width:50,textAlign:"center",padding:"4px 0"}}/>
-            {["weapon","armor","shield"].includes(item.type)&&<button onClick={()=>teq(item.id)} style={{padding:"4px 10px",borderRadius:6,fontSize:12,cursor:"pointer",background:"transparent",border:`1px solid ${item.equipped?"var(--success)":"var(--border)"}`,color:item.equipped?"var(--success)":"var(--text-muted)"}}>{item.equipped?"Unequip":"Equip"}</button>}
-            <button onClick={()=>rem(item.id)} style={{width:28,height:28,borderRadius:6,border:"1px solid var(--danger)",background:"transparent",color:"var(--danger)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <div style={{ marginBottom:10 }}><label style={lbl}>Description</label><input style={inp} value={ni.description} onChange={e => setNi({ ...ni, description:e.target.value })} placeholder="Optional…" /></div>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={addItem} style={{ padding:"8px 20px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:6, cursor:"pointer", fontFamily:"var(--font-display)" }}>Add</button>
+            <button onClick={() => setShowAdd(false)} style={{ padding:"8px 20px", background:"transparent", border:"1px solid var(--border)", color:"var(--text)", borderRadius:6, cursor:"pointer" }}>Cancel</button>
           </div>
-        </div>)}
-      </div>)}
+        </div>
+      )}
+
+      {inv.length === 0 && !showAdd && (
+        <div style={{ textAlign:"center", padding:44, color:"var(--text-muted)" }}>
+          <div style={{ fontSize:44, marginBottom:12 }}>🎒</div>
+          <div>Your pack is empty.</div>
+        </div>
+      )}
+
+      {Object.entries(grouped).map(([type, items]) => (
+        <div key={type} style={{ marginBottom:16 }}>
+          <div style={{ fontSize:11, color:tc(type), textTransform:"uppercase", letterSpacing:1, marginBottom:7, paddingBottom:4, borderBottom:"1px solid var(--border)" }}>
+            {tl(type)} ({items.length})
+          </div>
+          {items.map(item => (
+            <div key={item.id} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:12, marginBottom:7, display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:8, height:8, borderRadius:"50%", background:tc(item.type), flexShrink:0 }} />
+              <div style={{ flex:1 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontFamily:"var(--font-display)", fontSize:14 }}>{item.name}</span>
+                  {item.equipped && <span style={{ fontSize:10, padding:"2px 6px", background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", borderRadius:4, color:"var(--success)" }}>Equipped</span>}
+                </div>
+                {item.description && <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:2 }}>{item.description}</div>}
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                <input type="number" value={item.quantity} min={1} onChange={e => uq(item.id, +e.target.value)}
+                  style={{ ...inp, width:50, textAlign:"center", padding:"4px 0" }} />
+                {["weapon","armor","shield"].includes(item.type) && (
+                  <button onClick={() => teq(item.id)} style={{ padding:"4px 10px", borderRadius:6, fontSize:12, cursor:"pointer", background:"transparent",
+                    border:`1px solid ${item.equipped ? "var(--success)" : "var(--border)"}`,
+                    color: item.equipped ? "var(--success)" : "var(--text-muted)" }}>
+                    {item.equipped ? "Unequip" : "Equip"}
+                  </button>
+                )}
+                <button onClick={() => rem(item.id)} style={{ width:28, height:28, borderRadius:6, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
 
 // ============================================================
-// FEATURES TAB
+// FEATURES TAB (character sheet view)
 // ============================================================
-function FeaturesTab({char,gameData}){
-  const {classes,races}=gameData;
-  const cd=classes?.[char.class], rd=races?.[char.race];
-  if(!cd) return <div style={{color:"var(--text-muted)",padding:20}}>No class selected.</div>;
-  return(
-    <div>
-      {rd&&<div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:16,marginBottom:18}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12}}>{char.race} Racial Traits</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{(rd.traits||[]).map(t=><div key={t} style={{padding:"7px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:20,fontSize:13}}>{t}</div>)}</div>
-      </div>}
-      {Object.entries(cd.features||{}).filter(([l])=>+l<=char.level).reverse().map(([l,feats])=>feats.length>0&&
-        <div key={l} style={{marginBottom:14}}>
-          <div style={{fontSize:11,color:"var(--accent)",textTransform:"uppercase",letterSpacing:1,marginBottom:7,display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontFamily:"var(--font-display)"}}>Level {l}</span>
-            {+l===char.level&&<span style={{background:"var(--accent)",color:"var(--bg)",padding:"1px 7px",borderRadius:4,fontSize:10}}>CURRENT</span>}
+function FeaturesTab({ char, gameData }) {
+  const { classes, species:speciesDb } = gameData;
+  const classData   = classes?.[char.class];
+  const speciesData = speciesDb?.[char.species];
+  const [open, setOpen] = useState({});
+  const toggle = name => setOpen(o => ({ ...o, [name]:!o[name] }));
+
+  const allFeatures = [
+    ...(classData?.features || []),
+    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
+  ].sort((a, b) => a.level - b.level);
+
+  const FeatureRow = ({ feat, isSpecies }) => {
+    const locked  = !isSpecies && char.level < feat.level;
+    const chosen  = char.featureChoices?.[feat.name];
+    const isOpen  = open[feat.name + (isSpecies ? "_sp" : "")];
+    const toggleKey = feat.name + (isSpecies ? "_sp" : "");
+    return (
+      <div style={ws.fCard(locked)}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => toggle(toggleKey)}>
+          <span style={{ fontFamily:"var(--font-display)", color: locked ? "var(--text-dim)" : "var(--accent)", fontSize:14, flex:1 }}>{feat.name}</span>
+          {locked   && <span style={ws.lockBadge}>Lvl {feat.level}</span>}
+          {!locked && feat.level > 1 && !isSpecies && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:4 }}>Lvl {feat.level}</span>}
+          {chosen   && <span style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10, border:"1px solid var(--success)", maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{chosen.split("—")[0].trim()}</span>}
+          <span style={{ color:"var(--text-dim)", fontSize:11 }}>{isOpen ? "▲" : "▼"}</span>
+        </div>
+        {isOpen && (
+          <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
+            <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:0 }}>{feat.description}</p>
+            {chosen && (
+              <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(201,162,39,0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>
+                ✓ Chosen: {chosen}
+              </div>
+            )}
           </div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{feats.map(f=><div key={f} style={{padding:"7px 14px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:8,fontSize:13}}>{f}</div>)}</div>
-        </div>)}
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {speciesData && (
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
+            {char.species} Species Traits
+          </div>
+          {(speciesData.features || []).map(feat => <FeatureRow key={feat.name} feat={feat} isSpecies={true} />)}
+        </div>
+      )}
+      {classData && (
+        <div>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
+            {char.class}{char.subclass ? ` — ${char.subclass}` : ""} Features
+          </div>
+          {allFeatures.map((feat, i) => <FeatureRow key={`${feat.name}-${i}`} feat={feat} isSpecies={false} />)}
+        </div>
+      )}
     </div>
   );
 }
@@ -564,15 +1275,21 @@ function FeaturesTab({char,gameData}){
 // ============================================================
 // NOTES TAB
 // ============================================================
-function NotesTab({char,onUpdate}){
-  return(
+function NotesTab({ char, onUpdate }) {
+  return (
     <div>
-      {[["notes","Campaign Notes & Story"],["personalityTraits","Personality Traits"],["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"],["appearance","Appearance & Backstory"]].map(([f,l])=>
-        <div key={f} style={{marginBottom:16}}>
-          <label style={{display:"block",color:"var(--text-muted)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{l}</label>
-          <textarea value={char[f]||""} onChange={e=>onUpdate({...char,[f]:e.target.value})} placeholder={`Enter ${l.toLowerCase()}…`}
-            style={{width:"100%",background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",padding:"12px 14px",borderRadius:8,fontSize:14,fontFamily:"var(--font-body)",resize:"vertical",minHeight:f==="notes"?150:80,lineHeight:1.6,boxSizing:"border-box"}}/>
-        </div>)}
+      {[["notes","Campaign Notes & Story"],["personalityTraits","Personality Traits"],
+        ["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"],["appearance","Appearance & Backstory"]
+      ].map(([f, l]) => (
+        <div key={f} style={{ marginBottom:16 }}>
+          <label style={{ display:"block", color:"var(--text-muted)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{l}</label>
+          <textarea value={char[f] || ""} onChange={e => onUpdate({ ...char, [f]:e.target.value })}
+            placeholder={`Enter ${l.toLowerCase()}…`}
+            style={{ width:"100%", background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"12px 14px",
+              borderRadius:8, fontSize:14, fontFamily:"var(--font-body)", resize:"vertical",
+              minHeight: f === "notes" ? 150 : 80, lineHeight:1.6, boxSizing:"border-box" }} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -580,42 +1297,57 @@ function NotesTab({char,onUpdate}){
 // ============================================================
 // SETTINGS TAB
 // ============================================================
-function SettingsTab({char,gameData,onUpdate}){
-  const {themes,music}=gameData;
-  const [cu,setCu]=useState(char.customMusicUrl||"");
-  const tracks=music?.tracks||[];
-  return(
+function SettingsTab({ char, gameData, onUpdate }) {
+  const { themes, music } = gameData;
+  const [cu, setCu] = useState(char.customMusicUrl || "");
+  const tracks = music?.tracks || [];
+  return (
     <div>
-      <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:16,marginBottom:16}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12}}>Visual Theme</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:10}}>
-          {Object.entries(themes||{}).map(([k,t])=><div key={k} onClick={()=>onUpdate({...char,theme:k})} style={{padding:12,borderRadius:8,cursor:"pointer",textAlign:"center",transition:"all 0.2s",border:`2px solid ${char.theme===k?t.accent:"var(--border)"}`,background:"var(--surface)"}}>
-            <div style={{width:26,height:26,borderRadius:"50%",background:t.accent,margin:"0 auto 6px",border:`3px solid ${t.accentSecondary||t.accent}`}}/>
-            <div style={{fontSize:13}}>{t.name}</div>
-          </div>)}
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:16 }}>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Visual Theme</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))", gap:10 }}>
+          {Object.entries(themes || {}).map(([k, t]) => (
+            <div key={k} onClick={() => onUpdate({ ...char, theme:k })} style={{
+              padding:12, borderRadius:8, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
+              border:`2px solid ${char.theme === k ? t.accent : "var(--border)"}`,
+              background: "var(--surface)"
+            }}>
+              <div style={{ width:26, height:26, borderRadius:"50%", background:t.accent, margin:"0 auto 6px", border:`3px solid ${t.accentSecondary || t.accent}` }} />
+              <div style={{ fontSize:13 }}>{t.name}</div>
+            </div>
+          ))}
         </div>
       </div>
-      <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:16,marginBottom:16}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12}}>Background Music</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
-          {tracks.map(t=><div key={t.id} onClick={()=>onUpdate({...char,music:t.id})} style={{padding:"10px 14px",borderRadius:8,cursor:"pointer",fontSize:13,transition:"all 0.2s",border:`1px solid ${char.music===t.id?"var(--accent)":"var(--border)"}`,background:char.music===t.id?"rgba(201,162,39,0.08)":"var(--surface)"}}>
-            {char.music===t.id?"🎵 ":"♪ "}{t.name}{!t.url&&<span style={{fontSize:10,color:"var(--text-dim)",marginLeft:6}}>(no URL)</span>}
-          </div>)}
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:16 }}>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Background Music</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
+          {tracks.map(t => (
+            <div key={t.id} onClick={() => onUpdate({ ...char, music:t.id })} style={{
+              padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.2s",
+              border:`1px solid ${char.music === t.id ? "var(--accent)" : "var(--border)"}`,
+              background: char.music === t.id ? "rgba(201,162,39,0.08)" : "var(--surface)"
+            }}>
+              {char.music === t.id ? "🎵 " : "♪ "}{t.name}
+              {!t.url && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:6 }}>(no URL)</span>}
+            </div>
+          ))}
         </div>
         <div>
-          <label style={{display:"block",color:"var(--text-muted)",fontSize:12,textTransform:"uppercase",marginBottom:6}}>Custom Music URL (.mp3 / .ogg)</label>
-          <div style={{display:"flex",gap:8}}>
-            <input value={cu} onChange={e=>setCu(e.target.value)} placeholder="https://example.com/music.mp3" style={{flex:1,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"8px 12px",borderRadius:6,fontSize:13,fontFamily:"var(--font-body)"}}/>
-            <button onClick={()=>onUpdate({...char,music:"custom",customMusicUrl:cu})} style={{padding:"8px 16px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:6,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:13}}>Set</button>
+          <label style={{ display:"block", color:"var(--text-muted)", fontSize:12, textTransform:"uppercase", marginBottom:6 }}>Custom Music URL (.mp3 / .ogg)</label>
+          <div style={{ display:"flex", gap:8 }}>
+            <input value={cu} onChange={e => setCu(e.target.value)} placeholder="https://example.com/music.mp3"
+              style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 12px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)" }} />
+            <button onClick={() => onUpdate({ ...char, music:"custom", customMusicUrl:cu })}
+              style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:6, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>Set</button>
           </div>
         </div>
       </div>
-      <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,padding:16}}>
-        <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",marginBottom:12}}>Character Info</div>
-        <div style={{fontSize:13,color:"var(--text-muted)",lineHeight:2.2}}>
-          <div>Created: {char.createdAt?new Date(char.createdAt).toLocaleDateString():"—"}</div>
-          <div>Updated: {char.updatedAt?new Date(char.updatedAt).toLocaleDateString():"—"}</div>
-          <div style={{fontSize:11,color:"var(--text-dim)",marginTop:4}}>ID: {char.id}</div>
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16 }}>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Character Info</div>
+        <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:2.2 }}>
+          <div>Created: {char.createdAt ? new Date(char.createdAt).toLocaleDateString() : "—"}</div>
+          <div>Updated: {char.updatedAt ? new Date(char.updatedAt).toLocaleDateString() : "—"}</div>
+          <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>ID: {char.id}</div>
         </div>
       </div>
     </div>
@@ -625,121 +1357,194 @@ function SettingsTab({char,gameData,onUpdate}){
 // ============================================================
 // CHARACTER SHEET
 // ============================================================
-function CharacterSheet({char:initial,gameData,onBack,onDelete}){
-  const [char,setChar]=useState(initial);
-  const [tab,setTab]=useState("stats");
-  const [saved,setSaved]=useState(false);
-  const audioRef=useRef(null);
-  const saveTimer=useRef(null);
-  const {classes,races,themes,music}=gameData;
-  const theme=themes?.[char.theme]||themes?.[Object.keys(themes||{})[0]]||{};
-  const cd=classes?.[char.class], rd=races?.[char.race];
-  const pb=profBonus(char.level);
-  const saves=getSavingThrows(char,classes);
-  const skills=getSkillBonuses(char);
-  const tracks=music?.tracks||[];
+function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
+  const [char, setChar]   = useState(initial);
+  const [tab,  setTab]    = useState("stats");
+  const [saved, setSaved] = useState(false);
+  const audioRef  = useRef(null);
+  const saveTimer = useRef(null);
 
-  const upd=useCallback(u=>{
-    const s={...u,updatedAt:new Date().toISOString()};
+  const { classes, species:speciesDb, themes, music } = gameData;
+  const theme       = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
+  const classData   = classes?.[char.class];
+  const speciesData = speciesDb?.[char.species];
+  const pb          = profBonus(char.level);
+  const saves       = getSavingThrows(char, classes);
+  const skills      = getSkillBonuses(char);
+  const tracks      = music?.tracks || [];
+
+  const upd = useCallback(u => {
+    const s = { ...u, updatedAt: new Date().toISOString() };
     setChar(s);
     clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(()=>{
-      const all=loadChars(); const idx=all.findIndex(c=>c.id===s.id);
-      if(idx>=0) all[idx]=s; else all.push(s);
-      saveChars(all); setSaved(true); setTimeout(()=>setSaved(false),2000);
-    },800);
-  },[]);
+    saveTimer.current = setTimeout(() => {
+      const all = loadChars();
+      const idx = all.findIndex(c => c.id === s.id);
+      if (idx >= 0) all[idx] = s; else all.push(s);
+      saveChars(all); setSaved(true); setTimeout(() => setSaved(false), 2000);
+    }, 800);
+  }, []);
 
-  useEffect(()=>{
-    const t=tracks.find(t=>t.id===char.music);
-    const url=char.music==="custom"?char.customMusicUrl:t?.url;
-    if(audioRef.current){if(url){audioRef.current.src=url;audioRef.current.play().catch(()=>{});}else{audioRef.current.pause();audioRef.current.src="";}}
-  },[char.music,char.customMusicUrl]);
+  useEffect(() => {
+    const t = tracks.find(t => t.id === char.music);
+    const url = char.music === "custom" ? char.customMusicUrl : t?.url;
+    if (audioRef.current) {
+      if (url) { audioRef.current.src = url; audioRef.current.play().catch(() => {}); }
+      else     { audioRef.current.pause(); audioRef.current.src = ""; }
+    }
+  }, [char.music, char.customMusicUrl]);
 
-  const TABS=[{id:"stats",l:"⚔️ Stats"},{id:"spells",l:"✨ Spells"},{id:"inventory",l:"🎒 Inventory"},{id:"features",l:"⭐ Features"},{id:"notes",l:"📜 Notes"},{id:"settings",l:"⚙️ Settings"}];
-  const ts=a=>({padding:"10px 16px",borderRadius:"8px 8px 0 0",cursor:"pointer",fontSize:13,whiteSpace:"nowrap",transition:"all 0.15s",fontFamily:theme.fontBody||"serif",background:a?theme.card:"transparent",color:a?theme.accent:theme.textMuted,border:`1px solid ${a?theme.border:"transparent"}`,borderBottom:a?`1px solid ${theme.card}`:"transparent"});
-  const qs=[
-    {l:"HP",v:`${char.hp.current}/${char.hp.max}`,c:char.hp.current<char.hp.max/4?theme.danger:char.hp.current<char.hp.max/2?"#f39c12":theme.success},
-    {l:"AC",v:calcAC(char)},{l:"Init",v:modStr(calcMod(char.abilities.dex))},
-    {l:"Speed",v:`${rd?.speed||30}ft`},{l:"Prof",v:`+${pb}`},
-    {l:"Pass Perc",v:10+(skills["Perception"]?.value||0)},
-    ...(cd?.spellcaster?[{l:"Spell DC",v:calcSpellDC(char,classes)||"—"}]:[]),
+  const TABS = [
+    { id:"stats",     l:"⚔️ Stats"      },
+    { id:"spells",    l:"✨ Spells"     },
+    { id:"inventory", l:"🎒 Inventory"  },
+    { id:"features",  l:"⭐ Features"   },
+    { id:"notes",     l:"📜 Notes"      },
+    { id:"settings",  l:"⚙️ Settings"  },
   ];
-  return(
+
+  const ts = active => ({
+    padding:"10px 16px", borderRadius:"8px 8px 0 0", cursor:"pointer", fontSize:13,
+    whiteSpace:"nowrap", transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
+    background: active ? theme.card   : "transparent",
+    color:      active ? theme.accent : theme.textMuted,
+    border:     `1px solid ${active ? theme.border : "transparent"}`,
+    borderBottom: active ? `1px solid ${theme.card}` : "transparent",
+  });
+
+  const isSpellcaster = classData?.spellcaster || (char.subclass && classData?.subclasses?.[char.subclass]?.spellcaster);
+
+  const qs = [
+    { l:"HP",       v:`${char.hp.current}/${char.hp.max}`,
+      c: char.hp.current < char.hp.max / 4 ? theme.danger : char.hp.current < char.hp.max / 2 ? "#f39c12" : theme.success },
+    { l:"AC",       v: calcAC(char) },
+    { l:"Init",     v: modStr(calcMod(char.abilities.dex)) },
+    { l:"Speed",    v: `${speciesData?.speed || 30}ft` },
+    { l:"Prof",     v: `+${pb}` },
+    { l:"Pass Perc",v: 10 + (skills["Perception"]?.value || 0) },
+    ...(isSpellcaster ? [{ l:"Spell DC", v: calcSpellDC(char, classes) || "—" }] : []),
+  ];
+
+  return (
     <TW themeKey={char.theme} themes={themes}>
-      <audio ref={audioRef} loop style={{display:"none"}}/>
-      <div style={{background:theme.gradientHero||theme.bg,borderBottom:`1px solid ${theme.border}`,padding:"16px 20px",position:"sticky",top:0,zIndex:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-          <button onClick={onBack} style={{background:"transparent",border:`1px solid ${theme.border}`,color:theme.textMuted,padding:"6px 14px",borderRadius:6,cursor:"pointer",fontFamily:theme.fontBody,fontSize:13}}>← Back</button>
-          <div style={{flex:1,minWidth:200}}>
-            <div style={{fontFamily:theme.fontDisplay,fontSize:22,color:theme.accent}}>{char.name}</div>
-            <div style={{fontSize:13,color:theme.textMuted,marginTop:2}}>{[char.race,char.class,`Level ${char.level}`,char.background,char.alignment].filter(Boolean).join(" • ")}</div>
+      <audio ref={audioRef} loop style={{ display:"none" }} />
+
+      {/* Sticky header */}
+      <div style={{ background:theme.gradientHero || theme.bg, borderBottom:`1px solid ${theme.border}`, padding:"16px 20px", position:"sticky", top:0, zIndex:10 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
+          <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"6px 14px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:13 }}>← Back</button>
+          <div style={{ flex:1, minWidth:200 }}>
+            <div style={{ fontFamily:theme.fontDisplay, fontSize:22, color:theme.accent }}>{char.name}</div>
+            <div style={{ fontSize:13, color:theme.textMuted, marginTop:2 }}>
+              {[char.species, char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background, char.alignment].filter(Boolean).join(" • ")}
+            </div>
           </div>
-          <div style={{opacity:saved?1:0,transition:"opacity 0.3s",padding:"4px 12px",borderRadius:20,background:"rgba(39,174,96,0.15)",border:"1px solid var(--success)",color:"var(--success)",fontSize:12}}>✓ Saved</div>
-          {char.music&&char.music!=="none"&&<span>🎵</span>}
-          <button onClick={()=>{if(confirm("Delete this character permanently?"))onDelete(char.id);}} style={{background:"transparent",border:`1px solid ${theme.danger}`,color:theme.danger,padding:"6px 12px",borderRadius:6,cursor:"pointer",fontSize:13}}>Delete</button>
+          <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"4px 12px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)", fontSize:12 }}>✓ Saved</div>
+          {char.music && char.music !== "none" && <span>🎵</span>}
+          <button onClick={() => { if (confirm("Delete this character permanently?")) onDelete(char.id); }}
+            style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"6px 12px", borderRadius:6, cursor:"pointer", fontSize:13 }}>Delete</button>
         </div>
-        <div style={{display:"flex",gap:10,marginTop:12,flexWrap:"wrap",alignItems:"center"}}>
-          {qs.map(q=><div key={q.l} style={{textAlign:"center",padding:"5px 12px",background:"rgba(0,0,0,0.3)",border:`1px solid ${theme.border}`,borderRadius:8,minWidth:56}}>
-            <div style={{fontSize:10,color:theme.textMuted,textTransform:"uppercase",letterSpacing:1}}>{q.l}</div>
-            <div style={{fontFamily:theme.fontDisplay,fontSize:17,color:q.c||theme.accent,lineHeight:1.3}}>{q.v}</div>
-          </div>)}
-          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}>
-            <span style={{fontSize:12,color:theme.textMuted}}>Inspiration</span>
-            <div onClick={()=>upd({...char,inspiration:!char.inspiration})} style={{width:28,height:28,borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,transition:"all 0.2s",border:`2px solid ${char.inspiration?"#ffd700":theme.border}`,background:char.inspiration?"rgba(255,215,0,0.18)":"transparent"}}>{char.inspiration?"✦":""}</div>
+
+        {/* Quick stats */}
+        <div style={{ display:"flex", gap:10, marginTop:12, flexWrap:"wrap", alignItems:"center" }}>
+          {qs.map(q => (
+            <div key={q.l} style={{ textAlign:"center", padding:"5px 12px", background:"rgba(0,0,0,0.3)", border:`1px solid ${theme.border}`, borderRadius:8, minWidth:56 }}>
+              <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{q.l}</div>
+              <div style={{ fontFamily:theme.fontDisplay, fontSize:17, color:q.c || theme.accent, lineHeight:1.3 }}>{q.v}</div>
+            </div>
+          ))}
+          <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
+            <span style={{ fontSize:12, color:theme.textMuted }}>Inspiration</span>
+            <div onClick={() => upd({ ...char, inspiration:!char.inspiration })} style={{
+              width:28, height:28, borderRadius:6, cursor:"pointer", display:"flex", alignItems:"center",
+              justifyContent:"center", fontSize:18, transition:"all 0.2s",
+              border:`2px solid ${char.inspiration ? "#ffd700" : theme.border}`,
+              background: char.inspiration ? "rgba(255,215,0,0.18)" : "transparent"
+            }}>{char.inspiration ? "✦" : ""}</div>
           </div>
         </div>
       </div>
-      <div style={{padding:"0 20px 48px",maxWidth:1200,margin:"0 auto"}}>
-        <div style={{display:"flex",gap:4,marginTop:22,borderBottom:`1px solid ${theme.border}`,flexWrap:"wrap"}}>
-          {TABS.map(t=><button key={t.id} style={ts(tab===t.id)} onClick={()=>setTab(t.id)}>{t.l}</button>)}
+
+      {/* Content */}
+      <div style={{ padding:"0 20px 48px", maxWidth:1200, margin:"0 auto" }}>
+        <div style={{ display:"flex", gap:4, marginTop:22, borderBottom:`1px solid ${theme.border}`, flexWrap:"wrap" }}>
+          {TABS.map(t => <button key={t.id} style={ts(tab === t.id)} onClick={() => setTab(t.id)}>{t.l}</button>)}
         </div>
-        <div style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:"0 8px 8px 8px",padding:20}}>
-          {tab==="stats"&&<div style={{display:"grid",gridTemplateColumns:"260px 1fr",gap:22}}>
-            <div>
-              <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:11,textTransform:"uppercase",letterSpacing:2,marginBottom:10}}>Ability Scores</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
-                {Object.keys(char.abilities).map(ab=>{const score=char.abilities[ab];return(
-                  <div key={ab} style={{textAlign:"center",padding:12,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12}}>
-                    <div style={{fontSize:10,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>{ABILITY_SHORT[ab]}</div>
-                    <div style={{fontSize:28,fontFamily:"var(--font-display)",color:"var(--accent)",width:50,height:50,borderRadius:"50%",border:"2px solid var(--accent2)",display:"flex",alignItems:"center",justifyContent:"center",margin:"7px auto"}}>{score}</div>
-                    <div style={{fontSize:15,color:"var(--text)"}}>{modStr(calcMod(score))}</div>
-                  </div>);})}
+
+        <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:"0 8px 8px 8px", padding:20 }}>
+
+          {/* STATS TAB */}
+          {tab === "stats" && (
+            <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", gap:22 }}>
+              {/* Left: abilities + saves */}
+              <div>
+                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:10 }}>Ability Scores</div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9 }}>
+                  {Object.keys(char.abilities).map(ab => {
+                    const score = char.abilities[ab];
+                    return (
+                      <div key={ab} style={{ textAlign:"center", padding:12, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:12 }}>
+                        <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                        <div style={{ fontSize:28, fontFamily:"var(--font-display)", color:"var(--accent)", width:50, height:50, borderRadius:"50%", border:"2px solid var(--accent2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"7px auto" }}>{score}</div>
+                        <div style={{ fontSize:15, color:"var(--text)" }}>{modStr(calcMod(score))}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Saving Throws</div>
+                <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                  {Object.entries(saves).map(([ab, sv]) => (
+                    <div key={ab} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 10px", background:"var(--surface)", borderRadius:6, border:"1px solid var(--border)" }}>
+                      <span style={{ width:10, height:10, borderRadius:"50%", flexShrink:0, display:"inline-block",
+                        background: sv.proficient ? "var(--accent)" : "transparent",
+                        border:`2px solid ${sv.proficient ? "var(--accent)" : "var(--border)"}` }} />
+                      <span style={{ flex:1, fontSize:13 }}>{ABILITY_NAMES[ab]}</span>
+                      <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14 }}>{modStr(sv.value)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:11,textTransform:"uppercase",letterSpacing:2,margin:"18px 0 8px"}}>Saving Throws</div>
-              <div style={{display:"flex",flexDirection:"column",gap:5}}>
-                {Object.entries(saves).map(([ab,sv])=><div key={ab} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)"}}>
-                  <span style={{width:10,height:10,borderRadius:"50%",flexShrink:0,display:"inline-block",background:sv.proficient?"var(--accent)":"transparent",border:`2px solid ${sv.proficient?"var(--accent)":"var(--border)"}`}}/>
-                  <span style={{flex:1,fontSize:13}}>{ABILITY_NAMES[ab]}</span>
-                  <span style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:14}}>{modStr(sv.value)}</span>
-                </div>)}
+
+              {/* Right: HP, skills, proficiencies */}
+              <div>
+                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:8 }}>Hit Points</div>
+                <HPTracker hp={char.hp} onUpdate={hp => upd({ ...char, hp })} />
+
+                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Skills</div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
+                  {Object.entries(skills).map(([sk, d]) => (
+                    <div key={sk} style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 10px", background:"var(--surface)", borderRadius:6, border:"1px solid var(--border)" }}>
+                      <span style={{ width:10, height:10, flexShrink:0, display:"inline-block",
+                        borderRadius: d.expertise ? 0 : "50%", transform: d.expertise ? "rotate(45deg)" : "none",
+                        background: d.proficient || d.expertise ? "var(--accent)" : "transparent",
+                        border:`2px solid ${d.proficient || d.expertise ? "var(--accent)" : "var(--border)"}` }} />
+                      <span style={{ flex:1, fontSize:12, color: d.proficient ? "var(--text)" : "var(--text-muted)" }}>{sk}</span>
+                      <span style={{ fontSize:10, color:"var(--text-dim)" }}>({ABILITY_SHORT[SKILLS_MAP[sk]]})</span>
+                      <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, minWidth:28, textAlign:"right" }}>{modStr(d.value)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {classData && (
+                  <>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Proficiencies</div>
+                    <div style={{ padding:12, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, fontSize:13, lineHeight:1.9 }}>
+                      <div><span style={{ color:"var(--text-muted)" }}>Armor: </span>{(classData.armorProficiencies || []).join(", ") || "None"}</div>
+                      <div><span style={{ color:"var(--text-muted)" }}>Weapons: </span>{(classData.weaponProficiencies || []).join(", ")}</div>
+                      <div><span style={{ color:"var(--text-muted)" }}>Saves: </span>{(classData.savingThrows || []).map(ab => ABILITY_NAMES[ab]).join(", ")}</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-            <div>
-              <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:11,textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>Hit Points</div>
-              <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
-              <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:11,textTransform:"uppercase",letterSpacing:2,margin:"18px 0 8px"}}>Skills</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>
-                {Object.entries(skills).map(([sk,d])=><div key={sk} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",background:"var(--surface)",borderRadius:6,border:"1px solid var(--border)"}}>
-                  <span style={{width:10,height:10,flexShrink:0,display:"inline-block",borderRadius:d.expertise?0:"50%",transform:d.expertise?"rotate(45deg)":"none",background:d.proficient||d.expertise?"var(--accent)":"transparent",border:`2px solid ${d.proficient||d.expertise?"var(--accent)":"var(--border)"}`}}/>
-                  <span style={{flex:1,fontSize:12,color:d.proficient?"var(--text)":"var(--text-muted)"}}>{sk}</span>
-                  <span style={{fontSize:10,color:"var(--text-dim)"}}>({ABILITY_SHORT[SKILLS_MAP[sk]]})</span>
-                  <span style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13,minWidth:28,textAlign:"right"}}>{modStr(d.value)}</span>
-                </div>)}
-              </div>
-              {cd&&<><div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:11,textTransform:"uppercase",letterSpacing:2,margin:"18px 0 8px"}}>Proficiencies</div>
-              <div style={{padding:12,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8,fontSize:13,lineHeight:1.9}}>
-                <div><span style={{color:"var(--text-muted)"}}>Armor: </span>{(cd.armorProficiencies||[]).join(", ")||"None"}</div>
-                <div><span style={{color:"var(--text-muted)"}}>Weapons: </span>{(cd.weaponProficiencies||[]).join(", ")}</div>
-                <div><span style={{color:"var(--text-muted)"}}>Saves: </span>{(cd.savingThrows||[]).map(ab=>ABILITY_NAMES[ab]).join(", ")}</div>
-              </div></>}
-            </div>
-          </div>}
-          {tab==="spells"    &&<SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
-          {tab==="inventory" &&<InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
-          {tab==="features"  &&<FeaturesTab   char={char} gameData={gameData}/>}
-          {tab==="notes"     &&<NotesTab       char={char} onUpdate={upd}/>}
-          {tab==="settings"  &&<SettingsTab    char={char} gameData={gameData} onUpdate={upd}/>}
+          )}
+
+          {tab === "spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd} />}
+          {tab === "inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd} />}
+          {tab === "features"  && <FeaturesTab   char={char} gameData={gameData} />}
+          {tab === "notes"     && <NotesTab       char={char} onUpdate={upd} />}
+          {tab === "settings"  && <SettingsTab    char={char} gameData={gameData} onUpdate={upd} />}
         </div>
       </div>
     </TW>
@@ -747,36 +1552,48 @@ function CharacterSheet({char:initial,gameData,onBack,onDelete}){
 }
 
 // ============================================================
-// CHARACTER CARD
+// CHARACTER CARD (home screen)
 // ============================================================
-function CharacterCard({char,gameData,onClick}){
-  const {themes}=gameData;
-  const theme=themes?.[char.theme]||themes?.[Object.keys(themes||{})[0]]||{};
-  const hp=char.hp||{current:0,max:1};
-  const pct=Math.min(100,(hp.current/Math.max(1,hp.max))*100);
-  const hpC=pct>50?theme.success:pct>25?"#f39c12":theme.danger;
-  return(
-    <div onClick={onClick} style={{background:theme.card,border:`1px solid ${theme.border}`,borderRadius:14,padding:20,cursor:"pointer",transition:"all 0.22s",position:"relative",overflow:"hidden"}}
-      onMouseEnter={e=>{e.currentTarget.style.borderColor=theme.accent;e.currentTarget.style.transform="translateY(-3px)";}}
-      onMouseLeave={e=>{e.currentTarget.style.borderColor=theme.border;e.currentTarget.style.transform="translateY(0)";}}>
-      <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary||theme.accent})`}}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+function CharacterCard({ char, gameData, onClick }) {
+  const { themes } = gameData;
+  const theme = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
+  const hp    = char.hp || { current:0, max:1 };
+  const pct   = Math.min(100, (hp.current / Math.max(1, hp.max)) * 100);
+  const hpC   = pct > 50 ? theme.success : pct > 25 ? "#f39c12" : theme.danger;
+  const label = char.subclass ? `${char.class} (${char.subclass})` : char.class;
+
+  return (
+    <div onClick={onClick} style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, cursor:"pointer", transition:"all 0.22s", position:"relative", overflow:"hidden" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary || theme.accent})` }} />
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
         <div>
-          <div style={{fontFamily:theme.fontDisplay,color:theme.accent,fontSize:20,lineHeight:1.2}}>{char.name}</div>
-          <div style={{fontSize:13,color:theme.textMuted,marginTop:4}}><span style={{color:theme.text}}>{char.race}</span> · <span>{char.class}</span></div>
+          <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:20, lineHeight:1.2 }}>{char.name}</div>
+          <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
+            <span style={{ color:theme.text }}>{char.species}</span>
+            {char.species && label ? " · " : ""}<span>{label}</span>
+          </div>
         </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:theme.fontDisplay,color:theme.accent,fontSize:28}}>{char.level}</div>
-          <div style={{fontSize:10,color:theme.textMuted,textTransform:"uppercase",letterSpacing:1}}>Level</div>
+        <div style={{ textAlign:"right" }}>
+          <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
+          <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
         </div>
       </div>
-      <div style={{marginBottom:12}}>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:theme.textMuted,marginBottom:4}}><span>Hit Points</span><span style={{color:hpC}}>{hp.current}/{hp.max}</span></div>
-        <div style={{height:5,background:theme.bg,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:hpC,borderRadius:3,transition:"width 0.3s"}}/></div>
+      <div style={{ marginBottom:12 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
+          <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
+        </div>
+        <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
+          <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
+        </div>
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:12}}>
-        <span style={{color:theme.textMuted}}>{char.background}</span>
-        <div style={{display:"flex",gap:8}}>{char.music&&char.music!=="none"&&<span>🎵</span>}<span style={{color:theme.textDim}}>{char.alignment}</span></div>
+      <div style={{ display:"flex", justifyContent:"space-between", fontSize:12 }}>
+        <span style={{ color:theme.textMuted }}>{char.background}</span>
+        <div style={{ display:"flex", gap:8 }}>
+          {char.music && char.music !== "none" && <span>🎵</span>}
+          <span style={{ color:theme.textDim }}>{char.alignment}</span>
+        </div>
       </div>
     </div>
   );
@@ -785,90 +1602,112 @@ function CharacterCard({char,gameData,onClick}){
 // ============================================================
 // ROOT APP
 // ============================================================
-function App(){
-  const {data: gameData, error} = useGameData();
-  const [characters,setCharacters]=useState(()=>loadChars());
-  const [view,setView]=useState("home");
-  const [selId,setSelId]=useState(null);
-  const selChar=characters.find(c=>c.id===selId);
+function App() {
+  const { data:gameData, error } = useGameData();
+  const [characters, setCharacters] = useState(() => loadChars());
+  const [view,   setView]   = useState("home");
+  const [selId,  setSelId]  = useState(null);
+  const selChar = characters.find(c => c.id === selId);
 
-  // Loading screen
-  if(!gameData && !error) return(
-    <div style={{background:"#0d0d0f",minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#e8e0d0",fontFamily:"serif"}}>
-      <div style={{textAlign:"center"}}>
-        <div style={{fontFamily:"'Cinzel Decorative',serif",color:"#c9a227",fontSize:28,marginBottom:12}}>⚔️ Tome of Heroes</div>
-        <div style={{color:"#8a8070"}}>Loading game data…</div>
+  // Loading
+  if (!gameData && !error) return (
+    <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ color:"#8a8070" }}>Loading game data…</div>
       </div>
     </div>
   );
 
-  // Error screen
-  if(error) return(
-    <div style={{background:"#0d0d0f",minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#e8e0d0",fontFamily:"serif"}}>
-      <div style={{textAlign:"center",maxWidth:560,padding:32}}>
-        <div style={{fontSize:48,marginBottom:16}}>⚠️</div>
-        <div style={{fontFamily:"'Cinzel Decorative',serif",color:"#c9a227",fontSize:22,marginBottom:12}}>Could Not Load Game Data</div>
-        <div style={{background:"#1a0a0a",border:"1px solid #5a1a1a",borderRadius:8,padding:16,marginBottom:20,fontSize:13,color:"#c0392b",textAlign:"left",fontFamily:"monospace",wordBreak:"break-all"}}>{error}</div>
-        <div style={{color:"#8a8070",fontSize:14,lineHeight:1.8}}>
-          Make sure <strong style={{color:"#c9a227"}}>tome-data.json</strong> is in the same folder as <strong style={{color:"#c9a227"}}>tome-of-heroes.html</strong> and you are running a local server, not opening the file directly.<br/><br/>
-          Quick server: <code style={{color:"#c9a227"}}>python -m http.server 8000</code><br/>
-          Then visit: <code style={{color:"#c9a227"}}>http://localhost:8000</code><br/><br/>
-          Validate your JSON at <strong style={{color:"#c9a227"}}>jsonlint.com</strong>
+  // Error
+  if (error) return (
+    <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
+      <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
+        <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
+        <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{error}</div>
+        <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
+          Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
+          Quick server: <code style={{ color:"#c9a227" }}>python -m http.server 8000</code><br />
+          Then visit: <code style={{ color:"#c9a227" }}>http://localhost:8000</code><br />
+          Validate JSON: <strong style={{ color:"#c9a227" }}>jsonlint.com</strong>
         </div>
       </div>
     </div>
   );
 
-  const saveChar=char=>{
-    const upd=characters.find(c=>c.id===char.id)?characters.map(c=>c.id===char.id?char:c):[...characters,char];
+  const saveChar = char => {
+    const upd = characters.find(c => c.id === char.id)
+      ? characters.map(c => c.id === char.id ? char : c)
+      : [...characters, char];
     setCharacters(upd); saveChars(upd); setSelId(char.id); setView("sheet");
   };
-  const delChar=id=>{const upd=characters.filter(c=>c.id!==id);setCharacters(upd);saveChars(upd);setView("home");};
+  const delChar = id => {
+    const upd = characters.filter(c => c.id !== id);
+    setCharacters(upd); saveChars(upd); setView("home");
+  };
 
-  if(view==="create") return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={()=>setView("home")}/>;
-  if(view==="sheet"&&selChar) return <CharacterSheet char={selChar} gameData={gameData} onBack={()=>setView("home")} onDelete={delChar}/>;
+  if (view === "create") return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("home")} />;
+  if (view === "sheet" && selChar) return <CharacterSheet char={selChar} gameData={gameData} onBack={() => setView("home")} onDelete={delChar} />;
 
-  const themes=gameData.themes||{};
-  const dt=themes[Object.keys(themes)[0]]||{};
-  return(
+  const themes = gameData.themes || {};
+  const dt     = themes[Object.keys(themes)[0]] || {};
+
+  return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
-      <div style={{background:dt.bg||"#0d0d0f",minHeight:"100vh",fontFamily:dt.fontBody||"serif",color:dt.text||"#e8e0d0"}}>
-        <div style={{background:dt.gradientHero||dt.bg,borderBottom:`1px solid ${dt.border}`,padding:"42px 24px 34px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",inset:0,opacity:0.03,backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px)"}}/>
-          <div style={{fontFamily:dt.fontDisplay,fontSize:"clamp(26px,5vw,50px)",color:dt.accent,letterSpacing:2,textShadow:`0 0 40px ${dt.accentSecondary}`,position:"relative"}}>⚔️ TOME OF HEROES</div>
-          <div style={{color:dt.textMuted,fontSize:15,marginTop:8,fontStyle:"italic",position:"relative"}}>Your personal D&amp;D 5e character compendium</div>
-          <button onClick={()=>setView("create")} style={{marginTop:24,padding:"14px 36px",background:dt.accent,border:"none",color:dt.bg||"#0d0d0f",borderRadius:10,cursor:"pointer",fontFamily:dt.fontDisplay,fontSize:16,letterSpacing:1,position:"relative",boxShadow:`0 4px 20px ${dt.accentSecondary}`,transition:"all 0.2s"}}
-            onMouseEnter={e=>e.currentTarget.style.transform="scale(1.04)"}
-            onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>+ Create New Character</button>
+      <div style={{ background:dt.bg || "#0d0d0f", minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0" }}>
+
+        {/* Hero banner */}
+        <div style={{ background:dt.gradientHero || dt.bg, borderBottom:`1px solid ${dt.border}`, padding:"42px 24px 34px", textAlign:"center", position:"relative", overflow:"hidden" }}>
+          <div style={{ position:"absolute", inset:0, opacity:0.03,
+            backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px)" }} />
+          <div style={{ fontFamily:dt.fontDisplay, fontSize:"clamp(26px,5vw,50px)", color:dt.accent, letterSpacing:2, textShadow:`0 0 40px ${dt.accentSecondary}`, position:"relative" }}>
+            ⚔️ TOME OF HEROES
+          </div>
+          <div style={{ color:dt.textMuted, fontSize:15, marginTop:8, fontStyle:"italic", position:"relative" }}>Your personal D&amp;D 5e character compendium</div>
+          <button onClick={() => setView("create")} style={{
+            marginTop:24, padding:"14px 36px", background:dt.accent, border:"none", color:dt.bg || "#0d0d0f",
+            borderRadius:10, cursor:"pointer", fontFamily:dt.fontDisplay, fontSize:16, letterSpacing:1,
+            boxShadow:`0 4px 20px ${dt.accentSecondary}`, transition:"all 0.2s", position:"relative"
+          }}
+            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.04)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+            + Create New Character
+          </button>
         </div>
-        <div style={{maxWidth:1100,margin:"0 auto",padding:"32px 24px"}}>
-          {characters.length===0?(
-            <div style={{textAlign:"center",padding:"80px 20px"}}>
-              <div style={{fontSize:64,marginBottom:18}}>📖</div>
-              <div style={{fontFamily:dt.fontDisplay,fontSize:24,color:dt.textMuted,marginBottom:10}}>The tome is empty</div>
-              <div style={{color:dt.textDim,fontSize:15}}>Create your first character to begin your adventure</div>
+
+        {/* Character grid */}
+        <div style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
+          {characters.length === 0 ? (
+            <div style={{ textAlign:"center", padding:"80px 20px" }}>
+              <div style={{ fontSize:64, marginBottom:18 }}>📖</div>
+              <div style={{ fontFamily:dt.fontDisplay, fontSize:24, color:dt.textMuted, marginBottom:10 }}>The tome is empty</div>
+              <div style={{ color:dt.textDim, fontSize:15 }}>Create your first character to begin your adventure</div>
             </div>
-          ):(
+          ) : (
             <>
-              <div style={{fontFamily:dt.fontDisplay,color:dt.textMuted,fontSize:12,textTransform:"uppercase",letterSpacing:2,marginBottom:18}}>{characters.length} {characters.length===1?"Hero":"Heroes"} Registered</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:18}}>
-                {characters.map(c=><CharacterCard key={c.id} char={c} gameData={gameData} onClick={()=>{setSelId(c.id);setView("sheet");}}/>)}
+              <div style={{ fontFamily:dt.fontDisplay, color:dt.textMuted, fontSize:12, textTransform:"uppercase", letterSpacing:2, marginBottom:18 }}>
+                {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
+                {characters.map(c => <CharacterCard key={c.id} char={c} gameData={gameData} onClick={() => { setSelId(c.id); setView("sheet"); }} />)}
               </div>
             </>
           )}
         </div>
-        <div style={{textAlign:"center",padding:20,borderTop:`1px solid ${dt.border}`,color:dt.textDim,fontSize:12,fontStyle:"italic"}}>
-          Tome of Heroes • Edit <strong style={{color:dt.textMuted}}>tome-data.json</strong> to customise races, classes, spells, themes &amp; more
+
+        <div style={{ textAlign:"center", padding:20, borderTop:`1px solid ${dt.border}`, color:dt.textDim, fontSize:12, fontStyle:"italic" }}>
+          Tome of Heroes • Edit <strong style={{ color:dt.textMuted }}>tome-data.json</strong> to customise species, classes, spells, themes &amp; more
         </div>
       </div>
     </>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
