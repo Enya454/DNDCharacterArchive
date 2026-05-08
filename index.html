@@ -458,7 +458,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const [char, setChar] = useState({ ...DEFAULT_CHAR });
   const { species:speciesDb, classes, backgrounds, themes, alignments, languages:languageList, skills:allSkills } = gameData;
 
-  const STEPS = ["Identity","Class","Species","Background","Abilities","Equipment & Spells","Finalise"];
+  const STEPS = ["Identity","Class","Background","Species","Abilities","Equipment & Spells","Finalise"];
   const speciesData = speciesDb?.[char.species];
   const classData   = classes?.[char.class];
   const bgData      = backgrounds?.[char.background];
@@ -557,8 +557,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
           </div>
         )}
 
-        {/* ── STEP 3: Background ── */}
-        {step === 3 && (
+        {/* ── STEP 2: Background ── */}
+        {step === 2 && (
           <div>
             <div style={ws.optGrid}>
               {Object.entries(backgrounds || {}).map(([n, d]) => (
@@ -592,8 +592,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
           </div>
         )}
 
-        {/* ── STEP 2: Species ── */}
-        {step === 2 && (
+        {/* ── STEP 3: Species ── */}
+        {step === 3 && (
           <div>
             <div style={ws.optGrid}>
               {Object.entries(speciesDb || {}).map(([n, d]) => (
