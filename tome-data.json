@@ -1,0 +1,1238 @@
+{
+  "_readme": {
+    "title": "Tome of Heroes — Game Data File",
+    "description": "Edit this file to customise races, classes, backgrounds, spells, themes, and music. The app reads this file on load. JSON does not support comments, so all documentation is in these _readme/_notes/_fields fields — you can safely delete them.",
+    "abilityKeys": "str | dex | con | int | wis | cha  (always lowercase, always these 6)",
+    "skillKeys": "Acrobatics | Animal Handling | Arcana | Athletics | Deception | History | Insight | Intimidation | Investigation | Medicine | Nature | Perception | Performance | Persuasion | Religion | Sleight of Hand | Stealth | Survival",
+    "spellLevels": "0 = cantrip, 1–9 = spell levels",
+    "howToAddRace": "Copy any entry in 'races', change the key (name), adjust abilityBonuses, traits, speed, size",
+    "howToAddClass": "Copy any entry in 'classes'. spellcaster:false removes the spell tab. spellcastingAbility must be one of the 6 ability keys.",
+    "howToAddSpells": "Add to 'spells'. classKey must exactly match a key in 'classes'. level 0 = cantrip.",
+    "howToAddTheme": "Copy any entry in 'themes'. All color values are CSS (hex, rgb, hsl etc). fontDisplay/fontBody should be Google Fonts names.",
+    "howToAddMusic": "Add to 'music'. Set url to null if you want to add it later. id must be unique.",
+    "version": "1.0"
+  },
+
+  "races": {
+    "_notes": "Each key is the displayed race name. abilityBonuses: use ability keys, values are integers. traits: array of strings shown as tags. speed: movement in feet. size: Small | Medium | Large.",
+
+    "Human": {
+      "abilityBonuses": { "str": 1, "dex": 1, "con": 1, "int": 1, "wis": 1, "cha": 1 },
+      "traits": ["Extra Language", "Extra Skill"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Elf": {
+      "abilityBonuses": { "dex": 2, "int": 1 },
+      "traits": ["Darkvision", "Fey Ancestry", "Trance", "Keen Senses"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Dwarf": {
+      "abilityBonuses": { "con": 2, "wis": 1 },
+      "traits": ["Darkvision", "Dwarven Resilience", "Stonecunning", "Dwarven Combat Training"],
+      "speed": 25,
+      "size": "Medium"
+    },
+    "Halfling": {
+      "abilityBonuses": { "dex": 2, "cha": 1 },
+      "traits": ["Lucky", "Brave", "Halfling Nimbleness"],
+      "speed": 25,
+      "size": "Small"
+    },
+    "Gnome": {
+      "abilityBonuses": { "int": 2, "dex": 1 },
+      "traits": ["Darkvision", "Gnome Cunning"],
+      "speed": 25,
+      "size": "Small"
+    },
+    "Half-Elf": {
+      "abilityBonuses": { "cha": 2, "str": 1, "dex": 1 },
+      "traits": ["Darkvision", "Fey Ancestry", "Two Extra Skills"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Half-Orc": {
+      "abilityBonuses": { "str": 2, "con": 1 },
+      "traits": ["Darkvision", "Relentless Endurance", "Savage Attacks", "Menacing"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Tiefling": {
+      "abilityBonuses": { "int": 1, "cha": 2 },
+      "traits": ["Darkvision", "Hellish Resistance", "Infernal Legacy"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Dragonborn": {
+      "abilityBonuses": { "str": 2, "cha": 1 },
+      "traits": ["Draconic Ancestry", "Breath Weapon", "Damage Resistance"],
+      "speed": 30,
+      "size": "Medium"
+    },
+    "Aasimar": {
+      "abilityBonuses": { "cha": 2, "wis": 1 },
+      "traits": ["Darkvision", "Celestial Resistance", "Healing Hands", "Light Bearer"],
+      "speed": 30,
+      "size": "Medium"
+    },
+
+    "_example_custom_race": {
+      "_note": "DELETE this entry or rename it (remove the underscore) to use it. This is just an example.",
+      "abilityBonuses": { "str": 2, "con": 1 },
+      "traits": ["Natural Armor", "Powerful Build", "Stone's Endurance"],
+      "speed": 30,
+      "size": "Medium"
+    }
+  },
+
+  "classes": {
+    "_notes": "hitDie: integer (6/8/10/12). primaryAbility: ability key. savingThrows: array of 2 ability keys. spellcaster: true/false. spellcastingAbility: ability key (only needed if spellcaster=true). features: object where each key is a level number (as string) and value is an array of feature name strings. You MUST include all levels 1–20, use [] for empty levels.",
+
+    "Barbarian": {
+      "hitDie": 12,
+      "primaryAbility": "str",
+      "savingThrows": ["str", "con"],
+      "armorProficiencies": ["Light", "Medium", "Shields"],
+      "weaponProficiencies": ["Simple", "Martial"],
+      "skills": ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
+      "skillCount": 2,
+      "spellcaster": false,
+      "features": {
+        "1":  ["Rage (2/rest)", "Unarmored Defense"],
+        "2":  ["Reckless Attack", "Danger Sense"],
+        "3":  ["Primal Path"],
+        "4":  ["ASI"],
+        "5":  ["Extra Attack", "Fast Movement"],
+        "6":  ["Path Feature", "Rage (3/rest)"],
+        "7":  ["Feral Instinct"],
+        "8":  ["ASI"],
+        "9":  ["Brutal Critical (1 die)"],
+        "10": ["Path Feature"],
+        "11": ["Relentless Rage"],
+        "12": ["ASI", "Rage (4/rest)"],
+        "13": ["Brutal Critical (2 dice)"],
+        "14": ["Path Feature"],
+        "15": ["Persistent Rage"],
+        "16": ["ASI"],
+        "17": ["Brutal Critical (3 dice)", "Rage (5/rest)"],
+        "18": ["Indomitable Might"],
+        "19": ["ASI"],
+        "20": ["Primal Champion"]
+      }
+    },
+
+    "Bard": {
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "savingThrows": ["dex", "cha"],
+      "armorProficiencies": ["Light"],
+      "weaponProficiencies": ["Simple", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"],
+      "skills": ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"],
+      "skillCount": 3,
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": {
+        "1":  ["Spellcasting", "Bardic Inspiration (d6)"],
+        "2":  ["Jack of All Trades", "Song of Rest (d6)"],
+        "3":  ["Bard College", "Expertise"],
+        "4":  ["ASI"],
+        "5":  ["Bardic Inspiration (d8)", "Font of Inspiration"],
+        "6":  ["Countercharm", "College Feature"],
+        "7":  [],
+        "8":  ["ASI"],
+        "9":  ["Song of Rest (d8)"],
+        "10": ["Bardic Inspiration (d10)", "Expertise", "Magical Secrets"],
+        "11": [],
+        "12": ["ASI"],
+        "13": ["Song of Rest (d10)"],
+        "14": ["Magical Secrets", "College Feature"],
+        "15": ["Bardic Inspiration (d12)"],
+        "16": ["ASI"],
+        "17": ["Song of Rest (d12)"],
+        "18": ["Magical Secrets"],
+        "19": ["ASI"],
+        "20": ["Superior Inspiration"]
+      }
+    },
+
+    "Cleric": {
+      "hitDie": 8,
+      "primaryAbility": "wis",
+      "savingThrows": ["wis", "cha"],
+      "armorProficiencies": ["Light", "Medium", "Shields"],
+      "weaponProficiencies": ["Simple"],
+      "skills": ["History", "Insight", "Medicine", "Persuasion", "Religion"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": {
+        "1":  ["Spellcasting", "Divine Domain"],
+        "2":  ["Channel Divinity (1/rest)", "Domain Feature"],
+        "3":  ["Domain Feature"],
+        "4":  ["ASI"],
+        "5":  ["Destroy Undead (CR 1/2)"],
+        "6":  ["Channel Divinity (2/rest)", "Domain Feature"],
+        "7":  ["Domain Feature"],
+        "8":  ["ASI", "Destroy Undead (CR 1)", "Domain Feature"],
+        "9":  [],
+        "10": ["Divine Intervention"],
+        "11": ["Destroy Undead (CR 2)"],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Destroy Undead (CR 3)"],
+        "15": [],
+        "16": ["ASI"],
+        "17": ["Destroy Undead (CR 4)", "Domain Feature"],
+        "18": ["Channel Divinity (3/rest)"],
+        "19": ["ASI"],
+        "20": ["Divine Intervention Improvement"]
+      }
+    },
+
+    "Druid": {
+      "hitDie": 8,
+      "primaryAbility": "wis",
+      "savingThrows": ["int", "wis"],
+      "armorProficiencies": ["Light", "Medium", "Shields (non-metal)"],
+      "weaponProficiencies": ["Clubs", "Daggers", "Darts", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Slings", "Spears"],
+      "skills": ["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": {
+        "1":  ["Spellcasting", "Druidic"],
+        "2":  ["Wild Shape", "Druid Circle"],
+        "3":  ["Circle Feature"],
+        "4":  ["Wild Shape Improvement", "ASI"],
+        "5":  [],
+        "6":  ["Circle Feature"],
+        "7":  [],
+        "8":  ["Wild Shape Improvement", "ASI"],
+        "9":  [],
+        "10": ["Circle Feature"],
+        "11": [],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Circle Feature"],
+        "15": [],
+        "16": ["ASI"],
+        "17": [],
+        "18": ["Timeless Body", "Beast Spells"],
+        "19": ["ASI"],
+        "20": ["Archdruid"]
+      }
+    },
+
+    "Fighter": {
+      "hitDie": 10,
+      "primaryAbility": "str",
+      "savingThrows": ["str", "con"],
+      "armorProficiencies": ["All Armor", "Shields"],
+      "weaponProficiencies": ["Simple", "Martial"],
+      "skills": ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"],
+      "skillCount": 2,
+      "spellcaster": false,
+      "features": {
+        "1":  ["Fighting Style", "Second Wind"],
+        "2":  ["Action Surge (1/rest)"],
+        "3":  ["Martial Archetype"],
+        "4":  ["ASI"],
+        "5":  ["Extra Attack"],
+        "6":  ["ASI"],
+        "7":  ["Archetype Feature"],
+        "8":  ["ASI"],
+        "9":  ["Indomitable (1/day)"],
+        "10": ["Archetype Feature"],
+        "11": ["Extra Attack (2)"],
+        "12": ["ASI"],
+        "13": ["Indomitable (2/day)"],
+        "14": ["ASI"],
+        "15": ["Archetype Feature"],
+        "16": ["ASI"],
+        "17": ["Action Surge (2/rest)", "Indomitable (3/day)"],
+        "18": ["Archetype Feature"],
+        "19": ["ASI"],
+        "20": ["Extra Attack (3)"]
+      }
+    },
+
+    "Monk": {
+      "hitDie": 8,
+      "primaryAbility": "dex",
+      "savingThrows": ["str", "dex"],
+      "armorProficiencies": [],
+      "weaponProficiencies": ["Simple", "Shortswords"],
+      "skills": ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
+      "skillCount": 2,
+      "spellcaster": false,
+      "features": {
+        "1":  ["Unarmored Defense", "Martial Arts"],
+        "2":  ["Ki", "Unarmored Movement"],
+        "3":  ["Monastic Tradition", "Deflect Missiles"],
+        "4":  ["ASI", "Slow Fall"],
+        "5":  ["Extra Attack", "Stunning Strike"],
+        "6":  ["Ki-Empowered Strikes", "Tradition Feature"],
+        "7":  ["Evasion", "Stillness of Mind"],
+        "8":  ["ASI"],
+        "9":  ["Unarmored Movement Improvement"],
+        "10": ["Purity of Body"],
+        "11": ["Tradition Feature"],
+        "12": ["ASI"],
+        "13": ["Tongue of the Sun and Moon"],
+        "14": ["Diamond Soul"],
+        "15": ["Timeless Body"],
+        "16": ["ASI"],
+        "17": ["Tradition Feature"],
+        "18": ["Empty Body"],
+        "19": ["ASI"],
+        "20": ["Perfect Self"]
+      }
+    },
+
+    "Paladin": {
+      "hitDie": 10,
+      "primaryAbility": "str",
+      "savingThrows": ["wis", "cha"],
+      "armorProficiencies": ["All Armor", "Shields"],
+      "weaponProficiencies": ["Simple", "Martial"],
+      "skills": ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": {
+        "1":  ["Divine Sense", "Lay on Hands"],
+        "2":  ["Fighting Style", "Spellcasting", "Divine Smite"],
+        "3":  ["Divine Health", "Sacred Oath"],
+        "4":  ["ASI"],
+        "5":  ["Extra Attack"],
+        "6":  ["Aura of Protection"],
+        "7":  ["Oath Feature"],
+        "8":  ["ASI"],
+        "9":  [],
+        "10": ["Aura of Courage"],
+        "11": ["Improved Divine Smite"],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Cleansing Touch"],
+        "15": ["Oath Feature"],
+        "16": ["ASI"],
+        "17": [],
+        "18": ["Aura Improvements"],
+        "19": ["ASI"],
+        "20": ["Sacred Oath Feature"]
+      }
+    },
+
+    "Ranger": {
+      "hitDie": 10,
+      "primaryAbility": "dex",
+      "savingThrows": ["str", "dex"],
+      "armorProficiencies": ["Light", "Medium", "Shields"],
+      "weaponProficiencies": ["Simple", "Martial"],
+      "skills": ["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"],
+      "skillCount": 3,
+      "spellcaster": true,
+      "spellcastingAbility": "wis",
+      "features": {
+        "1":  ["Favored Enemy", "Natural Explorer"],
+        "2":  ["Fighting Style", "Spellcasting"],
+        "3":  ["Ranger Archetype", "Primeval Awareness"],
+        "4":  ["ASI"],
+        "5":  ["Extra Attack"],
+        "6":  ["Favored Enemy Improvement", "Natural Explorer Improvement"],
+        "7":  ["Archetype Feature"],
+        "8":  ["ASI", "Land's Stride"],
+        "9":  [],
+        "10": ["Natural Explorer Improvement", "Hide in Plain Sight"],
+        "11": ["Archetype Feature"],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Favored Enemy Improvement", "Vanish"],
+        "15": ["Archetype Feature"],
+        "16": ["ASI"],
+        "17": [],
+        "18": ["Feral Senses"],
+        "19": ["ASI"],
+        "20": ["Foe Slayer"]
+      }
+    },
+
+    "Rogue": {
+      "hitDie": 8,
+      "primaryAbility": "dex",
+      "savingThrows": ["dex", "int"],
+      "armorProficiencies": ["Light"],
+      "weaponProficiencies": ["Simple", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"],
+      "skills": ["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"],
+      "skillCount": 4,
+      "spellcaster": false,
+      "features": {
+        "1":  ["Expertise", "Sneak Attack (1d6)", "Thieves' Cant"],
+        "2":  ["Cunning Action"],
+        "3":  ["Roguish Archetype", "Sneak Attack (2d6)"],
+        "4":  ["ASI"],
+        "5":  ["Uncanny Dodge", "Sneak Attack (3d6)"],
+        "6":  ["Expertise", "Sneak Attack (4d6)"],
+        "7":  ["Evasion", "Sneak Attack (4d6)"],
+        "8":  ["ASI", "Sneak Attack (5d6)"],
+        "9":  ["Archetype Feature", "Sneak Attack (5d6)"],
+        "10": ["ASI", "Sneak Attack (6d6)"],
+        "11": ["Reliable Talent", "Sneak Attack (6d6)"],
+        "12": ["ASI", "Sneak Attack (7d6)"],
+        "13": ["Archetype Feature", "Sneak Attack (7d6)"],
+        "14": ["Blindsense", "Sneak Attack (8d6)"],
+        "15": ["Slippery Mind", "Sneak Attack (8d6)"],
+        "16": ["ASI", "Sneak Attack (9d6)"],
+        "17": ["Archetype Feature", "Sneak Attack (9d6)"],
+        "18": ["Elusive", "Sneak Attack (10d6)"],
+        "19": ["ASI", "Sneak Attack (10d6)"],
+        "20": ["Stroke of Luck", "Sneak Attack (10d6)"]
+      }
+    },
+
+    "Sorcerer": {
+      "hitDie": 6,
+      "primaryAbility": "cha",
+      "savingThrows": ["con", "cha"],
+      "armorProficiencies": [],
+      "weaponProficiencies": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"],
+      "skills": ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": {
+        "1":  ["Spellcasting", "Sorcerous Origin"],
+        "2":  ["Font of Magic"],
+        "3":  ["Metamagic (2)"],
+        "4":  ["ASI"],
+        "5":  [],
+        "6":  ["Origin Feature"],
+        "7":  [],
+        "8":  ["ASI"],
+        "9":  [],
+        "10": ["Metamagic (3)"],
+        "11": [],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Origin Feature"],
+        "15": [],
+        "16": ["ASI"],
+        "17": ["Metamagic (4)"],
+        "18": ["Origin Feature"],
+        "19": ["ASI"],
+        "20": ["Sorcerous Restoration"]
+      }
+    },
+
+    "Warlock": {
+      "hitDie": 8,
+      "primaryAbility": "cha",
+      "savingThrows": ["wis", "cha"],
+      "armorProficiencies": ["Light"],
+      "weaponProficiencies": ["Simple"],
+      "skills": ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "cha",
+      "features": {
+        "1":  ["Otherworldly Patron", "Pact Magic"],
+        "2":  ["Eldritch Invocations (2)"],
+        "3":  ["Pact Boon"],
+        "4":  ["ASI"],
+        "5":  ["Eldritch Invocations (3)"],
+        "6":  ["Patron Feature"],
+        "7":  ["Eldritch Invocations (4)"],
+        "8":  ["ASI"],
+        "9":  ["Eldritch Invocations (5)"],
+        "10": ["Patron Feature"],
+        "11": ["Mystic Arcanum (6th)"],
+        "12": ["ASI", "Eldritch Invocations (6)"],
+        "13": ["Mystic Arcanum (7th)"],
+        "14": ["Patron Feature"],
+        "15": ["Mystic Arcanum (8th)", "Eldritch Invocations (7)"],
+        "16": ["ASI"],
+        "17": ["Mystic Arcanum (9th)"],
+        "18": ["Eldritch Invocations (8)"],
+        "19": ["ASI"],
+        "20": ["Eldritch Master"]
+      }
+    },
+
+    "Wizard": {
+      "hitDie": 6,
+      "primaryAbility": "int",
+      "savingThrows": ["int", "wis"],
+      "armorProficiencies": [],
+      "weaponProficiencies": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"],
+      "skills": ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"],
+      "skillCount": 2,
+      "spellcaster": true,
+      "spellcastingAbility": "int",
+      "features": {
+        "1":  ["Spellcasting", "Arcane Recovery"],
+        "2":  ["Arcane Tradition"],
+        "3":  [],
+        "4":  ["ASI"],
+        "5":  [],
+        "6":  ["Tradition Feature"],
+        "7":  [],
+        "8":  ["ASI"],
+        "9":  [],
+        "10": ["Tradition Feature"],
+        "11": [],
+        "12": ["ASI"],
+        "13": [],
+        "14": ["Tradition Feature"],
+        "15": [],
+        "16": ["ASI"],
+        "17": [],
+        "18": ["Spell Mastery"],
+        "19": ["ASI"],
+        "20": ["Signature Spells"]
+      }
+    }
+  },
+
+  "backgrounds": {
+    "_notes": "skills: exactly 2 skill names. tools: optional array of tool proficiencies. languages: optional integer number of bonus languages. feature: name of the background feature (display only).",
+
+    "Acolyte":    { "skills": ["Insight", "Religion"],              "languages": 2,                                            "feature": "Shelter of the Faithful" },
+    "Charlatan":  { "skills": ["Deception", "Sleight of Hand"],     "tools": ["Disguise Kit", "Forgery Kit"],                  "feature": "False Identity" },
+    "Criminal":   { "skills": ["Deception", "Stealth"],             "tools": ["Thieves' Tools", "Gaming Set"],                 "feature": "Criminal Contact" },
+    "Entertainer":{ "skills": ["Acrobatics", "Performance"],        "tools": ["Disguise Kit", "Musical Instrument"],           "feature": "By Popular Demand" },
+    "Folk Hero":  { "skills": ["Animal Handling", "Survival"],      "tools": ["Artisan's Tools", "Vehicles (Land)"],           "feature": "Rustic Hospitality" },
+    "Hermit":     { "skills": ["Medicine", "Religion"],             "tools": ["Herbalism Kit"],          "languages": 1,       "feature": "Discovery" },
+    "Noble":      { "skills": ["History", "Persuasion"],            "tools": ["Gaming Set"],             "languages": 1,       "feature": "Position of Privilege" },
+    "Outlander":  { "skills": ["Athletics", "Survival"],            "tools": ["Musical Instrument"],     "languages": 1,       "feature": "Wanderer" },
+    "Sage":       { "skills": ["Arcana", "History"],                "languages": 2,                                            "feature": "Researcher" },
+    "Sailor":     { "skills": ["Athletics", "Perception"],          "tools": ["Navigator's Tools", "Vehicles (Water)"],        "feature": "Ship's Passage" },
+    "Soldier":    { "skills": ["Athletics", "Intimidation"],        "tools": ["Gaming Set", "Vehicles (Land)"],                "feature": "Military Rank" },
+    "Urchin":     { "skills": ["Sleight of Hand", "Stealth"],       "tools": ["Thieves' Tools", "Disguise Kit"],               "feature": "City Secrets" }
+  },
+
+  "spells": {
+    "_notes": "Each entry is an array of spells for that class. The key MUST exactly match a class name in 'classes'. level: 0=cantrip, 1-9=spell level. school: spell school (display only). castingTime/range/components/duration/description: all display strings.",
+
+    "Wizard": [
+      {
+        "name": "Fire Bolt",
+        "level": 0,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A mote of fire hurls toward a creature or object within range. Make a ranged spell attack. On a hit, deals 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)."
+      },
+      {
+        "name": "Mage Hand",
+        "level": 0,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "30 ft",
+        "components": "V, S",
+        "duration": "1 minute",
+        "description": "A spectral floating hand appears at a point you choose within range. You can use it to manipulate an object, open an unlocked door or container, stow or retrieve an item, or pour the contents of a vial."
+      },
+      {
+        "name": "Prestidigitation",
+        "level": 0,
+        "school": "Transmutation",
+        "castingTime": "1 action",
+        "range": "10 ft",
+        "components": "V, S",
+        "duration": "Up to 1 hour",
+        "description": "Create minor magical effects: light a candle, clean an object, soil an object, warm/cool a small area, make a colour or simple mark appear, create a small non-magical trinket or illusion."
+      },
+      {
+        "name": "Magic Missile",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "Create three glowing darts of magical force. Each dart hits a creature of your choice automatically, dealing 1d4+1 force damage. Darts can target the same creature or different ones. +1 dart per slot level above 1st."
+      },
+      {
+        "name": "Shield",
+        "level": 1,
+        "school": "Abjuration",
+        "castingTime": "1 reaction (when hit or targeted by Magic Missile)",
+        "range": "Self",
+        "components": "V, S",
+        "duration": "1 round",
+        "description": "An invisible barrier of magical force appears and protects you. You gain a +5 bonus to AC (including against the triggering attack) until the start of your next turn. You also take no damage from Magic Missile."
+      },
+      {
+        "name": "Detect Magic",
+        "level": 1,
+        "school": "Divination",
+        "castingTime": "1 action (ritual)",
+        "range": "Self",
+        "components": "V, S",
+        "duration": "Concentration, 10 minutes",
+        "description": "For the duration, you sense the presence of magic within 30 feet. You can use your action to see a faint aura around any visible creature or object that bears magic, and you learn its school of magic."
+      },
+      {
+        "name": "Misty Step",
+        "level": 2,
+        "school": "Conjuration",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V",
+        "duration": "Instantaneous",
+        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+      },
+      {
+        "name": "Invisibility",
+        "level": 2,
+        "school": "Illusion",
+        "castingTime": "1 action",
+        "range": "Touch",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 hour",
+        "description": "A creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. The spell ends if the target attacks or casts a spell."
+      },
+      {
+        "name": "Fireball",
+        "level": 3,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "150 ft",
+        "components": "V, S, M (a ball of bat guano and sulfur)",
+        "duration": "Instantaneous",
+        "description": "A bright streak flashes from your pointing finger to a 20-foot-radius sphere. Each creature must make a Dexterity saving throw, taking 8d6 fire damage on failure, half on success. +1d6 damage per slot level above 3rd."
+      },
+      {
+        "name": "Counterspell",
+        "level": 3,
+        "school": "Abjuration",
+        "castingTime": "1 reaction (when a creature within 60 ft casts a spell)",
+        "range": "60 ft",
+        "components": "S",
+        "duration": "Instantaneous",
+        "description": "Attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, it fails. For higher-level spells, make an ability check: DC 10 + spell level."
+      },
+      {
+        "name": "Polymorph",
+        "level": 4,
+        "school": "Transmutation",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, up to 1 hour",
+        "description": "This spell transforms a creature you can see into a new form. An unwilling creature must make a Wisdom saving throw. The new form can be any beast with a CR no greater than the target's level/CR."
+      },
+      {
+        "name": "Dimension Door",
+        "level": 4,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "500 ft",
+        "components": "V",
+        "duration": "Instantaneous",
+        "description": "Teleport yourself from your current location to any other spot within range. You arrive at the exact spot desired. You can bring along objects up to 500 pounds. You can also bring one willing creature of your size or smaller."
+      },
+      {
+        "name": "Cone of Cold",
+        "level": 5,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Self (60-ft cone)",
+        "components": "V, S, M",
+        "duration": "Instantaneous",
+        "description": "A blast of cold air erupts from your hands. Each creature in a 60-foot cone must make a Constitution saving throw. A creature takes 8d8 cold damage on a failed save, or half as much on success."
+      }
+    ],
+
+    "Cleric": [
+      {
+        "name": "Sacred Flame",
+        "level": 0,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "Flame-like radiance descends on a creature you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage (2d8 at level 5, 3d8 at 11, 4d8 at 17). The target gains no benefit from cover for this saving throw."
+      },
+      {
+        "name": "Guidance",
+        "level": 0,
+        "school": "Divination",
+        "castingTime": "1 action",
+        "range": "Touch",
+        "components": "V, S",
+        "duration": "Concentration, 1 minute",
+        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check."
+      },
+      {
+        "name": "Spare the Dying",
+        "level": 0,
+        "school": "Necromancy",
+        "castingTime": "1 action",
+        "range": "Touch",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs."
+      },
+      {
+        "name": "Cure Wounds",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Touch",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. +1d8 per slot level above 1st. This spell has no effect on undead or constructs."
+      },
+      {
+        "name": "Bless",
+        "level": 1,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "30 ft",
+        "components": "V, S, M (a sprinkling of holy water)",
+        "duration": "Concentration, 1 minute",
+        "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw."
+      },
+      {
+        "name": "Healing Word",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 bonus action",
+        "range": "60 ft",
+        "components": "V",
+        "duration": "Instantaneous",
+        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot level above 1st. No effect on undead or constructs."
+      },
+      {
+        "name": "Spiritual Weapon",
+        "level": 2,
+        "school": "Evocation",
+        "castingTime": "1 bonus action",
+        "range": "60 ft",
+        "components": "V, S",
+        "duration": "1 minute",
+        "description": "Create a floating, spectral weapon. As a bonus action you can move it and attack with it, dealing 1d8 + spellcasting ability modifier force damage on a hit. +1d8 per two slot levels above 2nd."
+      },
+      {
+        "name": "Hold Person",
+        "level": 2,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 minute",
+        "description": "Choose a humanoid within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, it can make another Wisdom saving throw."
+      },
+      {
+        "name": "Spirit Guardians",
+        "level": 3,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "Self (15-ft radius)",
+        "components": "V, S, M (a holy symbol)",
+        "duration": "Concentration, 10 minutes",
+        "description": "Call forth spirits. Creatures of your choice within 15 feet of you must make a Wisdom saving throw, taking 3d8 radiant (or necrotic) damage on failure and having their speed halved. +1d8 per slot level above 3rd."
+      },
+      {
+        "name": "Mass Cure Wounds",
+        "level": 5,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A wave of healing energy washes out from a point. Choose up to 6 creatures in a 30-foot-radius sphere. Each target regains hit points equal to 3d8 + your spellcasting ability modifier. +1d8 per slot level above 5th."
+      }
+    ],
+
+    "Bard": [
+      {
+        "name": "Vicious Mockery",
+        "level": 0,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V",
+        "duration": "Instantaneous",
+        "description": "Unleash a string of insults laced with subtle enchantments at a creature you can see. If it can hear you (it need not understand), it must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll before the end of its next turn."
+      },
+      {
+        "name": "Minor Illusion",
+        "level": 0,
+        "school": "Illusion",
+        "castingTime": "1 action",
+        "range": "30 ft",
+        "components": "S, M",
+        "duration": "1 minute",
+        "description": "Create a sound or an image of an object. You can make it seem like it's coming from a point within range. A creature that sees through the illusion recognizes it as illusory, and the spell ends."
+      },
+      {
+        "name": "Thunderwave",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Self (15-ft cube)",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube must make a Constitution saving throw. On a failed save, take 2d8 thunder damage and be pushed 10 feet away. On success, half damage and no push. +1d8 per slot level above 1st."
+      },
+      {
+        "name": "Charm Person",
+        "level": 1,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "30 ft",
+        "components": "V, S",
+        "duration": "1 hour",
+        "description": "Attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw (advantage if you or your companions are fighting it). On failure, the charmed creature regards you as a friendly acquaintance. One extra target per slot level above 1st."
+      },
+      {
+        "name": "Dissonant Whispers",
+        "level": 1,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V",
+        "duration": "Instantaneous",
+        "description": "Whisper a discordant melody that only one creature of your choice can hear. The target must make a Wisdom save or take 3d6 psychic damage and immediately move as far away as it can. On success, half damage and no movement."
+      },
+      {
+        "name": "Hypnotic Pattern",
+        "level": 3,
+        "school": "Illusion",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "S, M",
+        "duration": "Concentration, 1 minute",
+        "description": "A twisting pattern of colors weaves through the air in a 30-foot cube. Each creature in the area that can see the pattern must succeed on a Wisdom saving throw or become charmed and incapacitated with speed 0."
+      },
+      {
+        "name": "Polymorph",
+        "level": 4,
+        "school": "Transmutation",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 hour",
+        "description": "Transform a creature you can see into a new form. An unwilling creature must succeed on a Wisdom saving throw. The spell can't affect a target that has 0 hp. The new form can be any beast with CR ≤ target's level/CR."
+      }
+    ],
+
+    "Druid": [
+      {
+        "name": "Shillelagh",
+        "level": 0,
+        "school": "Transmutation",
+        "castingTime": "1 bonus action",
+        "range": "Touch",
+        "components": "V, S, M (mistletoe, shamrock leaf, and a club or quarterstaff)",
+        "duration": "1 minute",
+        "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for attack and damage rolls, and the weapon's damage die becomes a d8."
+      },
+      {
+        "name": "Entangle",
+        "level": 1,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "90 ft",
+        "components": "V, S",
+        "duration": "Concentration, 1 minute",
+        "description": "Grasping weeds and vines sprout from the ground in a 20-foot square originating from a point within range. For the duration, these plants turn the ground into difficult terrain. A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained."
+      },
+      {
+        "name": "Thunderwave",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Self (15-ft cube)",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A wave of thunderous force sweeps out. Each creature in a 15-foot cube makes a Constitution save, taking 2d8 thunder damage and being pushed 10 feet on failure. +1d8 per slot level above 1st."
+      },
+      {
+        "name": "Moonbeam",
+        "level": 2,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 minute",
+        "description": "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high cylinder. Creatures take 2d10 radiant damage (half on save). Shapechangers have disadvantage. As an action you can move the beam 60 feet. +1d10 per slot level above 2nd."
+      },
+      {
+        "name": "Call Lightning",
+        "level": 3,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Concentration, 10 minutes",
+        "description": "A storm cloud appears in a 10-foot-radius, 20-foot-high cylinder. Each round as an action, you can call down lightning: choose a point below the cloud, each creature within 5 feet makes a Dex save or takes 3d10 lightning damage (half on success)."
+      },
+      {
+        "name": "Conjure Animals",
+        "level": 3,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S",
+        "duration": "Concentration, 1 hour",
+        "description": "You summon fey spirits that take the form of beasts and appear in unoccupied spaces within range. Choose one of: 1 beast of CR 2, 2 beasts of CR 1, 4 beasts of CR 1/2, or 8 beasts of CR 1/4. Each beast is also considered fey."
+      }
+    ],
+
+    "Sorcerer": [
+      {
+        "name": "Fire Bolt",
+        "level": 0,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, deals 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)."
+      },
+      {
+        "name": "Prestidigitation",
+        "level": 0,
+        "school": "Transmutation",
+        "castingTime": "1 action",
+        "range": "10 ft",
+        "components": "V, S",
+        "duration": "Up to 1 hour",
+        "description": "Create minor magical effects for various purposes."
+      },
+      {
+        "name": "Burning Hands",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Self (15-ft cone)",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth. Each creature in a 15-foot cone must make a Dexterity saving throw, taking 3d6 fire damage on failure, half on success. +1d6 per slot level above 1st."
+      },
+      {
+        "name": "Chromatic Orb",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "90 ft",
+        "components": "V, S, M (a diamond worth at least 50 gp)",
+        "duration": "Instantaneous",
+        "description": "Hurl a 4-inch-diameter sphere of energy. Choose acid, cold, fire, lightning, poison, or thunder. Make a ranged spell attack; on hit, the target takes 3d8 damage of the chosen type. +1d8 per slot level above 1st."
+      },
+      {
+        "name": "Scorching Ray",
+        "level": 2,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "You create three rays of fire and hurl them at targets within range. Make a ranged spell attack for each ray; on hit, deals 2d6 fire damage. +1 ray per slot level above 2nd."
+      },
+      {
+        "name": "Haste",
+        "level": 3,
+        "school": "Transmutation",
+        "castingTime": "1 action",
+        "range": "30 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 minute",
+        "description": "Choose a willing creature. Its speed is doubled, it gains +2 AC, advantage on Dexterity saving throws, and it gains one additional action on each of its turns. When the spell ends, the target can't move or take actions until after its next turn."
+      }
+    ],
+
+    "Warlock": [
+      {
+        "name": "Eldritch Blast",
+        "level": 0,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "description": "A beam of crackling energy streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage. +1 beam at levels 5, 11, and 17 (each requiring its own attack roll)."
+      },
+      {
+        "name": "Chill Touch",
+        "level": 0,
+        "school": "Necromancy",
+        "castingTime": "1 action",
+        "range": "120 ft",
+        "components": "V, S",
+        "duration": "1 round",
+        "description": "Create a ghostly, skeletal hand. Make a ranged spell attack; on hit, the target takes 1d8 necrotic damage and can't regain hit points until the start of your next turn. If the target is undead, it also has disadvantage on attack rolls."
+      },
+      {
+        "name": "Hex",
+        "level": 1,
+        "school": "Enchantment",
+        "castingTime": "1 bonus action",
+        "range": "90 ft",
+        "components": "V, S, M (the petrified eye of a newt)",
+        "duration": "Concentration, 1 hour",
+        "description": "Place a curse on a creature. Until the spell ends, you deal an extra 1d6 necrotic damage whenever you hit the cursed target with an attack. Also choose an ability: the target has disadvantage on ability checks with that ability. If the target drops to 0 hp, you can use a bonus action to move the hex to a new creature."
+      },
+      {
+        "name": "Hunger of Hadar",
+        "level": 3,
+        "school": "Conjuration",
+        "castingTime": "1 action",
+        "range": "150 ft",
+        "components": "V, S, M (a pickled octopus tentacle)",
+        "duration": "Concentration, 1 minute",
+        "description": "Open a gateway to the dark between the stars in a 20-foot-radius sphere. A creature that starts its turn in the area takes 2d6 cold damage. A creature that ends its turn in the area must succeed on a Dexterity saving throw or take 2d6 acid damage."
+      },
+      {
+        "name": "Banishment",
+        "level": 4,
+        "school": "Abjuration",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 minute",
+        "description": "Attempt to send one creature to another plane. The target must succeed on a Charisma saving throw or be banished. If it originated from a different plane of existence, it is instead returned there permanently if it fails the save."
+      }
+    ],
+
+    "Paladin": [
+      {
+        "name": "Divine Favor",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V, S",
+        "duration": "Concentration, 1 minute",
+        "description": "Your prayer empowers you with divine radiance. Until the spell ends, your weapon attacks deal an extra 1d4 radiant damage on a hit."
+      },
+      {
+        "name": "Wrathful Smite",
+        "level": 1,
+        "school": "Evocation",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V",
+        "duration": "Concentration, 1 minute",
+        "description": "The next time you hit with a melee weapon attack during this spell's duration, your attack deals an extra 1d6 psychic damage. Additionally, if the target is a creature, it must make a Wisdom saving throw or be frightened of you until the spell ends."
+      },
+      {
+        "name": "Zone of Truth",
+        "level": 2,
+        "school": "Enchantment",
+        "castingTime": "1 action",
+        "range": "60 ft",
+        "components": "V, S",
+        "duration": "10 minutes",
+        "description": "Create a magical zone that guards against deception in a 15-foot-radius sphere. Creatures that fail their Charisma saving throw can't speak a deliberate lie while in the zone, though they can choose to remain silent."
+      },
+      {
+        "name": "Aura of Vitality",
+        "level": 3,
+        "school": "Evocation",
+        "castingTime": "1 action",
+        "range": "Self (30-ft radius)",
+        "components": "V",
+        "duration": "Concentration, 1 minute",
+        "description": "Healing energy radiates from you in an aura with a 30-foot radius. Until the spell ends, you can use a bonus action to cause one creature in the aura (including you) to regain 2d6 hit points."
+      }
+    ],
+
+    "Ranger": [
+      {
+        "name": "Hunter's Mark",
+        "level": 1,
+        "school": "Divination",
+        "castingTime": "1 bonus action",
+        "range": "90 ft",
+        "components": "V",
+        "duration": "Concentration, 1 hour",
+        "description": "Choose a creature you can see within range. Until the spell ends, you deal an extra 1d6 damage to the target whenever you hit it with a weapon attack, and you have advantage on any Wisdom (Perception) or Wisdom (Survival) check you make to find it."
+      },
+      {
+        "name": "Ensnaring Strike",
+        "level": 1,
+        "school": "Conjuration",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V",
+        "duration": "Concentration, 1 minute",
+        "description": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact. The target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends."
+      },
+      {
+        "name": "Hail of Thorns",
+        "level": 1,
+        "school": "Conjuration",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V",
+        "duration": "Concentration, 1 minute",
+        "description": "The next time you hit a creature with a ranged weapon attack before the spell ends, this spell creates a rain of thorns. The target and each creature within 5 feet of it must make a Dexterity saving throw, taking 1d10 piercing damage on failure."
+      },
+      {
+        "name": "Pass without Trace",
+        "level": 2,
+        "school": "Abjuration",
+        "castingTime": "1 action",
+        "range": "Self",
+        "components": "V, S, M",
+        "duration": "Concentration, 1 hour",
+        "description": "A veil of shadows and silence radiates from you, masking you and your companions from detection. For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can't be tracked except by magical means."
+      },
+      {
+        "name": "Lightning Arrow",
+        "level": 3,
+        "school": "Transmutation",
+        "castingTime": "1 bonus action",
+        "range": "Self",
+        "components": "V, S",
+        "duration": "Concentration, 1 minute",
+        "description": "The next time you make a ranged weapon attack during the spell's duration, the weapon's ammunition, or the weapon itself if it's a thrown weapon, transforms into a bolt of lightning. Make the attack roll normally. On hit, the target takes 4d8 lightning damage instead of the weapon's normal damage, and each creature within 10 feet must make a Dexterity save or take 2d8 lightning damage."
+      }
+    ]
+  },
+
+  "themes": {
+    "_notes": "All color values accept any valid CSS color string. fontDisplay and fontBody must be valid Google Fonts names (loaded automatically). gradientHero is the CSS background value for the character sheet header.",
+
+    "dungeon": {
+      "name": "Dungeon Stone",
+      "bg": "#0d0d0f",
+      "surface": "#1a1a1f",
+      "card": "#222228",
+      "border": "#3a3a45",
+      "accent": "#c9a227",
+      "accentSecondary": "#8b6914",
+      "text": "#e8e0d0",
+      "textMuted": "#8a8070",
+      "textDim": "#554f45",
+      "highlight": "#d4a843",
+      "danger": "#c0392b",
+      "success": "#27ae60",
+      "info": "#2980b9",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Crimson Pro', serif",
+      "gradientHero": "linear-gradient(135deg, #1a1208 0%, #0d0d0f 50%, #08080d 100%)"
+    },
+
+    "arcane": {
+      "name": "Arcane Nexus",
+      "bg": "#050510",
+      "surface": "#0a0a20",
+      "card": "#0f0f2a",
+      "border": "#2a2a5a",
+      "accent": "#7b2fff",
+      "accentSecondary": "#4a1f99",
+      "text": "#e0d8ff",
+      "textMuted": "#8070c0",
+      "textDim": "#404070",
+      "highlight": "#a855f7",
+      "danger": "#e53e3e",
+      "success": "#38a169",
+      "info": "#4299e1",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Philosopher', serif",
+      "gradientHero": "linear-gradient(135deg, #050510 0%, #0d0525 50%, #10052a 100%)"
+    },
+
+    "forest": {
+      "name": "Elven Forest",
+      "bg": "#060d06",
+      "surface": "#0d1a0d",
+      "card": "#122012",
+      "border": "#2a4a2a",
+      "accent": "#4caf50",
+      "accentSecondary": "#2d7a30",
+      "text": "#d0e8d0",
+      "textMuted": "#6a906a",
+      "textDim": "#3a5a3a",
+      "highlight": "#66bb6a",
+      "danger": "#e53e3e",
+      "success": "#4caf50",
+      "info": "#29b6f6",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Lora', serif",
+      "gradientHero": "linear-gradient(135deg, #061006 0%, #0a1a0a 50%, #081408 100%)"
+    },
+
+    "infernal": {
+      "name": "Infernal Pact",
+      "bg": "#0d0500",
+      "surface": "#1a0a00",
+      "card": "#241000",
+      "border": "#5a2000",
+      "accent": "#ff6b00",
+      "accentSecondary": "#c04800",
+      "text": "#ffe0c0",
+      "textMuted": "#996040",
+      "textDim": "#5a3010",
+      "highlight": "#ff8c42",
+      "danger": "#ff1a1a",
+      "success": "#52b788",
+      "info": "#4cc9f0",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Spectral', serif",
+      "gradientHero": "linear-gradient(135deg, #1a0500 0%, #0d0300 50%, #100800 100%)"
+    },
+
+    "ice": {
+      "name": "Frozen Wastes",
+      "bg": "#020810",
+      "surface": "#05101c",
+      "card": "#081828",
+      "border": "#1a3a5a",
+      "accent": "#4ecdc4",
+      "accentSecondary": "#2980b9",
+      "text": "#d0ecff",
+      "textMuted": "#5080a0",
+      "textDim": "#203040",
+      "highlight": "#74d7cf",
+      "danger": "#e53e3e",
+      "success": "#48bb78",
+      "info": "#63b3ed",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Libre Baskerville', serif",
+      "gradientHero": "linear-gradient(135deg, #020810 0%, #05101c 50%, #03080f 100%)"
+    }
+  },
+
+  "music": {
+    "_notes": "id must be unique. name is displayed in the UI. url: a direct link to an mp3 or ogg file, or null. Set id 'none' always present (no music option). Do not remove the 'none' entry.",
+
+    "tracks": [
+      { "id": "none",    "name": "No Music",         "url": null },
+      { "id": "tavern",  "name": "Tavern Ambience",   "url": null,
+        "_note": "Replace null with a direct .mp3 URL, e.g. https://yourserver.com/tavern.mp3" },
+      { "id": "dungeon", "name": "Dungeon Depths",    "url": null },
+      { "id": "battle",  "name": "Epic Battle",       "url": null },
+      { "id": "forest",  "name": "Enchanted Forest",  "url": null },
+      { "id": "peaceful","name": "Peaceful Village",  "url": null },
+      { "id": "sea",     "name": "Sea Voyage",        "url": null }
+    ]
+  },
+
+  "alignments": [
+    "Lawful Good", "Neutral Good", "Chaotic Good",
+    "Lawful Neutral", "True Neutral", "Chaotic Neutral",
+    "Lawful Evil", "Neutral Evil", "Chaotic Evil"
+  ],
+
+  "itemTypes": {
+    "_notes": "These are the item type options available when adding inventory. Add/remove as needed. Each entry: key = internal id, label = display name, color = CSS color for the dot.",
+    "weapon":    { "label": "Weapon",     "color": "#c0392b" },
+    "armor":     { "label": "Armor",      "color": "#2980b9" },
+    "shield":    { "label": "Shield",     "color": "#2980b9" },
+    "potion":    { "label": "Potion",     "color": "#27ae60" },
+    "magic":     { "label": "Magic Item", "color": "#9b59b6" },
+    "tool":      { "label": "Tool",       "color": "#f39c12" },
+    "treasure":  { "label": "Treasure",   "color": "#ffd700" },
+    "misc":      { "label": "Misc",       "color": "#7f8c8d" }
+  }
+}
