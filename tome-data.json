@@ -609,7 +609,74 @@
             }
           ]
         }
-      }
+      },
+      "startingGoldDice": "2d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Greataxe",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 7,
+                "description": "1d12 slashing, heavy, two-handed"
+              }
+            ],
+            [
+              {
+                "name": "Any martial melee weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Two handaxes",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 slashing, light, thrown"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Explorer's Pack",
+              "qty": 1,
+              "type": "misc",
+              "weight": 2,
+              "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft hempen rope"
+            },
+            {
+              "name": "4 Javelins",
+              "qty": 4,
+              "type": "weapon",
+              "weight": 2,
+              "description": "1d6 piercing, thrown (30/120)"
+            }
+          ]
+        }
+      ]
     },
     "Rogue": {
       "hitDie": 8,
@@ -1133,7 +1200,120 @@
             }
           }
         }
-      }
+      },
+      "startingGoldDice": "4d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Rapier",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d8 piercing, finesse"
+              }
+            ],
+            [
+              {
+                "name": "Shortsword",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, finesse, light"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Shortbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, ammunition, two-handed, range 80/320"
+              },
+              {
+                "name": "Quiver of 20 Arrows",
+                "qty": 1,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ],
+            [
+              {
+                "name": "Shortsword",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, finesse, light"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Burglar's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, ball bearings, string, bell, candles, crowbar, hammer, pitons, lantern, oil, rations, tinderbox, waterskin, rope"
+              }
+            ],
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Bedroll, mess kit, tinderbox, torches, rations, waterskin, rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Leather Armor",
+              "qty": 1,
+              "type": "armor",
+              "weight": 10,
+              "description": "AC 11 + Dex modifier"
+            },
+            {
+              "name": "Two Daggers",
+              "qty": 2,
+              "type": "weapon",
+              "weight": 1,
+              "description": "1d4 piercing, finesse, light, thrown (20/60)"
+            },
+            {
+              "name": "Thieves' Tools",
+              "qty": 1,
+              "type": "tool",
+              "weight": 1,
+              "description": "Proficiency tool for Rogues"
+            }
+          ]
+        }
+      ]
     },
     "Fighter": {
       "hitDie": 10,
@@ -1640,7 +1820,130 @@
             }
           }
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Chain Mail",
+                "qty": 1,
+                "type": "armor",
+                "weight": 55,
+                "description": "AC 16; Str 13 required; disadvantage on Stealth"
+              }
+            ],
+            [
+              {
+                "name": "Leather Armor",
+                "qty": 1,
+                "type": "armor",
+                "weight": 10,
+                "description": "AC 11 + Dex modifier"
+              },
+              {
+                "name": "Longbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d8 piercing, ammunition, heavy, two-handed, range 150/600"
+              },
+              {
+                "name": "20 Arrows",
+                "qty": 20,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Martial weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose any martial weapon"
+              },
+              {
+                "name": "Shield",
+                "qty": 1,
+                "type": "shield",
+                "weight": 6,
+                "description": "+2 AC"
+              }
+            ],
+            [
+              {
+                "name": "Martial weapon",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Two martial weapons of your choice"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Light Crossbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 5,
+                "description": "1d8 piercing, loading, range 80/320"
+              },
+              {
+                "name": "20 Crossbow bolts",
+                "qty": 20,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ],
+            [
+              {
+                "name": "Two Handaxes",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 slashing, light, thrown"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, crowbar, hammer, 10 pitons, 10 torches, tinderbox, 10 days rations, waterskin, 50ft rope"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft rope"
+              }
+            ]
+          ]
+        }
+      ]
     },
     "Wizard": {
       "hitDie": 6,
@@ -2071,7 +2374,90 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "4d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Quarterstaff",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 4,
+                "description": "1d6 bludgeoning, versatile (1d8)"
+              }
+            ],
+            [
+              {
+                "name": "Dagger",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 1,
+                "description": "1d4 piercing, finesse, light, thrown"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Component Pouch",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Spellcasting focus \u2014 replaces material components without cost"
+              }
+            ],
+            [
+              {
+                "name": "Arcane Focus",
+                "qty": 1,
+                "type": "misc",
+                "weight": 1,
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Scholar's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, book of lore, bottle of ink, ink pen, 10 sheets parchment, bag of sand, small knife"
+              }
+            ],
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Spellbook",
+              "qty": 1,
+              "type": "misc",
+              "weight": 3,
+              "description": "Contains your wizard spells and has 100 pages"
+            }
+          ]
+        }
+      ]
     },
     "Cleric": {
       "hitDie": 8,
@@ -2479,7 +2865,136 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Mace",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 4,
+                "description": "1d6 bludgeoning"
+              }
+            ],
+            [
+              {
+                "name": "Warhammer",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d8 bludgeoning, versatile (1d10) \u2014 if proficient"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Scale Mail",
+                "qty": 1,
+                "type": "armor",
+                "weight": 45,
+                "description": "AC 14 + Dex (max 2); disadvantage on Stealth"
+              }
+            ],
+            [
+              {
+                "name": "Leather Armor",
+                "qty": 1,
+                "type": "armor",
+                "weight": 10,
+                "description": "AC 11 + Dex modifier"
+              }
+            ],
+            [
+              {
+                "name": "Chain Mail",
+                "qty": 1,
+                "type": "armor",
+                "weight": 55,
+                "description": "AC 16; Str 13 required; disadvantage on Stealth \u2014 if proficient"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Light Crossbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 5,
+                "description": "1d8 piercing, ammunition, loading, two-handed"
+              },
+              {
+                "name": "20 Crossbow bolts",
+                "qty": 20,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Priest's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, blanket, 10 candles, tinderbox, alms box, 2 blocks incense, censer, vestments, 2 days rations, waterskin"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Shield",
+              "qty": 1,
+              "type": "shield",
+              "weight": 6,
+              "description": "+2 AC"
+            },
+            {
+              "name": "Holy Symbol",
+              "qty": 1,
+              "type": "misc",
+              "weight": 1,
+              "description": "Spellcasting focus for clerics and paladins"
+            }
+          ]
+        }
+      ]
     },
     "Bard": {
       "hitDie": 8,
@@ -2941,7 +3456,106 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Rapier",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d8 piercing, finesse"
+              }
+            ],
+            [
+              {
+                "name": "Longsword",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 3,
+                "description": "1d8 slashing, versatile (1d10)"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Diplomat's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 3,
+                "description": "Chest, 2 cases for maps/scrolls, fine clothes, bottle of ink, ink pen, lamp, 2 flasks oil, 5 sheets paper, vial perfume, sealing wax, soap"
+              }
+            ],
+            [
+              {
+                "name": "Entertainer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, bedroll, 2 costumes, 5 candles, 5 days rations, waterskin, disguise kit"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Lute",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Musical instrument"
+              }
+            ],
+            [
+              {
+                "name": "Any musical instrument",
+                "qty": 1,
+                "type": "misc",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Leather Armor",
+              "qty": 1,
+              "type": "armor",
+              "weight": 10,
+              "description": "AC 11 + Dex modifier"
+            },
+            {
+              "name": "Dagger",
+              "qty": 1,
+              "type": "weapon",
+              "weight": 1,
+              "description": "1d4 piercing, finesse, light, thrown"
+            }
+          ]
+        }
+      ]
     },
     "Paladin": {
       "hitDie": 10,
@@ -3362,7 +3976,104 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Martial weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose any martial weapon"
+              },
+              {
+                "name": "Shield",
+                "qty": 1,
+                "type": "shield",
+                "weight": 6,
+                "description": "+2 AC"
+              }
+            ],
+            [
+              {
+                "name": "Martial weapon",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Two martial weapons of your choice"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "5 Javelins",
+                "qty": 5,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, thrown (30/120)"
+              }
+            ],
+            [
+              {
+                "name": "Any simple melee weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Priest's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, blanket, 10 candles, tinderbox, alms box, incense, censer, vestments, rations, waterskin"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Chain Mail",
+              "qty": 1,
+              "type": "armor",
+              "weight": 55,
+              "description": "AC 16"
+            },
+            {
+              "name": "Holy Symbol",
+              "qty": 1,
+              "type": "misc",
+              "weight": 1,
+              "description": "Spellcasting focus"
+            }
+          ]
+        }
+      ]
     },
     "Ranger": {
       "hitDie": 10,
@@ -3827,7 +4538,97 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Scale Mail",
+                "qty": 1,
+                "type": "armor",
+                "weight": 45,
+                "description": "AC 14 + Dex (max 2)"
+              }
+            ],
+            [
+              {
+                "name": "Leather Armor",
+                "qty": 1,
+                "type": "armor",
+                "weight": 10,
+                "description": "AC 11 + Dex modifier"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Two Shortswords",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, finesse, light"
+              }
+            ],
+            [
+              {
+                "name": "Two simple melee weapons",
+                "qty": 2,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Bedroll, mess kit, tinderbox, torches, rations, waterskin, rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Longbow",
+              "qty": 1,
+              "type": "weapon",
+              "weight": 2,
+              "description": "1d8 piercing, heavy, two-handed, range 150/600"
+            },
+            {
+              "name": "Quiver of 20 Arrows",
+              "qty": 1,
+              "type": "misc",
+              "weight": 1,
+              "description": "Ammunition"
+            }
+          ]
+        }
+      ]
     },
     "Druid": {
       "hitDie": 8,
@@ -4252,7 +5053,81 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "2d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Wooden Shield",
+                "qty": 1,
+                "type": "shield",
+                "weight": 6,
+                "description": "+2 AC"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Scimitar",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 3,
+                "description": "1d6 slashing, finesse, light"
+              }
+            ],
+            [
+              {
+                "name": "Any simple melee weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Leather Armor",
+              "qty": 1,
+              "type": "armor",
+              "weight": 10,
+              "description": "AC 11 + Dex modifier"
+            },
+            {
+              "name": "Explorer's Pack",
+              "qty": 1,
+              "type": "misc",
+              "weight": 2,
+              "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft rope"
+            },
+            {
+              "name": "Druidic Focus",
+              "qty": 1,
+              "type": "misc",
+              "weight": 1,
+              "description": "Spellcasting focus for druids"
+            }
+          ]
+        }
+      ]
     },
     "Monk": {
       "hitDie": 8,
@@ -4370,7 +5245,67 @@
             }
           ]
         }
-      }
+      },
+      "startingGoldDice": "5d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Shortsword",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 2,
+                "description": "1d6 piercing, finesse, light"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, crowbar, hammer, 10 pitons, 10 torches, tinderbox, 10 days rations, waterskin, 50ft rope"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "10 Darts",
+              "qty": 10,
+              "type": "weapon",
+              "weight": 0.25,
+              "description": "1d4 piercing, finesse, thrown (20/60)"
+            }
+          ]
+        }
+      ]
     },
     "Sorcerer": {
       "hitDie": 6,
@@ -4824,7 +5759,97 @@
             ]
           }
         }
-      }
+      },
+      "startingGoldDice": "3d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Light Crossbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 5,
+                "description": "1d8 piercing, loading, range 80/320"
+              },
+              {
+                "name": "20 Crossbow bolts",
+                "qty": 20,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Component Pouch",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Spellcasting focus \u2014 replaces material components without cost"
+              }
+            ],
+            [
+              {
+                "name": "Arcane Focus",
+                "qty": 1,
+                "type": "misc",
+                "weight": 1,
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope"
+              }
+            ],
+            [
+              {
+                "name": "Explorer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Bedroll, mess kit, tinderbox, torches, rations, waterskin, rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Two Daggers",
+              "qty": 2,
+              "type": "weapon",
+              "weight": 1,
+              "description": "1d4 piercing, finesse, light, thrown"
+            }
+          ]
+        }
+      ]
     },
     "Warlock": {
       "hitDie": 8,
@@ -5289,7 +6314,111 @@
             "pactSlots": 4
           }
         }
-      }
+      },
+      "startingGoldDice": "4d4",
+      "startingEquipment": [
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Light Crossbow",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 5,
+                "description": "1d8 piercing, loading, range 80/320"
+              },
+              {
+                "name": "20 Crossbow bolts",
+                "qty": 20,
+                "type": "misc",
+                "weight": 1,
+                "description": "Ammunition"
+              }
+            ],
+            [
+              {
+                "name": "Any simple weapon",
+                "qty": 1,
+                "type": "weapon",
+                "weight": 0,
+                "description": "Choose at DM discretion"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Component Pouch",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Spellcasting focus \u2014 replaces material components without cost"
+              }
+            ],
+            [
+              {
+                "name": "Arcane Focus",
+                "qty": 1,
+                "type": "misc",
+                "weight": 1,
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+              }
+            ]
+          ]
+        },
+        {
+          "pick": 1,
+          "options": [
+            [
+              {
+                "name": "Scholar's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Backpack, book of lore, bottle of ink, ink pen, 10 sheets parchment, bag of sand, small knife"
+              }
+            ],
+            [
+              {
+                "name": "Dungeoneer's Pack",
+                "qty": 1,
+                "type": "misc",
+                "weight": 2,
+                "description": "Crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope"
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Leather Armor",
+              "qty": 1,
+              "type": "armor",
+              "weight": 10,
+              "description": "AC 11 + Dex modifier"
+            },
+            {
+              "name": "Any simple weapon",
+              "qty": 1,
+              "type": "weapon",
+              "weight": 0,
+              "description": "Choose at DM discretion"
+            },
+            {
+              "name": "Two Daggers",
+              "qty": 2,
+              "type": "weapon",
+              "weight": 1,
+              "description": "1d4 piercing, finesse, light, thrown"
+            }
+          ]
+        }
+      ]
     }
   },
   "backgrounds": {
@@ -5321,6 +6450,51 @@
           "type": "passive",
           "description": "As an acolyte, you command the respect of those who share your faith and can perform religious ceremonies of your deity. You and your companions can expect free healing and care at a temple of your faith, though you must provide material components for spells. Those who share your religion will support you at a modest lifestyle. You might have a residence at a specific temple where you have a home."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Holy Symbol",
+          "qty": 1,
+          "type": "misc",
+          "weight": 1,
+          "description": "A holy symbol of your deity"
+        },
+        {
+          "name": "Prayer book or prayer wheel",
+          "qty": 1,
+          "type": "misc",
+          "weight": 1,
+          "description": "Religious text"
+        },
+        {
+          "name": "5 sticks of incense",
+          "qty": 5,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Vestments",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": "Priestly robes"
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 15gp",
+          "gold": 15
+        }
       ]
     },
     "Charlatan": {
@@ -5349,6 +6523,37 @@
           "name": "False Identity",
           "type": "passive",
           "description": "You have created a second identity including documentation, established acquaintances, and disguises. You can also forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or handwriting you are trying to copy."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Fine clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 6,
+          "description": ""
+        },
+        {
+          "name": "Disguise kit",
+          "qty": 1,
+          "type": "tool",
+          "weight": 3,
+          "description": "Tool for creating disguises"
+        },
+        {
+          "name": "Con tools",
+          "qty": 1,
+          "type": "misc",
+          "weight": 1,
+          "description": "Ten stoppered bottles, set of weighted dice, deck of marked cards, or signet ring of an imaginary duke"
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 15gp",
+          "gold": 15
         }
       ]
     },
@@ -5390,6 +6595,30 @@
           "type": "passive",
           "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances, through messengers, corrupt caravan masters, and seedy sailors."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Crowbar",
+          "qty": 1,
+          "type": "tool",
+          "weight": 5,
+          "description": ""
+        },
+        {
+          "name": "Dark common clothes with hood",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": "Includes a hood"
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 15gp",
+          "gold": 15
+        }
       ]
     },
     "Entertainer": {
@@ -5423,6 +6652,37 @@
           "name": "By Popular Demand",
           "type": "passive",
           "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, theatre, or noble's court. You receive free lodging and food of a modest or comfortable standard as long as you perform each night. Your performance makes you something of a local figure wherever you have performed."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Musical instrument",
+          "qty": 1,
+          "type": "misc",
+          "weight": 2,
+          "description": "One of your choice"
+        },
+        {
+          "name": "The favor of an admirer",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Love letter, lock of hair, or trinket"
+        },
+        {
+          "name": "Costume clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 4,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 15gp",
+          "gold": 15
         }
       ]
     },
@@ -5477,6 +6737,44 @@
           "type": "passive",
           "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Artisan's tools",
+          "qty": 1,
+          "type": "tool",
+          "weight": 5,
+          "description": "One type of your choice"
+        },
+        {
+          "name": "Shovel",
+          "qty": 1,
+          "type": "tool",
+          "weight": 5,
+          "description": ""
+        },
+        {
+          "name": "Iron pot",
+          "qty": 1,
+          "type": "misc",
+          "weight": 10,
+          "description": ""
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
+        }
       ]
     },
     "Hermit": {
@@ -5511,6 +6809,44 @@
           "name": "Discovery",
           "type": "passive",
           "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It might be a site that no one else has ever seen, or a fact long forgotten, or a relic of the past that could rewrite history."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Scroll case with notes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 1,
+          "description": "Notes from your studies or prayers"
+        },
+        {
+          "name": "Winter blanket",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Herbalism kit",
+          "qty": 1,
+          "type": "tool",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 5gp",
+          "gold": 5
         }
       ]
     },
@@ -5553,6 +6889,37 @@
           "type": "passive",
           "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Fine clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 6,
+          "description": ""
+        },
+        {
+          "name": "Signet ring",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Ring bearing your family crest"
+        },
+        {
+          "name": "Scroll of pedigree",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Document tracing your noble lineage"
+        },
+        {
+          "name": "Purse",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 25gp",
+          "gold": 25
+        }
       ]
     },
     "Outlander": {
@@ -5588,6 +6955,44 @@
           "type": "passive",
           "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Staff",
+          "qty": 1,
+          "type": "weapon",
+          "weight": 4,
+          "description": "Quarterstaff"
+        },
+        {
+          "name": "Hunting trap",
+          "qty": 1,
+          "type": "tool",
+          "weight": 25,
+          "description": ""
+        },
+        {
+          "name": "Trophy from an animal",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0.5,
+          "description": "Claw, tooth, or scalp"
+        },
+        {
+          "name": "Traveler's clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 4,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
+        }
       ]
     },
     "Sage": {
@@ -5617,6 +7022,51 @@
           "name": "Researcher",
           "type": "passive",
           "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually this comes from a library, scriptorium, university, or sage. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Bottle of black ink",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Quill",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Small knife",
+          "qty": 1,
+          "type": "weapon",
+          "weight": 0.5,
+          "description": ""
+        },
+        {
+          "name": "Letter with unanswered question",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "A mystery to pursue"
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
         }
       ]
     },
@@ -5651,6 +7101,44 @@
           "name": "Ships Passage",
           "type": "passive",
           "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return for your free passage, you and your companions are expected to assist the crew during the voyage."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Belaying pin (club)",
+          "qty": 1,
+          "type": "weapon",
+          "weight": 2,
+          "description": "1d4 bludgeoning"
+        },
+        {
+          "name": "50ft silk rope",
+          "qty": 1,
+          "type": "misc",
+          "weight": 5,
+          "description": ""
+        },
+        {
+          "name": "Lucky charm",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Trinket of personal significance"
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
         }
       ]
     },
@@ -5692,6 +7180,44 @@
           "type": "passive",
           "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organisation still recognise your authority and influence, and defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can usually gain access to friendly military encampments and fortresses where your rank is recognised."
         }
+      ],
+      "startingItems": [
+        {
+          "name": "Insignia of rank",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Badge of your military rank"
+        },
+        {
+          "name": "Trophy from fallen enemy",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0.5,
+          "description": "Dagger, broken blade, or piece of a banner"
+        },
+        {
+          "name": "Deck of cards or set of dice",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
+        }
       ]
     },
     "Urchin": {
@@ -5725,6 +7251,51 @@
           "name": "City Secrets",
           "type": "passive",
           "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow."
+        }
+      ],
+      "startingItems": [
+        {
+          "name": "Small knife",
+          "qty": 1,
+          "type": "weapon",
+          "weight": 0.5,
+          "description": ""
+        },
+        {
+          "name": "Map of your home city",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Pet mouse",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": ""
+        },
+        {
+          "name": "Token from your parents",
+          "qty": 1,
+          "type": "misc",
+          "weight": 0,
+          "description": "Trinket or keepsake"
+        },
+        {
+          "name": "Common clothes",
+          "qty": 1,
+          "type": "misc",
+          "weight": 3,
+          "description": ""
+        },
+        {
+          "name": "Belt Pouch",
+          "qty": 1,
+          "type": "treasure",
+          "weight": 0.5,
+          "description": "Contains 10gp",
+          "gold": 10
         }
       ]
     }
