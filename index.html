@@ -105,8 +105,8 @@ const DEFAULT_CHAR = {
   id:null, name:"", species:"", class:"", subclass:"", background:"", level:1,
   abilities:{ str:10, dex:10, con:10, int:10, wis:10, cha:10 },
   speciesAbilityChoices:{},
-  skillProficiencies:[], skillExpertise:[],
-  featureChoices:{},
+  skillProficiencies:[], skillExpertise:[], skillProfSources:{},
+  featureChoices:{}, asiChoices:{},
   languages:[],
   alignment:"True Neutral",
   personalityTraits:"", ideals:"", bonds:"", flaws:"", notes:"", appearance:"",
@@ -160,11 +160,15 @@ const ws = {
 };
 
 // ============================================================
-// SKILL PICKER — reusable for class & species proficiency choices
+// SKILL PICKER — source-aware: shows skills already taken by
+// other sources, lets this source claim/displace them
 // ============================================================
-function SkillPicker({ title, count, from, allSkills, current, onToggle }) {
+// skillSources: { "Perception": "Class", "Stealth": "Background" ... }
+// thisSource:   label for this picker e.g. "Bard Class" or "College of Lore"
+// ownedByThis:  skills currently owned by THIS source
+function SkillPicker({ title, count, from, allSkills, current, onToggle, skillSources, thisSource, ownedByThis }) {
   const pool = from === "all" ? allSkills : (from || []);
-  const sel  = current || [];
+  const sel  = ownedByThis || current || [];  // skills this source has picked
   const remaining = count - sel.length;
   return (
     <div>
@@ -176,21 +180,25 @@ function SkillPicker({ title, count, from, allSkills, current, onToggle }) {
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
         {pool.map(skill => {
-          const isSel = sel.includes(skill);
-          const canAdd = isSel || sel.length < count;
+          const ownedHere  = sel.includes(skill);
+          const otherSource = skillSources && !ownedHere ? skillSources[skill] : null;
+          const canAdd = ownedHere || sel.length < count;
           return (
             <div key={skill} onClick={() => canAdd && onToggle(skill)} style={{
               display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
               transition:"all 0.15s", cursor: canAdd ? "pointer" : "not-allowed",
-              background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)",
-              border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-              opacity: !canAdd ? 0.4 : 1
+              background: ownedHere ? "rgba(201,162,39,0.08)" : otherSource ? "rgba(41,128,185,0.08)" : "var(--surface)",
+              border:`1px solid ${ownedHere ? "var(--accent)" : otherSource ? "var(--info)" : "var(--border)"}`,
+              opacity: !canAdd && !otherSource ? 0.4 : 1
             }}>
               <span style={{ width:12, height:12, borderRadius:"50%", flexShrink:0, display:"inline-block",
-                background: isSel ? "var(--accent)" : "transparent",
-                border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
+                background: ownedHere ? "var(--accent)" : otherSource ? "var(--info)" : "transparent",
+                border:`2px solid ${ownedHere ? "var(--accent)" : otherSource ? "var(--info)" : "var(--border)"}` }}/>
               <span style={{ fontSize:13, flex:1 }}>{skill}</span>
               <span style={{ fontSize:10, color:"var(--text-muted)" }}>({ABILITY_SHORT[SKILLS_MAP[skill] || "str"]})</span>
+              {otherSource && (
+                <span style={{ fontSize:10, color:"var(--info)", marginLeft:4, fontStyle:"italic" }}>via {otherSource}</span>
+              )}
             </div>
           );
         })}
@@ -200,43 +208,61 @@ function SkillPicker({ title, count, from, allSkills, current, onToggle }) {
 }
 
 // ============================================================
-// FEATURE PANEL — renders a single class or species feature
-// with interactive controls based on feature.type
+// FEATURE PANEL — source-aware, completion-highlighted,
+// ASI-capable interactive feature panel
 // ============================================================
 function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillToggle,
     expertiseProfs, onExpertiseToggle, allSkills, languages, onLanguageChoice,
-    languageList, subclass, onSubclassChoice, subclasses }) {
+    languageList, subclass, onSubclassChoice, subclasses, source,
+    asiChoices, onAsiChange, currentAbilities, skillSources, thisSource }) {
 
   const [open, setOpen] = useState(!locked);
   const chosen = choices?.[feature.name];
 
+  // ── Completeness ──
+  const isComplete = (() => {
+    if (locked) return true;
+    switch (feature.type) {
+      case "passive":            return true;
+      case "choice":             return !!chosen;
+      case "subclass_choice":    return !!subclass;
+      case "proficiency_choice": {
+        const owned = skillSources && thisSource
+          ? Object.entries(skillSources).filter(([,s]) => s === thisSource).map(([sk]) => sk)
+          : (skillProfs || []);
+        return owned.length >= (feature.count || 0);
+      }
+      case "expertise_choice":   return (expertiseProfs || []).length >= (feature.count || 0);
+      case "language_choice":    return (languages || []).length >= (feature.count || 0);
+      case "asi":                return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
+      default:                   return true;
+    }
+  })();
+
+
   return (
-    <div style={ws.fCard(locked)}>
+    <div style={{ padding:"14px 16px", borderRadius:8, marginBottom:10, opacity: locked ? 0.55 : 1,
+      border:`1px solid ${locked ? "var(--border)" : !isComplete ? "#e67e22" : "var(--border)"}`,
+      background: locked ? "rgba(0,0,0,0.2)" : !isComplete ? "rgba(230,126,34,0.05)" : "var(--surface)" }}>
+
       <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => setOpen(o => !o)}>
         <span style={{ fontFamily:"var(--font-display)", color: locked ? "var(--text-dim)" : "var(--accent)", fontSize:14, flex:1 }}>
           {feature.name}
         </span>
-        {locked && <span style={ws.lockBadge}>Lvl {feature.level}</span>}
-        {!locked && feature.type === "choice" &&
-          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10,
-            border:`1px solid ${chosen ? "var(--success)" : "var(--accent2)"}`,
-            color: chosen ? "var(--success)" : "var(--accent2)" }}>
-            {chosen ? "✓ chosen" : "Choose"}
-          </span>}
-        {!locked && feature.type === "subclass_choice" &&
-          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10,
-            border:`1px solid ${subclass ? "var(--success)" : "var(--accent2)"}`,
-            color: subclass ? "var(--success)" : "var(--accent2)" }}>
-            {subclass || "Choose subclass"}
-          </span>}
-        {!locked && feature.type === "proficiency_choice" &&
-          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, border:"1px solid var(--accent2)", color:"var(--accent2)" }}>
-            Choose skills
-          </span>}
-        {!locked && feature.type === "expertise_choice" &&
-          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, border:"1px solid var(--accent2)", color:"var(--accent2)" }}>
-            Choose expertise
-          </span>}
+        {source && !locked && (
+          <span style={{ fontSize:10, padding:"1px 7px", borderRadius:10, background:"rgba(155,89,182,0.15)", border:"1px solid #9b59b6", color:"#9b59b6", whiteSpace:"nowrap" }}>
+            {source}
+          </span>
+        )}
+        {locked && <span style={{ display:"inline-block", padding:"1px 8px", borderRadius:10, background:"rgba(255,255,255,0.06)", border:"1px solid var(--border)", color:"var(--text-dim)", fontSize:10 }}>Lvl {feature.level}</span>}
+        {!locked && !isComplete && <span style={{ fontSize:10, padding:"1px 8px", borderRadius:10, background:"rgba(230,126,34,0.15)", border:"1px solid #e67e22", color:"#e67e22", whiteSpace:"nowrap" }}>⚠ incomplete</span>}
+        {!locked && isComplete && feature.type !== "passive" && <span style={{ fontSize:10, padding:"1px 8px", borderRadius:10, background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)" }}>✓</span>}
+        {!locked && chosen && feature.type === "choice" && (
+          <span style={{ fontSize:10, color:"var(--text-muted)", maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{chosen.split("—")[0].trim()}</span>
+        )}
+        {!locked && subclass && feature.type === "subclass_choice" && (
+          <span style={{ fontSize:10, color:"var(--text-muted)" }}>{subclass}</span>
+        )}
         <span style={{ color:"var(--text-dim)", fontSize:11 }}>{open ? "▲" : "▼"}</span>
       </div>
 
@@ -244,7 +270,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid var(--border)" }}>
           <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{feature.description}</p>
 
-          {/* Simple pick-one choice */}
+          {/* Simple choice */}
           {!locked && feature.type === "choice" && feature.options && (
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
               {feature.options.map(opt => (
@@ -254,7 +280,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                   background: chosen === opt ? "rgba(201,162,39,0.1)" : "var(--surface)",
                   color: chosen === opt ? "var(--accent)" : "var(--text)"
                 }}>
-                  {chosen === opt && <span style={{ marginRight:6 }}>✓</span>}{opt}
+                  {chosen === opt && "✓ "}{opt}
                 </div>
               ))}
             </div>
@@ -270,10 +296,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                   background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
                   color: subclass === sc ? "var(--accent)" : "var(--text)"
                 }}>
-                  {subclass === sc && <span style={{ marginRight:6 }}>✓</span>}{sc}
-                  {scData?.features?.[0] && (
-                    <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>
-                  )}
+                  {subclass === sc && "✓ "}{sc}
+                  {scData?.features?.[0] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>}
                 </div>
               ))}
             </div>
@@ -283,37 +307,43 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           {!locked && feature.type === "proficiency_choice" && (
             <SkillPicker title="Skill proficiencies" count={feature.count}
               from={feature.from} allSkills={allSkills}
-              current={skillProfs} onToggle={onSkillToggle} />
+              current={skillProfs} onToggle={onSkillToggle}
+              skillSources={skillSources} thisSource={thisSource}
+              ownedByThis={skillSources && thisSource
+                ? Object.entries(skillSources).filter(([,s]) => s === thisSource).map(([sk]) => sk)
+                : undefined} />
           )}
 
-          {/* Expertise picker (double prof) */}
+          {/* Expertise — only shows currently proficient skills, fixing the stale-state bug */}
           {!locked && feature.type === "expertise_choice" && (
             <div>
               <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
-                Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> known skills to gain expertise (×2 proficiency bonus).
-                {(expertiseProfs || []).length >= feature.count &&
-                  <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> proficient skills for expertise (×2 prof bonus).
+                {(expertiseProfs||[]).length >= feature.count && <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
-                {(skillProfs || []).map(skill => {
-                  const isSel = (expertiseProfs || []).includes(skill);
-                  const canAdd = isSel || (expertiseProfs || []).length < feature.count;
-                  return (
-                    <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill)} style={{
-                      display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
-                      cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
-                      background: isSel ? "rgba(201,162,39,0.12)" : "var(--surface)",
-                      border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                      opacity: !canAdd ? 0.4 : 1
-                    }}>
-                      <span style={{ width:12, height:12, borderRadius:0, transform:"rotate(45deg)", flexShrink:0, display:"inline-block",
-                        background: isSel ? "var(--accent)" : "transparent",
-                        border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
-                      <span style={{ fontSize:13 }}>{skill} ×2</span>
-                    </div>
-                  );
-                })}
-              </div>
+              {(skillProfs||[]).length === 0
+                ? <p style={{ fontSize:12, color:"var(--text-dim)" }}>Select skill proficiencies first.</p>
+                : <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
+                    {(skillProfs||[]).map(skill => {
+                      const isSel = (expertiseProfs||[]).includes(skill);
+                      const canAdd = isSel || (expertiseProfs||[]).length < feature.count;
+                      return (
+                        <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill)} style={{
+                          display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
+                          cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
+                          background: isSel ? "rgba(201,162,39,0.12)" : "var(--surface)",
+                          border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                          opacity: !canAdd ? 0.4 : 1
+                        }}>
+                          <span style={{ width:12, height:12, borderRadius:0, transform:"rotate(45deg)", flexShrink:0, display:"inline-block",
+                            background: isSel ? "var(--accent)" : "transparent",
+                            border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
+                          <span style={{ fontSize:13 }}>{skill} ×2</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+              }
             </div>
           )}
 
@@ -322,20 +352,18 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             <div>
               <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
                 Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> language(s).
-                {(languages || []).length >= feature.count &&
-                  <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                {(languages||[]).length >= feature.count && <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
-                {(languageList || []).map(lang => {
-                  const isSel = (languages || []).includes(lang);
-                  const canAdd = isSel || (languages || []).length < feature.count;
+                {(languageList||[]).map(lang => {
+                  const isSel = (languages||[]).includes(lang);
+                  const canAdd = isSel || (languages||[]).length < feature.count;
                   return (
                     <div key={lang} onClick={() => canAdd && onLanguageChoice(lang)} style={{
                       padding:"6px 10px", borderRadius:6, cursor: canAdd ? "pointer" : "not-allowed",
                       transition:"all 0.15s", fontSize:13,
                       background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)",
-                      border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                      opacity: !canAdd ? 0.4 : 1
+                      border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`, opacity: !canAdd ? 0.4 : 1
                     }}>
                       {isSel && "✓ "}{lang}
                     </div>
@@ -344,6 +372,46 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
               </div>
             </div>
           )}
+
+          {/* ASI — +2 to one ability or +1/+1 to two, capped at 20 */}
+          {!locked && feature.type === "asi" && (() => {
+            const asi = asiChoices?.[feature.name] || {};
+            const spent = Object.values(asi).reduce((s,v)=>s+(v||0),0);
+            const rem = 2 - spent;
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
+                  Spend <strong style={{ color:"var(--accent)" }}>2 points</strong>: all to one ability (+2) or split across two (+1/+1). Max 20.
+                  {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
+                           : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+                  {Object.keys(ABILITY_NAMES).map(ab => {
+                    const base = currentAbilities?.[ab] || 10;
+                    const bonus = asi[ab] || 0;
+                    const total = base + bonus;
+                    const atMax = total >= 20;
+                    return (
+                      <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
+                        background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
+                        <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                        <div style={{ fontSize:18, fontFamily:"var(--font-display)", color:bonus>0?"var(--accent)":"var(--text)" }}>
+                          {total}{bonus>0&&<span style={{ fontSize:12 }}> (+{bonus})</span>}
+                        </div>
+                        <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
+                          <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
+                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
+                        </div>
+                        {atMax && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:2 }}>max</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -463,30 +531,55 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const classData   = classes?.[char.class];
   const bgData      = backgrounds?.[char.background];
 
-  // Effective ability = base + fixed species bonus + chosen species bonus
+  // Effective ability = base + fixed species bonus + chosen species bonus + ASI bonuses
   const totalAb = ab => {
     const base   = char.abilities[ab] || 10;
     const fixed  = speciesData?.abilityBonuses?.[ab] || 0;
     const chosen = char.speciesAbilityChoices?.[ab] || 0;
-    return base + fixed + chosen;
+    const asi    = Object.values(char.asiChoices || {}).reduce((s, v) => s + (v?.[ab] || 0), 0);
+    return base + fixed + chosen + asi;
   };
   const maxHP = classData ? calcHP(classData, char.level || 1, calcMod(totalAb("con"))) : 0;
 
-  // Helpers to mutate char state
-  const setChoice      = (name, val)  => setChar(c => ({ ...c, featureChoices:{ ...c.featureChoices, [name]:val } }));
-  const setSubclass    = sc           => setChar(c => ({ ...c, subclass:sc }));
-  const toggleSkill    = skill        => setChar(c => {
-    const cur = c.skillProficiencies;
-    return { ...c, skillProficiencies: cur.includes(skill) ? cur.filter(s => s !== skill) : [...cur, skill] };
-  });
-  const toggleExpertise = skill       => setChar(c => {
-    const cur = c.skillExpertise || [];
+  // ── skillSources: { "Perception": "Ranger Class", "Stealth": "Background" } ──
+  // Built from skillProfSources stored on char
+  const skillSources = char.skillProfSources || {};
+
+  // Toggle a skill for a given source label. Handles displacing from other sources.
+  const toggleSkillForSource = (skill, sourceLabel) => {
+    setChar(c => {
+      const sources = { ...c.skillProfSources };
+      const profs   = [...(c.skillProficiencies || [])];
+      const exp     = (c.skillExpertise || []).filter(s => s !== skill); // drop expertise if skill removed
+      if (sources[skill] === sourceLabel) {
+        // Deselect: remove from this source
+        delete sources[skill];
+        return { ...c, skillProfSources: sources, skillProficiencies: profs.filter(s => s !== skill), skillExpertise: exp };
+      } else {
+        // Select or displace: assign to this source
+        sources[skill] = sourceLabel;
+        const newProfs = profs.includes(skill) ? profs : [...profs, skill];
+        return { ...c, skillProfSources: sources, skillProficiencies: newProfs };
+      }
+    });
+  };
+
+  // Expertise toggle — auto-cleans stale entries not in current skillProficiencies
+  const toggleExpertise = skill => setChar(c => {
+    const validProfs = c.skillProficiencies || [];
+    const cur = (c.skillExpertise || []).filter(s => validProfs.includes(s)); // clean stale
     return { ...c, skillExpertise: cur.includes(skill) ? cur.filter(s => s !== skill) : [...cur, skill] };
   });
-  const toggleLanguage  = lang        => setChar(c => {
+
+  const setChoice      = (name, val) => setChar(c => ({ ...c, featureChoices:{ ...c.featureChoices, [name]:val } }));
+  const setSubclass    = sc          => setChar(c => ({ ...c, subclass:sc }));
+  const toggleLanguage = lang        => setChar(c => {
     const cur = c.languages || [];
     return { ...c, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] };
   });
+  const setAsi = (featureName, val) => setChar(c => ({
+    ...c, asiChoices: { ...(c.asiChoices||{}), [featureName]: val }
+  }));
 
   const finalize = () => {
     const fa = Object.keys(char.abilities).reduce((acc, ab) => { acc[ab] = totalAb(ab); return acc; }, {});
@@ -499,11 +592,31 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     });
   };
 
-  // All class features (base + subclass) sorted by level
+  // All class features (base + subclass) sorted by level, with source label on subclass features
+  const subclassName = char.subclass;
   const allClassFeatures = [
-    ...(classData?.features || []),
-    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
+    ...(classData?.features || []).map(f => ({ ...f, _source: null })),
+    ...((subclassName && classData?.subclasses?.[subclassName]?.features) || []).map(f => ({ ...f, _source: subclassName }))
   ].sort((a, b) => a.level - b.level);
+
+  // Shared FeaturePanel props builder
+  const fpProps = (sourceLabel) => ({
+    choices: char.featureChoices, onChoice: setChoice,
+    skillProfs: char.skillProficiencies,
+    onSkillToggle: skill => toggleSkillForSource(skill, sourceLabel),
+    expertiseProfs: (char.skillExpertise||[]).filter(s=>(char.skillProficiencies||[]).includes(s)),
+    onExpertiseToggle: toggleExpertise,
+    allSkills: allSkills || [],
+    languages: char.languages, onLanguageChoice: toggleLanguage,
+    languageList: languageList || [],
+    subclass: char.subclass, onSubclassChoice: setSubclass,
+    subclasses: classData?.subclasses,
+    skillSources, thisSource: sourceLabel,
+    asiChoices: char.asiChoices || {}, onAsiChange: setAsi,
+    currentAbilities: char.abilities,
+  });
+
+
 
   // Step indicator dots
   const StepBar = () => (
@@ -564,21 +677,19 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
               {Object.entries(backgrounds || {}).map(([n, d]) => (
                 <div key={n} style={ws.optCard(char.background === n)} onClick={() => setChar({ ...char, background:n })}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
-                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>{(d.skills || []).join(", ")}</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)" }}>
+                    {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>(f.fixed||f.from||[]).slice(0,2).join(", ")).join(" • ")}
+                  </div>
                 </div>
               ))}
             </div>
             {bgData && (
-              <div style={{ ...ws.card, marginTop:16 }}>
-                <div style={ws.secTitle}>{char.background} — {bgData.feature}</div>
-                {bgData.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{bgData.description}</p>}
-                <div style={{ fontSize:13, marginBottom:14 }}>
-                  <span style={{ color:"var(--text-muted)" }}>Skills: </span>
-                  {(bgData.skills || []).map(sk => <span key={sk} style={ws.tag}>{sk}</span>)}
-                  {bgData.tools && <><span style={{ color:"var(--text-muted)", marginLeft:8 }}>Tools: </span>{bgData.tools.map(t => <span key={t} style={ws.tag}>{t}</span>)}</>}
-                  {bgData.languages && <span style={{ color:"var(--text-muted)", marginLeft:8 }}>+{bgData.languages} language(s)</span>}
+              <div style={{ marginTop:20 }}>
+                <div style={{ ...ws.card }}>
+                  <div style={ws.secTitle}>{char.background}</div>
+                  {bgData.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:0 }}>{bgData.description}</p>}
                 </div>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14 }}>
                   {[["personalityTraits","Personality Traits"],["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"]].map(([f, l]) => (
                     <div key={f}>
                       <label style={ws.label}>{l}</label>
@@ -587,6 +698,11 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     </div>
                   ))}
                 </div>
+                <div style={ws.secTitle}>Background Features</div>
+                {(bgData.features || []).map(feat => (
+                  <FeaturePanel key={feat.name} feature={feat} locked={false}
+                    {...fpProps("Background")} />
+                ))}
               </div>
             )}
           </div>
@@ -667,12 +783,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                 <div style={ws.secTitle}>Species Features</div>
                 {(speciesData.features || []).map(feat => (
                   <FeaturePanel key={feat.name} feature={feat} locked={false}
-                    choices={char.featureChoices} onChoice={setChoice}
-                    skillProfs={char.skillProficiencies} onSkillToggle={toggleSkill}
-                    expertiseProfs={char.skillExpertise} onExpertiseToggle={toggleExpertise}
-                    allSkills={allSkills || []}
-                    languages={char.languages} onLanguageChoice={toggleLanguage}
-                    languageList={languageList || []} />
+                    {...fpProps("Species")} />
                 ))}
               </div>
             )}
@@ -723,16 +834,11 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                 <div style={ws.secTitle}>Class Features</div>
                 {allClassFeatures.map((feat, idx) => {
                   const locked = (char.level || 1) < feat.level;
+                  const sourceLabel = feat._source ? feat._source : `${char.class} Class`;
                   return (
                     <FeaturePanel key={`${feat.name}-${idx}`} feature={feat} locked={locked}
-                      choices={char.featureChoices} onChoice={setChoice}
-                      skillProfs={char.skillProficiencies} onSkillToggle={toggleSkill}
-                      expertiseProfs={char.skillExpertise} onExpertiseToggle={toggleExpertise}
-                      allSkills={allSkills || []}
-                      languages={char.languages} onLanguageChoice={toggleLanguage}
-                      languageList={languageList || []}
-                      subclass={char.subclass} onSubclassChoice={setSubclass}
-                      subclasses={classData.subclasses} />
+                      source={feat._source ? feat._source : null}
+                      {...fpProps(sourceLabel)} />
                   );
                 })}
               </div>

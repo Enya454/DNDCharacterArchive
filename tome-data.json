@@ -586,18 +586,105 @@
   },
 
   "backgrounds": {
-    "Acolyte":     { "skills": ["Insight","Religion"],            "languages": 2,                                      "feature": "Shelter of the Faithful",    "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods. You act as an intermediary between the realm of the holy and the mortal world." },
-    "Charlatan":   { "skills": ["Deception","Sleight of Hand"],   "tools": ["Disguise Kit","Forgery Kit"],              "feature": "False Identity",             "description": "You have always had a way with people. You know what makes them tick, you can tease out their hearts' desires after a few minutes of conversation, and with a few leading questions you can read them like they were children's books." },
-    "Criminal":    { "skills": ["Deception","Stealth"],           "tools": ["Thieves' Tools","Gaming Set"],             "feature": "Criminal Contact",           "description": "You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld." },
-    "Entertainer": { "skills": ["Acrobatics","Performance"],      "tools": ["Disguise Kit","Musical Instrument"],       "feature": "By Popular Demand",          "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them. Your poetics can stir the hearts of those who hear you." },
-    "Folk Hero":   { "skills": ["Animal Handling","Survival"],    "tools": ["Artisan's Tools","Vehicles (Land)"],       "feature": "Rustic Hospitality",         "description": "You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion." },
-    "Hermit":      { "skills": ["Medicine","Religion"],           "tools": ["Herbalism Kit"],    "languages": 1,        "feature": "Discovery",                  "description": "You lived in seclusion — either in a sheltered community such as a monastery, or entirely alone — for a formative part of your life." },
-    "Noble":       { "skills": ["History","Persuasion"],          "tools": ["Gaming Set"],       "languages": 1,        "feature": "Position of Privilege",      "description": "You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence." },
-    "Outlander":   { "skills": ["Athletics","Survival"],          "tools": ["Musical Instrument"],"languages": 1,       "feature": "Wanderer",                   "description": "You grew up in the wilds, far from civilization and the comforts of town and technology. You've witnessed the migration of herds larger than forests, survived weather more extreme than any city-dweller could comprehend." },
-    "Sage":        { "skills": ["Arcana","History"],              "languages": 2,                                       "feature": "Researcher",                 "description": "You spent years learning the lore of the multiverse. You scoured manuscripts, studied under sages, and pored over anything you could get your hands on." },
-    "Sailor":      { "skills": ["Athletics","Perception"],        "tools": ["Navigator's Tools","Vehicles (Water)"],    "feature": "Ship's Passage",             "description": "You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft to the bottomless depths." },
-    "Soldier":     { "skills": ["Athletics","Intimidation"],      "tools": ["Gaming Set","Vehicles (Land)"],            "feature": "Military Rank",              "description": "War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, and learned basic survival techniques." },
-    "Urchin":      { "skills": ["Sleight of Hand","Stealth"],     "tools": ["Thieves' Tools","Disguise Kit"],           "feature": "City Secrets",               "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you or to provide for you, so you learned to provide for yourself." }
+    "Acolyte": {
+      "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Insight","Religion"], "fixed": ["Insight","Religion"], "description": "You gain proficiency in Insight and Religion." },
+        { "name": "Languages",           "type": "language_choice",    "count": 2, "description": "You can speak, read, and write two additional languages of your choice." },
+        { "name": "Shelter of the Faithful","type":"passive", "description": "As an acolyte, you command the respect of those who share your faith, and you can perform the religious ceremonies of your deity. You and your adventuring companions can expect to receive free healing and care at a temple, shrine, or other established presence of your faith." }
+      ]
+    },
+    "Charlatan": {
+      "description": "You have always had a way with people. You know what makes them tick and can read them like children's books.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Deception","Sleight of Hand"], "fixed": ["Deception","Sleight of Hand"], "description": "You gain proficiency in Deception and Sleight of Hand." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with a Disguise Kit and a Forgery Kit." },
+        { "name": "False Identity",      "type": "passive", "description": "You have created a second identity that includes documentation, established acquaintances, and disguises that allow you to assume that persona. Additionally, you can forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or the handwriting you are trying to copy." }
+      ]
+    },
+    "Criminal": {
+      "description": "You are an experienced criminal with a history of breaking the law.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Deception","Stealth"], "fixed": ["Deception","Stealth"], "description": "You gain proficiency in Deception and Stealth." },
+        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with Thieves' Tools and one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Criminal Contact",    "type": "passive", "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances; specifically, you know the local messengers, corrupt caravan masters, and seedy sailors who can deliver messages for you." }
+      ]
+    },
+    "Entertainer": {
+      "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Acrobatics","Performance"], "fixed": ["Acrobatics","Performance"], "description": "You gain proficiency in Acrobatics and Performance." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with a Disguise Kit and one type of musical instrument of your choice." },
+        { "name": "By Popular Demand",   "type": "passive", "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, at a theater, or even in a noble's court. At such a place, you receive free lodging and food of a modest or comfortable standard (depending on the quality of the establishment), as long as you perform each night." }
+      ]
+    },
+    "Folk Hero": {
+      "description": "You come from a humble social rank, but you are destined for so much more.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Animal Handling","Survival"], "fixed": ["Animal Handling","Survival"], "description": "You gain proficiency in Animal Handling and Survival." },
+        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of artisan's tools of your choice and with Vehicles (Land).", "options": ["Alchemist's Supplies","Brewer's Supplies","Calligrapher's Supplies","Carpenter's Tools","Cartographer's Tools","Cobbler's Tools","Cook's Utensils","Glassblower's Tools","Jeweler's Tools","Leatherworker's Tools","Mason's Tools","Painter's Supplies","Potter's Tools","Smith's Tools","Tinker's Tools","Weaver's Tools","Woodcarver's Tools"] },
+        { "name": "Rustic Hospitality", "type": "passive", "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you." }
+      ]
+    },
+    "Hermit": {
+      "description": "You lived in seclusion — either in a sheltered community such as a monastery, or entirely alone.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Medicine","Religion"], "fixed": ["Medicine","Religion"], "description": "You gain proficiency in Medicine and Religion." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with an Herbalism Kit." },
+        { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
+        { "name": "Discovery",           "type": "passive", "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature." }
+      ]
+    },
+    "Noble": {
+      "description": "You understand wealth, power, and privilege. You carry a noble title and your family wields significant political influence.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["History","Persuasion"], "fixed": ["History","Persuasion"], "description": "You gain proficiency in History and Persuasion." },
+        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
+        { "name": "Position of Privilege","type":"passive", "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere." }
+      ]
+    },
+    "Outlander": {
+      "description": "You grew up in the wilds, far from civilization and the comforts of town and technology.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Survival"], "fixed": ["Athletics","Survival"], "description": "You gain proficiency in Athletics and Survival." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with one type of musical instrument of your choice." },
+        { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
+        { "name": "Wanderer",            "type": "passive", "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth." }
+      ]
+    },
+    "Sage": {
+      "description": "You spent years learning the lore of the multiverse, scouring manuscripts and studying under sages.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Arcana","History"], "fixed": ["Arcana","History"], "description": "You gain proficiency in Arcana and History." },
+        { "name": "Languages",           "type": "language_choice", "count": 2, "description": "You can speak, read, and write two additional languages of your choice." },
+        { "name": "Researcher",          "type": "passive", "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this information comes from a library, scriptorium, university, or a sage or other learned person or creature." }
+      ]
+    },
+    "Sailor": {
+      "description": "You sailed on a seagoing vessel for years, facing mighty storms, monsters of the deep, and pirates.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Perception"], "fixed": ["Athletics","Perception"], "description": "You gain proficiency in Athletics and Perception." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with Navigator's Tools and Vehicles (Water)." },
+        { "name": "Ship's Passage",      "type": "passive", "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return, you are expected to assist the crew during the voyage." }
+      ]
+    },
+    "Soldier": {
+      "description": "War has been your life for as long as you care to remember. You trained as a youth and studied weapons and armor.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Intimidation"], "fixed": ["Athletics","Intimidation"], "description": "You gain proficiency in Athletics and Intimidation." },
+        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of gaming set and with Vehicles (Land).", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Military Rank",       "type": "passive", "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use." }
+      ]
+    },
+    "Urchin": {
+      "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you, so you learned to provide for yourself.",
+      "features": [
+        { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Sleight of Hand","Stealth"], "fixed": ["Sleight of Hand","Stealth"], "description": "You gain proficiency in Sleight of Hand and Stealth." },
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with Thieves' Tools and a Disguise Kit." },
+        { "name": "City Secrets",        "type": "passive", "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow." }
+      ]
+    }
   },
 
   "spells": {
