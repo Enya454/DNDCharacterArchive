@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tome of Heroes — Data Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0d0d0f;color:#e8e0d0;font-family:'Crimson Pro',serif;min-height:100vh}
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#0d0d0f}
+    ::-webkit-scrollbar-thumb{background:#3a3a45;border-radius:3px}
+    input,textarea,select{outline:none}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useCallback, useRef } = React;
+
+// ── Theme tokens ──
+const T = {
+  bg:"#0d0d0f", surface:"#1a1a1f", card:"#222228", border:"#3a3a45",
+  accent:"#c9a227", accent2:"#8b6914", text:"#e8e0d0",
+  muted:"#8a8070", dim:"#554f45", danger:"#c0392b", success:"#27ae60", info:"#2980b9",
+  display:"'Cinzel Decorative',serif", body:"'Crimson Pro',serif"
+};
+
+// ── Shared style helpers ──
+const inp = { width:"100%", background:T.surface, border:`1px solid ${T.border}`, color:T.text, padding:"7px 10px", borderRadius:6, fontSize:13, fontFamily:T.body, boxSizing:"border-box" };
+const btn = (variant="default") => ({
+  padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:T.body,
+  border: variant==="primary" ? `1px solid ${T.accent}` : variant==="danger" ? `1px solid ${T.danger}` : `1px solid ${T.border}`,
+  background: variant==="primary" ? T.accent : variant==="danger" ? "rgba(192,57,43,0.15)" : T.surface,
+  color: variant==="primary" ? T.bg : variant==="danger" ? T.danger : T.text,
+  transition:"all 0.15s"
+});
+const label = { display:"block", fontSize:11, color:T.muted, textTransform:"uppercase", letterSpacing:1, marginBottom:4 };
+const sectionHead = { fontFamily:T.display, color:T.accent, fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10, paddingBottom:6, borderBottom:`1px solid ${T.border}` };
+
+// ── Primitive field components ──
+const Field = ({label:lbl, value, onChange, type="text", placeholder=""}) => (
+  <div style={{marginBottom:10}}>
+    <label style={label}>{lbl}</label>
+    <input type={type} value={value??""} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={inp}/>
+  </div>
+);
+const TextArea = ({label:lbl, value, onChange, rows=3}) => (
+  <div style={{marginBottom:10}}>
+    <label style={label}>{lbl}</label>
+    <textarea value={value??""} onChange={e=>onChange(e.target.value)} rows={rows} style={{...inp,resize:"vertical"}}/>
+  </div>
+);
+const Select = ({label:lbl, value, onChange, options}) => (
+  <div style={{marginBottom:10}}>
+    <label style={label}>{lbl}</label>
+    <select value={value??""} onChange={e=>onChange(e.target.value)} style={{...inp,cursor:"pointer"}}>
+      {options.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+    </select>
+  </div>
+);
+const Check = ({label:lbl, value, onChange}) => (
+  <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:T.text,cursor:"pointer",marginBottom:10}}>
+    <input type="checkbox" checked={!!value} onChange={e=>onChange(e.target.checked)} style={{width:15,height:15,accentColor:T.accent}}/>
+    {lbl}
+  </label>
+);
+const Grid = ({children,cols="1fr 1fr"}) => <div style={{display:"grid",gridTemplateColumns:cols,gap:10}}>{children}</div>;
+const Card = ({children,highlight=false,style={}}) => (
+  <div style={{background:T.card,border:`1px solid ${highlight?T.accent:T.border}`,borderRadius:8,padding:14,marginBottom:10,...style}}>
+    {children}
+  </div>
+);
+const Tag = ({text,onRemove}) => (
+  <span style={{display:"inline-flex",alignItems:"center",gap:4,padding:"2px 8px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,fontSize:12,color:T.text,margin:"2px 3px 2px 0"}}>
+    {text}
+    <span onClick={onRemove} style={{color:T.danger,cursor:"pointer",fontSize:14,lineHeight:1}}>×</span>
+  </span>
+);
+const AddTag = ({placeholder, onAdd}) => {
+  const [v,setV] = useState("");
+  return (
+    <div style={{display:"flex",gap:6,marginTop:6}}>
+      <input value={v} onChange={e=>setV(e.target.value)} placeholder={placeholder} style={{...inp,flex:1,fontSize:12,padding:"5px 8px"}}
+        onKeyDown={e=>{if(e.key==="Enter"&&v.trim()){onAdd(v.trim());setV("");}}}/>
+      <button onClick={()=>{if(v.trim()){onAdd(v.trim());setV("");}}} style={{...btn(),padding:"5px 12px",fontSize:12}}>+</button>
+    </div>
+  );
+};
+
+// ── Feature type options ──
+const FEAT_TYPES = [
+  ["passive","Passive (display only)"],
+  ["choice","Choice (pick one option)"],
+  ["subclass_choice","Subclass Choice"],
+  ["proficiency_choice","Skill Proficiency Choice"],
+  ["expertise_choice","Expertise Choice"],
+  ["language_choice","Language Choice"],
+  ["asi","ASI (+2 / +1+1)"],
+  ["asi_points","Species Flexible ASI"],
+];
+const ABILITY_KEYS = ["str","dex","con","int","wis","cha"];
+const ABILITY_SHORT = {str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA"};
+
+// ── Feature editor ──
+function FeatureEditor({feat, onChange, onRemove, index}) {
+  const [open,setOpen] = useState(false);
+  const upd = (key,val) => onChange({...feat,[key]:val});
+  return (
+    <Card highlight={open}>
+      <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+        <span style={{fontFamily:T.display,color:T.accent,fontSize:13,flex:1}}>{feat.name||<em style={{color:T.muted}}>Unnamed feature</em>}</span>
+        <span style={{fontSize:11,padding:"1px 7px",borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,color:T.muted}}>{feat.type}</span>
+        {feat.level>1&&<span style={{fontSize:10,color:T.dim}}>Lvl {feat.level}</span>}
+        <button onClick={e=>{e.stopPropagation();onRemove();}} style={{...btn("danger"),padding:"2px 8px",fontSize:11}}>×</button>
+        <span style={{color:T.dim,fontSize:11}}>{open?"▲":"▼"}</span>
+      </div>
+      {open&&<div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.border}`}}>
+        <Grid cols="1fr 1fr">
+          <Field label="Name" value={feat.name} onChange={v=>upd("name",v)}/>
+          <Select label="Type" value={feat.type} onChange={v=>upd("type",v)} options={FEAT_TYPES}/>
+        </Grid>
+        <Grid cols="1fr 1fr">
+          <Field label="Unlock Level" value={feat.level} onChange={v=>upd("level",+v)} type="number"/>
+          {(feat.type==="proficiency_choice"||feat.type==="expertise_choice"||feat.type==="language_choice"||feat.type==="asi_points")&&
+            <Field label="Count / Points" value={feat.count||feat.points} onChange={v=>upd(feat.type==="asi_points"?"points":"count",+v)} type="number"/>}
+        </Grid>
+        <TextArea label="Description" value={feat.description} onChange={v=>upd("description",v)} rows={3}/>
+        {feat.type==="choice"&&<div style={{marginBottom:10}}>
+          <label style={label}>Options (one per line)</label>
+          <textarea value={(feat.options||[]).join("\n")} onChange={e=>upd("options",e.target.value.split("\n"))}
+            rows={4} style={{...inp,resize:"vertical"}}/>
+        </div>}
+        {feat.type==="proficiency_choice"&&<div style={{marginBottom:10}}>
+          <label style={label}>Skill pool ("all" or comma-separated)</label>
+          <input value={Array.isArray(feat.from)?feat.from.join(", "):feat.from||"all"} onChange={e=>{
+            const v=e.target.value.trim();
+            upd("from",v==="all"?"all":v.split(",").map(s=>s.trim()).filter(Boolean));
+          }} style={inp}/>
+        </div>}
+        {feat.type==="asi_points"&&<div style={{marginBottom:10}}>
+          <label style={label}>Excluded abilities (comma-separated keys e.g. cha)</label>
+          <input value={(feat.exclude||[]).join(", ")} onChange={e=>upd("exclude",e.target.value.split(",").map(s=>s.trim()).filter(Boolean))} style={inp}/>
+        </div>}
+      </div>}
+    </Card>
+  );
+}
+
+function FeatureList({features=[], onChange}) {
+  const add = () => onChange([...features,{name:"New Feature",level:1,type:"passive",description:""}]);
+  const upd = (i,f) => { const a=[...features]; a[i]=f; onChange(a); };
+  const rem = i => onChange(features.filter((_,idx)=>idx!==i));
+  const moveUp = i => { if(i===0)return; const a=[...features]; [a[i-1],a[i]]=[a[i],a[i-1]]; onChange(a); };
+  return (
+    <div>
+      {features.map((f,i)=>(
+        <div key={i} style={{position:"relative"}}>
+          <div style={{position:"absolute",top:8,left:-24,display:"flex",flexDirection:"column",gap:2}}>
+            <button onClick={()=>moveUp(i)} style={{...btn(),padding:"1px 4px",fontSize:10,opacity:i===0?0.3:1}}>▲</button>
+            <button onClick={()=>{ const a=[...features];if(i<a.length-1){[a[i],a[i+1]]=[a[i+1],a[i]];onChange(a);}}} style={{...btn(),padding:"1px 4px",fontSize:10,opacity:i===features.length-1?0.3:1}}>▼</button>
+          </div>
+          <FeatureEditor key={i} feat={f} index={i} onChange={f=>upd(i,f)} onRemove={()=>rem(i)}/>
+        </div>
+      ))}
+      <button onClick={add} style={{...btn("primary"),width:"100%",marginTop:4}}>+ Add Feature</button>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// SECTION EDITORS
+// ══════════════════════════════════════════════
+
+// ── Species Editor ──
+function SpeciesEditor({data,onChange}) {
+  const [sel,setSel] = useState(Object.keys(data)[0]||"");
+  const [newName,setNewName] = useState("");
+  const sp = data[sel]||{};
+  const upd = (key,val) => onChange({...data,[sel]:{...sp,[key]:val}});
+  const updBonus = (ab,val) => { const b={...sp.abilityBonuses,[ab]:+val}; if(!b[ab])delete b[ab]; upd("abilityBonuses",b); };
+  const addSpecies = () => {
+    if(!newName.trim())return;
+    onChange({...data,[newName.trim()]:{abilityBonuses:{},speed:30,size:"Medium",autoLanguages:["Common"],features:[]}});
+    setSel(newName.trim()); setNewName("");
+  };
+  const delSpecies = () => { const d={...data}; delete d[sel]; onChange(d); setSel(Object.keys(d)[0]||""); };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:20,height:"100%"}}>
+      {/* List */}
+      <div>
+        <div style={sectionHead}>Species</div>
+        {Object.keys(data).map(n=>(
+          <div key={n} onClick={()=>setSel(n)} style={{padding:"7px 10px",borderRadius:6,marginBottom:4,cursor:"pointer",fontSize:13,
+            background:sel===n?`rgba(201,162,39,0.12)`:T.surface,
+            border:`1px solid ${sel===n?T.accent:T.border}`,color:sel===n?T.accent:T.text}}>
+            {n}
+          </div>
+        ))}
+        <div style={{display:"flex",gap:6,marginTop:8}}>
+          <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="New species…" style={{...inp,flex:1,fontSize:12,padding:"5px 8px"}}
+            onKeyDown={e=>e.key==="Enter"&&addSpecies()}/>
+          <button onClick={addSpecies} style={{...btn("primary"),padding:"5px 10px"}}>+</button>
+        </div>
+      </div>
+      {/* Editor */}
+      {sel&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:18}}>{sel}</span>
+          <button onClick={delSpecies} style={{...btn("danger"),fontSize:12}}>Delete Species</button>
+        </div>
+        <Grid>
+          <Field label="Speed (ft)" value={sp.speed} onChange={v=>upd("speed",+v)} type="number"/>
+          <Select label="Size" value={sp.size} onChange={v=>upd("size",v)} options={[["Small","Small"],["Medium","Medium"],["Large","Large"]]}/>
+        </Grid>
+        <div style={{marginBottom:12}}>
+          <label style={label}>Fixed Ability Bonuses</label>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6}}>
+            {ABILITY_KEYS.map(ab=>(
+              <div key={ab} style={{textAlign:"center"}}>
+                <div style={{fontSize:10,color:T.muted,textTransform:"uppercase",marginBottom:3}}>{ABILITY_SHORT[ab]}</div>
+                <input type="number" value={sp.abilityBonuses?.[ab]||0} onChange={e=>updBonus(ab,e.target.value)}
+                  style={{...inp,textAlign:"center",padding:"4px 0",fontSize:14}}/>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{marginBottom:12}}>
+          <label style={label}>Auto-granted Languages</label>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:4}}>
+            {(sp.autoLanguages||[]).map(l=><Tag key={l} text={l} onRemove={()=>upd("autoLanguages",(sp.autoLanguages||[]).filter(x=>x!==l))}/>)}
+          </div>
+          <AddTag placeholder="Add language…" onAdd={v=>upd("autoLanguages",[...(sp.autoLanguages||[]),v])}/>
+        </div>
+        <div style={{marginLeft:28}}>
+          <label style={label}>Features</label>
+          <FeatureList features={sp.features||[]} onChange={v=>upd("features",v)}/>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+// ── Class Editor ──
+function ClassEditor({data,onChange}) {
+  const [sel,setSel] = useState(Object.keys(data)[0]||"");
+  const [subSel,setSubSel] = useState("");
+  const [newName,setNewName] = useState("");
+  const [newSubName,setNewSubName] = useState("");
+  const cls = data[sel]||{};
+  const upd = (key,val) => onChange({...data,[sel]:{...cls,[key]:val}});
+
+  const addCls = () => {
+    if(!newName.trim())return;
+    onChange({...data,[newName.trim()]:{hitDie:8,primaryAbility:"str",savingThrows:[],armorProficiencies:[],weaponProficiencies:[],toolProficiencies:[],spellcaster:false,features:[],subclasses:{}}});
+    setSel(newName.trim()); setNewName("");
+  };
+  const delCls = () => { const d={...data}; delete d[sel]; onChange(d); setSel(Object.keys(d)[0]||""); };
+  const updSub = (sname,sdata) => upd("subclasses",{...cls.subclasses,[sname]:sdata});
+  const delSub = sname => { const s={...cls.subclasses}; delete s[sname]; upd("subclasses",s); setSubSel(""); };
+  const addSub = () => {
+    if(!newSubName.trim())return;
+    upd("subclasses",{...cls.subclasses,[newSubName.trim()]:{features:[]}});
+    setSubSel(newSubName.trim()); setNewSubName("");
+  };
+
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:20}}>
+      {/* List */}
+      <div>
+        <div style={sectionHead}>Classes</div>
+        {Object.keys(data).map(n=>(
+          <div key={n} onClick={()=>{setSel(n);setSubSel("");}} style={{padding:"7px 10px",borderRadius:6,marginBottom:4,cursor:"pointer",fontSize:13,
+            background:sel===n?`rgba(201,162,39,0.12)`:T.surface,
+            border:`1px solid ${sel===n?T.accent:T.border}`,color:sel===n?T.accent:T.text}}>
+            {n}
+          </div>
+        ))}
+        <div style={{display:"flex",gap:6,marginTop:8}}>
+          <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="New class…" style={{...inp,flex:1,fontSize:12,padding:"5px 8px"}}
+            onKeyDown={e=>e.key==="Enter"&&addCls()}/>
+          <button onClick={addCls} style={{...btn("primary"),padding:"5px 10px"}}>+</button>
+        </div>
+      </div>
+      {/* Editor */}
+      {sel&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:18}}>{sel}</span>
+          <button onClick={delCls} style={{...btn("danger"),fontSize:12}}>Delete Class</button>
+        </div>
+        <Grid>
+          <Field label="Hit Die" value={cls.hitDie} onChange={v=>upd("hitDie",+v)} type="number"/>
+          <Select label="Primary Ability" value={cls.primaryAbility} onChange={v=>upd("primaryAbility",v)}
+            options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>
+        </Grid>
+        <div style={{marginBottom:10}}>
+          <label style={label}>Saving Throws</label>
+          <div style={{display:"flex",gap:8}}>
+            {ABILITY_KEYS.map(ab=>(
+              <label key={ab} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,cursor:"pointer"}}>
+                <input type="checkbox" checked={(cls.savingThrows||[]).includes(ab)}
+                  onChange={e=>upd("savingThrows",e.target.checked?(cls.savingThrows||[]).concat(ab):(cls.savingThrows||[]).filter(x=>x!==ab))}
+                  style={{accentColor:T.accent}}/>
+                {ABILITY_SHORT[ab]}
+              </label>
+            ))}
+          </div>
+        </div>
+        <Grid>
+          <div>
+            <label style={label}>Armor Proficiencies</label>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:4}}>
+              {(cls.armorProficiencies||[]).map(p=><Tag key={p} text={p} onRemove={()=>upd("armorProficiencies",(cls.armorProficiencies||[]).filter(x=>x!==p))}/>)}
+            </div>
+            <AddTag placeholder="Add armor…" onAdd={v=>upd("armorProficiencies",[...(cls.armorProficiencies||[]),v])}/>
+          </div>
+          <div>
+            <label style={label}>Weapon Proficiencies</label>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:4}}>
+              {(cls.weaponProficiencies||[]).map(p=><Tag key={p} text={p} onRemove={()=>upd("weaponProficiencies",(cls.weaponProficiencies||[]).filter(x=>x!==p))}/>)}
+            </div>
+            <AddTag placeholder="Add weapon…" onAdd={v=>upd("weaponProficiencies",[...(cls.weaponProficiencies||[]),v])}/>
+          </div>
+        </Grid>
+        <Grid>
+          <div>
+            <Check label="Spellcasting class" value={cls.spellcaster} onChange={v=>upd("spellcaster",v)}/>
+            {cls.spellcaster&&<Select label="Spellcasting Ability" value={cls.spellcastingAbility||"int"}
+              onChange={v=>upd("spellcastingAbility",v)} options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>}
+          </div>
+          <div>
+            <Field label="Starting Gold Dice (e.g. 5d4)" value={cls.startingGoldDice} onChange={v=>upd("startingGoldDice",v)}/>
+          </div>
+        </Grid>
+
+        {/* Class Features */}
+        <div style={{marginBottom:20,marginLeft:28}}>
+          <label style={label}>Class Features</label>
+          <FeatureList features={cls.features||[]} onChange={v=>upd("features",v)}/>
+        </div>
+
+        {/* Subclasses */}
+        <div style={{marginTop:20,paddingTop:16,borderTop:`1px solid ${T.border}`}}>
+          <div style={sectionHead}>Subclasses</div>
+          <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+            {Object.keys(cls.subclasses||{}).map(sn=>(
+              <button key={sn} onClick={()=>setSubSel(sn)} style={{...btn(subSel===sn?"primary":"default"),fontSize:12}}>
+                {sn}
+              </button>
+            ))}
+            <div style={{display:"flex",gap:4}}>
+              <input value={newSubName} onChange={e=>setNewSubName(e.target.value)} placeholder="New subclass…"
+                style={{...inp,width:160,fontSize:12,padding:"5px 8px"}} onKeyDown={e=>e.key==="Enter"&&addSub()}/>
+              <button onClick={addSub} style={{...btn("primary"),padding:"5px 10px",fontSize:12}}>+</button>
+            </div>
+          </div>
+          {subSel&&cls.subclasses?.[subSel]&&(
+            <Card highlight>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <span style={{fontFamily:T.display,color:T.accent,fontSize:15}}>{subSel}</span>
+                <div style={{display:"flex",gap:8}}>
+                  <Check label="Spellcaster" value={cls.subclasses[subSel].spellcaster}
+                    onChange={v=>updSub(subSel,{...cls.subclasses[subSel],spellcaster:v})}/>
+                  {cls.subclasses[subSel].spellcaster&&
+                    <Select label="" value={cls.subclasses[subSel].spellcastingAbility||"int"}
+                      onChange={v=>updSub(subSel,{...cls.subclasses[subSel],spellcastingAbility:v})}
+                      options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>}
+                  <button onClick={()=>delSub(subSel)} style={{...btn("danger"),fontSize:12}}>Delete</button>
+                </div>
+              </div>
+              <div style={{marginLeft:28}}>
+                <FeatureList features={cls.subclasses[subSel].features||[]}
+                  onChange={v=>updSub(subSel,{...cls.subclasses[subSel],features:v})}/>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+// ── Background Editor ──
+function BackgroundEditor({data,onChange}) {
+  const [sel,setSel] = useState(Object.keys(data)[0]||"");
+  const [newName,setNewName] = useState("");
+  const bg = data[sel]||{};
+  const upd = (key,val) => onChange({...data,[sel]:{...bg,[key]:val}});
+  const addBg = () => {
+    if(!newName.trim())return;
+    onChange({...data,[newName.trim()]:{description:"",features:[]}});
+    setSel(newName.trim()); setNewName("");
+  };
+  const delBg = () => { const d={...data}; delete d[sel]; onChange(d); setSel(Object.keys(d)[0]||""); };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Backgrounds</div>
+        {Object.keys(data).map(n=>(
+          <div key={n} onClick={()=>setSel(n)} style={{padding:"7px 10px",borderRadius:6,marginBottom:4,cursor:"pointer",fontSize:13,
+            background:sel===n?`rgba(201,162,39,0.12)`:T.surface,
+            border:`1px solid ${sel===n?T.accent:T.border}`,color:sel===n?T.accent:T.text}}>
+            {n}
+          </div>
+        ))}
+        <div style={{display:"flex",gap:6,marginTop:8}}>
+          <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="New background…"
+            style={{...inp,flex:1,fontSize:12,padding:"5px 8px"}} onKeyDown={e=>e.key==="Enter"&&addBg()}/>
+          <button onClick={addBg} style={{...btn("primary"),padding:"5px 10px"}}>+</button>
+        </div>
+      </div>
+      {sel&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:18}}>{sel}</span>
+          <button onClick={delBg} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <TextArea label="Description" value={bg.description} onChange={v=>upd("description",v)} rows={3}/>
+        <div style={{marginLeft:28}}>
+          <label style={label}>Features</label>
+          <FeatureList features={bg.features||[]} onChange={v=>upd("features",v)}/>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+// ── Spell Editor ──
+function SpellEditor({data,onChange}) {
+  const classes = Object.keys(data);
+  const [cls,setCls] = useState(classes[0]||"");
+  const [selIdx,setSelIdx] = useState(0);
+  const [search,setSearch] = useState("");
+  const [newCls,setNewCls] = useState("");
+  const spells = data[cls]||[];
+  const filtered = spells.filter(s=>s.name.toLowerCase().includes(search.toLowerCase()));
+  const sp = spells[selIdx]||null;
+  const upd = (key,val) => {
+    const a=[...spells]; a[selIdx]={...sp,[key]:val}; onChange({...data,[cls]:a});
+  };
+  const addSpell = () => {
+    const a=[...spells,{name:"New Spell",level:0,school:"Evocation",castingTime:"1 action",range:"Self",components:"V, S",duration:"Instantaneous",description:""}];
+    onChange({...data,[cls]:a}); setSelIdx(a.length-1);
+  };
+  const delSpell = () => {
+    const a=spells.filter((_,i)=>i!==selIdx);
+    onChange({...data,[cls]:a}); setSelIdx(Math.max(0,selIdx-1));
+  };
+  const addCls = () => {
+    if(!newCls.trim())return;
+    onChange({...data,[newCls.trim()]:[]});
+    setCls(newCls.trim()); setNewCls(""); setSelIdx(0);
+  };
+  const SCHOOLS = ["Abjuration","Conjuration","Divination","Enchantment","Evocation","Illusion","Necromancy","Transmutation"];
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Spells</div>
+        <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+          {classes.map(c=>(
+            <button key={c} onClick={()=>{setCls(c);setSelIdx(0);setSearch("");}} style={{...btn(cls===c?"primary":"default"),fontSize:11,padding:"3px 8px"}}>{c}</button>
+          ))}
+          <div style={{display:"flex",gap:4,marginTop:4,width:"100%"}}>
+            <input value={newCls} onChange={e=>setNewCls(e.target.value)} placeholder="New class list…" style={{...inp,flex:1,fontSize:11,padding:"4px 7px"}} onKeyDown={e=>e.key==="Enter"&&addCls()}/>
+            <button onClick={addCls} style={{...btn("primary"),padding:"4px 8px",fontSize:11}}>+</button>
+          </div>
+        </div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search spells…" style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
+        <div style={{maxHeight:"50vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
+          {filtered.map((s,i)=>{
+            const realIdx = spells.indexOf(s);
+            return (
+              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
+                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,color:selIdx===realIdx?T.accent:T.text,
+                display:"flex",justifyContent:"space-between"}}>
+                <span>{s.name}</span>
+                <span style={{fontSize:10,color:T.muted}}>{s.level===0?"C":`L${s.level}`}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={addSpell} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Spell</button>
+      </div>
+      {sp&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{sp.name}</span>
+          <button onClick={delSpell} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <Grid>
+          <Field label="Name" value={sp.name} onChange={v=>upd("name",v)}/>
+          <Field label="Level (0=cantrip)" value={sp.level} onChange={v=>upd("level",+v)} type="number"/>
+        </Grid>
+        <Grid>
+          <Select label="School" value={sp.school} onChange={v=>upd("school",v)} options={SCHOOLS.map(s=>[s,s])}/>
+          <Field label="Casting Time" value={sp.castingTime} onChange={v=>upd("castingTime",v)}/>
+        </Grid>
+        <Grid>
+          <Field label="Range" value={sp.range} onChange={v=>upd("range",v)}/>
+          <Field label="Components" value={sp.components} onChange={v=>upd("components",v)}/>
+        </Grid>
+        <Field label="Duration" value={sp.duration} onChange={v=>upd("duration",v)}/>
+        <TextArea label="Description" value={sp.description} onChange={v=>upd("description",v)} rows={5}/>
+        <div style={{paddingTop:10,borderTop:`1px solid ${T.border}`,marginTop:4}}>
+          <label style={{...label,marginBottom:8}}>Combat Data (optional)</label>
+          <Grid>
+            <Select label="Attack Type" value={sp.combat?.attack||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.attack=v;else delete c.attack;upd("combat",c);}}
+              options={[["","None"],["ranged","Ranged Spell Attack"],["melee","Melee Spell Attack"]]}/>
+            <Select label="Save Type" value={sp.combat?.save||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.save=v;else delete c.save;upd("combat",c);}}
+              options={[["","None"],...ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])]}/>
+          </Grid>
+          <Grid>
+            <Field label="Damage (e.g. 1d10)" value={sp.combat?.damage||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.damage=v;else delete c.damage;upd("combat",c);}}/>
+            <Field label="Damage Type" value={sp.combat?.damageType||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.damageType=v;else delete c.damageType;upd("combat",c);}}/>
+          </Grid>
+          <Grid>
+            <Field label="Cantrip scale die (e.g. 1d10)" value={sp.combat?.cantripScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.cantripScale=v;else delete c.cantripScale;upd("combat",c);}} placeholder="blank if not a cantrip"/>
+            <Field label="Slot scale (e.g. +1d6)" value={sp.combat?.slotScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.slotScale=v;else delete c.slotScale;upd("combat",c);}}/>
+          </Grid>
+          <Field label="Notes (brief effect note)" value={sp.combat?.notes||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.notes=v;else delete c.notes;upd("combat",c);}}/>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+// ── Weapons Editor ──
+function WeaponsEditor({data,onChange}) {
+  const [selIdx,setSelIdx] = useState(0);
+  const [search,setSearch] = useState("");
+  const CATEGORIES = ["simpleWeapon","simpleRanged","martialWeapon","martialRanged"];
+  const PROPS = ["light","finesse","thrown","versatile","heavy","reach","ammunition","loading","two-handed","special"];
+  const filtered = (data||[]).filter(w=>w.name.toLowerCase().includes(search.toLowerCase()));
+  const w = (data||[])[selIdx]||null;
+  const upd = (key,val) => { const a=[...data]; a[selIdx]={...w,[key]:val}; onChange(a); };
+  const add = () => { const a=[...data,{name:"New Weapon",category:"simpleWeapon",damage:"1d6",damageType:"slashing",weight:2,properties:[],range:null,description:""}]; onChange(a); setSelIdx(a.length-1); };
+  const del = () => { const a=data.filter((_,i)=>i!==selIdx); onChange(a); setSelIdx(Math.max(0,selIdx-1)); };
+  const toggleProp = p => { const ps=w.properties||[]; upd("properties",ps.includes(p)?ps.filter(x=>x!==p):[...ps,p]); };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Weapons ({(data||[]).length})</div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
+        <div style={{maxHeight:"60vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
+          {filtered.map((ww,i)=>{
+            const realIdx=(data||[]).indexOf(ww);
+            return(
+              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
+                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,color:selIdx===realIdx?T.accent:T.text,
+                display:"flex",justifyContent:"space-between"}}>
+                <span>{ww.name}</span>
+                <span style={{fontSize:10,color:T.muted}}>{ww.damage}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={add} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Weapon</button>
+      </div>
+      {w&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{w.name}</span>
+          <button onClick={del} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <Grid>
+          <Field label="Name" value={w.name} onChange={v=>upd("name",v)}/>
+          <Select label="Category" value={w.category} onChange={v=>upd("category",v)} options={CATEGORIES.map(c=>[c,c])}/>
+        </Grid>
+        <Grid>
+          <Field label="Damage (e.g. 1d8)" value={w.damage} onChange={v=>upd("damage",v)}/>
+          <Field label="Damage Type" value={w.damageType} onChange={v=>upd("damageType",v)}/>
+        </Grid>
+        <Grid>
+          <Field label="Weight (lbs)" value={w.weight} onChange={v=>upd("weight",+v)} type="number"/>
+          <Field label="Range (e.g. 20/60, blank if none)" value={w.range||""} onChange={v=>upd("range",v||null)}/>
+        </Grid>
+        <div style={{marginBottom:10}}>
+          <label style={label}>Properties</label>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {PROPS.map(p=>(
+              <label key={p} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,cursor:"pointer",padding:"3px 8px",borderRadius:5,
+                background:(w.properties||[]).includes(p)?`rgba(201,162,39,0.15)`:T.surface,
+                border:`1px solid ${(w.properties||[]).includes(p)?T.accent:T.border}`}}>
+                <input type="checkbox" checked={(w.properties||[]).includes(p)} onChange={()=>toggleProp(p)} style={{accentColor:T.accent}}/>
+                {p}
+              </label>
+            ))}
+          </div>
+        </div>
+        <TextArea label="Description" value={w.description} onChange={v=>upd("description",v)} rows={2}/>
+      </div>}
+    </div>
+  );
+}
+
+// ── Gear Editor ──
+function GearEditor({data,onChange}) {
+  const [selIdx,setSelIdx] = useState(0);
+  const [search,setSearch] = useState("");
+  const GEAR_CATS = ["musicalInstrument","arcaneFocus","druidicFocus","holySymbol","artisanTool","gamingSet","tool","misc"];
+  const filtered = (data||[]).filter(g=>g.name.toLowerCase().includes(search.toLowerCase()));
+  const g = (data||[])[selIdx]||null;
+  const upd = (key,val) => { const a=[...data]; a[selIdx]={...g,[key]:val}; onChange(a); };
+  const add = () => { const a=[...data,{name:"New Item",category:"misc",weight:0,description:""}]; onChange(a); setSelIdx(a.length-1); };
+  const del = () => { const a=data.filter((_,i)=>i!==selIdx); onChange(a); setSelIdx(Math.max(0,selIdx-1)); };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Gear / Equipment ({(data||[]).length})</div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
+        <div style={{maxHeight:"60vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
+          {filtered.map((gg,i)=>{
+            const realIdx=(data||[]).indexOf(gg);
+            return(
+              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
+                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,color:selIdx===realIdx?T.accent:T.text,
+                display:"flex",justifyContent:"space-between"}}>
+                <span>{gg.name}</span>
+                <span style={{fontSize:10,color:T.muted}}>{gg.category}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={add} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Item</button>
+      </div>
+      {g&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{g.name}</span>
+          <button onClick={del} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <Grid>
+          <Field label="Name" value={g.name} onChange={v=>upd("name",v)}/>
+          <Select label="Category" value={g.category} onChange={v=>upd("category",v)} options={GEAR_CATS.map(c=>[c,c])}/>
+        </Grid>
+        <Field label="Weight (lbs)" value={g.weight} onChange={v=>upd("weight",+v)} type="number"/>
+        <TextArea label="Description" value={g.description} onChange={v=>upd("description",v)} rows={3}/>
+      </div>}
+    </div>
+  );
+}
+
+// ── Lists Editor (languages, skills, alignments) ──
+function ListsEditor({data,onChange}) {
+  const updList = (key,val) => onChange({...data,[key]:val});
+  const SimpleList = ({title,listKey}) => {
+    const list = data[listKey]||[];
+    return (
+      <div style={{marginBottom:20}}>
+        <div style={sectionHead}>{title} ({list.length})</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+          {list.map(item=><Tag key={item} text={item} onRemove={()=>updList(listKey,list.filter(x=>x!==item))}/>)}
+        </div>
+        <AddTag placeholder={`Add ${title.toLowerCase().slice(0,-1)}…`} onAdd={v=>updList(listKey,[...list,v])}/>
+      </div>
+    );
+  };
+  return (
+    <div>
+      <SimpleList title="Languages" listKey="languages"/>
+      <SimpleList title="Skills" listKey="skills"/>
+      <SimpleList title="Alignments" listKey="alignments"/>
+    </div>
+  );
+}
+
+// ── Themes Editor ──
+function ThemesEditor({data,onChange}) {
+  const [sel,setSel] = useState(Object.keys(data)[0]||"");
+  const [newName,setNewName] = useState("");
+  const theme = data[sel]||{};
+  const upd = (key,val) => onChange({...data,[sel]:{...theme,[key]:val}});
+  const COLOR_FIELDS = [["bg","Background"],["surface","Surface"],["card","Card"],["border","Border"],["accent","Accent"],["accentSecondary","Accent Secondary"],["text","Text"],["textMuted","Text Muted"],["textDim","Text Dim"],["danger","Danger"],["success","Success"],["info","Info"]];
+  const addTheme = () => {
+    if(!newName.trim())return;
+    onChange({...data,[newName.trim()]:{...theme,name:newName.trim()}});
+    setSel(newName.trim()); setNewName("");
+  };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"200px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Themes</div>
+        {Object.keys(data).map(n=>(
+          <div key={n} onClick={()=>setSel(n)} style={{padding:"7px 10px",borderRadius:6,marginBottom:4,cursor:"pointer",fontSize:13,
+            background:sel===n?`rgba(201,162,39,0.12)`:T.surface,
+            border:`1px solid ${sel===n?T.accent:T.border}`,
+            display:"flex",alignItems:"center",gap:8}}>
+            <div style={{width:12,height:12,borderRadius:"50%",background:data[n].accent||"#ccc",flexShrink:0}}/>
+            {n}
+          </div>
+        ))}
+        <div style={{display:"flex",gap:6,marginTop:8}}>
+          <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="New theme…" style={{...inp,flex:1,fontSize:12,padding:"5px 8px"}} onKeyDown={e=>e.key==="Enter"&&addTheme()}/>
+          <button onClick={addTheme} style={{...btn("primary"),padding:"5px 10px"}}>+</button>
+        </div>
+      </div>
+      {sel&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <span style={{fontFamily:T.display,color:T.accent,fontSize:16,display:"block",marginBottom:14}}>{sel}</span>
+        <Field label="Display Name" value={theme.name} onChange={v=>upd("name",v)}/>
+        <Field label="Display Font (CSS)" value={theme.fontDisplay} onChange={v=>upd("fontDisplay",v)}/>
+        <Field label="Body Font (CSS)" value={theme.fontBody} onChange={v=>upd("fontBody",v)}/>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginTop:10}}>
+          {COLOR_FIELDS.map(([key,lbl])=>(
+            <div key={key}>
+              <label style={label}>{lbl}</label>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <input type="color" value={theme[key]||"#000000"} onChange={e=>upd(key,e.target.value)}
+                  style={{width:36,height:32,border:"none",borderRadius:4,cursor:"pointer",background:"none",padding:0}}/>
+                <input value={theme[key]||""} onChange={e=>upd(key,e.target.value)} style={{...inp,flex:1,fontSize:12,padding:"5px 8px",fontFamily:"monospace"}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// MAIN EDITOR APP
+// ══════════════════════════════════════════════
+const TABS = [
+  {id:"species",   label:"🧝 Species"},
+  {id:"classes",   label:"⚔️ Classes"},
+  {id:"backgrounds",label:"📜 Backgrounds"},
+  {id:"spells",    label:"✨ Spells"},
+  {id:"weapons",   label:"🗡️ Weapons"},
+  {id:"gear",      label:"🎒 Gear"},
+  {id:"lists",     label:"📋 Lists"},
+  {id:"themes",    label:"🎨 Themes"},
+];
+
+function EditorApp() {
+  const [gameData, setGameData]   = useState(null);
+  const [tab, setTab]             = useState("species");
+  const [saved, setSaved]         = useState(false);
+  const [error, setError]         = useState(null);
+  const fileRef = useRef();
+
+  const loadFile = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        setGameData(parsed);
+        setError(null);
+      } catch(err) {
+        setError("Invalid JSON: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const saveFile = () => {
+    const json = JSON.stringify(gameData, null, 2);
+    const blob = new Blob([json], {type:"application/json"});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "tome-data.json";
+    a.click(); URL.revokeObjectURL(url);
+    setSaved(true); setTimeout(()=>setSaved(false),2000);
+  };
+
+  const updSection = (key, val) => setGameData(d => ({...d,[key]:val}));
+
+  // ── Splash screen ──
+  if (!gameData) return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:T.bg}}>
+      <div style={{textAlign:"center",maxWidth:480,padding:40}}>
+        <div style={{fontFamily:T.display,color:T.accent,fontSize:32,marginBottom:12}}>⚙️ Tome Editor</div>
+        <p style={{color:T.muted,fontSize:15,lineHeight:1.7,marginBottom:28}}>
+          Load your <strong style={{color:T.text}}>tome-data.json</strong> file to begin editing species, classes, backgrounds, spells, weapons, gear, and more.
+        </p>
+        {error && <div style={{background:"rgba(192,57,43,0.15)",border:`1px solid ${T.danger}`,borderRadius:8,padding:12,marginBottom:16,color:T.danger,fontSize:13}}>{error}</div>}
+        <button onClick={()=>fileRef.current.click()} style={{...btn("primary"),padding:"14px 40px",fontSize:16,fontFamily:T.display}}>
+          📂 Load tome-data.json
+        </button>
+        <input ref={fileRef} type="file" accept=".json" onChange={loadFile} style={{display:"none"}}/>
+        <p style={{color:T.dim,fontSize:12,marginTop:20}}>
+          No data leaves your browser. Everything is edited locally and downloaded when you click Save.
+        </p>
+      </div>
+    </div>
+  );
+
+  const tabBtn = active => ({
+    padding:"9px 16px", cursor:"pointer", fontSize:13, fontFamily:T.body, whiteSpace:"nowrap",
+    border:"none", borderBottom:`2px solid ${active?T.accent:"transparent"}`,
+    background:"transparent", color:active?T.accent:T.muted, transition:"all 0.15s"
+  });
+
+  return (
+    <div style={{background:T.bg,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+      {/* Header */}
+      <div style={{background:T.card,borderBottom:`1px solid ${T.border}`,padding:"12px 24px",display:"flex",alignItems:"center",gap:16,position:"sticky",top:0,zIndex:10}}>
+        <span style={{fontFamily:T.display,color:T.accent,fontSize:18,flexShrink:0}}>⚙️ Tome Editor</span>
+        <div style={{flex:1}}/>
+        <button onClick={()=>fileRef.current.click()} style={{...btn(),fontSize:12}}>📂 Load new file</button>
+        <input ref={fileRef} type="file" accept=".json" onChange={loadFile} style={{display:"none"}}/>
+        <button onClick={saveFile} style={{...btn("primary"),fontSize:13,padding:"8px 24px"}}>
+          {saved?"✓ Saved!":"💾 Save to disk"}
+        </button>
+      </div>
+
+      {/* Tab bar */}
+      <div style={{background:T.surface,borderBottom:`1px solid ${T.border}`,display:"flex",overflowX:"auto",padding:"0 16px",flexShrink:0}}>
+        {TABS.map(t=>(
+          <button key={t.id} style={tabBtn(tab===t.id)} onClick={()=>setTab(t.id)}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{flex:1,padding:"24px",overflowY:"auto",maxWidth:1200,margin:"0 auto",width:"100%"}}>
+        {tab==="species"     && <SpeciesEditor     data={gameData.species||{}}      onChange={v=>updSection("species",v)}/>}
+        {tab==="classes"     && <ClassEditor       data={gameData.classes||{}}      onChange={v=>updSection("classes",v)}/>}
+        {tab==="backgrounds" && <BackgroundEditor  data={gameData.backgrounds||{}}  onChange={v=>updSection("backgrounds",v)}/>}
+        {tab==="spells"      && <SpellEditor       data={gameData.spells||{}}       onChange={v=>updSection("spells",v)}/>}
+        {tab==="weapons"     && <WeaponsEditor     data={gameData.weapons||[]}      onChange={v=>updSection("weapons",v)}/>}
+        {tab==="gear"        && <GearEditor        data={gameData.gear||[]}         onChange={v=>updSection("gear",v)}/>}
+        {tab==="lists"       && <ListsEditor       data={gameData}                  onChange={setGameData}/>}
+        {tab==="themes"      && <ThemesEditor      data={gameData.themes||{}}       onChange={v=>updSection("themes",v)}/>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<EditorApp/>);
+</script>
+</body>
+</html>
