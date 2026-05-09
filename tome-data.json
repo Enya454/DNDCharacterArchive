@@ -630,7 +630,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "martialWeapon"
               }
             ]
           ]
@@ -653,7 +654,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -1869,7 +1871,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose any martial weapon"
+                "description": "Choose any martial weapon",
+                "pick": "martialWeapon"
               },
               {
                 "name": "Shield",
@@ -1885,7 +1888,8 @@
                 "qty": 2,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Two martial weapons of your choice"
+                "description": "Two martial weapons of your choice",
+                "pick": "martialWeapon"
               }
             ]
           ]
@@ -2418,7 +2422,8 @@
                 "qty": 1,
                 "type": "misc",
                 "weight": 1,
-                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus",
+                "pick": "arcaneFocus"
               }
             ]
           ]
@@ -2948,7 +2953,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -3486,7 +3492,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -3532,7 +3539,8 @@
                 "qty": 1,
                 "type": "misc",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "musicalInstrument"
               }
             ]
           ]
@@ -3988,7 +3996,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose any martial weapon"
+                "description": "Choose any martial weapon",
+                "pick": "martialWeapon"
               },
               {
                 "name": "Shield",
@@ -4004,7 +4013,8 @@
                 "qty": 2,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Two martial weapons of your choice"
+                "description": "Two martial weapons of your choice",
+                "pick": "martialWeapon"
               }
             ]
           ]
@@ -4027,7 +4037,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -5074,7 +5085,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -5097,7 +5109,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -5266,7 +5279,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -5787,7 +5801,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -5810,7 +5825,8 @@
                 "qty": 1,
                 "type": "misc",
                 "weight": 1,
-                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus",
+                "pick": "arcaneFocus"
               }
             ]
           ]
@@ -6342,7 +6358,8 @@
                 "qty": 1,
                 "type": "weapon",
                 "weight": 0,
-                "description": "Choose at DM discretion"
+                "description": "Choose at DM discretion",
+                "pick": "simpleWeapon"
               }
             ]
           ]
@@ -6365,7 +6382,8 @@
                 "qty": 1,
                 "type": "misc",
                 "weight": 1,
-                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus"
+                "description": "Crystal, orb, rod, staff, or wand \u2014 spellcasting focus",
+                "pick": "arcaneFocus"
               }
             ]
           ]
@@ -6660,14 +6678,16 @@
           "qty": 1,
           "type": "misc",
           "weight": 2,
-          "description": "One of your choice"
+          "description": "One of your choice",
+          "pick": "musicalInstrument"
         },
         {
           "name": "The favor of an admirer",
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": "Love letter, lock of hair, or trinket"
+          "description": "Love letter, lock of hair, or trinket",
+          "personal": true
         },
         {
           "name": "Costume clothes",
@@ -6744,7 +6764,8 @@
           "qty": 1,
           "type": "tool",
           "weight": 5,
-          "description": "One type of your choice"
+          "description": "One type of your choice",
+          "pick": "artisanTool"
         },
         {
           "name": "Shovel",
@@ -6817,7 +6838,8 @@
           "qty": 1,
           "type": "misc",
           "weight": 1,
-          "description": "Notes from your studies or prayers"
+          "description": "Notes from your studies or prayers",
+          "personal": true
         },
         {
           "name": "Winter blanket",
@@ -6976,7 +6998,8 @@
           "qty": 1,
           "type": "misc",
           "weight": 0.5,
-          "description": "Claw, tooth, or scalp"
+          "description": "Claw, tooth, or scalp",
+          "personal": true
         },
         {
           "name": "Traveler's clothes",
@@ -7051,7 +7074,8 @@
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": "A mystery to pursue"
+          "description": "A mystery to pursue",
+          "personal": true
         },
         {
           "name": "Common clothes",
@@ -7123,7 +7147,8 @@
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": "Trinket of personal significance"
+          "description": "Trinket of personal significance",
+          "personal": true
         },
         {
           "name": "Common clothes",
@@ -7187,14 +7212,16 @@
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": "Badge of your military rank"
+          "description": "Badge of your military rank",
+          "personal": true
         },
         {
           "name": "Trophy from fallen enemy",
           "qty": 1,
           "type": "misc",
           "weight": 0.5,
-          "description": "Dagger, broken blade, or piece of a banner"
+          "description": "Dagger, broken blade, or piece of a banner",
+          "personal": true
         },
         {
           "name": "Deck of cards or set of dice",
@@ -7266,21 +7293,24 @@
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": ""
+          "description": "",
+          "personal": true
         },
         {
           "name": "Pet mouse",
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": ""
+          "description": "",
+          "personal": true
         },
         {
           "name": "Token from your parents",
           "qty": 1,
           "type": "misc",
           "weight": 0,
-          "description": "Trinket or keepsake"
+          "description": "Trinket or keepsake",
+          "personal": true
         },
         {
           "name": "Common clothes",
@@ -9353,5 +9383,758 @@
       "label": "Misc",
       "color": "#7f8c8d"
     }
-  }
+  },
+  "weapons": [
+    {
+      "name": "Club",
+      "category": "simpleWeapon",
+      "damage": "1d4",
+      "damageType": "bludgeoning",
+      "weight": 2,
+      "properties": [
+        "light"
+      ],
+      "range": null,
+      "description": "A simple wooden club."
+    },
+    {
+      "name": "Dagger",
+      "category": "simpleWeapon",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "weight": 1,
+      "properties": [
+        "finesse",
+        "light",
+        "thrown"
+      ],
+      "range": "20/60",
+      "description": "A short blade useful for concealment and quick strikes."
+    },
+    {
+      "name": "Greatclub",
+      "category": "simpleWeapon",
+      "damage": "1d8",
+      "damageType": "bludgeoning",
+      "weight": 10,
+      "properties": [
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A large, heavy club."
+    },
+    {
+      "name": "Handaxe",
+      "category": "simpleWeapon",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "weight": 2,
+      "properties": [
+        "light",
+        "thrown"
+      ],
+      "range": "20/60",
+      "description": "A small axe suitable for one hand or throwing."
+    },
+    {
+      "name": "Javelin",
+      "category": "simpleWeapon",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [
+        "thrown"
+      ],
+      "range": "30/120",
+      "description": "A light spear designed for throwing."
+    },
+    {
+      "name": "Light Hammer",
+      "category": "simpleWeapon",
+      "damage": "1d4",
+      "damageType": "bludgeoning",
+      "weight": 2,
+      "properties": [
+        "light",
+        "thrown"
+      ],
+      "range": "20/60",
+      "description": "A small hammer, useful as a thrown weapon."
+    },
+    {
+      "name": "Mace",
+      "category": "simpleWeapon",
+      "damage": "1d6",
+      "damageType": "bludgeoning",
+      "weight": 4,
+      "properties": [],
+      "range": null,
+      "description": "A metal rod with a heavy head, favoured by clerics."
+    },
+    {
+      "name": "Quarterstaff",
+      "category": "simpleWeapon",
+      "damage": "1d6",
+      "damageType": "bludgeoning",
+      "weight": 4,
+      "properties": [
+        "versatile"
+      ],
+      "range": null,
+      "description": "A long wooden staff. Versatile: 1d8 two-handed."
+    },
+    {
+      "name": "Sickle",
+      "category": "simpleWeapon",
+      "damage": "1d4",
+      "damageType": "slashing",
+      "weight": 2,
+      "properties": [
+        "light"
+      ],
+      "range": null,
+      "description": "A short curved blade, used in harvesting."
+    },
+    {
+      "name": "Spear",
+      "category": "simpleWeapon",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 3,
+      "properties": [
+        "thrown",
+        "versatile"
+      ],
+      "range": "20/60",
+      "description": "A pole weapon with a metal tip. Versatile: 1d8 two-handed."
+    },
+    {
+      "name": "Light Crossbow",
+      "category": "simpleRanged",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "weight": 5,
+      "properties": [
+        "ammunition",
+        "loading",
+        "two-handed"
+      ],
+      "range": "80/320",
+      "description": "A mechanically drawn crossbow. Requires a bolt and one action to reload."
+    },
+    {
+      "name": "Dart",
+      "category": "simpleRanged",
+      "damage": "1d4",
+      "damageType": "piercing",
+      "weight": 0.25,
+      "properties": [
+        "finesse",
+        "thrown"
+      ],
+      "range": "20/60",
+      "description": "A small pointed projectile."
+    },
+    {
+      "name": "Shortbow",
+      "category": "simpleRanged",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [
+        "ammunition",
+        "two-handed"
+      ],
+      "range": "80/320",
+      "description": "A small bow. Requires arrows."
+    },
+    {
+      "name": "Sling",
+      "category": "simpleRanged",
+      "damage": "1d4",
+      "damageType": "bludgeoning",
+      "weight": 0,
+      "properties": [
+        "ammunition"
+      ],
+      "range": "30/120",
+      "description": "A leather strap used to hurl stones or bullets."
+    },
+    {
+      "name": "Battleaxe",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "slashing",
+      "weight": 4,
+      "properties": [
+        "versatile"
+      ],
+      "range": null,
+      "description": "A single-headed axe. Versatile: 1d10 two-handed."
+    },
+    {
+      "name": "Flail",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "bludgeoning",
+      "weight": 2,
+      "properties": [],
+      "range": null,
+      "description": "A spiked ball on a chain."
+    },
+    {
+      "name": "Glaive",
+      "category": "martialWeapon",
+      "damage": "1d10",
+      "damageType": "slashing",
+      "weight": 6,
+      "properties": [
+        "heavy",
+        "reach",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A blade on a long pole. Reach: attack creatures 10 ft away."
+    },
+    {
+      "name": "Greataxe",
+      "category": "martialWeapon",
+      "damage": "1d12",
+      "damageType": "slashing",
+      "weight": 7,
+      "properties": [
+        "heavy",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A massive two-handed axe."
+    },
+    {
+      "name": "Greatsword",
+      "category": "martialWeapon",
+      "damage": "2d6",
+      "damageType": "slashing",
+      "weight": 6,
+      "properties": [
+        "heavy",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A massive two-handed sword."
+    },
+    {
+      "name": "Halberd",
+      "category": "martialWeapon",
+      "damage": "1d10",
+      "damageType": "slashing",
+      "weight": 6,
+      "properties": [
+        "heavy",
+        "reach",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "An axe-blade on a long pole with a spike on top."
+    },
+    {
+      "name": "Lance",
+      "category": "martialWeapon",
+      "damage": "1d12",
+      "damageType": "piercing",
+      "weight": 6,
+      "properties": [
+        "reach",
+        "special"
+      ],
+      "range": null,
+      "description": "Disadvantage on attacks within 5 ft. Requires one hand while mounted."
+    },
+    {
+      "name": "Longsword",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "slashing",
+      "weight": 3,
+      "properties": [
+        "versatile"
+      ],
+      "range": null,
+      "description": "A standard sword. Versatile: 1d10 two-handed."
+    },
+    {
+      "name": "Maul",
+      "category": "martialWeapon",
+      "damage": "2d6",
+      "damageType": "bludgeoning",
+      "weight": 10,
+      "properties": [
+        "heavy",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A massive two-handed hammer."
+    },
+    {
+      "name": "Morningstar",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "weight": 4,
+      "properties": [],
+      "range": null,
+      "description": "A spiked metal ball on a handle."
+    },
+    {
+      "name": "Pike",
+      "category": "martialWeapon",
+      "damage": "1d10",
+      "damageType": "piercing",
+      "weight": 18,
+      "properties": [
+        "heavy",
+        "reach",
+        "two-handed"
+      ],
+      "range": null,
+      "description": "A long pole weapon. Reach: attack creatures 10 ft away."
+    },
+    {
+      "name": "Rapier",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [
+        "finesse"
+      ],
+      "range": null,
+      "description": "A thin thrusting blade favoured by duelists."
+    },
+    {
+      "name": "Scimitar",
+      "category": "martialWeapon",
+      "damage": "1d6",
+      "damageType": "slashing",
+      "weight": 3,
+      "properties": [
+        "finesse",
+        "light"
+      ],
+      "range": null,
+      "description": "A curved blade. Light, so usable for two-weapon fighting."
+    },
+    {
+      "name": "Shortsword",
+      "category": "martialWeapon",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [
+        "finesse",
+        "light"
+      ],
+      "range": null,
+      "description": "A short blade. Light and finesse, popular with rogues."
+    },
+    {
+      "name": "Trident",
+      "category": "martialWeapon",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 4,
+      "properties": [
+        "thrown",
+        "versatile"
+      ],
+      "range": "20/60",
+      "description": "A three-pronged spear. Versatile: 1d8 two-handed."
+    },
+    {
+      "name": "War Pick",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [],
+      "range": null,
+      "description": "A pick designed for punching through armour."
+    },
+    {
+      "name": "Warhammer",
+      "category": "martialWeapon",
+      "damage": "1d8",
+      "damageType": "bludgeoning",
+      "weight": 2,
+      "properties": [
+        "versatile"
+      ],
+      "range": null,
+      "description": "A hammer designed for war. Versatile: 1d10 two-handed."
+    },
+    {
+      "name": "Whip",
+      "category": "martialWeapon",
+      "damage": "1d4",
+      "damageType": "slashing",
+      "weight": 3,
+      "properties": [
+        "finesse",
+        "reach"
+      ],
+      "range": null,
+      "description": "Reach: attack creatures up to 10 ft away."
+    },
+    {
+      "name": "Hand Crossbow",
+      "category": "martialRanged",
+      "damage": "1d6",
+      "damageType": "piercing",
+      "weight": 3,
+      "properties": [
+        "ammunition",
+        "light",
+        "loading"
+      ],
+      "range": "30/120",
+      "description": "A one-handed crossbow."
+    },
+    {
+      "name": "Heavy Crossbow",
+      "category": "martialRanged",
+      "damage": "1d10",
+      "damageType": "piercing",
+      "weight": 18,
+      "properties": [
+        "ammunition",
+        "heavy",
+        "loading",
+        "two-handed"
+      ],
+      "range": "100/400",
+      "description": "A large, powerful crossbow."
+    },
+    {
+      "name": "Longbow",
+      "category": "martialRanged",
+      "damage": "1d8",
+      "damageType": "piercing",
+      "weight": 2,
+      "properties": [
+        "ammunition",
+        "heavy",
+        "two-handed"
+      ],
+      "range": "150/600",
+      "description": "A large bow. Requires arrows and Str 15 to fire without disadvantage."
+    },
+    {
+      "name": "Net",
+      "category": "martialRanged",
+      "damage": "\u2014",
+      "damageType": "\u2014",
+      "weight": 3,
+      "properties": [
+        "thrown",
+        "special"
+      ],
+      "range": "5/15",
+      "description": "Large or smaller creature: DC 10 Str save or restrained. No damage."
+    }
+  ],
+  "gear": [
+    {
+      "name": "Bagpipes",
+      "category": "musicalInstrument",
+      "weight": 6,
+      "description": "A wind instrument with drone pipes."
+    },
+    {
+      "name": "Drum",
+      "category": "musicalInstrument",
+      "weight": 3,
+      "description": "A percussion instrument."
+    },
+    {
+      "name": "Dulcimer",
+      "category": "musicalInstrument",
+      "weight": 10,
+      "description": "A stringed instrument struck with hammers."
+    },
+    {
+      "name": "Flute",
+      "category": "musicalInstrument",
+      "weight": 1,
+      "description": "A small wind instrument."
+    },
+    {
+      "name": "Lute",
+      "category": "musicalInstrument",
+      "weight": 2,
+      "description": "A plucked stringed instrument."
+    },
+    {
+      "name": "Lyre",
+      "category": "musicalInstrument",
+      "weight": 2,
+      "description": "A small harp-like instrument."
+    },
+    {
+      "name": "Horn",
+      "category": "musicalInstrument",
+      "weight": 2,
+      "description": "A brass wind instrument."
+    },
+    {
+      "name": "Pan Flute",
+      "category": "musicalInstrument",
+      "weight": 2,
+      "description": "Multiple pipes of graduated length."
+    },
+    {
+      "name": "Shawm",
+      "category": "musicalInstrument",
+      "weight": 1,
+      "description": "A loud double-reed instrument."
+    },
+    {
+      "name": "Viol",
+      "category": "musicalInstrument",
+      "weight": 1,
+      "description": "A bowed stringed instrument."
+    },
+    {
+      "name": "Crystal",
+      "category": "arcaneFocus",
+      "weight": 1,
+      "description": "An arcane focus in the form of a crystal orb."
+    },
+    {
+      "name": "Orb",
+      "category": "arcaneFocus",
+      "weight": 3,
+      "description": "A glass or crystal sphere used as an arcane focus."
+    },
+    {
+      "name": "Rod",
+      "category": "arcaneFocus",
+      "weight": 2,
+      "description": "A metal rod etched with arcane sigils."
+    },
+    {
+      "name": "Staff (focus)",
+      "category": "arcaneFocus",
+      "weight": 4,
+      "description": "A wooden or metal staff used as an arcane focus."
+    },
+    {
+      "name": "Wand",
+      "category": "arcaneFocus",
+      "weight": 1,
+      "description": "A slender rod of wood or metal, carved with arcane runes."
+    },
+    {
+      "name": "Sprig of Mistletoe",
+      "category": "druidicFocus",
+      "weight": 0,
+      "description": "A druidic focus of a sprig of mistletoe."
+    },
+    {
+      "name": "Totem",
+      "category": "druidicFocus",
+      "weight": 0,
+      "description": "An animal fetish used as a druidic focus."
+    },
+    {
+      "name": "Wooden Staff",
+      "category": "druidicFocus",
+      "weight": 4,
+      "description": "A staff carved from a living tree."
+    },
+    {
+      "name": "Yew Wand",
+      "category": "druidicFocus",
+      "weight": 1,
+      "description": "A wand fashioned from yew wood."
+    },
+    {
+      "name": "Amulet (holy symbol)",
+      "category": "holySymbol",
+      "weight": 1,
+      "description": "A holy symbol worn as an amulet."
+    },
+    {
+      "name": "Emblem (holy symbol)",
+      "category": "holySymbol",
+      "weight": 0,
+      "description": "A holy symbol embossed on a shield or cloak."
+    },
+    {
+      "name": "Reliquary",
+      "category": "holySymbol",
+      "weight": 2,
+      "description": "A reliquary box containing a holy relic."
+    },
+    {
+      "name": "Alchemist's Supplies",
+      "category": "artisanTool",
+      "weight": 8,
+      "description": "Used to brew potions and work with chemicals."
+    },
+    {
+      "name": "Brewer's Supplies",
+      "category": "artisanTool",
+      "weight": 9,
+      "description": "Equipment for brewing ales and meads."
+    },
+    {
+      "name": "Calligrapher's Supplies",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Inks, quills, and parchment for fine writing."
+    },
+    {
+      "name": "Carpenter's Tools",
+      "category": "artisanTool",
+      "weight": 6,
+      "description": "Tools for woodworking."
+    },
+    {
+      "name": "Cartographer's Tools",
+      "category": "artisanTool",
+      "weight": 6,
+      "description": "Tools for drawing and reading maps."
+    },
+    {
+      "name": "Cobbler's Tools",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Tools for making and repairing footwear."
+    },
+    {
+      "name": "Cook's Utensils",
+      "category": "artisanTool",
+      "weight": 8,
+      "description": "Pots, knives, and utensils for cooking."
+    },
+    {
+      "name": "Glassblower's Tools",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Tools for shaping molten glass."
+    },
+    {
+      "name": "Jeweler's Tools",
+      "category": "artisanTool",
+      "weight": 2,
+      "description": "Delicate tools for working with gems and metals."
+    },
+    {
+      "name": "Leatherworker's Tools",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Tools for tanning and shaping leather."
+    },
+    {
+      "name": "Mason's Tools",
+      "category": "artisanTool",
+      "weight": 8,
+      "description": "Hammers, chisels, and levels for stonework."
+    },
+    {
+      "name": "Painter's Supplies",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Brushes, palettes, and pigments."
+    },
+    {
+      "name": "Potter's Tools",
+      "category": "artisanTool",
+      "weight": 3,
+      "description": "Tools for shaping clay vessels."
+    },
+    {
+      "name": "Smith's Tools",
+      "category": "artisanTool",
+      "weight": 8,
+      "description": "Hammer, tongs, and files for metalwork."
+    },
+    {
+      "name": "Tinker's Tools",
+      "category": "artisanTool",
+      "weight": 10,
+      "description": "Fine tools for constructing and repairing small mechanical devices."
+    },
+    {
+      "name": "Weaver's Tools",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Needles, thread, and looms for weaving."
+    },
+    {
+      "name": "Woodcarver's Tools",
+      "category": "artisanTool",
+      "weight": 5,
+      "description": "Knives and gouges for carving wood."
+    },
+    {
+      "name": "Dice Set",
+      "category": "gamingSet",
+      "weight": 0,
+      "description": "A set of polyhedral dice for games of chance."
+    },
+    {
+      "name": "Dragonchess Set",
+      "category": "gamingSet",
+      "weight": 0.5,
+      "description": "A complex strategy game played on a three-level board."
+    },
+    {
+      "name": "Playing Card Set",
+      "category": "gamingSet",
+      "weight": 0,
+      "description": "A deck of illustrated cards for games."
+    },
+    {
+      "name": "Three-Dragon Ante Set",
+      "category": "gamingSet",
+      "weight": 0,
+      "description": "Cards for a popular gambling game."
+    },
+    {
+      "name": "Disguise Kit",
+      "category": "tool",
+      "weight": 3,
+      "description": "Cosmetics, hair dye, small props, and a few pieces of costume clothing. Proficiency allows you to change your appearance."
+    },
+    {
+      "name": "Forgery Kit",
+      "category": "tool",
+      "weight": 5,
+      "description": "Various papers and parchments, as well as pens, inks, seals, and wax for creating convincing forgeries."
+    },
+    {
+      "name": "Herbalism Kit",
+      "category": "tool",
+      "weight": 3,
+      "description": "Pouches and vials for collecting and identifying plants, plus tools for preparing remedies."
+    },
+    {
+      "name": "Navigator's Tools",
+      "category": "tool",
+      "weight": 2,
+      "description": "Sextant, compass, calipers, ruler, parchment, ink, and quill for seafaring navigation."
+    },
+    {
+      "name": "Poisoner's Kit",
+      "category": "tool",
+      "weight": 2,
+      "description": "Vials, chemicals, and a special syringe for creating poisons."
+    },
+    {
+      "name": "Thieves' Tools",
+      "category": "tool",
+      "weight": 1,
+      "description": "Small file, set of lock picks, small mirror on a metal handle, narrow-bladed scissors, and a pair of pliers."
+    }
+  ]
 }

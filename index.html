@@ -245,7 +245,7 @@ const DEFAULT_CHAR = {
   languages:[], languageSources:{},
   alignment:"True Neutral",
   personalityTraits:"", ideals:"", bonds:"", flaws:"", notes:"", appearance:"",
-  inventory:[], spells:[],
+  inventory:[], spells:[], personalItems:[],
   hp:{ current:8, max:8, temp:0 },
   hitDice:{ current:1, max:1 },
   deathSaves:{ successes:0, failures:0 },
@@ -733,42 +733,74 @@ function AbilityRoller({ abilities, onChange }) {
 // so React hooks work correctly)
 // ============================================================
 function WizardEquipmentStep({ char, setChar, gameData }) {
-  const { classes, backgrounds, itemTypes } = gameData;
+  const { classes, backgrounds, itemTypes, weapons:weaponLib=[], gear:gearLib=[] } = gameData;
   const classData = classes?.[char.class];
   const bgData    = backgrounds?.[char.background];
 
-  const [mode, setMode]       = useState("equipment"); // "equipment" | "gold"
-  const [choices, setChoices] = useState({});          // { groupIdx: optionIdx }
+  const [mode, setMode]         = useState("equipment");
+  const [choices, setChoices]   = useState({});   // { "class-gi": optionIdx, "bg-gi": optionIdx }
+  const [pickSels, setPickSels] = useState({});   // { "class-gi-oi-itemIdx": chosenItemName }
   const [rolledGold, setRolledGold] = useState(null);
   const [customName, setCustomName] = useState("");
   const [customType, setCustomType] = useState("weapon");
 
-  const goldDice  = classData?.startingGoldDice || "3d4";  // e.g. "5d4"
+  const goldDice  = classData?.startingGoldDice || "3d4";
   const diceMatch = goldDice.match(/^(\d+)d(\d+)$/);
   const numDice   = diceMatch ? +diceMatch[1] : 3;
   const dieSize   = diceMatch ? +diceMatch[2] : 4;
 
+  // All items in the weapon/gear library for a category
+  const libraryForCategory = cat => {
+    if (!cat) return [];
+    const fromWeapons = (weaponLib||[]).filter(w => w.category === cat);
+    const fromGear    = (gearLib||[]).filter(g => g.category === cat);
+    return [...fromWeapons, ...fromGear];
+  };
+
   const rollGold = () => {
-    const total = Array.from({length: numDice}, () => Math.floor(Math.random() * dieSize) + 1)
-      .reduce((a,b) => a+b, 0) * 10;
+    const total = Array.from({length:numDice}, ()=>Math.floor(Math.random()*dieSize)+1)
+      .reduce((a,b)=>a+b,0) * 10;
     setRolledGold(total);
   };
 
-  // Collect the items from current equipment choices
+  // Resolve an item's actual name (substituting pick selection if needed)
+  const resolveItem = (item, pickKey) => {
+    if (!item.pick) return item;
+    const selName = pickSels[pickKey];
+    if (!selName) return null; // unresolved pick = not ready
+    const lib = libraryForCategory(item.pick);
+    const found = lib.find(l => l.name === selName);
+    if (!found) return null;
+    // Build a resolved item
+    return {
+      name: found.name,
+      qty: item.qty || 1,
+      type: found.damage ? "weapon" : "misc",
+      weight: found.weight || 0,
+      description: found.damage
+        ? `${found.damage} ${found.damageType}${found.properties?.length ? " — " + found.properties.join(", ") : ""}${found.range ? " — Range " + found.range : ""}`
+        : (found.description || ""),
+      personal: false,
+    };
+  };
+
   const getEquipmentItems = () => {
-    const groups = classData?.startingEquipment || [];
     const items = [];
-    // Class choices
-    groups.forEach((group, gi) => {
+    // Class groups
+    (classData?.startingEquipment || []).forEach((group, gi) => {
       if (group.fixed) {
         group.fixed.forEach(it => items.push(it));
       } else {
-        const chosenIdx = choices[gi] ?? 0;
-        const option = group.options[chosenIdx] || group.options[0];
-        option.forEach(it => items.push(it));
+        const oi = choices[`class-${gi}`] ?? 0;
+        const option = group.options[oi] || group.options[0];
+        option.forEach((it, ii) => {
+          const resolved = resolveItem(it, `class-${gi}-${oi}-${ii}`);
+          if (resolved) items.push(resolved);
+          else if (!it.pick) items.push(it);
+        });
       }
     });
-    // Background fixed items
+    // Background items
     (bgData?.startingItems || []).forEach(it => items.push(it));
     return items;
   };
@@ -776,123 +808,164 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
   const applyEquipment = () => {
     const rawItems = getEquipmentItems();
     let goldBonus = 0;
-    const invItems = rawItems.map(it => {
+    const invItems = [], personalItems = [];
+    rawItems.forEach(it => {
       if (it.gold) goldBonus += it.gold;
-      return {
-        id: Date.now() + Math.random(),
-        name: it.name, type: it.type || "misc",
-        quantity: it.qty || 1, weight: it.weight || 0,
-        description: it.description || "", equipped: false
-      };
+      const obj = { id:Date.now()+Math.random(), name:it.name, type:it.type||"misc", quantity:it.qty||1, weight:it.weight||0, description:it.description||"", equipped:false };
+      if (it.personal) personalItems.push(obj);
+      else invItems.push(obj);
     });
     setChar(c => ({
       ...c,
       inventory: [...(c.inventory||[]), ...invItems],
-      currencies: { ...c.currencies, gp: (c.currencies?.gp||0) + goldBonus }
+      personalItems: [...(c.personalItems||[]), ...personalItems],
+      currencies: { ...c.currencies, gp:(c.currencies?.gp||0)+goldBonus }
     }));
   };
 
   const applyGold = () => {
-    if (rolledGold === null) return;
-    setChar(c => ({ ...c, currencies: { ...c.currencies, gp: (c.currencies?.gp||0) + rolledGold } }));
+    if (rolledGold===null) return;
+    setChar(c => ({ ...c, currencies:{...c.currencies,gp:(c.currencies?.gp||0)+rolledGold} }));
     setRolledGold(null);
   };
 
   const addCustom = () => {
     if (!customName) return;
-    setChar(c => ({ ...c, inventory: [...(c.inventory||[]), { id:Date.now(), name:customName, type:customType, quantity:1, weight:0, description:"", equipped:false }] }));
+    setChar(c => ({ ...c, inventory:[...(c.inventory||[]),{id:Date.now(),name:customName,type:customType,quantity:1,weight:0,description:"",equipped:false}] }));
     setCustomName("");
   };
 
-  const removeItem = id => setChar(c => ({ ...c, inventory: c.inventory.filter(i => i.id !== id) }));
-  const setCurrency = (coin, val) => setChar(c => ({ ...c, currencies: { ...c.currencies, [coin]: Math.max(0, +val||0) } }));
+  const removeItem = id => setChar(c => ({ ...c, inventory:c.inventory.filter(i=>i.id!==id) }));
+  const setCurrency = (coin,val) => setChar(c => ({ ...c, currencies:{...c.currencies,[coin]:Math.max(0,+val||0)} }));
 
-  const inp = { background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 12px", borderRadius:8, fontSize:14, fontFamily:"var(--font-body)", boxSizing:"border-box" };
+  const inp  = { background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 12px", borderRadius:8, fontSize:14, fontFamily:"var(--font-body)", boxSizing:"border-box" };
   const mBtn = a => ({ padding:"10px 24px", borderRadius:8, cursor:"pointer", fontSize:13, fontFamily:"var(--font-display)", letterSpacing:0.5, transition:"all 0.2s", border:`1px solid ${a?"var(--accent)":"var(--border)"}`, background:a?"var(--accent)":"var(--surface)", color:a?"var(--bg)":"var(--text)" });
 
-  const groups = classData?.startingEquipment || [];
+  const groups   = classData?.startingEquipment || [];
   const currency = char.currencies || {cp:0,sp:0,ep:0,gp:0,pp:0};
-  const inv = char.inventory || [];
+  const inv      = char.inventory || [];
 
-  const previewItems = mode === "equipment" ? getEquipmentItems() : [];
+  // Render one item in an option — handles pick items with dropdown
+  const renderOptionItem = (it, pickKey) => {
+    if (!it.pick) {
+      return (
+        <span key={it.name} style={{ color:"var(--text)" }}>
+          {it.qty>1?`${it.qty}× `:""}
+          <strong>{it.name}</strong>
+          {it.description && <span style={{ color:"var(--text-dim)", fontSize:11, marginLeft:4 }}>{it.description}</span>}
+        </span>
+      );
+    }
+    const lib = libraryForCategory(it.pick);
+    const selName = pickSels[pickKey] || "";
+    const selItem = lib.find(l=>l.name===selName);
+    return (
+      <div key={pickKey} style={{ display:"flex", flexDirection:"column", gap:4 }}>
+        <div style={{ fontSize:12, color:"var(--text-muted)" }}>Choose {it.name}:</div>
+        <select value={selName} onChange={e=>setPickSels(p=>({...p,[pickKey]:e.target.value}))} style={{...inp,fontSize:13}}>
+          <option value="">— select —</option>
+          {lib.map(w=>(
+            <option key={w.name} value={w.name}>
+              {w.name}{w.damage?` (${w.damage} ${w.damageType}${w.properties?.length?" — "+w.properties.join(", "):""})`:""}
+            </option>
+          ))}
+        </select>
+        {selItem && (
+          <div style={{ fontSize:11, color:"var(--text-dim)", paddingLeft:4 }}>
+            {selItem.damage && <span style={{color:"var(--danger)",marginRight:8}}>{selItem.damage} {selItem.damageType}</span>}
+            {selItem.properties?.length>0 && <span style={{marginRight:8}}>{selItem.properties.join(", ")}</span>}
+            {selItem.range && <span>Range {selItem.range}</span>}
+            {selItem.description && !selItem.damage && <span>{selItem.description}</span>}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div>
       {/* Mode toggle */}
-      <div style={{ display:"flex", gap:10, marginBottom:20 }}>
+      <div style={{display:"flex",gap:10,marginBottom:20}}>
         <button style={mBtn(mode==="equipment")} onClick={()=>setMode("equipment")}>⚔️ Choose by Equipment</button>
         <button style={mBtn(mode==="gold")}      onClick={()=>setMode("gold")}>🪙 Choose by Gold</button>
       </div>
 
       {/* ── Equipment mode ── */}
-      {mode === "equipment" && (
+      {mode==="equipment" && (
         <div>
           {!classData
-            ? <p style={{ color:"var(--text-muted)", fontSize:13 }}>Select a class to see starting equipment options.</p>
+            ? <p style={{color:"var(--text-muted)",fontSize:13}}>Select a class first.</p>
             : <>
-              {/* Class equipment groups */}
-              <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>
+              <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>
                 {char.class} Starting Equipment
               </div>
-              {groups.map((group, gi) => {
+              {groups.map((group,gi)=>{
                 if (group.fixed) return (
-                  <div key={gi} style={{ marginBottom:12, padding:"10px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8 }}>
-                    <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>You always get</div>
-                    <div style={{ fontSize:13, color:"var(--text)" }}>{group.fixed.map(it => `${it.qty > 1 ? it.qty+"× " : ""}${it.name}`).join(", ")}</div>
-                  </div>
-                );
-                const chosenIdx = choices[gi] ?? 0;
-                return (
-                  <div key={gi} style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Choice {gi + 1} — pick one</div>
-                    <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-                      {group.options.map((option, oi) => (
-                        <div key={oi} onClick={() => setChoices(c => ({...c,[gi]:oi}))} style={{
-                          padding:"10px 14px", borderRadius:8, cursor:"pointer", transition:"all 0.15s",
-                          border:`1px solid ${chosenIdx===oi?"var(--accent)":"var(--border)"}`,
-                          background: chosenIdx===oi ? "rgba(201,162,39,0.08)" : "var(--surface)"
-                        }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <span style={{ width:14, height:14, borderRadius:"50%", flexShrink:0, display:"inline-block", border:`2px solid ${chosenIdx===oi?"var(--accent)":"var(--border)"}`, background: chosenIdx===oi?"var(--accent)":"transparent" }}/>
-                            <span style={{ fontSize:13, color: chosenIdx===oi?"var(--accent)":"var(--text)", fontWeight: chosenIdx===oi?"bold":"normal" }}>
-                              {option.map(it => `${it.qty > 1 ? it.qty+"× " : ""}${it.name}`).join(" + ")}
-                            </span>
-                          </div>
-                          {chosenIdx===oi && (
-                            <div style={{ marginTop:6, marginLeft:22, display:"flex", flexDirection:"column", gap:2 }}>
-                              {option.map(it => it.description && (
-                                <div key={it.name} style={{ fontSize:11, color:"var(--text-dim)" }}>{it.name}: {it.description}</div>
-                              ))}
-                            </div>
-                          )}
+                  <div key={gi} style={{marginBottom:12,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8}}>
+                    <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>You always get</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                      {group.fixed.map(it=>(
+                        <div key={it.name} style={{fontSize:13}}>
+                          {it.qty>1?`${it.qty}× `:""}
+                          <strong>{it.name}</strong>
+                          {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                );
+                const chosenOi = choices[`class-${gi}`] ?? 0;
+                return (
+                  <div key={gi} style={{marginBottom:14}}>
+                    <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Choice {gi+1} — pick one</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                      {group.options.map((option,oi)=>{
+                        const isSel = chosenOi===oi;
+                        return (
+                          <div key={oi} style={{
+                            padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
+                            border:`1px solid ${isSel?"var(--accent)":"var(--border)"}`,
+                            background:isSel?"rgba(201,162,39,0.08)":"var(--surface)"
+                          }}>
+                            <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(c=>({...c,[`class-${gi}`]:oi}))}>
+                              <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${isSel?"var(--accent)":"var(--border)"}`,background:isSel?"var(--accent)":"transparent"}}/>
+                              <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
+                                {option.map((it,ii)=>renderOptionItem(it,`class-${gi}-${oi}-${ii}`))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
               })}
 
               {/* Background items */}
-              {bgData?.startingItems?.length > 0 && (
-                <div style={{ marginTop:16 }}>
-                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>
+              {bgData?.startingItems?.length>0 && (
+                <div style={{marginTop:16}}>
+                  <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>
                     {char.background} Background Items
                   </div>
-                  <div style={{ padding:"10px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8 }}>
-                    <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                      {bgData.startingItems.map(it => (
-                        <div key={it.name} style={{ fontSize:13, display:"flex", justifyContent:"space-between" }}>
-                          <span style={{ color:"var(--text)" }}>{it.qty > 1 ? `${it.qty}× ` : ""}{it.name}</span>
-                          {it.description && <span style={{ fontSize:11, color:"var(--text-dim)", maxWidth:"55%", textAlign:"right" }}>{it.description}</span>}
-                        </div>
-                      ))}
-                    </div>
+                  <div style={{padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8}}>
+                    {bgData.startingItems.map(it=>(
+                      <div key={it.name} style={{marginBottom:6,fontSize:13}}>
+                        {it.pick
+                          ? renderOptionItem(it, `bg-${it.name}`)
+                          : <>
+                              <strong>{it.qty>1?`${it.qty}× `:""}{it.name}</strong>
+                              {it.personal && <span style={{fontSize:10,color:"var(--info)",marginLeft:6,padding:"1px 6px",border:"1px solid var(--info)",borderRadius:8}}>personal</span>}
+                              {it.gold && <span style={{fontSize:11,color:"var(--accent)",marginLeft:6}}>+{it.gold} gp</span>}
+                              {it.description && <span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
+                            </>
+                        }
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Apply button */}
-              <button onClick={applyEquipment} style={{ marginTop:16, padding:"12px 28px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:14, width:"100%" }}>
+              <button onClick={applyEquipment} style={{marginTop:16,padding:"12px 28px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:14,width:"100%"}}>
                 ✓ Apply Starting Equipment to Inventory
               </button>
             </>
@@ -901,42 +974,39 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
       )}
 
       {/* ── Gold mode ── */}
-      {mode === "gold" && (
+      {mode==="gold" && (
         <div>
-          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:14 }}>
-            Starting Gold — {char.class || "your class"} rolls {goldDice} × 10 gp
+          <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:14}}>
+            Starting Gold — {char.class||"your class"} rolls {goldDice} × 10 gp
           </div>
-          <div style={{ display:"flex", gap:14, alignItems:"center", marginBottom:20, flexWrap:"wrap" }}>
-            <button onClick={rollGold} style={{ padding:"12px 28px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:14 }}>
+          <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:20,flexWrap:"wrap"}}>
+            <button onClick={rollGold} style={{padding:"12px 28px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:14}}>
               🎲 Roll {goldDice} × 10
             </button>
-            {rolledGold !== null && (
-              <>
-                <div style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>Result</div>
-                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:36 }}>{rolledGold} gp</div>
-                </div>
-                <button onClick={applyGold} style={{ padding:"12px 28px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:14 }}>
-                  + Add to Wallet
-                </button>
-              </>
-            )}
+            {rolledGold!==null && (<>
+              <div style={{textAlign:"center"}}>
+                <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>Result</div>
+                <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:36}}>{rolledGold} gp</div>
+              </div>
+              <button onClick={applyGold} style={{padding:"12px 28px",background:"var(--surface)",border:"1px solid var(--accent)",color:"var(--accent)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:14}}>
+                + Add to Wallet
+              </button>
+            </>)}
           </div>
-          <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>
-            You can then buy equipment on your own. Use the custom item adder below, or spend your gold at the character sheet inventory tab.
+          <p style={{fontSize:13,color:"var(--text-muted)",lineHeight:1.6}}>
+            You can then buy equipment using the custom adder below, or manage your inventory on the character sheet.
           </p>
         </div>
       )}
 
       {/* ── Current inventory preview ── */}
-      {inv.length > 0 && (
-        <div style={{ marginTop:20 }}>
-          <div style={{ fontSize:12, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Current Inventory ({inv.length} items)</div>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-            {inv.map(it => (
-              <span key={it.id} onClick={() => removeItem(it.id)} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"4px 10px", background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, fontSize:12, cursor:"pointer" }}>
-                {it.name}{it.quantity > 1 ? ` ×${it.quantity}` : ""}
-                <span style={{ color:"var(--danger)", fontSize:14, lineHeight:1 }}>×</span>
+      {inv.length>0 && (
+        <div style={{marginTop:20}}>
+          <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Current Inventory ({inv.length})</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {inv.map(it=>(
+              <span key={it.id} onClick={()=>removeItem(it.id)} style={{display:"inline-flex",alignItems:"center",gap:4,padding:"4px 10px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:10,fontSize:12,cursor:"pointer"}}>
+                {it.name}{it.quantity>1?` ×${it.quantity}`:""}<span style={{color:"var(--danger)",fontSize:14,lineHeight:1}}>×</span>
               </span>
             ))}
           </div>
@@ -944,30 +1014,28 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
       )}
 
       {/* ── Currency editor ── */}
-      <div style={{ marginTop:20, padding:"14px 16px", background:"var(--card)", border:"1px solid var(--border)", borderRadius:10 }}>
-        <div style={{ fontSize:12, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>Currency</div>
-        <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
-          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([coin,label,color]) => (
-            <div key={coin} style={{ textAlign:"center" }}>
-              <div style={{ width:28,height:28,borderRadius:"50%",background:color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333" }}>{coin.toUpperCase()}</div>
-              <input type="number" value={currency[coin]||0} onChange={e=>setCurrency(coin,e.target.value)}
-                style={{ ...inp, width:72, textAlign:"center", fontSize:15, padding:"4px 0" }}/>
-              <div style={{ fontSize:10, color:"var(--text-muted)", marginTop:2 }}>{label}</div>
+      <div style={{marginTop:20,padding:"14px 16px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:10}}>
+        <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Currency</div>
+        <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([coin,label,color])=>(
+            <div key={coin} style={{textAlign:"center"}}>
+              <div style={{width:28,height:28,borderRadius:"50%",background:color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{coin.toUpperCase()}</div>
+              <input type="number" value={currency[coin]||0} onChange={e=>setCurrency(coin,e.target.value)} style={{...inp,width:72,textAlign:"center",fontSize:15,padding:"4px 0"}}/>
+              <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{label}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Custom item adder ── */}
-      <div style={{ marginTop:16 }}>
-        <div style={{ fontSize:12, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Add Custom Item</div>
-        <div style={{ display:"grid", gridTemplateColumns:"3fr 1fr auto", gap:8 }}>
-          <input style={{...inp, width:"100%"}} value={customName} onChange={e=>setCustomName(e.target.value)}
-            placeholder="Item name…" onKeyDown={e=>e.key==="Enter"&&addCustom()} />
-          <select style={{...inp, width:"100%"}} value={customType} onChange={e=>setCustomType(e.target.value)}>
+      <div style={{marginTop:16}}>
+        <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Custom Item</div>
+        <div style={{display:"grid",gridTemplateColumns:"3fr 1fr auto",gap:8}}>
+          <input style={{...inp,width:"100%"}} value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="Item name…" onKeyDown={e=>e.key==="Enter"&&addCustom()}/>
+          <select style={{...inp,width:"100%"}} value={customType} onChange={e=>setCustomType(e.target.value)}>
             {Object.entries(itemTypes||{}).map(([k,v])=><option key={k} value={k}>{v.label||k}</option>)}
           </select>
-          <button onClick={addCustom} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13, whiteSpace:"nowrap" }}>Add</button>
+          <button onClick={addCustom} style={{padding:"8px 16px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:13,whiteSpace:"nowrap"}}>Add</button>
         </div>
       </div>
     </div>
@@ -2108,6 +2176,43 @@ function SpellsTab({ char, gameData, onUpdate }) {
 }
 
 // ============================================================
+// PERSONAL ITEMS SECTION (used in InventoryTab)
+// ============================================================
+function PersonalItemsSection({ char, onUpdate }) {
+  const [newPersonal, setNewPersonal] = useState("");
+  const personal = char.personalItems || [];
+  const add = () => {
+    if (!newPersonal) return;
+    onUpdate({ ...char, personalItems:[...personal, {id:Date.now(), name:newPersonal, description:""}] });
+    setNewPersonal("");
+  };
+  const rem = id => onUpdate({ ...char, personalItems: personal.filter(p => p.id !== id) });
+  return (
+    <div style={{ marginTop:24 }}>
+      <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:10, paddingTop:16, borderTop:"1px solid var(--border)" }}>
+        Personal Effects &amp; Mementos
+        <span style={{ color:"var(--text-dim)", fontSize:10, marginLeft:8, textTransform:"none", letterSpacing:0 }}>Trinkets, tokens, and flavour items</span>
+      </div>
+      {personal.length === 0 && <div style={{ fontSize:13, color:"var(--text-dim)", marginBottom:10 }}>None yet.</div>}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:10 }}>
+        {personal.map(p => (
+          <div key={p.id} style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 10px", background:"rgba(100,100,200,0.08)", border:"1px solid rgba(100,100,200,0.3)", borderRadius:8, fontSize:13 }}>
+            <span style={{ color:"var(--text)" }}>{p.name}</span>
+            <button onClick={() => rem(p.id)} style={{ background:"transparent", border:"none", color:"var(--danger)", cursor:"pointer", fontSize:14, lineHeight:1, padding:0 }}>×</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:"flex", gap:8 }}>
+        <input value={newPersonal} onChange={e => setNewPersonal(e.target.value)} placeholder="Add personal item, memento, or trinket…"
+          onKeyDown={e => e.key==="Enter"&&add()}
+          style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 12px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)" }}/>
+        <button onClick={add} style={{ padding:"7px 16px", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", borderRadius:6, cursor:"pointer", fontSize:13 }}>Add</button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // INVENTORY TAB
 // ============================================================
 function InventoryTab({ char, gameData, onUpdate }) {
@@ -2217,6 +2322,9 @@ function InventoryTab({ char, gameData, onUpdate }) {
           ))}
         </div>
       ))}
+
+      {/* Personal Items */}
+      <PersonalItemsSection char={char} onUpdate={onUpdate} />
     </div>
   );
 }
