@@ -780,24 +780,72 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   });
 
   // ── Per-step completeness ──
-  const stepComplete = [
-    // 0 Identity
-    !!char.name,
-    // 1 Class
-    !!char.class && !!(char.level >= 1),
-    // 2 Background
-    !!char.background,
-    // 3 Species
-    !!char.species,
-    // 4 Abilities — always considered optional (just rolling/assigning)
-    true,
-    // 5 Equipment — always optional
-    true,
-    // 6 Finalise — always true
-    true,
-  ];
+  // Checks whether each step has all its required choices made,
+  // including detecting when proficiencies from one step have been
+  // displaced by choices on another step.
 
-  // Show ! on steps that are incomplete AND come before (or equal to) the current step
+  const skillsFromSource = src =>
+    Object.entries(char.skillProfSources || {}).filter(([,s]) => s === src).map(([sk]) => sk);
+
+  const requiredProfCountForStep = (stepIdx) => {
+    // Returns { required, have } for skill proficiency on that step, or null if N/A
+    if (stepIdx === 1 && classData) {
+      const feat = classData.features?.find(f => f.type === "proficiency_choice");
+      if (feat) return { required: feat.count || 0, have: skillsFromSource(`${char.class} Class`).length };
+    }
+    if (stepIdx === 2 && bgData) {
+      const feat = bgData.features?.find(f => f.type === "proficiency_choice");
+      if (feat) return { required: feat.count || 0, have: skillsFromSource("Background").length };
+    }
+    if (stepIdx === 3 && speciesData) {
+      const feat = speciesData.features?.find(f => f.type === "proficiency_choice");
+      if (feat) return { required: feat.count || 0, have: skillsFromSource("Species").length };
+    }
+    return null;
+  };
+
+  const stepComplete = STEPS.map((_, i) => {
+    switch(i) {
+      case 0: return !!char.name;
+      case 1: {
+        if (!char.class) return false;
+        const pc = requiredProfCountForStep(1);
+        if (pc && pc.have < pc.required) return false;
+        // Also check required feature choices at this level are made
+        const missingChoice = allClassFeatures.some(f => {
+          if ((char.level||1) < f.level) return false; // locked, ignore
+          if (f.type === "choice" || f.type === "subclass_choice") return !char.featureChoices?.[f.name] && f.type !== "subclass_choice" ? false : f.type === "subclass_choice" ? !char.subclass : !char.featureChoices?.[f.name];
+          return false;
+        });
+        return true; // choices are indicated inline, not blocking step completion
+      }
+      case 2: {
+        if (!char.background) return false;
+        const pc = requiredProfCountForStep(2);
+        if (pc && pc.have < pc.required) return false;
+        return true;
+      }
+      case 3: {
+        if (!char.species) return false;
+        const pc = requiredProfCountForStep(3);
+        if (pc && pc.have < pc.required) return false;
+        // Check asi_points complete
+        const asiFeature = speciesData?.features?.find(f => f.type === "asi_points");
+        if (asiFeature) {
+          const chosen = Object.values(char.speciesAbilityChoices || {}).filter(v => v > 0).length;
+          if (chosen < (asiFeature.points || 2)) return false;
+        }
+        return true;
+      }
+      case 4: return true; // Abilities optional
+      case 5: return true; // Equipment optional
+      case 6: return true;
+      default: return true;
+    }
+  });
+
+
+  // Show ! on steps that are incomplete AND at or before the current step
   const StepBar = () => (
     <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
       {STEPS.map((name, i) => {
@@ -832,7 +880,6 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
         );
       })}
     </div>
-  );
   );
 
   return (
