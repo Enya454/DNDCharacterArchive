@@ -351,24 +351,31 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           {/* Language choice */}
           {!locked && feature.type === "language_choice" && (() => {
             const autoLangs = autoLanguages || [];
-            // Chosen languages that are NOT auto-granted count against this feature's slots.
-            // Auto-granted ones are shown locked and don't use a slot here.
-            const chosenByUser = (languages || []).filter(l => !autoLangs.includes(l));
-            const remaining = feature.count - chosenByUser.length;
+            // Languages the user explicitly chose that are NOT auto-granted count against slots.
+            // If a user chose a language that is now auto-granted by their species,
+            // that choice is "covered" — the slot is freed and they can pick something else.
+            const userChosen = (languages || []).filter(l => !autoLangs.includes(l));
+            const coveredBySpecies = (languages || []).filter(l => autoLangs.includes(l));
+            const remaining = feature.count - userChosen.length;
             const isComplete = remaining <= 0;
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
                   Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> language(s).
+                  {coveredBySpecies.length > 0 && (
+                    <span style={{ color:"var(--info)", marginLeft:6, fontSize:12 }}>
+                      ({coveredBySpecies.join(", ")} covered by species — slot freed)
+                    </span>
+                  )}
                   {isComplete
                     ? <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>
                     : <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({remaining} remaining)</span>}
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
                   {(languageList || []).map(lang => {
-                    const isAuto   = autoLangs.includes(lang);
-                    const isChosen = chosenByUser.includes(lang);
-                    const canAdd   = !isAuto && (isChosen || remaining > 0);
+                    const isAuto    = autoLangs.includes(lang);
+                    const isChosen  = userChosen.includes(lang);
+                    const canAdd    = !isAuto && (isChosen || remaining > 0);
                     return (
                       <div key={lang} onClick={() => !isAuto && canAdd && onLanguageChoice(lang)} style={{
                         padding:"6px 10px", borderRadius:6, fontSize:13, transition:"all 0.15s",
@@ -1060,11 +1067,15 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
 
             {speciesData && (
               <div style={{ marginTop:20 }}>
-                {/* Auto-granted languages */}
+                {/* Auto-granted languages — shown as context, not separate from picker */}
                 {autoLangs.length > 0 && (
                   <div style={{ ...ws.card, fontSize:13 }}>
-                    <span style={{ color:"var(--text-muted)" }}>Automatically known languages: </span>
-                    {autoLangs.map(l => <span key={l} style={ws.tag}>{l}</span>)}
+                    <span style={{ color:"var(--text-muted)" }}>Automatically known (shown locked in language pickers): </span>
+                    {autoLangs.map(l => (
+                      <span key={l} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 10px", background:"rgba(100,100,200,0.12)", border:"1px solid var(--info)", borderRadius:12, color:"var(--info)", fontSize:12, margin:"3px 4px 3px 0" }}>
+                        🔒 {l}
+                      </span>
+                    ))}
                   </div>
                 )}
                 {/* Fixed ability bonuses */}
