@@ -235,7 +235,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
       case "expertise_choice":   return (expertiseProfs || []).length >= (feature.count || 0);
       case "language_choice":    return (languages || []).length >= (feature.count || 0);
       case "asi":                return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
-      case "asi_points":         return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= (feature.points || 2);
+      case "asi_points":         return Object.values(asiChoices?.[feature.name] || {}).filter(v=>v>0).length >= (feature.points || 2);
       default:                   return true;
     }
   })();
@@ -422,7 +422,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
-                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong> across any abilities{excluded.length?` (not ${excluded.map(ab=>ABILITY_SHORT[ab]).join(", ")})`:""}. You can stack points on the same ability.
+                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong> — one point per ability, across {totalPts} different abilities{excluded.length?` (not ${excluded.map(ab=>ABILITY_SHORT[ab]).join(", ")})`:""}.
                   {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
                            : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
                 </div>
@@ -431,6 +431,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     const base = currentAbilities?.[ab] || 10;
                     const bonus = asi[ab] || 0;
                     const total = base + bonus;
+                    const atMax = bonus >= 1; // max +1 per ability for asi_points (species flex bonus)
                     return (
                       <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
                         background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
@@ -441,8 +442,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
                           <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
                             style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
-                          <button onClick={() => { if(rem<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0?"pointer":"not-allowed",fontSize:14,opacity:rem>0?1:0.3,lineHeight:1 }}>+</button>
+                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
                         </div>
                       </div>
                     );
@@ -551,6 +552,93 @@ function AbilityRoller({ abilities, onChange }) {
           ))}</div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ============================================================
+// WIZARD SUB-COMPONENTS (must be proper components, not IIFEs,
+// so React hooks work correctly)
+// ============================================================
+function WizardEquipmentAdder({ char, setChar, gameData }) {
+  const { itemTypes } = gameData;
+  const [name, setName] = useState("");
+  const [type, setType] = useState("weapon");
+  const inv = char.inventory || [];
+  const addItem = () => {
+    if (!name) return;
+    setChar(c => ({ ...c, inventory:[...c.inventory, { id:Date.now(), name, type, quantity:1, weight:0, description:"", equipped:false }] }));
+    setName("");
+  };
+  return (
+    <div>
+      <div style={{ display:"grid", gridTemplateColumns:"3fr 1fr auto", gap:8, marginBottom:8 }}>
+        <input style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"10px 14px", borderRadius:8, fontSize:13, fontFamily:"var(--font-body)", boxSizing:"border-box" }}
+          value={name} onChange={e => setName(e.target.value)}
+          placeholder="Item name…" onKeyDown={e => e.key === "Enter" && addItem()} />
+        <select style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"10px 14px", borderRadius:8, fontSize:13, fontFamily:"var(--font-body)", boxSizing:"border-box" }}
+          value={type} onChange={e => setType(e.target.value)}>
+          {Object.entries(itemTypes || {}).map(([k, v]) => <option key={k} value={k}>{v.label || k}</option>)}
+        </select>
+        <button onClick={addItem} style={{ padding:"10px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13, whiteSpace:"nowrap" }}>Add</button>
+      </div>
+      {inv.length > 0 && (
+        <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+          {inv.map(item => (
+            <span key={item.id} onClick={() => setChar(c => ({ ...c, inventory:c.inventory.filter(i => i.id !== item.id) }))}
+              style={{ display:"inline-block", padding:"3px 10px", background:"var(--bg)", border:"1px solid var(--accent2)", borderRadius:12, color:"var(--accent)", fontSize:12, margin:"3px 4px 3px 0", cursor:"pointer" }}>
+              {item.name} ×
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WizardSpellPicker({ char, setChar, gameData }) {
+  const classSpells = gameData.spells?.[char.class] || [];
+  const [filter, setFilter] = useState("all");
+  const known = char.spells || [];
+  const displayed = classSpells.filter(sp => filter === "all" || sp.level === +filter);
+  const toggleKnown = spell => {
+    const isK = known.some(s => s.name === spell.name);
+    setChar(c => ({ ...c, spells: isK ? c.spells.filter(s => s.name !== spell.name) : [...c.spells, { ...spell, prepared:false }] }));
+  };
+  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+    border:`1px solid ${a ? "var(--accent)" : "var(--border)"}`,
+    background: a ? "var(--accent)" : "transparent", color: a ? "var(--bg)" : "var(--text-muted)" });
+  if (classSpells.length === 0) return <p style={{ fontSize:13, color:"var(--text-muted)" }}>No spells listed for {char.class} in tome-data.json yet.</p>;
+  return (
+    <div>
+      {known.length > 0 && (
+        <div style={{ marginBottom:12 }}>
+          <span style={{ fontSize:12, color:"var(--text-muted)" }}>Chosen: </span>
+          {known.map(s => <span key={s.name} onClick={() => toggleKnown(s)} style={{ display:"inline-block", padding:"3px 10px", background:"var(--bg)", border:"1px solid var(--accent2)", borderRadius:12, color:"var(--accent)", fontSize:12, margin:"3px 4px 3px 0", cursor:"pointer" }}>{s.name} ×</span>)}
+        </div>
+      )}
+      <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
+        {["all","0","1","2","3","4","5"].map(l =>
+          <button key={l} style={fBtn(filter === l)} onClick={() => setFilter(l)}>
+            {l === "all" ? "All" : l === "0" ? "Cantrips" : `Lvl ${l}`}
+          </button>)}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(175px,1fr))", gap:6 }}>
+        {displayed.map(spell => {
+          const isK = known.some(s => s.name === spell.name);
+          return (
+            <div key={spell.name} onClick={() => toggleKnown(spell)} style={{
+              padding:"8px 12px", borderRadius:6, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+              border:`1px solid ${isK ? "var(--accent)" : "var(--border)"}`,
+              background: isK ? "rgba(201,162,39,0.1)" : "var(--surface)",
+              color: isK ? "var(--accent)" : "var(--text)"
+            }}>
+              {isK ? "✓ " : ""}{spell.name}
+              <span style={{ fontSize:10, color:"var(--text-muted)", marginLeft:6 }}>{spell.level === 0 ? "C" : `L${spell.level}`}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -691,21 +779,60 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     currentAbilities: char.abilities,
   });
 
+  // ── Per-step completeness ──
+  const stepComplete = [
+    // 0 Identity
+    !!char.name,
+    // 1 Class
+    !!char.class && !!(char.level >= 1),
+    // 2 Background
+    !!char.background,
+    // 3 Species
+    !!char.species,
+    // 4 Abilities — always considered optional (just rolling/assigning)
+    true,
+    // 5 Equipment — always optional
+    true,
+    // 6 Finalise — always true
+    true,
+  ];
 
-  // Step indicator dots
+  // Show ! on steps that are incomplete AND come before (or equal to) the current step
   const StepBar = () => (
     <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
-      {STEPS.map((name, i) => (
-        <div key={i} onClick={() => i < step && setStep(i)} style={{
-          padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
-          letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s",
-          cursor: i < step ? "pointer" : "default",
-          border: i === step ? "1px solid var(--accent)" : "1px solid var(--border)",
-          background: i === step ? "var(--accent)" : i < step ? "var(--accent2)" : "var(--surface)",
-          color: i <= step ? "var(--bg)" : "var(--text-muted)"
-        }}>{i+1}. {name}</div>
-      ))}
+      {STEPS.map((name, i) => {
+        const isCurrent = i === step;
+        const incomplete = !stepComplete[i] && i <= step;
+        return (
+          <div key={i} onClick={() => setStep(i)} style={{
+            padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
+            letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s", cursor:"pointer",
+            border: isCurrent
+              ? `1px solid var(--accent)`
+              : incomplete
+                ? "1px solid #e67e22"
+                : "1px solid var(--border)",
+            background: isCurrent
+              ? "var(--accent)"
+              : incomplete
+                ? "rgba(230,126,34,0.15)"
+                : i < step
+                  ? "var(--accent2)"
+                  : "var(--surface)",
+            color: isCurrent
+              ? "var(--bg)"
+              : incomplete
+                ? "#e67e22"
+                : i < step
+                  ? "var(--bg)"
+                  : "var(--text-muted)"
+          }}>
+            {incomplete ? "! " : ""}{i+1}. {name}
+          </div>
+        );
+      })}
     </div>
+  );
   );
 
   return (
@@ -979,92 +1106,15 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
               <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 14px" }}>
                 Add your starting gear. You can always edit inventory on the character sheet later.
               </p>
-              {/* Quick inventory adder */}
-              {(() => {
-                const { itemTypes } = gameData;
-                const inv = char.inventory || [];
-                const [name, setName] = useState("");
-                const [type, setType] = useState("weapon");
-                const addItem = () => {
-                  if (!name) return;
-                  setChar(c => ({ ...c, inventory:[...c.inventory, { id:Date.now(), name, type, quantity:1, weight:0, description:"", equipped:false }] }));
-                  setName("");
-                };
-                return (
-                  <div>
-                    <div style={{ display:"grid", gridTemplateColumns:"3fr 1fr auto", gap:8, marginBottom:8 }}>
-                      <input style={{ ...ws.input, fontSize:13 }} value={name} onChange={e => setName(e.target.value)}
-                        placeholder="Item name…" onKeyDown={e => e.key === "Enter" && addItem()} />
-                      <select style={{ ...ws.input, fontSize:13 }} value={type} onChange={e => setType(e.target.value)}>
-                        {Object.entries(itemTypes || {}).map(([k, v]) => <option key={k} value={k}>{v.label || k}</option>)}
-                      </select>
-                      <button onClick={addItem} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13, whiteSpace:"nowrap" }}>Add</button>
-                    </div>
-                    {inv.length > 0 && (
-                      <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-                        {inv.map(item => (
-                          <span key={item.id} onClick={() => setChar(c => ({ ...c, inventory:c.inventory.filter(i => i.id !== item.id) }))}
-                            style={{ ...ws.tag, cursor:"pointer" }}>{item.name} ×</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              <WizardEquipmentAdder char={char} setChar={setChar} gameData={gameData} />
             </div>
-
             {classData?.spellcaster && (
               <div style={{ ...ws.card, marginTop:14 }}>
                 <div style={ws.secTitle}>Starting Spells</div>
                 <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 14px" }}>
                   Pick spells from your class list. You can add more later on the sheet.
                 </p>
-                {(() => {
-                  const classSpells = gameData.spells?.[char.class] || [];
-                  const [filter, setFilter] = useState("all");
-                  const known = char.spells || [];
-                  const displayed = classSpells.filter(sp => filter === "all" || sp.level === +filter);
-                  const toggleKnown = spell => {
-                    const isK = known.some(s => s.name === spell.name);
-                    setChar(c => ({ ...c, spells: isK ? c.spells.filter(s => s.name !== spell.name) : [...c.spells, { ...spell, prepared:false }] }));
-                  };
-                  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
-                    border:`1px solid ${a ? "var(--accent)" : "var(--border)"}`,
-                    background: a ? "var(--accent)" : "transparent", color: a ? "var(--bg)" : "var(--text-muted)" });
-                  if (classSpells.length === 0) return <p style={{ fontSize:13, color:"var(--text-muted)" }}>No spells listed for {char.class} in tome-data.json yet.</p>;
-                  return (
-                    <div>
-                      {known.length > 0 && (
-                        <div style={{ marginBottom:12 }}>
-                          <span style={{ fontSize:12, color:"var(--text-muted)" }}>Chosen: </span>
-                          {known.map(s => <span key={s.name} onClick={() => toggleKnown(s)} style={{ ...ws.tag, cursor:"pointer" }}>{s.name} ×</span>)}
-                        </div>
-                      )}
-                      <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
-                        {["all","0","1","2","3","4","5"].map(l =>
-                          <button key={l} style={fBtn(filter === l)} onClick={() => setFilter(l)}>
-                            {l === "all" ? "All" : l === "0" ? "Cantrips" : `Lvl ${l}`}
-                          </button>)}
-                      </div>
-                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(175px,1fr))", gap:6 }}>
-                        {displayed.map(spell => {
-                          const isK = known.some(s => s.name === spell.name);
-                          return (
-                            <div key={spell.name} onClick={() => toggleKnown(spell)} style={{
-                              padding:"8px 12px", borderRadius:6, cursor:"pointer", fontSize:13, transition:"all 0.15s",
-                              border:`1px solid ${isK ? "var(--accent)" : "var(--border)"}`,
-                              background: isK ? "rgba(201,162,39,0.1)" : "var(--surface)",
-                              color: isK ? "var(--accent)" : "var(--text)"
-                            }}>
-                              {isK ? "✓ " : ""}{spell.name}
-                              <span style={{ fontSize:10, color:"var(--text-muted)", marginLeft:6 }}>{spell.level === 0 ? "C" : `L${spell.level}`}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <WizardSpellPicker char={char} setChar={setChar} gameData={gameData} />
               </div>
             )}
           </div>
