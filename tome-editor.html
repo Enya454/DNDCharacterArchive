@@ -101,8 +101,10 @@ const FEAT_TYPES = [
   ["proficiency_choice","Skill Proficiency Choice"],
   ["expertise_choice","Expertise Choice"],
   ["language_choice","Language Choice"],
-  ["asi","ASI (+2 / +1+1)"],
+  ["asi","ASI (+2 / +1+1 or Feat)"],
   ["asi_points","Species Flexible ASI"],
+  ["spell_grant","Spell Grant (auto-granted spells at levels)"],
+  ["spell_choice","Spell Choice (pick from a class list)"],
 ];
 const ABILITY_KEYS = ["str","dex","con","int","wis","cha"];
 const ABILITY_SHORT = {str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA"};
@@ -146,6 +148,44 @@ function FeatureEditor({feat, onChange, onRemove, index}) {
         {feat.type==="asi_points"&&<div style={{marginBottom:10}}>
           <label style={label}>Excluded abilities (comma-separated keys e.g. cha)</label>
           <input value={(feat.exclude||[]).join(", ")} onChange={e=>upd("exclude",e.target.value.split(",").map(s=>s.trim()).filter(Boolean))} style={inp}/>
+        </div>}
+
+        {/* spell_grant sub-editor */}
+        {feat.type==="spell_grant"&&<div style={{marginBottom:10}}>
+          <Select label="Spellcasting Ability" value={feat.spellcastingAbility||"cha"} onChange={v=>upd("spellcastingAbility",v)}
+            options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>
+          <label style={{...label,marginTop:8}}>Granted Spells</label>
+          {(feat.grants||[]).map((grant,gi)=>(
+            <div key={gi} style={{display:"grid",gridTemplateColumns:"1fr 80px auto",gap:6,marginBottom:6,alignItems:"center"}}>
+              <input value={grant.spellName||""} onChange={e=>{
+                const g=[...(feat.grants||[])]; g[gi]={...g[gi],spellName:e.target.value}; upd("grants",g);
+              }} placeholder="Spell name…" style={{...inp,fontSize:12}}/>
+              <div>
+                <div style={{fontSize:10,color:T.muted,marginBottom:2}}>Min level</div>
+                <input type="number" min={1} max={20} value={grant.minCharLevel||1} onChange={e=>{
+                  const g=[...(feat.grants||[])]; g[gi]={...g[gi],minCharLevel:+e.target.value}; upd("grants",g);
+                }} style={{...inp,fontSize:12,textAlign:"center"}}/>
+              </div>
+              <button onClick={()=>upd("grants",(feat.grants||[]).filter((_,i)=>i!==gi))}
+                style={{...btn("danger"),padding:"4px 8px",fontSize:11,marginTop:14}}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>upd("grants",[...(feat.grants||[]),{spellName:"",minCharLevel:1}])}
+            style={{...btn(),fontSize:12,width:"100%",marginTop:4}}>+ Add Spell Grant</button>
+        </div>}
+
+        {/* spell_choice sub-editor */}
+        {feat.type==="spell_choice"&&<div style={{marginBottom:10}}>
+          <Grid>
+            <Field label="Spell List (class name, e.g. Wizard)" value={feat.spellList||""} onChange={v=>upd("spellList",v)}/>
+            <Select label="Spellcasting Ability" value={feat.spellcastingAbility||"int"} onChange={v=>upd("spellcastingAbility",v)}
+              options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>
+          </Grid>
+          <Grid>
+            <Field label="Spell Level (0=cantrips only, blank=any)" value={feat.spellLevel!==undefined?feat.spellLevel:""} onChange={v=>upd("spellLevel",v===""?undefined:+v)} type="number"/>
+            <Field label="Max Spell Level (for range)" value={feat.maxLevel||""} onChange={v=>upd("maxLevel",v===''?undefined:+v)} type="number" placeholder="Leave blank if using exact level"/>
+          </Grid>
+          <Field label="Count (how many to pick)" value={feat.count||1} onChange={v=>upd("count",+v)} type="number"/>
         </div>}
       </div>}
     </Card>
@@ -238,10 +278,279 @@ function SpeciesEditor({data,onChange}) {
           <AddTag placeholder="Add language…" onAdd={v=>upd("autoLanguages",[...(sp.autoLanguages||[]),v])}/>
         </div>
         <div style={{marginLeft:28}}>
-          <label style={label}>Features</label>
+          <label style={label}>Base Species Features</label>
           <FeatureList features={sp.features||[]} onChange={v=>upd("features",v)}/>
         </div>
+
+        {/* Subraces section */}
+        <SubraceEditor subraces={sp.subraces||{}} onChange={v=>upd("subraces",v)} speciesName={sel}/>
       </div>}
+    </div>
+  );
+}
+
+// ── Subrace Editor (used inside SpeciesEditor) ──
+function SubraceEditor({ subraces, onChange, speciesName }) {
+  const [subSel, setSubSel] = useState("");
+  const [newName, setNewName] = useState("");
+
+  const addSub = () => {
+    if (!newName.trim()) return;
+    onChange({ ...subraces, [newName.trim()]: { abilityBonuses:{}, autoLanguages:[], features:[] } });
+    setSubSel(newName.trim()); setNewName("");
+  };
+  const delSub = name => {
+    const s = {...subraces}; delete s[name]; onChange(s); setSubSel("");
+  };
+  const updSub = (name, val) => onChange({ ...subraces, [name]: val });
+  const updBonus = (name, ab, val) => {
+    const b = {...(subraces[name].abilityBonuses||{}), [ab]:+val};
+    if (!b[ab]) delete b[ab];
+    updSub(name, { ...subraces[name], abilityBonuses:b });
+  };
+
+  return (
+    <div style={{marginTop:20,paddingTop:16,borderTop:`1px solid ${T.border}`}}>
+      <div style={sectionHead}>Subraces for {speciesName}</div>
+      {/* Subrace pills */}
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+        {Object.keys(subraces).map(n=>(
+          <button key={n} onClick={()=>setSubSel(subSel===n?"":n)} style={{...btn(subSel===n?"primary":"default"),fontSize:12}}>
+            {n}
+          </button>
+        ))}
+        <div style={{display:"flex",gap:4}}>
+          <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="New subrace…"
+            style={{...inp,width:160,fontSize:12,padding:"5px 8px"}} onKeyDown={e=>e.key==="Enter"&&addSub()}/>
+          <button onClick={addSub} style={{...btn("primary"),padding:"5px 10px",fontSize:12}}>+</button>
+        </div>
+      </div>
+
+      {subSel && subraces[subSel] && (
+        <Card highlight>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <span style={{fontFamily:T.display,color:T.accent,fontSize:15}}>{subSel}</span>
+            <button onClick={()=>delSub(subSel)} style={{...btn("danger"),fontSize:12}}>Delete Subrace</button>
+          </div>
+          {/* Ability bonuses */}
+          <div style={{marginBottom:12}}>
+            <label style={label}>Ability Bonuses</label>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6}}>
+              {ABILITY_KEYS.map(ab=>(
+                <div key={ab} style={{textAlign:"center"}}>
+                  <div style={{fontSize:10,color:T.muted,textTransform:"uppercase",marginBottom:3}}>{ABILITY_SHORT[ab]}</div>
+                  <input type="number" value={subraces[subSel].abilityBonuses?.[ab]||0}
+                    onChange={e=>updBonus(subSel,ab,e.target.value)}
+                    style={{...inp,textAlign:"center",padding:"4px 0",fontSize:14}}/>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Auto-languages */}
+          <div style={{marginBottom:12}}>
+            <label style={label}>Auto-granted Languages</label>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:4}}>
+              {(subraces[subSel].autoLanguages||[]).map(l=>(
+                <Tag key={l} text={l} onRemove={()=>updSub(subSel,{...subraces[subSel],autoLanguages:(subraces[subSel].autoLanguages||[]).filter(x=>x!==l)})}/>
+              ))}
+            </div>
+            <AddTag placeholder="Add language…" onAdd={v=>updSub(subSel,{...subraces[subSel],autoLanguages:[...(subraces[subSel].autoLanguages||[]),v]})}/>
+          </div>
+          {/* Features */}
+          <div style={{marginLeft:28}}>
+            <label style={label}>Subrace Features</label>
+            <FeatureList
+              features={subraces[subSel].features||[]}
+              onChange={v=>updSub(subSel,{...subraces[subSel],features:v})}
+            />
+          </div>
+        </Card>
+      )}
+      {Object.keys(subraces).length === 0 && (
+        <div style={{fontSize:12,color:T.dim,fontStyle:"italic"}}>No subraces yet — add one above if this species has variants.</div>
+      )}
+    </div>
+  );
+}
+
+// ── Spellcasting Table Editor ──
+// Edits the full spellcastingTable object on a class or subclass.
+function SpellcastingTableEditor({ table, onChange }) {
+  const type     = table.type     || "known";
+  const ability  = table.spellcastingAbility || "int";
+  const formula  = table.preparedFormula || "level + abilityModifier";
+  const tbl      = table.table || {};
+
+  const updTop = (key, val) => onChange({ ...table, [key]: val });
+
+  // Ensure we always have all 20 rows
+  const ensureRow = (lvl) => {
+    const existing = tbl[String(lvl)] || {};
+    return {
+      cantrips:    existing.cantrips    ?? 0,
+      spellsKnown: existing.spellsKnown ?? 0,
+      slots:       existing.slots       ?? [0,0,0,0,0,0,0,0,0],
+      pactSlotLevel: existing.pactSlotLevel ?? 1,
+      pactSlots:   existing.pactSlots   ?? 1,
+    };
+  };
+
+  const setCell = (lvl, key, val) => {
+    const row = ensureRow(lvl);
+    const newRow = { ...row, [key]: val };
+    onChange({ ...table, table: { ...tbl, [String(lvl)]: newRow } });
+  };
+
+  const setSlot = (lvl, slotIdx, val) => {
+    const row  = ensureRow(lvl);
+    const slots = [...(row.slots || [0,0,0,0,0,0,0,0,0])];
+    slots[slotIdx] = Math.max(0, +val || 0);
+    onChange({ ...table, table: { ...tbl, [String(lvl)]: { ...row, slots } } });
+  };
+
+  // Fill down from a row (convenience for monotonically increasing tables)
+  const fillDown = (fromLvl, key, val) => {
+    const newTbl = { ...tbl };
+    for (let i = fromLvl; i <= 20; i++) {
+      const row = ensureRow(i);
+      newTbl[String(i)] = { ...row, [key]: val };
+    }
+    onChange({ ...table, table: newTbl });
+  };
+  const fillSlotDown = (fromLvl, slotIdx, val) => {
+    const newTbl = { ...tbl };
+    for (let i = fromLvl; i <= 20; i++) {
+      const row  = ensureRow(i);
+      const slots = [...(row.slots || [0,0,0,0,0,0,0,0,0])];
+      slots[slotIdx] = Math.max(0, +val || 0);
+      newTbl[String(i)] = { ...row, slots };
+    }
+    onChange({ ...table, table: newTbl });
+  };
+
+  const isPrepared  = type === "prepared";
+  const isPact      = type === "pact";
+  const isKnown     = type === "known" || type === "known_third";
+  const showKnown   = isKnown;
+  const showPact    = isPact;
+
+  const cellInp = {
+    background:"transparent", border:"none", color:T.text, width:"100%",
+    textAlign:"center", fontSize:12, fontFamily:"monospace", padding:0,
+  };
+  const hdr = { padding:"4px 3px", fontSize:10, color:T.muted, textAlign:"center",
+    textTransform:"uppercase", letterSpacing:0.5, whiteSpace:"nowrap", background:"rgba(0,0,0,0.25)" };
+  const cell = (bg) => ({ padding:"2px 3px", textAlign:"center", background:bg||"transparent",
+    borderBottom:`1px solid ${T.border}`, borderRight:`1px solid ${T.border}` });
+
+  const SLOT_COLORS = ["#c0392b","#e67e22","#f39c12","#27ae60","#2980b9","#8e44ad","#16a085","#d35400","#7f8c8d"];
+
+  return (
+    <div style={{ background:T.surface, border:`1px solid ${T.accent}`, borderRadius:10, padding:16, marginBottom:20 }}>
+      <div style={{ fontFamily:T.display, color:T.accent, fontSize:13, marginBottom:14 }}>Spellcasting Table</div>
+
+      {/* Top-level settings */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:14 }}>
+        <Select label="Caster Type" value={type} onChange={v=>updTop("type",v)} options={[
+          ["known",       "Known (Bard, Sorcerer, Warlock, Ranger)"],
+          ["prepared",    "Prepared (Cleric, Druid, Wizard, Paladin)"],
+          ["pact",        "Pact Magic (Warlock)"],
+          ["known_third", "1/3 Caster (Arcane Trickster, Eldritch Knight)"],
+        ]}/>
+        <Select label="Spellcasting Ability" value={ability} onChange={v=>updTop("spellcastingAbility",v)}
+          options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>
+        {isPrepared && (
+          <Select label="Prepared Formula" value={formula} onChange={v=>updTop("preparedFormula",v)} options={[
+            ["level + abilityModifier",         "Level + ability modifier (Cleric, Druid, Wizard)"],
+            ["halfLevelRoundUp + abilityModifier","½ Level (round up) + ability modifier (Paladin)"],
+          ]}/>
+        )}
+      </div>
+
+      {isPrepared && (
+        <div style={{ marginBottom:12, padding:"8px 12px", background:"rgba(41,128,185,0.1)", border:`1px solid ${T.info}`, borderRadius:6, fontSize:12, color:T.info }}>
+          Prepared casters: players choose spells to prepare each day from their class spell list. Number prepared = {formula === "halfLevelRoundUp + abilityModifier" ? "½ level (round up)" : "level"} + {ABILITY_SHORT[ability]} modifier. No "spells known" column needed.
+        </div>
+      )}
+
+      {/* The table */}
+      <div style={{ overflowX:"auto" }}>
+        <table style={{ borderCollapse:"collapse", width:"100%", fontSize:12 }}>
+          <thead>
+            <tr>
+              <th style={{...hdr, width:32}}>Lvl</th>
+              <th style={{...hdr, width:52}}>Cantrips</th>
+              {showKnown  && <th style={{...hdr, width:56}}>Spells Known</th>}
+              {showPact   && <th style={{...hdr, width:52}}>Pact Slots</th>}
+              {showPact   && <th style={{...hdr, width:52}}>Slot Level</th>}
+              {[1,2,3,4,5,6,7,8,9].map(s=>(
+                <th key={s} style={{...hdr, width:34, color:SLOT_COLORS[s-1]}}>S{s}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({length:20},(_,i)=>i+1).map(lvl => {
+              const row = ensureRow(lvl);
+              const isEven = lvl % 2 === 0;
+              const rowBg = isEven ? "rgba(255,255,255,0.02)" : "transparent";
+              return (
+                <tr key={lvl} style={{ background:rowBg }}>
+                  {/* Level label */}
+                  <td style={{...cell(), fontFamily:T.display, color:T.accent, fontSize:11, padding:"3px 6px", textAlign:"center"}}>
+                    {lvl}
+                  </td>
+                  {/* Cantrips */}
+                  <td style={cell()}>
+                    <input type="number" min={0} max={10} value={row.cantrips}
+                      onChange={e=>setCell(lvl,"cantrips",Math.max(0,+e.target.value||0))}
+                      onDoubleClick={e=>fillDown(lvl,"cantrips",Math.max(0,+e.target.value||0))}
+                      style={cellInp} title="Double-click to fill down"/>
+                  </td>
+                  {/* Spells Known (known/known_third only) */}
+                  {showKnown && (
+                    <td style={cell()}>
+                      <input type="number" min={0} value={row.spellsKnown}
+                        onChange={e=>setCell(lvl,"spellsKnown",Math.max(0,+e.target.value||0))}
+                        onDoubleClick={e=>fillDown(lvl,"spellsKnown",Math.max(0,+e.target.value||0))}
+                        style={cellInp} title="Double-click to fill down"/>
+                    </td>
+                  )}
+                  {/* Pact slots */}
+                  {showPact && (
+                    <td style={cell()}>
+                      <input type="number" min={0} max={4} value={row.pactSlots}
+                        onChange={e=>setCell(lvl,"pactSlots",Math.max(0,+e.target.value||0))}
+                        onDoubleClick={e=>fillDown(lvl,"pactSlots",Math.max(0,+e.target.value||0))}
+                        style={cellInp} title="Double-click to fill down"/>
+                    </td>
+                  )}
+                  {showPact && (
+                    <td style={cell()}>
+                      <input type="number" min={1} max={5} value={row.pactSlotLevel}
+                        onChange={e=>setCell(lvl,"pactSlotLevel",Math.min(5,Math.max(1,+e.target.value||1)))}
+                        onDoubleClick={e=>fillDown(lvl,"pactSlotLevel",Math.min(5,Math.max(1,+e.target.value||1)))}
+                        style={cellInp} title="Double-click to fill down"/>
+                    </td>
+                  )}
+                  {/* Spell slots 1–9 */}
+                  {[0,1,2,3,4,5,6,7,8].map(si=>(
+                    <td key={si} style={cell(row.slots[si]>0?`rgba(${si<3?"192,57,43":si<6?"41,128,185":"142,68,173"},0.08)`:"")}>
+                      <input type="number" min={0} max={4} value={row.slots[si]||0}
+                        onChange={e=>setSlot(lvl,si,e.target.value)}
+                        onDoubleClick={e=>fillSlotDown(lvl,si,+e.target.value||0)}
+                        style={{...cellInp, color: row.slots[si]>0 ? SLOT_COLORS[si] : T.dim}}
+                        title="Double-click to fill down"/>
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ fontSize:11, color:T.dim, marginTop:8 }}>
+        Tip: double-click any cell to fill that value down to all remaining levels.
+      </div>
     </div>
   );
 }
@@ -329,14 +638,27 @@ function ClassEditor({data,onChange}) {
         </Grid>
         <Grid>
           <div>
-            <Check label="Spellcasting class" value={cls.spellcaster} onChange={v=>upd("spellcaster",v)}/>
-            {cls.spellcaster&&<Select label="Spellcasting Ability" value={cls.spellcastingAbility||"int"}
-              onChange={v=>upd("spellcastingAbility",v)} options={ABILITY_KEYS.map(ab=>[ab,ABILITY_SHORT[ab]])}/>}
+            <Check label="Spellcasting class" value={cls.spellcaster} onChange={v=>{
+              upd("spellcaster",v);
+              // Initialise a blank spellcasting table if enabling and none exists
+              if (v && !cls.spellcastingTable) {
+                const blankRow = {cantrips:0,spellsKnown:0,slots:[0,0,0,0,0,0,0,0,0]};
+                const table = {};
+                for (let i=1;i<=20;i++) table[String(i)] = JSON.parse(JSON.stringify(blankRow));
+                upd("spellcastingTable",{type:"known",spellcastingAbility:"int",table});
+              }
+            }}/>
           </div>
           <div>
             <Field label="Starting Gold Dice (e.g. 5d4)" value={cls.startingGoldDice} onChange={v=>upd("startingGoldDice",v)}/>
           </div>
         </Grid>
+
+        {/* Spellcasting table editor */}
+        {cls.spellcaster && <SpellcastingTableEditor
+          table={cls.spellcastingTable||{}}
+          onChange={v=>upd("spellcastingTable",v)}
+        />}
 
         {/* Class Features */}
         <div style={{marginBottom:20,marginLeft:28}}>
@@ -363,9 +685,19 @@ function ClassEditor({data,onChange}) {
             <Card highlight>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
                 <span style={{fontFamily:T.display,color:T.accent,fontSize:15}}>{subSel}</span>
-                <div style={{display:"flex",gap:8}}>
+                <div style={{display:"flex",gap:8,alignItems:"center"}}>
                   <Check label="Spellcaster" value={cls.subclasses[subSel].spellcaster}
-                    onChange={v=>updSub(subSel,{...cls.subclasses[subSel],spellcaster:v})}/>
+                    onChange={v=>{
+                      const sub = cls.subclasses[subSel];
+                      const updated = {...sub, spellcaster:v};
+                      if (v && !sub.spellcastingTable) {
+                        const blankRow = {cantrips:0,spellsKnown:0,slots:[0,0,0,0,0,0,0,0,0]};
+                        const table = {};
+                        for (let i=1;i<=20;i++) table[String(i)] = JSON.parse(JSON.stringify(blankRow));
+                        updated.spellcastingTable = {type:"known_third",spellcastingAbility:"int",table};
+                      }
+                      updSub(subSel, updated);
+                    }}/>
                   {cls.subclasses[subSel].spellcaster&&
                     <Select label="" value={cls.subclasses[subSel].spellcastingAbility||"int"}
                       onChange={v=>updSub(subSel,{...cls.subclasses[subSel],spellcastingAbility:v})}
@@ -373,6 +705,12 @@ function ClassEditor({data,onChange}) {
                   <button onClick={()=>delSub(subSel)} style={{...btn("danger"),fontSize:12}}>Delete</button>
                 </div>
               </div>
+              {cls.subclasses[subSel].spellcaster && (
+                <SpellcastingTableEditor
+                  table={cls.subclasses[subSel].spellcastingTable||{}}
+                  onChange={v=>updSub(subSel,{...cls.subclasses[subSel],spellcastingTable:v})}
+                />
+              )}
               <div style={{marginLeft:28}}>
                 <FeatureList features={cls.subclasses[subSel].features||[]}
                   onChange={v=>updSub(subSel,{...cls.subclasses[subSel],features:v})}/>
@@ -430,70 +768,127 @@ function BackgroundEditor({data,onChange}) {
 }
 
 // ── Spell Editor ──
-function SpellEditor({data,onChange}) {
-  const classes = Object.keys(data);
-  const [cls,setCls] = useState(classes[0]||"");
-  const [selIdx,setSelIdx] = useState(0);
-  const [search,setSearch] = useState("");
-  const [newCls,setNewCls] = useState("");
-  const spells = data[cls]||[];
-  const filtered = spells.filter(s=>s.name.toLowerCase().includes(search.toLowerCase()));
-  const sp = spells[selIdx]||null;
-  const upd = (key,val) => {
-    const a=[...spells]; a[selIdx]={...sp,[key]:val}; onChange({...data,[cls]:a});
+function SpellEditor({data, onChange, gameData}) {
+  // data is now a flat array of spells, each with a classes[] property
+  const spells = Array.isArray(data) ? data : [];
+  const allClasses = [...new Set(spells.flatMap(s => s.classes||[]))].sort();
+
+  const [classFilter, setClassFilter] = useState("all");
+  const [search,      setSearch]      = useState("");
+  const [selIdx,      setSelIdx]      = useState(0);
+  const [newSpellName,setNewSpellName] = useState("");
+
+  // Derive the list of all known class names from the classes section too
+  const knownClasses = gameData ? Object.keys(gameData.classes||{}) : allClasses;
+  const filterOptions = ["all", ...new Set([...allClasses, ...knownClasses])].sort((a,b)=>a==="all"?-1:a.localeCompare(b));
+
+  const filtered = spells.filter(s => {
+    const matchClass = classFilter === "all" || (s.classes||[]).includes(classFilter);
+    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase());
+    return matchClass && matchSearch;
+  });
+
+  const sp = spells[selIdx] || null;
+  const upd = (key, val) => {
+    const arr = [...spells]; arr[selIdx] = {...sp, [key]: val}; onChange(arr);
   };
+
   const addSpell = () => {
-    const a=[...spells,{name:"New Spell",level:0,school:"Evocation",castingTime:"1 action",range:"Self",components:"V, S",duration:"Instantaneous",description:""}];
-    onChange({...data,[cls]:a}); setSelIdx(a.length-1);
+    const name = newSpellName.trim() || "New Spell";
+    const arr = [...spells, {
+      name, level:0, school:"Evocation", castingTime:"1 action",
+      range:"Self", components:"V, S", duration:"Instantaneous",
+      description:"", classes: classFilter !== "all" ? [classFilter] : []
+    }];
+    onChange(arr);
+    setSelIdx(arr.length - 1);
+    setNewSpellName("");
   };
+
   const delSpell = () => {
-    const a=spells.filter((_,i)=>i!==selIdx);
-    onChange({...data,[cls]:a}); setSelIdx(Math.max(0,selIdx-1));
+    const arr = spells.filter((_, i) => i !== selIdx);
+    onChange(arr);
+    setSelIdx(Math.max(0, selIdx - 1));
   };
-  const addCls = () => {
-    if(!newCls.trim())return;
-    onChange({...data,[newCls.trim()]:[]});
-    setCls(newCls.trim()); setNewCls(""); setSelIdx(0);
+
+  const toggleClass = (cls) => {
+    const cur = sp.classes || [];
+    upd("classes", cur.includes(cls) ? cur.filter(c => c !== cls) : [...cur, cls]);
   };
+
   const SCHOOLS = ["Abjuration","Conjuration","Divination","Enchantment","Evocation","Illusion","Necromancy","Transmutation"];
+
   return (
-    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+    <div style={{display:"grid", gridTemplateColumns:"260px 1fr", gap:20}}>
+      {/* Left panel — filter + list */}
       <div>
-        <div style={sectionHead}>Spells</div>
-        <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
-          {classes.map(c=>(
-            <button key={c} onClick={()=>{setCls(c);setSelIdx(0);setSearch("");}} style={{...btn(cls===c?"primary":"default"),fontSize:11,padding:"3px 8px"}}>{c}</button>
-          ))}
-          <div style={{display:"flex",gap:4,marginTop:4,width:"100%"}}>
-            <input value={newCls} onChange={e=>setNewCls(e.target.value)} placeholder="New class list…" style={{...inp,flex:1,fontSize:11,padding:"4px 7px"}} onKeyDown={e=>e.key==="Enter"&&addCls()}/>
-            <button onClick={addCls} style={{...btn("primary"),padding:"4px 8px",fontSize:11}}>+</button>
+        <div style={sectionHead}>Spells ({spells.length} total)</div>
+
+        {/* Class filter pills */}
+        <div style={{marginBottom:8}}>
+          <label style={label}>Filter by class</label>
+          <div style={{display:"flex", gap:4, flexWrap:"wrap"}}>
+            {filterOptions.map(c=>(
+              <button key={c} onClick={()=>{setClassFilter(c);setSelIdx(0);}} style={{
+                padding:"3px 9px", borderRadius:20, cursor:"pointer", fontSize:11, transition:"all 0.15s",
+                border:`1px solid ${classFilter===c?T.accent:T.border}`,
+                background:classFilter===c?T.accent:T.surface,
+                color:classFilter===c?T.bg:T.muted
+              }}>{c==="all"?"All":c}</button>
+            ))}
           </div>
         </div>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search spells…" style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
-        <div style={{maxHeight:"50vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
-          {filtered.map((s,i)=>{
+
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search spells…"
+          style={{...inp, fontSize:12, padding:"6px 10px", marginBottom:8}}/>
+
+        <div style={{fontSize:11, color:T.muted, marginBottom:4}}>{filtered.length} spell{filtered.length!==1?"s":""} shown</div>
+
+        <div style={{maxHeight:"52vh", overflowY:"auto", display:"flex", flexDirection:"column", gap:3}}>
+          {filtered.map((s, fi) => {
             const realIdx = spells.indexOf(s);
+            const isSel   = selIdx === realIdx;
             return (
-              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
-                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
-                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,color:selIdx===realIdx?T.accent:T.text,
-                display:"flex",justifyContent:"space-between"}}>
-                <span>{s.name}</span>
-                <span style={{fontSize:10,color:T.muted}}>{s.level===0?"C":`L${s.level}`}</span>
+              <div key={fi} onClick={()=>setSelIdx(realIdx)} style={{
+                padding:"5px 8px", borderRadius:5, cursor:"pointer", fontSize:12,
+                background:isSel?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${isSel?T.accent:T.border}`, color:isSel?T.accent:T.text,
+                display:"flex", justifyContent:"space-between", alignItems:"center", gap:4
+              }}>
+                <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</span>
+                <span style={{display:"flex",gap:3,flexShrink:0}}>
+                  <span style={{fontSize:10,color:T.muted}}>{s.level===0?"C":`L${s.level}`}</span>
+                  {(s.classes||[]).length > 0 && (
+                    <span style={{fontSize:9,color:T.dim}}>·{(s.classes||[]).map(c=>c.slice(0,3)).join(",")}</span>
+                  )}
+                </span>
               </div>
             );
           })}
+          {filtered.length === 0 && <div style={{fontSize:12,color:T.dim,padding:"8px 0"}}>No spells match.</div>}
         </div>
-        <button onClick={addSpell} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Spell</button>
+
+        {/* Add new spell */}
+        <div style={{display:"flex", gap:5, marginTop:8}}>
+          <input value={newSpellName} onChange={e=>setNewSpellName(e.target.value)}
+            placeholder="New spell name…"
+            style={{...inp, flex:1, fontSize:12, padding:"5px 8px"}}
+            onKeyDown={e=>e.key==="Enter"&&addSpell()}/>
+          <button onClick={addSpell} style={{...btn("primary"), padding:"5px 10px", fontSize:12}}>+</button>
+        </div>
       </div>
-      {sp&&<div style={{overflowY:"auto",paddingRight:4}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{sp.name}</span>
-          <button onClick={delSpell} style={{...btn("danger"),fontSize:12}}>Delete</button>
+
+      {/* Right panel — spell editor */}
+      {sp && <div style={{overflowY:"auto", paddingRight:4}}>
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14}}>
+          <span style={{fontFamily:T.display, color:T.accent, fontSize:16}}>{sp.name}</span>
+          <button onClick={delSpell} style={{...btn("danger"), fontSize:12}}>Delete</button>
         </div>
+
         <Grid>
           <Field label="Name" value={sp.name} onChange={v=>upd("name",v)}/>
-          <Field label="Level (0=cantrip)" value={sp.level} onChange={v=>upd("level",+v)} type="number"/>
+          <Field label="Level (0 = cantrip)" value={sp.level} onChange={v=>upd("level",+v)} type="number"/>
         </Grid>
         <Grid>
           <Select label="School" value={sp.school} onChange={v=>upd("school",v)} options={SCHOOLS.map(s=>[s,s])}/>
@@ -505,8 +900,32 @@ function SpellEditor({data,onChange}) {
         </Grid>
         <Field label="Duration" value={sp.duration} onChange={v=>upd("duration",v)}/>
         <TextArea label="Description" value={sp.description} onChange={v=>upd("description",v)} rows={5}/>
-        <div style={{paddingTop:10,borderTop:`1px solid ${T.border}`,marginTop:4}}>
-          <label style={{...label,marginBottom:8}}>Combat Data (optional)</label>
+
+        {/* Class membership */}
+        <div style={{marginBottom:14}}>
+          <label style={label}>Available to classes</label>
+          <div style={{display:"flex", flexWrap:"wrap", gap:6}}>
+            {knownClasses.map(cls=>(
+              <label key={cls} style={{
+                display:"flex", alignItems:"center", gap:5, padding:"4px 10px",
+                borderRadius:6, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+                border:`1px solid ${(sp.classes||[]).includes(cls)?T.accent:T.border}`,
+                background:(sp.classes||[]).includes(cls)?`rgba(201,162,39,0.12)`:T.surface,
+              }}>
+                <input type="checkbox" checked={(sp.classes||[]).includes(cls)}
+                  onChange={()=>toggleClass(cls)} style={{accentColor:T.accent}}/>
+                {cls}
+              </label>
+            ))}
+          </div>
+          {/* Also allow typing a custom class name */}
+          <AddTag placeholder="Add another class…"
+            onAdd={v=>{ if(!sp.classes?.includes(v)) upd("classes",[...(sp.classes||[]),v]); }}/>
+        </div>
+
+        {/* Combat data */}
+        <div style={{paddingTop:12, borderTop:`1px solid ${T.border}`}}>
+          <label style={{...label, marginBottom:8}}>Combat Data (optional)</label>
           <Grid>
             <Select label="Attack Type" value={sp.combat?.attack||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.attack=v;else delete c.attack;upd("combat",c);}}
               options={[["","None"],["ranged","Ranged Spell Attack"],["melee","Melee Spell Attack"]]}/>
@@ -519,7 +938,11 @@ function SpellEditor({data,onChange}) {
           </Grid>
           <Grid>
             <Field label="Cantrip scale die (e.g. 1d10)" value={sp.combat?.cantripScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.cantripScale=v;else delete c.cantripScale;upd("combat",c);}} placeholder="blank if not a cantrip"/>
-            <Field label="Slot scale (e.g. +1d6)" value={sp.combat?.slotScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.slotScale=v;else delete c.slotScale;upd("combat",c);}}/>
+            <Field label="Slot scale (e.g. +1d6 per slot)" value={sp.combat?.slotScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.slotScale=v;else delete c.slotScale;upd("combat",c);}}/>
+          </Grid>
+          <Grid>
+            <Field label="Healing (e.g. 1d8)" value={sp.combat?.healing||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.healing=v;else delete c.healing;upd("combat",c);}}/>
+            <Field label="Heal slot scale (e.g. +1d8)" value={sp.combat?.healSlotScale||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.healSlotScale=v;else delete c.healSlotScale;upd("combat",c);}}/>
           </Grid>
           <Field label="Notes (brief effect note)" value={sp.combat?.notes||""} onChange={v=>{const c={...sp.combat||{}};if(v)c.notes=v;else delete c.notes;upd("combat",c);}}/>
         </div>
@@ -645,6 +1068,161 @@ function GearEditor({data,onChange}) {
 }
 
 // ── Lists Editor (languages, skills, alignments) ──
+// ── Armor Editor ──
+function ArmorEditor({data,onChange}) {
+  const [selIdx,setSelIdx] = useState(0);
+  const [search,setSearch] = useState("");
+  const ARMOR_CATS = ["lightArmor","mediumArmor","heavyArmor","shield"];
+  const PROPS_ARMOR = [["stealthDisadvantage","Stealth Disadvantage"]];
+  const filtered = (data||[]).filter(a=>a.name.toLowerCase().includes(search.toLowerCase()));
+  const a = (data||[])[selIdx]||null;
+  const upd = (key,val) => { const arr=[...data]; arr[selIdx]={...a,[key]:val}; onChange(arr); };
+  const add = () => { const arr=[...data,{name:"New Armor",category:"lightArmor",acBase:11,acDexCap:null,acFormula:"11 + DEX",strengthReq:0,stealthDisadvantage:false,weight:10,description:""}]; onChange(arr); setSelIdx(arr.length-1); };
+  const del = () => { const arr=data.filter((_,i)=>i!==selIdx); onChange(arr); setSelIdx(Math.max(0,selIdx-1)); };
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Armor ({(data||[]).length})</div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…" style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
+        <div style={{maxHeight:"60vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
+          {filtered.map((aa,i)=>{
+            const realIdx=(data||[]).indexOf(aa);
+            return(
+              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
+                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,color:selIdx===realIdx?T.accent:T.text,
+                display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span>{aa.name}</span>
+                <span style={{fontSize:10,color:T.muted}}>AC {aa.acFormula||aa.acBase}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={add} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Armor</button>
+      </div>
+      {a&&<div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{a.name}</span>
+          <button onClick={del} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <Grid>
+          <Field label="Name" value={a.name} onChange={v=>upd("name",v)}/>
+          <Select label="Category" value={a.category} onChange={v=>upd("category",v)} options={ARMOR_CATS.map(c=>[c,c])}/>
+        </Grid>
+        <Grid cols="1fr 1fr 1fr">
+          <Field label="Base AC" value={a.acBase} onChange={v=>upd("acBase",+v)} type="number"/>
+          <Field label="Dex Cap (null=none, 0=no dex, 2=medium)" value={a.acDexCap??""} onChange={v=>upd("acDexCap",v===""?null:+v)}/>
+          <Field label="Strength Required" value={a.strengthReq||0} onChange={v=>upd("strengthReq",+v)} type="number"/>
+        </Grid>
+        <Field label="AC Formula (display text, e.g. 14 + DEX (max +2))" value={a.acFormula} onChange={v=>upd("acFormula",v)}/>
+        <Grid>
+          <Field label="Weight (lbs)" value={a.weight} onChange={v=>upd("weight",+v)} type="number"/>
+          <Check label="Stealth Disadvantage" value={a.stealthDisadvantage} onChange={v=>upd("stealthDisadvantage",v)}/>
+        </Grid>
+        <TextArea label="Description" value={a.description} onChange={v=>upd("description",v)} rows={3}/>
+      </div>}
+    </div>
+  );
+}
+
+// ── Feats Editor ──
+function FeatsEditor({data, onChange}) {
+  const feats = data || [];
+  const [selIdx, setSelIdx] = useState(0);
+  const [search, setSearch] = useState("");
+  const filtered = feats.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+  const feat = feats[selIdx] || null;
+  const upd = (key, val) => { const a=[...feats]; a[selIdx]={...feat,[key]:val}; onChange(a); };
+  const add = () => {
+    const a=[...feats,{name:"New Feat",description:"",prerequisites:null,effects:{}}];
+    onChange(a); setSelIdx(a.length-1);
+  };
+  const del = () => { const a=feats.filter((_,i)=>i!==selIdx); onChange(a); setSelIdx(Math.max(0,selIdx-1)); };
+
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"240px 1fr",gap:20}}>
+      <div>
+        <div style={sectionHead}>Feats ({feats.length})</div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…"
+          style={{...inp,fontSize:12,padding:"6px 10px",marginBottom:8}}/>
+        <div style={{maxHeight:"60vh",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
+          {filtered.map((f,i)=>{
+            const realIdx=feats.indexOf(f);
+            return(
+              <div key={i} onClick={()=>setSelIdx(realIdx)} style={{
+                padding:"5px 8px",borderRadius:5,cursor:"pointer",fontSize:12,
+                background:selIdx===realIdx?`rgba(201,162,39,0.12)`:T.surface,
+                border:`1px solid ${selIdx===realIdx?T.accent:T.border}`,
+                color:selIdx===realIdx?T.accent:T.text}}>
+                {f.name}
+                {f.prerequisites && <span style={{fontSize:9,color:T.muted,marginLeft:6}}>prereqs</span>}
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={add} style={{...btn("primary"),width:"100%",marginTop:8,fontSize:12}}>+ New Feat</button>
+      </div>
+
+      {feat && <div style={{overflowY:"auto",paddingRight:4}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <span style={{fontFamily:T.display,color:T.accent,fontSize:16}}>{feat.name}</span>
+          <button onClick={del} style={{...btn("danger"),fontSize:12}}>Delete</button>
+        </div>
+        <Field label="Name" value={feat.name} onChange={v=>upd("name",v)}/>
+        <TextArea label="Description" value={feat.description} onChange={v=>upd("description",v)} rows={5}/>
+
+        <div style={{paddingTop:12,borderTop:`1px solid ${T.border}`,marginTop:4}}>
+          <label style={{...label,marginBottom:8}}>Prerequisites (optional)</label>
+          <div style={{marginBottom:8,padding:"8px 12px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:6,fontSize:12,color:T.muted}}>
+            Ability score requirements: set a minimum score, leave 0 for none.
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,marginBottom:10}}>
+            {ABILITY_KEYS.map(ab=>(
+              <div key={ab} style={{textAlign:"center"}}>
+                <div style={{fontSize:10,color:T.muted,textTransform:"uppercase",marginBottom:3}}>{ABILITY_SHORT[ab]}</div>
+                <input type="number" min={0} max={20}
+                  value={feat.prerequisites?.ability?.[ab]||0}
+                  onChange={e=>{
+                    const v=+e.target.value;
+                    const prereqs={...feat.prerequisites||{}};
+                    if(!prereqs.ability) prereqs.ability={};
+                    if(v>0) prereqs.ability[ab]=v; else delete prereqs.ability[ab];
+                    if(Object.keys(prereqs.ability).length===0) delete prereqs.ability;
+                    upd("prerequisites",Object.keys(prereqs).length?prereqs:null);
+                  }}
+                  style={{...inp,textAlign:"center",padding:"4px 0",fontSize:13}}/>
+              </div>
+            ))}
+          </div>
+          <Check label="Requires spellcasting ability"
+            value={!!feat.prerequisites?.spellcasting}
+            onChange={v=>{
+              const prereqs={...feat.prerequisites||{}};
+              if(v) prereqs.spellcasting=true; else delete prereqs.spellcasting;
+              upd("prerequisites",Object.keys(prereqs).length?prereqs:null);
+            }}/>
+        </div>
+
+        <div style={{paddingTop:12,borderTop:`1px solid ${T.border}`,marginTop:4}}>
+          <label style={{...label,marginBottom:8}}>Mechanical Effects (for reference)</label>
+          <Grid>
+            <Field label="Fixed ASI (e.g. {cha:1})" value={JSON.stringify(feat.effects?.asiFixed||{})}
+              onChange={v=>{ try{upd("effects",{...feat.effects,asiFixed:JSON.parse(v)});}catch{} }}/>
+            <Field label="AC bonus" value={feat.effects?.ac||""} type="number"
+              onChange={v=>upd("effects",{...feat.effects,ac:+v||undefined})}/>
+          </Grid>
+          <Grid>
+            <Field label="Speed bonus (ft)" value={feat.effects?.speed||""} type="number"
+              onChange={v=>upd("effects",{...feat.effects,speed:+v||undefined})}/>
+            <Field label="Initiative bonus" value={feat.effects?.initiative||""} type="number"
+              onChange={v=>upd("effects",{...feat.effects,initiative:+v||undefined})}/>
+          </Grid>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
 function ListsEditor({data,onChange}) {
   const updList = (key,val) => onChange({...data,[key]:val});
   const SimpleList = ({title,listKey}) => {
@@ -724,14 +1302,16 @@ function ThemesEditor({data,onChange}) {
 // MAIN EDITOR APP
 // ══════════════════════════════════════════════
 const TABS = [
-  {id:"species",   label:"🧝 Species"},
-  {id:"classes",   label:"⚔️ Classes"},
-  {id:"backgrounds",label:"📜 Backgrounds"},
-  {id:"spells",    label:"✨ Spells"},
-  {id:"weapons",   label:"🗡️ Weapons"},
-  {id:"gear",      label:"🎒 Gear"},
-  {id:"lists",     label:"📋 Lists"},
-  {id:"themes",    label:"🎨 Themes"},
+  {id:"species",     label:"🧝 Species"},
+  {id:"classes",     label:"⚔️ Classes"},
+  {id:"backgrounds", label:"📜 Backgrounds"},
+  {id:"spells",      label:"✨ Spells"},
+  {id:"feats",       label:"🏆 Feats"},
+  {id:"weapons",     label:"🗡️ Weapons"},
+  {id:"armor",       label:"🛡️ Armor"},
+  {id:"gear",        label:"🎒 Gear"},
+  {id:"lists",       label:"📋 Lists"},
+  {id:"themes",      label:"🎨 Themes"},
 ];
 
 function EditorApp() {
@@ -820,8 +1400,10 @@ function EditorApp() {
         {tab==="species"     && <SpeciesEditor     data={gameData.species||{}}      onChange={v=>updSection("species",v)}/>}
         {tab==="classes"     && <ClassEditor       data={gameData.classes||{}}      onChange={v=>updSection("classes",v)}/>}
         {tab==="backgrounds" && <BackgroundEditor  data={gameData.backgrounds||{}}  onChange={v=>updSection("backgrounds",v)}/>}
-        {tab==="spells"      && <SpellEditor       data={gameData.spells||{}}       onChange={v=>updSection("spells",v)}/>}
+        {tab==="spells"      && <SpellEditor       data={gameData.spells||[]}       onChange={v=>updSection("spells",v)} gameData={gameData}/>}
+        {tab==="feats"       && <FeatsEditor       data={gameData.feats||[]}        onChange={v=>updSection("feats",v)}/>}
         {tab==="weapons"     && <WeaponsEditor     data={gameData.weapons||[]}      onChange={v=>updSection("weapons",v)}/>}
+        {tab==="armor"       && <ArmorEditor       data={gameData.armor||[]}        onChange={v=>updSection("armor",v)}/>}
         {tab==="gear"        && <GearEditor        data={gameData.gear||[]}         onChange={v=>updSection("gear",v)}/>}
         {tab==="lists"       && <ListsEditor       data={gameData}                  onChange={setGameData}/>}
         {tab==="themes"      && <ThemesEditor      data={gameData.themes||{}}       onChange={v=>updSection("themes",v)}/>}

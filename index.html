@@ -67,13 +67,117 @@ const calcMod   = s => Math.floor((s - 10) / 2);
 const modStr    = m => m >= 0 ? `+${m}` : `${m}`;
 const profBonus = l => Math.ceil(l / 4) + 1;
 const calcHP    = (cd, level, conMod) => Math.max(1, (cd.hitDie + conMod) + Math.floor((cd.hitDie / 2) + 1 + conMod) * (level - 1));
-const calcAC    = char => {
-  const dex = calcMod(char.abilities.dex), con = calcMod(char.abilities.con), wis = calcMod(char.abilities.wis);
-  const hasArmor = char.inventory?.some(i => i.type === "armor" && i.equipped);
-  if (char.class === "Barbarian" && !hasArmor) return 10 + dex + con;
-  if (char.class === "Monk"      && !hasArmor) return 10 + dex + wis;
-  return 10 + dex;
+// ── Armor / weapon helpers ──
+
+// Look up an item's library entry by name (checks armor, weapons, gear libraries)
+const lookupLibraryItem = (itemName, gameData) => {
+  const name = itemName?.toLowerCase().trim();
+  if (!name) return null;
+  for (const a of gameData?.armor || [])   if (a.name.toLowerCase() === name) return { ...a, _lib:"armor" };
+  for (const w of gameData?.weapons || []) if (w.name.toLowerCase() === name) return { ...w, _lib:"weapon" };
+  for (const g of gameData?.gear || [])    if (g.name.toLowerCase() === name) return { ...g, _lib:"gear" };
+  return null;
 };
+
+// Check if a character is proficient with an item given their class/subclass
+const isItemProficient = (item, char, classes) => {
+  const cd = classes?.[char.class];
+  if (!cd) return false;
+  const allProfs = [
+    ...(cd.armorProficiencies || []),
+    ...(cd.weaponProficiencies || []),
+    ...(cd.toolProficiencies || []),
+  ];
+  const subProfs = char.subclass ? [
+    ...(cd.subclasses?.[char.subclass]?.armorProficiencies || []),
+    ...(cd.subclasses?.[char.subclass]?.weaponProficiencies || []),
+  ] : [];
+  const combined = [...allProfs, ...subProfs].map(p => p.toLowerCase());
+
+  // Direct name match
+  if (combined.includes(item.name?.toLowerCase())) return true;
+  // Proficiency group match (e.g. "Simple", "Martial", "Light", "Medium")
+  const pg = item.proficiencyGroup?.toLowerCase();
+  if (pg && combined.some(p => p.includes(pg))) return true;
+  // Category-based fallbacks
+  if (["simpleWeapon","simpleRanged"].includes(item.category) && combined.some(p => p.includes("simple"))) return true;
+  if (["martialWeapon","martialRanged"].includes(item.category) && combined.some(p => p.includes("martial"))) return true;
+  if (item.category === "lightArmor"  && combined.some(p => p.includes("light"))) return true;
+  if (item.category === "mediumArmor" && (combined.some(p => p.includes("medium")) || combined.some(p => p.includes("all armor")))) return true;
+  if (item.category === "heavyArmor"  && (combined.some(p => p.includes("heavy")) || combined.some(p => p.includes("all armor")))) return true;
+  if (item.category === "shield"      && combined.some(p => p.includes("shield"))) return true;
+  return false;
+};
+
+// Full AC calculation using armor library
+const calcAC = (char, gameData) => {
+  const dex = calcMod(char.abilities?.dex || 10);
+  const con = calcMod(char.abilities?.con || 10);
+  const wis = calcMod(char.abilities?.wis || 10);
+  const equipped = (char.inventory || []).filter(i => i.equipped);
+
+  // Find equipped armor and shield from library
+  let bodyArmor = null, hasShield = false, shieldAC = 2;
+  for (const item of equipped) {
+    const lib = lookupLibraryItem(item.name, gameData);
+    if (!lib) continue;
+    if (lib._lib === "armor") {
+      if (lib.category === "shield") { hasShield = true; shieldAC = lib.acBase || 2; }
+      else bodyArmor = lib;
+    }
+    // Fallback: type-tagged armor
+    if (!lib && item.type === "shield") hasShield = true;
+  }
+  // Also check type-tagged items without library entries
+  if (!hasShield && equipped.some(i => i.type === "shield")) hasShield = true;
+  if (!bodyArmor && equipped.some(i => i.type === "armor")) {
+    // Rough fallback: assume leather (11+dex)
+    bodyArmor = { acBase:11, acDexCap:null, category:"lightArmor" };
+  }
+
+  let ac;
+  if (bodyArmor) {
+    if (bodyArmor.acDexCap === 0) {
+      ac = bodyArmor.acBase; // Heavy — no dex
+    } else if (bodyArmor.acDexCap != null) {
+      ac = bodyArmor.acBase + Math.min(dex, bodyArmor.acDexCap); // Medium — capped dex
+    } else {
+      ac = bodyArmor.acBase + dex; // Light — full dex
+    }
+  } else {
+    // Unarmored
+    if (char.class === "Barbarian") ac = 10 + dex + con;
+    else if (char.class === "Monk") ac = 10 + dex + wis;
+    else ac = 10 + dex;
+  }
+  if (hasShield) ac += shieldAC;
+  return ac;
+};
+
+// Returns stealth disadvantage status from equipped armor
+const hasStealthDisadvantage = (char, gameData) => {
+  return (char.inventory || [])
+    .filter(i => i.equipped)
+    .some(i => {
+      const lib = lookupLibraryItem(i.name, gameData);
+      return lib?.stealthDisadvantage === true;
+    });
+};
+
+// Strength requirement not met?
+const strRequirementMet = (char, gameData) => {
+  const issues = (char.inventory || [])
+    .filter(i => i.equipped)
+    .map(i => {
+      const lib = lookupLibraryItem(i.name, gameData);
+      if (lib?.strengthReq && (char.abilities?.str || 10) < lib.strengthReq)
+        return `${i.name} requires STR ${lib.strengthReq}`;
+      return null;
+    }).filter(Boolean);
+  return issues;
+};
+
+
 // ── Spellcasting helpers ──
 // Returns the effective spellcasting info for a character, checking class then subclass
 const getSpellcastingInfo = (char, classes) => {
@@ -237,7 +341,7 @@ const saveChars = chars => localStorage.setItem(SK, JSON.stringify(chars));
 
 // ── Default character ──
 const DEFAULT_CHAR = {
-  id:null, name:"", species:"", class:"", subclass:"", background:"", level:1,
+  id:null, name:"", species:"", subrace:"", class:"", subclass:"", background:"", level:1,
   abilities:{ str:10, dex:10, con:10, int:10, wis:10, cha:10 },
   speciesAbilityChoices:{},
   skillProficiencies:[], skillExpertise:[], skillProfSources:{},
@@ -245,7 +349,8 @@ const DEFAULT_CHAR = {
   languages:[], languageSources:{},
   alignment:"True Neutral",
   personalityTraits:"", ideals:"", bonds:"", flaws:"", notes:"", appearance:"",
-  inventory:[], spells:[], personalItems:[],
+  inventory:[], spells:[], racialSpells:[], personalItems:[],
+  featChoices:{},
   hp:{ current:8, max:8, temp:0 },
   hitDice:{ current:1, max:1 },
   deathSaves:{ successes:0, failures:0 },
@@ -350,7 +455,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
     expertiseProfs, onExpertiseToggle, allSkills, languages, languageSources,
     onLanguageChoice, languageList, autoLanguages, thisLanguageSource,
     subclass, onSubclassChoice, subclasses, source,
-    asiChoices, onAsiChange, currentAbilities, skillSources, thisSource }) {
+    asiChoices, onAsiChange, currentAbilities, skillSources, thisSource,
+    gameData, charLevel, racialSpells, onRacialSpellToggle, featChoices, onFeatChoice }) {
 
   const [open, setOpen] = useState(!locked);
   const chosen = choices?.[feature.name];
@@ -375,8 +481,17 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         const myPicks = (languages || []).filter(l => (languageSources||{})[l] === src && !autoL.includes(l));
         return myPicks.length >= (feature.count || 0);
       }
-      case "asi":                return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
+      case "asi":                {
+        // Complete if: feat chosen OR ability scores filled
+        if (featChoices?.[feature.name]) return true;
+        return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
+      }
       case "asi_points":         return Object.values(asiChoices?.[feature.name] || {}).filter(v=>v>0).length >= (feature.points || 2);
+      case "spell_choice":       {
+        const myGrants = (racialSpells || []).filter(s => s.sourceFeature === feature.name);
+        return myGrants.length >= (feature.count || 1);
+      }
+      case "spell_grant":        return true; // auto-granted, always complete
       default:                   return true;
     }
   })();
@@ -603,7 +718,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     const base = currentAbilities?.[ab] || 10;
                     const bonus = asi[ab] || 0;
                     const total = base + bonus;
-                    const atMax = bonus >= 1; // max +1 per ability for asi_points (species flex bonus)
+                    const atMax = bonus >= 1;
                     return (
                       <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
                         background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
@@ -621,6 +736,221 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     );
                   })}
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* spell_grant — racial spells auto-added at certain levels */}
+          {feature.type === "spell_grant" && (() => {
+            const level = charLevel || 1;
+            const allSpells = gameData?.spells || [];
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                  Spells granted by your heritage. They are always known and don't count against your spell limit.
+                  {feature.spellcastingAbility && <span style={{ marginLeft:6, color:"var(--accent)" }}>({ABILITY_SHORT[feature.spellcastingAbility]} for spellcasting)</span>}
+                </div>
+                {(feature.grants || []).map(grant => {
+                  const spell = allSpells.find(s => s.name.toLowerCase() === grant.spellName.toLowerCase());
+                  const available = level >= (grant.minCharLevel || 1);
+                  const isGranted = (racialSpells || []).some(s => s.name === grant.spellName);
+                  return (
+                    <div key={grant.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px",
+                      marginBottom:6, borderRadius:8, background:"var(--surface)",
+                      border:`1px solid ${isGranted ? "var(--accent2)" : "var(--border)"}`,
+                      opacity: available ? 1 : 0.45 }}>
+                      <div style={{ flex:1 }}>
+                        <span style={{ fontFamily:"var(--font-display)", color: isGranted ? "var(--accent)" : available ? "var(--text)" : "var(--text-dim)", fontSize:14 }}>
+                          {grant.spellName}
+                        </span>
+                        {spell && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>{spell.level===0?"Cantrip":`Level ${spell.level}`} • {spell.school}</span>}
+                        {!available && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>unlocks at level {grant.minCharLevel}</span>}
+                      </div>
+                      {available && !locked && (
+                        <button onClick={() => onRacialSpellToggle && onRacialSpellToggle(grant.spellName, feature.name, spell)}
+                          style={{ padding:"3px 12px", borderRadius:6, fontSize:12, cursor:"pointer",
+                            border:`1px solid ${isGranted?"var(--danger)":"var(--accent)"}`,
+                            background: isGranted?"transparent":"var(--accent)",
+                            color: isGranted?"var(--danger)":"var(--bg)" }}>
+                          {isGranted ? "Remove" : "+ Grant"}
+                        </button>
+                      )}
+                      {isGranted && <span style={{ fontSize:10, color:"var(--accent2)", padding:"2px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>Racial</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* spell_choice — pick N spells from a class list at a given level */}
+          {!locked && feature.type === "spell_choice" && (() => {
+            const allSpells = (gameData?.spells || []).filter(s =>
+              (s.classes || []).includes(feature.spellList) &&
+              (feature.spellLevel !== undefined ? s.level === feature.spellLevel : s.level <= (feature.maxLevel || 9))
+            );
+            const myGrants = (racialSpells || []).filter(s => s.sourceFeature === feature.name);
+            const needed = feature.count || 1;
+            const remaining = needed - myGrants.length;
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                  Choose <strong style={{ color:"var(--accent)" }}>{needed}</strong> {feature.spellLevel === 0 ? "cantrip" : "spell"}{needed>1?"s":""} from the {feature.spellList} list.
+                  {feature.spellcastingAbility && <span style={{ marginLeft:6, color:"var(--accent)" }}>({ABILITY_SHORT[feature.spellcastingAbility]} for spellcasting)</span>}
+                  {remaining > 0
+                    ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({remaining} remaining)</span>
+                    : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                </div>
+                <div style={{ display:"flex", flexDirection:"column", gap:5, maxHeight:240, overflowY:"auto" }}>
+                  {allSpells.map(spell => {
+                    const alreadyGranted = myGrants.some(s => s.name === spell.name);
+                    const alreadyKnown = (feature.allowDuplicate !== true) &&
+                      !alreadyGranted && false; // intentional: racial and class spells can overlap
+                    const canAdd = alreadyGranted || remaining > 0;
+                    return (
+                      <div key={spell.name} onClick={() => canAdd && onRacialSpellToggle && onRacialSpellToggle(spell.name, feature.name, spell)}
+                        style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                          padding:"7px 10px", borderRadius:7, cursor: canAdd ? "pointer" : "not-allowed",
+                          background: alreadyGranted ? "rgba(201,162,39,0.08)" : "var(--surface)",
+                          border:`1px solid ${alreadyGranted ? "var(--accent)" : "var(--border)"}`,
+                          opacity: !canAdd ? 0.4 : 1 }}>
+                        <div>
+                          <span style={{ fontFamily:"var(--font-display)", color: alreadyGranted ? "var(--accent)" : "var(--text)", fontSize:13 }}>
+                            {alreadyGranted && "✓ "}{spell.name}
+                          </span>
+                          <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:8 }}>{spell.school}</span>
+                          {spell.combat?.damage && <span style={{ fontSize:11, color:"var(--danger)", marginLeft:8 }}>{spell.combat.damage} {spell.combat.damageType}</span>}
+                        </div>
+                        <span style={{ fontSize:10, color: alreadyGranted ? "var(--danger)" : "var(--text-dim)" }}>
+                          {alreadyGranted ? "× Remove" : "+ Pick"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Feat-or-ASI toggle on asi features */}
+          {!locked && feature.type === "asi" && onFeatChoice && (() => {
+            const hasFeat = !!featChoices?.[feature.name];
+            const chosenFeat = featChoices?.[feature.name];
+            const allFeats = gameData?.feats || [];
+            const char = { abilities: currentAbilities || {}, spells: [] }; // minimal char for prereqs
+
+            const meetsPrereqs = feat => {
+              if (!feat.prerequisites) return true;
+              const prereqs = feat.prerequisites;
+              if (prereqs.ability) {
+                for (const [ab, min] of Object.entries(prereqs.ability)) {
+                  if ((currentAbilities?.[ab] || 10) < min) return false;
+                }
+              }
+              return true;
+            };
+
+            return (
+              <div style={{ marginTop:10 }}>
+                {/* Toggle buttons */}
+                <div style={{ display:"flex", gap:8, marginBottom:12 }}>
+                  <button onClick={() => { if(hasFeat) onFeatChoice(feature.name, null); }}
+                    style={{ padding:"6px 16px", borderRadius:6, cursor:"pointer", fontSize:13,
+                      border:`1px solid ${!hasFeat?"var(--accent)":"var(--border)"}`,
+                      background:!hasFeat?"var(--accent)":"var(--surface)",
+                      color:!hasFeat?"var(--bg)":"var(--text-muted)" }}>
+                    +2 / +1+1 Ability Score
+                  </button>
+                  <button onClick={() => { if(!hasFeat) onFeatChoice(feature.name, "__pending__"); }}
+                    style={{ padding:"6px 16px", borderRadius:6, cursor:"pointer", fontSize:13,
+                      border:`1px solid ${hasFeat?"var(--accent)":"var(--border)"}`,
+                      background:hasFeat?"var(--accent)":"var(--surface)",
+                      color:hasFeat?"var(--bg)":"var(--text-muted)" }}>
+                    🏆 Take a Feat
+                  </button>
+                </div>
+
+                {/* ASI widgets — only shown when not taking a feat */}
+                {!hasFeat && (() => {
+                  const asi = asiChoices?.[feature.name] || {};
+                  const spent = Object.values(asi).reduce((s,v)=>s+v,0);
+                  const rem = 2 - spent;
+                  return (
+                    <div>
+                      <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>
+                        Spend <strong style={{ color:"var(--accent)" }}>2 points</strong>: put both in one ability (+2) or split across two (+1/+1).
+                        {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} left)</span>
+                                 : <span style={{ color:"var(--success)", marginLeft:6 }}>✓</span>}
+                      </div>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+                        {Object.keys(ABILITY_NAMES).map(ab => {
+                          const bonus = asi[ab] || 0;
+                          const total = (currentAbilities?.[ab] || 10) + bonus;
+                          const canAdd = rem > 0 && bonus < 2;
+                          return (
+                            <div key={ab} style={{ padding:8, borderRadius:8, textAlign:"center",
+                              background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
+                              <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                              <div style={{ fontSize:16, fontFamily:"var(--font-display)", color:bonus>0?"var(--accent)":"var(--text)" }}>
+                                {total}{bonus>0&&<span style={{ fontSize:11 }}> (+{bonus})</span>}
+                              </div>
+                              <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:4 }}>
+                                <button onClick={()=>{ if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
+                                  style={{ width:22,height:22,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:13,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
+                                <button onClick={()=>{ if(!canAdd)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                                  style={{ width:22,height:22,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:canAdd?"pointer":"not-allowed",fontSize:13,opacity:canAdd?1:0.3,lineHeight:1 }}>+</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Feat picker */}
+                {hasFeat && (
+                  <div>
+                    {chosenFeat && chosenFeat !== "__pending__" ? (
+                      <div style={{ padding:"10px 14px", background:"rgba(201,162,39,0.08)", border:"1px solid var(--accent)", borderRadius:8, marginBottom:10 }}>
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                          <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15 }}>🏆 {chosenFeat}</span>
+                          <button onClick={()=>onFeatChoice(feature.name,"__pending__")} style={{ padding:"3px 10px", borderRadius:6, fontSize:12, cursor:"pointer", border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>Change</button>
+                        </div>
+                        {allFeats.find(f=>f.name===chosenFeat)?.description && (
+                          <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:6, lineHeight:1.5 }}>
+                            {allFeats.find(f=>f.name===chosenFeat).description.slice(0,180)}{allFeats.find(f=>f.name===chosenFeat).description.length>180?"…":""}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>Choose a feat:</div>
+                        <div style={{ maxHeight:300, overflowY:"auto", display:"flex", flexDirection:"column", gap:5 }}>
+                          {allFeats.map(feat => {
+                            const eligible = meetsPrereqs(feat);
+                            return (
+                              <div key={feat.name} onClick={()=> eligible && onFeatChoice(feature.name, feat.name)}
+                                style={{ padding:"8px 12px", borderRadius:8, cursor:eligible?"pointer":"not-allowed",
+                                  background:"var(--surface)", border:"1px solid var(--border)",
+                                  opacity: eligible ? 1 : 0.4, transition:"all 0.15s" }}
+                                onMouseEnter={e=>{ if(eligible) e.currentTarget.style.borderColor="var(--accent)"; }}
+                                onMouseLeave={e=>{ e.currentTarget.style.borderColor="var(--border)"; }}>
+                                <div style={{ display:"flex", justifyContent:"space-between" }}>
+                                  <span style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:13 }}>{feat.name}</span>
+                                  {!eligible && <span style={{ fontSize:10, color:"var(--text-dim)" }}>prereqs not met</span>}
+                                </div>
+                                <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3, lineHeight:1.4 }}>
+                                  {feat.description.slice(0, 120)}{feat.description.length>120?"…":""}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -743,6 +1073,10 @@ const CATEGORY_LABELS = {
   simpleRanged:     "Simple Ranged",
   martialWeapon:    "Martial Weapons",
   martialRanged:    "Martial Ranged",
+  lightArmor:       "Light Armor",
+  mediumArmor:      "Medium Armor",
+  heavyArmor:       "Heavy Armor",
+  shield:           "Shields",
   musicalInstrument:"Musical Instruments",
   arcaneFocus:      "Arcane Foci",
   druidicFocus:     "Druidic Foci",
@@ -753,7 +1087,7 @@ const CATEGORY_LABELS = {
 };
 
 function LibraryItemAdder({ gameData, onAdd }) {
-  const { weapons:weaponLib=[], gear:gearLib=[], itemTypes={} } = gameData;
+  const { weapons:weaponLib=[], gear:gearLib=[], armor:armorLib=[], itemTypes={} } = gameData;
   const [tab, setTab]           = useState("library");
   const [category, setCategory] = useState("simpleWeapon");
   const [search, setSearch]     = useState("");
@@ -763,7 +1097,7 @@ function LibraryItemAdder({ gameData, onAdd }) {
   const [qty, setQty]           = useState(1);
   const [added, setAdded]       = useState(null);
 
-  const allLibrary = [...weaponLib, ...gearLib];
+  const allLibrary = [...weaponLib, ...armorLib, ...gearLib];
   const categories = [...new Set(allLibrary.map(i => i.category))];
 
   const inCategory = allLibrary.filter(it =>
@@ -774,10 +1108,15 @@ function LibraryItemAdder({ gameData, onAdd }) {
   const flashAdded = name => { setAdded(name); setTimeout(()=>setAdded(null), 1200); };
 
   const addFromLibrary = it => {
+    const isWeapon = !!it.damage;
+    const isArmor  = it._lib === "armor" || it.acBase !== undefined;
     const desc = it.damage
       ? `${it.damage} ${it.damageType}${it.properties?.length?" — "+it.properties.join(", "):""}${it.range?" — Range "+it.range:""}`
-      : (it.description||"");
-    onAdd({ id:Date.now()+Math.random(), name:it.name, type:it.damage?"weapon":"misc", quantity:qty, weight:it.weight||0, description:desc, equipped:false });
+      : it.acFormula
+        ? `AC: ${it.acFormula}${it.stealthDisadvantage?" — Stealth disadv.":""}${it.strengthReq?` — Str ${it.strengthReq}+ required`:""}`
+        : (it.description||"");
+    const type = isWeapon ? "weapon" : (isArmor ? (it.category==="shield"?"shield":"armor") : "misc");
+    onAdd({ id:Date.now()+Math.random(), name:it.name, type, quantity:qty, weight:it.weight||0, description:desc, equipped:false });
     flashAdded(it.name);
   };
 
@@ -831,10 +1170,13 @@ function LibraryItemAdder({ gameData, onAdd }) {
                       <span style={{ fontSize:13, color:"var(--text)", fontWeight:500 }}>{it.name}</span>
                       <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:10 }}>
                         {it.damage && <span style={{color:"var(--danger)",marginRight:8}}>{it.damage} {it.damageType}</span>}
+                        {it.acFormula && <span style={{color:"var(--info)",marginRight:8}}>AC: {it.acFormula}</span>}
                         {it.properties?.length>0 && <span style={{marginRight:8}}>{it.properties.join(", ")}</span>}
                         {it.range && <span style={{marginRight:8}}>Range {it.range}</span>}
+                        {it.stealthDisadvantage && <span style={{color:"#e67e22",marginRight:8}}>Stealth disadv.</span>}
+                        {it.strengthReq>0 && <span style={{color:"var(--text-dim)",marginRight:8}}>Str {it.strengthReq}+</span>}
                         {it.weight>0 && <span style={{color:"var(--text-dim)"}}>{it.weight} lb</span>}
-                        {!it.damage && it.description && <span style={{color:"var(--text-dim)"}}>{it.description}</span>}
+                        {!it.damage && !it.acFormula && it.description && <span style={{color:"var(--text-dim)"}}>{it.description}</span>}
                       </span>
                     </div>
                     <button onClick={()=>addFromLibrary(it)} style={{
@@ -1208,7 +1550,10 @@ function WizardSpellPicker({ char, setChar, gameData }) {
 
   const limits = getSpellLimits(char, classes);
   const spellList = limits?.spellList || char.class;
-  const classSpells = spellDb?.[spellList] || [];
+  // Flat array — filter spells that include this class
+  const classSpells = Array.isArray(spellDb)
+    ? spellDb.filter(s => (s.classes||[]).includes(spellList))
+    : (spellDb?.[spellList] || []);
   const known = char.spells || [];
 
   const knownCantrips = known.filter(s => s.level === 0);
@@ -1454,18 +1799,30 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const { species:speciesDb, classes, backgrounds, themes, alignments, languages:languageList, skills:allSkills } = gameData;
 
   const STEPS = ["Identity","Class","Background","Species","Abilities","Equipment & Spells","Finalise"];
-  const speciesData = speciesDb?.[char.species];
-  const classData   = classes?.[char.class];
-  const bgData      = backgrounds?.[char.background];
+  const speciesData  = speciesDb?.[char.species];
+  const subraceData  = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
+  const classData    = classes?.[char.class];
+  const bgData       = backgrounds?.[char.background];
 
-  // Effective ability = base + fixed species bonus + asi_points species choices + ASI from class features
+  // Merged ability bonuses: species fixed + subrace fixed
+  const mergedSpeciesBonuses = ab => {
+    const base    = speciesData?.abilityBonuses?.[ab] || 0;
+    const subrace = subraceData?.abilityBonuses?.[ab] || 0;
+    return base + subrace;
+  };
+
+  // Combined features from species + subrace
+  const allSpeciesFeatures = [
+    ...(speciesData?.features || []),
+    ...(subraceData?.features || []),
+  ];
+
+  // Effective ability = base + fixed species+subrace bonus + asi_points species choices + ASI from class features
   const totalAb = ab => {
-    const base   = char.abilities[ab] || 10;
-    const fixed  = speciesData?.abilityBonuses?.[ab] || 0;
-    // Points spent in asi_points species features (stored in speciesAbilityChoices)
+    const base         = char.abilities[ab] || 10;
+    const fixed        = mergedSpeciesBonuses(ab);
     const speciesPoints = char.speciesAbilityChoices?.[ab] || 0;
-    // Points spent in ASI class features (stored in asiChoices)
-    const asi    = Object.values(char.asiChoices || {}).reduce((s, v) => s + (v?.[ab] || 0), 0);
+    const asi          = Object.values(char.asiChoices || {}).reduce((s, v) => s + (v?.[ab] || 0), 0);
     return base + fixed + speciesPoints + asi;
   };
   const maxHP = classData ? calcHP(classData, char.level || 1, calcMod(totalAb("con"))) : 0;
@@ -1538,13 +1895,28 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     ...c, asiChoices: { ...(c.asiChoices||{}), [featureName]: val }
   }));
   const setSpeciesAsi = (featureName, val) => {
-    // Flatten all asi_points feature values into speciesAbilityChoices
     const merged = Object.keys(ABILITY_NAMES).reduce((acc, ab) => {
       acc[ab] = val[ab] || 0;
       return acc;
     }, {});
     setChar(c => ({ ...c, speciesAbilityChoices: merged }));
   };
+  const setFeatChoice = (featureName, featName) => setChar(c => {
+    const newFeats = { ...(c.featChoices||{}), [featureName]: featName };
+    if (!featName) delete newFeats[featureName];
+    // If switching back to ASI, clear the feat choice but keep asiChoices intact
+    return { ...c, featChoices: newFeats };
+  });
+  const toggleRacialSpell = (spellName, sourceFeature, spellObj) => setChar(c => {
+    const cur = c.racialSpells || [];
+    const already = cur.some(s => s.name === spellName && s.sourceFeature === sourceFeature);
+    if (already) {
+      return { ...c, racialSpells: cur.filter(s => !(s.name === spellName && s.sourceFeature === sourceFeature)) };
+    }
+    // Don't add if the spell is already in racial spells from a different source
+    const spell = spellObj || (gameData?.spells||[]).find(s=>s.name===spellName) || { name:spellName };
+    return { ...c, racialSpells: [...cur, { ...spell, sourceFeature, racial:true }] };
+  });
 
   const finalize = () => {
     const fa = Object.keys(char.abilities).reduce((acc, ab) => { acc[ab] = totalAb(ab); return acc; }, {});
@@ -1564,8 +1936,11 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     ...((subclassName && classData?.subclasses?.[subclassName]?.features) || []).map(f => ({ ...f, _source: subclassName }))
   ].sort((a, b) => a.level - b.level);
 
-  // Auto-granted languages from current species (shouldn't be re-selectable)
-  const autoLangs = speciesData?.autoLanguages || [];
+  // Auto-granted languages from current species + subrace
+  const autoLangs = [
+    ...(speciesData?.autoLanguages || []),
+    ...(subraceData?.autoLanguages || []),
+  ];
 
   // Shared FeaturePanel props builder
   const fpProps = (sourceLabel, isSpecies = false) => ({
@@ -1589,6 +1964,12 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
       : char.asiChoices || {},
     onAsiChange: isSpecies ? setSpeciesAsi : setAsi,
     currentAbilities: char.abilities,
+    gameData,
+    charLevel: char.level || 1,
+    racialSpells: char.racialSpells || [],
+    onRacialSpellToggle: toggleRacialSpell,
+    featChoices: char.featChoices || {},
+    onFeatChoice: isSpecies ? null : setFeatChoice, // feats only on class ASIs
   });
 
   // ── Per-step completeness ──
@@ -1647,18 +2028,20 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
       }
       case 3: {
         if (!char.species) return false;
+        // Require subrace selection if species has subraces
+        if (speciesData?.subraces && Object.keys(speciesData.subraces).length > 0 && !char.subrace) return false;
         const pc = requiredProfCountForStep(3);
         if (pc && pc.have < pc.required) return false;
-        // Check species language choices are complete
-        const spLangFeats = speciesData?.features?.filter(f => f.type === "language_choice") || [];
+        // Check species language choices
+        const spLangFeats = allSpeciesFeatures.filter(f => f.type === "language_choice");
         for (const feat of spLangFeats) {
           const myPicks = (char.languages || []).filter(l =>
-            (char.languageSources||{})[l] === "Species" && !(autoLangs||[]).includes(l)
+            ["Species","Subrace"].includes((char.languageSources||{})[l]) && !(autoLangs||[]).includes(l)
           );
           if (myPicks.length < (feat.count || 0)) return false;
         }
-        // Check asi_points complete
-        const asiFeature = speciesData?.features?.find(f => f.type === "asi_points");
+        // Check asi_points complete (across species + subrace)
+        const asiFeature = allSpeciesFeatures.find(f => f.type === "asi_points");
         if (asiFeature) {
           const chosen = Object.values(char.speciesAbilityChoices || {}).filter(v => v > 0).length;
           if (chosen < (asiFeature.points || 2)) return false;
@@ -1820,33 +2203,31 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
               {Object.entries(speciesDb || {}).map(([n, d]) => (
                 <div key={n} style={ws.optCard(char.species === n)}
                   onClick={() => setChar(c => {
-                    if (c.species === n) return c; // no change
-                    // Strip everything sourced from the old species
+                    if (c.species === n) return c;
+                    // Strip everything sourced from the old species + old subrace features
+                    const oldSubraceFeatureNames = new Set([
+                      ...(speciesDb?.[c.species]?.features || []).map(f => f.name),
+                      ...Object.values(speciesDb?.[c.species]?.subraces || {}).flatMap(sr => (sr.features||[]).map(f=>f.name))
+                    ]);
                     const newSources = Object.fromEntries(
-                      Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Species")
+                      Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Species" && src !== "Subrace")
                     );
-                    const newProfs = (c.skillProficiencies || []).filter(sk => newSources[sk] !== undefined
-                      || !(c.skillProfSources||{})[sk]
-                      || c.skillProfSources[sk] !== "Species"
+                    const newProfs = (c.skillProficiencies || []).filter(sk =>
+                      (c.skillProfSources||{})[sk] !== "Species" && (c.skillProfSources||{})[sk] !== "Subrace"
                     );
                     const newExpertise = (c.skillExpertise || []).filter(s => newProfs.includes(s));
-                    // Clear feature choices that belonged to old species features
-                    const oldSpeciesFeatureNames = new Set(
-                      (speciesDb?.[c.species]?.features || []).map(f => f.name)
-                    );
                     const newChoices = Object.fromEntries(
-                      Object.entries(c.featureChoices || {}).filter(([k]) => !oldSpeciesFeatureNames.has(k))
+                      Object.entries(c.featureChoices || {}).filter(([k]) => !oldSubraceFeatureNames.has(k))
                     );
-                    // Clear languages chosen by old species (keep background choices and other sources)
                     const newLangs = (c.languages || []).filter(l =>
-                      (c.languageSources||{})[l] !== "Species" &&
+                      (c.languageSources||{})[l] !== "Species" && (c.languageSources||{})[l] !== "Subrace" &&
                       !(speciesDb?.[c.species]?.autoLanguages||[]).includes(l)
                     );
                     const newLangSources = Object.fromEntries(
                       Object.entries(c.languageSources || {}).filter(([l]) => newLangs.includes(l))
                     );
                     return {
-                      ...c, species: n,
+                      ...c, species: n, subrace: "",
                       speciesAbilityChoices: {},
                       languages: newLangs,
                       languageSources: newLangSources,
@@ -1863,14 +2244,72 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                       ...(d.features||[]).filter(f=>f.type==="asi_points").map(f=>`+${f.points} (flex)`)
                     ].join(", ")}
                   </div>
-                  <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.speed}ft • {d.size}</div>
+                  <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>
+                    {d.speed}ft • {d.size}
+                    {d.subraces && <span style={{ color:"var(--accent)", marginLeft:6 }}>▾ {Object.keys(d.subraces).length} subraces</span>}
+                  </div>
                 </div>
               ))}
             </div>
 
             {speciesData && (
               <div style={{ marginTop:20 }}>
-                {/* Auto-granted languages — shown as context, not separate from picker */}
+                {/* Subrace selector — shown when species has subraces */}
+                {speciesData.subraces && Object.keys(speciesData.subraces).length > 0 && (
+                  <div style={{ ...ws.card, marginBottom:14 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>
+                      Choose your {char.species} subrace
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                      {Object.entries(speciesData.subraces).map(([srName, srData]) => {
+                        const isSel = char.subrace === srName;
+                        return (
+                          <div key={srName} onClick={() => setChar(c => {
+                            if (c.subrace === srName) return c;
+                            // Clear old subrace choices when changing subrace
+                            const oldSrFeatureNames = new Set(
+                              (speciesData.subraces?.[c.subrace]?.features || []).map(f => f.name)
+                            );
+                            const newChoices = Object.fromEntries(
+                              Object.entries(c.featureChoices || {}).filter(([k]) => !oldSrFeatureNames.has(k))
+                            );
+                            const newSources = Object.fromEntries(
+                              Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Subrace")
+                            );
+                            const newProfs = (c.skillProficiencies || []).filter(sk =>
+                              (c.skillProfSources||{})[sk] !== "Subrace"
+                            );
+                            return { ...c, subrace: srName, featureChoices: newChoices, skillProfSources: newSources, skillProficiencies: newProfs };
+                          })} style={{
+                            padding:"10px 14px", borderRadius:8, cursor:"pointer", transition:"all 0.15s",
+                            border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                            background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)"
+                          }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                              <span style={{ width:14, height:14, borderRadius:"50%", flexShrink:0, display:"inline-block",
+                                border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
+                                background: isSel ? "var(--accent)" : "transparent" }}/>
+                              <span style={{ fontFamily:"var(--font-display)", color: isSel ? "var(--accent)" : "var(--text)", fontSize:14 }}>{srName}</span>
+                              <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:4 }}>
+                                {Object.entries(srData.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`).join(", ")}
+                              </span>
+                            </div>
+                            {isSel && srData.features?.length > 0 && (
+                              <div style={{ marginTop:6, marginLeft:22, fontSize:11, color:"var(--text-dim)" }}>
+                                {srData.features.map(f => f.name).join(" • ")}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {!char.subrace && (
+                      <div style={{ marginTop:8, fontSize:12, color:"#e67e22" }}>⚠ Please choose a subrace</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Auto-granted languages */}
                 {autoLangs.length > 0 && (
                   <div style={{ ...ws.card, fontSize:13 }}>
                     <span style={{ color:"var(--text-muted)" }}>Automatically known (shown locked in language pickers): </span>
@@ -1881,21 +2320,42 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     ))}
                   </div>
                 )}
-                {/* Fixed ability bonuses */}
-                {Object.keys(speciesData.abilityBonuses || {}).length > 0 && (
-                  <div style={{ ...ws.card, fontSize:13 }}>
-                    <span style={{ color:"var(--text-muted)" }}>Fixed ability bonuses: </span>
-                    {Object.entries(speciesData.abilityBonuses).map(([ab, v]) => (
-                      <span key={ab} style={{ color:"var(--accent)", marginRight:10 }}>+{v} {ABILITY_NAMES[ab]}</span>
-                    ))}
-                  </div>
-                )}
-                {/* Species features (including asi_points for flex bonuses) */}
+
+                {/* Fixed ability bonuses (species + subrace combined) */}
+                {(() => {
+                  const allBonuses = {};
+                  Object.entries(speciesData.abilityBonuses || {}).forEach(([ab,v]) => allBonuses[ab] = (allBonuses[ab]||0)+v);
+                  Object.entries(subraceData?.abilityBonuses || {}).forEach(([ab,v]) => allBonuses[ab] = (allBonuses[ab]||0)+v);
+                  return Object.keys(allBonuses).length > 0 ? (
+                    <div style={{ ...ws.card, fontSize:13 }}>
+                      <span style={{ color:"var(--text-muted)" }}>Fixed ability bonuses: </span>
+                      {Object.entries(allBonuses).map(([ab, v]) => (
+                        <span key={ab} style={{ color:"var(--accent)", marginRight:10 }}>+{v} {ABILITY_NAMES[ab]}</span>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* Species features */}
                 <div style={ws.secTitle}>Species Features</div>
                 {(speciesData.features || []).map(feat => (
                   <FeaturePanel key={feat.name} feature={feat} locked={false}
                     {...fpProps("Species", true)} />
                 ))}
+
+                {/* Subrace features */}
+                {subraceData?.features?.length > 0 && (
+                  <>
+                    <div style={{ ...ws.secTitle, marginTop:12 }}>
+                      {char.subrace} Features
+                      <span style={{ fontSize:11, fontFamily:"var(--font-body)", color:"var(--accent2)", marginLeft:8, fontStyle:"italic" }}>Subrace</span>
+                    </div>
+                    {subraceData.features.map(feat => (
+                      <FeaturePanel key={feat.name} feature={feat} locked={false}
+                        {...fpProps("Subrace", true)} />
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -2020,6 +2480,12 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                       <tr style={{ borderTop:"1px solid var(--border)" }}>
                         <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>{char.species} (fixed)</td>
                         {Object.keys(char.abilities).map(ab => { const v=speciesData.abilityBonuses[ab]||0; return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)" }}>{v>0?`+${v}`:""}</td>; })}
+                      </tr>
+                    )}
+                    {subraceData && Object.keys(subraceData.abilityBonuses||{}).some(ab=>subraceData.abilityBonuses[ab]>0) && (
+                      <tr style={{ borderTop:"1px solid var(--border)" }}>
+                        <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>{char.subrace} (subrace)</td>
+                        {Object.keys(char.abilities).map(ab => { const v=subraceData.abilityBonuses[ab]||0; return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)" }}>{v>0?`+${v}`:""}</td>; })}
                       </tr>
                     )}
                     {Object.values(char.speciesAbilityChoices||{}).some(v=>v>0) && (
@@ -2187,7 +2653,10 @@ function SpellsTab({ char, gameData, onUpdate }) {
   const limits    = getSpellLimits(char, classes);
   const spellList = limits?.spellList || char.class;
   const known     = char.spells || [];
-  const allSpells = spellDb?.[spellList] || [];
+  // Flat array — filter spells that include this class
+  const allSpells = Array.isArray(spellDb)
+    ? spellDb.filter(s => (s.classes||[]).includes(spellList))
+    : (spellDb?.[spellList] || []);
 
   const knownCantrips = known.filter(s => s.level === 0);
   const knownSpells   = known.filter(s => s.level > 0);
@@ -2443,30 +2912,68 @@ function InventoryTab({ char, gameData, onUpdate }) {
           <div style={{ fontSize:11, color:tc(type), textTransform:"uppercase", letterSpacing:1, marginBottom:7, paddingBottom:4, borderBottom:"1px solid var(--border)" }}>
             {tl(type)} ({items.length})
           </div>
-          {items.map(item => (
-            <div key={item.id} style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:12, marginBottom:7, display:"flex", alignItems:"center", gap:10 }}>
-              <div style={{ width:8, height:8, borderRadius:"50%", background:tc(item.type), flexShrink:0 }} />
-              <div style={{ flex:1 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <span style={{ fontFamily:"var(--font-display)", fontSize:14 }}>{item.name}</span>
-                  {item.equipped && <span style={{ fontSize:10, padding:"2px 6px", background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", borderRadius:4, color:"var(--success)" }}>Equipped</span>}
+          {items.map(item => {
+            const lib = lookupLibraryItem(item.name, gameData);
+            const proficient = lib ? isItemProficient(lib, char, gameData.classes) : null;
+            const isEquippable = ["weapon","armor","shield"].includes(item.type) || lib?.category?.includes("Armor") || lib?.category === "shield";
+            const canEquip = isEquippable || (lib && (lib._lib === "armor" || lib._lib === "weapon"));
+            const showEquip = canEquip || ["weapon","armor","shield"].includes(item.type);
+            const stealthDisadv = item.equipped && lib?.stealthDisadvantage;
+            const strReq = item.equipped && lib?.strengthReq && (char.abilities?.str||10) < lib.strengthReq;
+            return (
+              <div key={item.id} style={{ background:"var(--card)", border:`1px solid ${item.equipped?"var(--accent2)":"var(--border)"}`, borderRadius:10, padding:12, marginBottom:7 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ width:8, height:8, borderRadius:"50%", background:tc(item.type), flexShrink:0 }} />
+                  <div style={{ flex:1, minWidth:0 }}>
+                    {/* Name row */}
+                    <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                      <span style={{ fontFamily:"var(--font-display)", fontSize:14 }}>{item.name}</span>
+                      {item.equipped && <span style={{ fontSize:10, padding:"2px 6px", background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", borderRadius:4, color:"var(--success)" }}>Equipped</span>}
+                      {/* Proficiency badge */}
+                      {proficient !== null && (
+                        <span style={{ fontSize:10, padding:"2px 6px", borderRadius:4,
+                          background: proficient ? "rgba(39,174,96,0.12)" : "rgba(230,126,34,0.12)",
+                          border:`1px solid ${proficient?"var(--success)":"#e67e22"}`,
+                          color: proficient ? "var(--success)" : "#e67e22" }}>
+                          {proficient ? "✓ Proficient" : "⚠ Not proficient"}
+                        </span>
+                      )}
+                      {/* Stealth disadvantage badge */}
+                      {stealthDisadv && <span style={{ fontSize:10, padding:"2px 6px", borderRadius:4, background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", color:"#e67e22" }}>⚠ Stealth disadv.</span>}
+                      {/* Str requirement warning */}
+                      {strReq && <span style={{ fontSize:10, padding:"2px 6px", borderRadius:4, background:"rgba(192,57,43,0.12)", border:"1px solid var(--danger)", color:"var(--danger)" }}>⚠ STR {lib.strengthReq} required</span>}
+                    </div>
+                    {/* Stats row from library */}
+                    {lib && (
+                      <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3, display:"flex", gap:10, flexWrap:"wrap" }}>
+                        {lib.damage && <span style={{ color:"var(--danger)" }}>{lib.damage} {lib.damageType}</span>}
+                        {lib.acFormula && <span style={{ color:"var(--info)" }}>AC: {lib.acFormula}</span>}
+                        {lib.properties?.length > 0 && <span>{lib.properties.join(", ")}</span>}
+                        {lib.range && <span>Range {lib.range}</span>}
+                        {lib.stealthDisadvantage && !item.equipped && <span style={{ color:"#e67e22" }}>Stealth disadvantage</span>}
+                        {lib.strengthReq > 0 && <span style={{ color:"var(--text-dim)" }}>Str {lib.strengthReq}+</span>}
+                        {(item.weight||lib.weight) > 0 && <span style={{ color:"var(--text-dim)" }}>{item.weight||lib.weight} lb</span>}
+                      </div>
+                    )}
+                    {/* Custom description (if no library entry or extra notes) */}
+                    {item.description && !lib && <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:2 }}>{item.description}</div>}
+                  </div>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
+                    <input type="number" value={item.quantity} min={1} onChange={e => uq(item.id, +e.target.value)}
+                      style={{ ...inp, width:50, textAlign:"center", padding:"4px 0" }} />
+                    {showEquip && (
+                      <button onClick={() => teq(item.id)} style={{ padding:"4px 10px", borderRadius:6, fontSize:12, cursor:"pointer", background:"transparent",
+                        border:`1px solid ${item.equipped ? "var(--success)" : "var(--border)"}`,
+                        color: item.equipped ? "var(--success)" : "var(--text-muted)" }}>
+                        {item.equipped ? "Unequip" : "Equip"}
+                      </button>
+                    )}
+                    <button onClick={() => rem(item.id)} style={{ width:28, height:28, borderRadius:6, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
+                  </div>
                 </div>
-                {item.description && <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:2 }}>{item.description}</div>}
               </div>
-              <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <input type="number" value={item.quantity} min={1} onChange={e => uq(item.id, +e.target.value)}
-                  style={{ ...inp, width:50, textAlign:"center", padding:"4px 0" }} />
-                {["weapon","armor","shield"].includes(item.type) && (
-                  <button onClick={() => teq(item.id)} style={{ padding:"4px 10px", borderRadius:6, fontSize:12, cursor:"pointer", background:"transparent",
-                    border:`1px solid ${item.equipped ? "var(--success)" : "var(--border)"}`,
-                    color: item.equipped ? "var(--success)" : "var(--text-muted)" }}>
-                    {item.equipped ? "Unequip" : "Equip"}
-                  </button>
-                )}
-                <button onClick={() => rem(item.id)} style={{ width:28, height:28, borderRadius:6, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ))}
 
@@ -2480,9 +2987,10 @@ function InventoryTab({ char, gameData, onUpdate }) {
 // FEATURES TAB (character sheet view)
 // ============================================================
 function FeaturesTab({ char, gameData }) {
-  const { classes, species:speciesDb } = gameData;
+  const { classes, species:speciesDb, feats:featList=[] } = gameData;
   const classData   = classes?.[char.class];
   const speciesData = speciesDb?.[char.species];
+  const subraceData = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
   const [open, setOpen] = useState({});
   const toggle = name => setOpen(o => ({ ...o, [name]:!o[name] }));
 
@@ -2491,36 +2999,98 @@ function FeaturesTab({ char, gameData }) {
     ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
   ].sort((a, b) => a.level - b.level);
 
-  const FeatureRow = ({ feat, isSpecies }) => {
-    const locked  = !isSpecies && char.level < feat.level;
+  const FeatureRow = ({ feat, isSpecies, isSubrace }) => {
+    const locked  = !isSpecies && !isSubrace && char.level < feat.level;
     const chosen  = char.featureChoices?.[feat.name];
-    const isOpen  = open[feat.name + (isSpecies ? "_sp" : "")];
-    const toggleKey = feat.name + (isSpecies ? "_sp" : "");
+    const chosenFeat = char.featChoices?.[feat.name];
+    const toggleKey = feat.name + (isSpecies ? "_sp" : isSubrace ? "_sr" : "");
+    const isOpen = open[toggleKey];
     return (
       <div style={ws.fCard(locked)}>
         <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => toggle(toggleKey)}>
           <span style={{ fontFamily:"var(--font-display)", color: locked ? "var(--text-dim)" : "var(--accent)", fontSize:14, flex:1 }}>{feat.name}</span>
+          {feat.type === "asi" && chosenFeat && chosenFeat !== "__pending__" && (
+            <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, background:"rgba(201,162,39,0.12)", border:"1px solid var(--accent)", color:"var(--accent)" }}>🏆 {chosenFeat}</span>
+          )}
+          {feat.type === "asi" && !chosenFeat && (
+            <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-dim)" }}>ASI</span>
+          )}
           {locked   && <span style={ws.lockBadge}>Lvl {feat.level}</span>}
-          {!locked && feat.level > 1 && !isSpecies && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:4 }}>Lvl {feat.level}</span>}
-          {chosen   && <span style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10, border:"1px solid var(--success)", maxWidth:160, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{chosen.split("—")[0].trim()}</span>}
+          {!locked && feat.level > 1 && !isSpecies && !isSubrace && <span style={{ fontSize:10, color:"var(--text-dim)" }}>Lvl {feat.level}</span>}
+          {chosen   && <span style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10, border:"1px solid var(--success)" }}>{chosen.split("—")[0].trim()}</span>}
           <span style={{ color:"var(--text-dim)", fontSize:11 }}>{isOpen ? "▲" : "▼"}</span>
         </div>
         {isOpen && (
           <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
             <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:0 }}>{feat.description}</p>
             {chosen && (
-              <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(201,162,39,0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>
-                ✓ Chosen: {chosen}
+              <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(201,162,39,0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>✓ Chosen: {chosen}</div>
+            )}
+            {feat.type === "asi" && chosenFeat && chosenFeat !== "__pending__" && (
+              <div style={{ marginTop:8, padding:"8px 12px", background:"rgba(201,162,39,0.08)", border:"1px solid var(--accent)", borderRadius:8 }}>
+                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:4 }}>🏆 {chosenFeat}</div>
+                <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.5 }}>
+                  {featList.find(f=>f.name===chosenFeat)?.description}
+                </div>
               </div>
             )}
+            {feat.type === "asi" && !chosenFeat && (() => {
+              const asi = char.asiChoices?.[feat.name] || {};
+              const bonuses = Object.entries(asi).filter(([,v])=>v>0);
+              return bonuses.length > 0 ? (
+                <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(39,174,96,0.08)", borderRadius:6, fontSize:12, color:"var(--success)" }}>
+                  ✓ {bonuses.map(([ab,v])=>`+${v} ${ABILITY_SHORT[ab]}`).join(", ")}
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
       </div>
     );
   };
 
+  // Collect taken feats for summary
+  const takenFeats = Object.entries(char.featChoices||{})
+    .filter(([,v]) => v && v !== "__pending__")
+    .map(([asiFeature, featName]) => ({ asiFeature, featName, feat: featList.find(f=>f.name===featName) }));
+
+  // Racial spells
+  const racialSpells = char.racialSpells || [];
+
   return (
     <div>
+      {/* Feats summary */}
+      {takenFeats.length > 0 && (
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>
+            Feats
+          </div>
+          {takenFeats.map(({featName, feat}) => (
+            <div key={featName} style={{ background:"var(--card)", border:"1px solid var(--accent2)", borderRadius:10, padding:"10px 14px", marginBottom:8 }}>
+              <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:4 }}>🏆 {featName}</div>
+              <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.5 }}>{feat?.description}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Racial spells */}
+      {racialSpells.length > 0 && (
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>
+            Racial Spells
+          </div>
+          {racialSpells.map(spell => (
+            <div key={spell.name + spell.sourceFeature} style={{ background:"var(--card)", border:"1px solid var(--accent2)", borderRadius:8, padding:"8px 12px", marginBottom:6, display:"flex", alignItems:"center", gap:10 }}>
+              <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, flex:1 }}>{spell.name}</span>
+              <span style={{ fontSize:10, color:"var(--text-dim)", padding:"2px 6px", border:"1px solid var(--border)", borderRadius:4 }}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
+              <span style={{ fontSize:10, color:"var(--accent2)", padding:"2px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>Racial</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Species traits */}
       {speciesData && (
         <div style={{ marginBottom:24 }}>
           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
@@ -2529,6 +3099,17 @@ function FeaturesTab({ char, gameData }) {
           {(speciesData.features || []).map(feat => <FeatureRow key={feat.name} feat={feat} isSpecies={true} />)}
         </div>
       )}
+
+      {/* Subrace traits */}
+      {subraceData?.features?.length > 0 && (
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
+            {char.subrace} Traits
+          </div>
+          {subraceData.features.map(feat => <FeatureRow key={feat.name} feat={feat} isSubrace={true} />)}
+        </div>
+      )}
+
       {classData && (
         <div>
           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
@@ -2686,7 +3267,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
   const qs = [
     { l:"HP",       v:`${char.hp.current}/${char.hp.max}`,
       c: char.hp.current < char.hp.max / 4 ? theme.danger : char.hp.current < char.hp.max / 2 ? "#f39c12" : theme.success },
-    { l:"AC",       v: calcAC(char) },
+    { l:"AC",       v: calcAC(char, gameData) },
     { l:"Init",     v: modStr(calcMod(char.abilities.dex)) },
     { l:"Speed",    v: `${speciesData?.speed || 30}ft` },
     { l:"Prof",     v: `+${pb}` },
@@ -2705,7 +3286,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
           <div style={{ flex:1, minWidth:200 }}>
             <div style={{ fontFamily:theme.fontDisplay, fontSize:22, color:theme.accent }}>{char.name}</div>
             <div style={{ fontSize:13, color:theme.textMuted, marginTop:2 }}>
-              {[char.species, char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background, char.alignment].filter(Boolean).join(" • ")}
+              {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background, char.alignment].filter(Boolean).join(" • ")}
             </div>
           </div>
           <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"4px 12px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)", fontSize:12 }}>✓ Saved</div>
@@ -2855,6 +3436,18 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
                     </div>
                   </>
                 )}
+
+                {/* Armor warnings */}
+                {hasStealthDisadvantage(char, gameData) && (
+                  <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", borderRadius:8, fontSize:12, color:"#e67e22" }}>
+                    ⚠ Stealth disadvantage — equipped armor imposes disadvantage on Dexterity (Stealth) checks.
+                  </div>
+                )}
+                {strRequirementMet(char, gameData).map(msg => (
+                  <div key={msg} style={{ marginTop:6, padding:"8px 12px", background:"rgba(192,57,43,0.12)", border:`1px solid var(--danger)`, borderRadius:8, fontSize:12, color:"var(--danger)" }}>
+                    ⚠ {msg}
+                  </div>
+                ))}
               </div>
             </div>
           )}
