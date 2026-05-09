@@ -732,6 +732,168 @@ function AbilityRoller({ abilities, onChange }) {
 // WIZARD SUB-COMPONENTS (must be proper components, not IIFEs,
 // so React hooks work correctly)
 // ============================================================
+
+// ── LIBRARY ITEM ADDER ──────────────────────────────────────
+// Shared by wizard equipment step and inventory tab.
+// Two tabs: browse the weapon/gear library (with stats) or
+// type a custom item.
+// ────────────────────────────────────────────────────────────
+const CATEGORY_LABELS = {
+  simpleWeapon:     "Simple Weapons",
+  simpleRanged:     "Simple Ranged",
+  martialWeapon:    "Martial Weapons",
+  martialRanged:    "Martial Ranged",
+  musicalInstrument:"Musical Instruments",
+  arcaneFocus:      "Arcane Foci",
+  druidicFocus:     "Druidic Foci",
+  holySymbol:       "Holy Symbols",
+  artisanTool:      "Artisan's Tools",
+  gamingSet:        "Gaming Sets",
+  tool:             "Tools",
+};
+
+function LibraryItemAdder({ gameData, onAdd }) {
+  const { weapons:weaponLib=[], gear:gearLib=[], itemTypes={} } = gameData;
+  const [tab, setTab]           = useState("library");
+  const [category, setCategory] = useState("simpleWeapon");
+  const [search, setSearch]     = useState("");
+  const [customName, setCustomName] = useState("");
+  const [customType, setCustomType] = useState("weapon");
+  const [customDesc, setCustomDesc] = useState("");
+  const [qty, setQty]           = useState(1);
+  const [added, setAdded]       = useState(null);
+
+  const allLibrary = [...weaponLib, ...gearLib];
+  const categories = [...new Set(allLibrary.map(i => i.category))];
+
+  const inCategory = allLibrary.filter(it =>
+    it.category === category &&
+    (!search || it.name.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const flashAdded = name => { setAdded(name); setTimeout(()=>setAdded(null), 1200); };
+
+  const addFromLibrary = it => {
+    const desc = it.damage
+      ? `${it.damage} ${it.damageType}${it.properties?.length?" — "+it.properties.join(", "):""}${it.range?" — Range "+it.range:""}`
+      : (it.description||"");
+    onAdd({ id:Date.now()+Math.random(), name:it.name, type:it.damage?"weapon":"misc", quantity:qty, weight:it.weight||0, description:desc, equipped:false });
+    flashAdded(it.name);
+  };
+
+  const addCustom = () => {
+    if (!customName) return;
+    onAdd({ id:Date.now(), name:customName, type:customType, quantity:qty, weight:0, description:customDesc, equipped:false });
+    setCustomName(""); setCustomDesc("");
+    flashAdded(customName);
+  };
+
+  const inp = { background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 12px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)", boxSizing:"border-box" };
+  const tabBtn = a => ({ padding:"6px 16px", borderRadius:"6px 6px 0 0", cursor:"pointer", fontSize:12, fontFamily:"var(--font-display)", transition:"all 0.15s", marginRight:4, border:`1px solid ${a?"var(--accent)":"var(--border)"}`, borderBottom:a?"1px solid var(--card)":"1px solid var(--border)", background:a?"var(--card)":"var(--surface)", color:a?"var(--accent)":"var(--text-muted)" });
+
+  return (
+    <div>
+      <div style={{ display:"flex", marginBottom:0 }}>
+        <button style={tabBtn(tab==="library")} onClick={()=>setTab("library")}>From Library</button>
+        <button style={tabBtn(tab==="custom")}  onClick={()=>setTab("custom")}>Custom</button>
+      </div>
+
+      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:"0 8px 8px 8px", padding:14 }}>
+
+        {/* ── Library tab ── */}
+        {tab==="library" && (
+          <div>
+            {/* Category pills */}
+            <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
+              {categories.map(cat=>(
+                <button key={cat} onClick={()=>{ setCategory(cat); setSearch(""); }} style={{
+                  padding:"3px 10px", borderRadius:20, cursor:"pointer", fontSize:11, transition:"all 0.15s",
+                  border:`1px solid ${category===cat?"var(--accent)":"var(--border)"}`,
+                  background:category===cat?"var(--accent)":"var(--surface)",
+                  color:category===cat?"var(--bg)":"var(--text-muted)"
+                }}>{CATEGORY_LABELS[cat]||cat}</button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <input style={{...inp,width:"100%",marginBottom:10}} value={search}
+              onChange={e=>setSearch(e.target.value)}
+              placeholder={`Search ${CATEGORY_LABELS[category]||category}…`}/>
+
+            {/* Item rows */}
+            <div style={{ maxHeight:260, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
+              {inCategory.length===0 && <div style={{fontSize:13,color:"var(--text-dim)",padding:"8px 0"}}>No items found.</div>}
+              {inCategory.map(it=>{
+                const justAdded = added===it.name;
+                return (
+                  <div key={it.name} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 10px", background:"var(--surface)", borderRadius:6, border:`1px solid ${justAdded?"var(--success)":"var(--border)"}`, transition:"border-color 0.3s" }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <span style={{ fontSize:13, color:"var(--text)", fontWeight:500 }}>{it.name}</span>
+                      <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:10 }}>
+                        {it.damage && <span style={{color:"var(--danger)",marginRight:8}}>{it.damage} {it.damageType}</span>}
+                        {it.properties?.length>0 && <span style={{marginRight:8}}>{it.properties.join(", ")}</span>}
+                        {it.range && <span style={{marginRight:8}}>Range {it.range}</span>}
+                        {it.weight>0 && <span style={{color:"var(--text-dim)"}}>{it.weight} lb</span>}
+                        {!it.damage && it.description && <span style={{color:"var(--text-dim)"}}>{it.description}</span>}
+                      </span>
+                    </div>
+                    <button onClick={()=>addFromLibrary(it)} style={{
+                      padding:"4px 12px", borderRadius:6, fontSize:12, cursor:"pointer", flexShrink:0,
+                      border:`1px solid ${justAdded?"var(--success)":"var(--accent)"}`,
+                      background:justAdded?"var(--success)":"var(--accent)",
+                      color:"var(--bg)", transition:"all 0.2s"
+                    }}>{justAdded?"✓":"+ Add"}</button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Qty */}
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:10, fontSize:12, color:"var(--text-muted)" }}>
+              Quantity:
+              <button onClick={()=>setQty(q=>Math.max(1,q-1))} style={{...inp,width:26,height:26,padding:0,textAlign:"center",cursor:"pointer",lineHeight:1}}>−</button>
+              <span style={{fontFamily:"var(--font-display)",color:"var(--accent)",minWidth:20,textAlign:"center"}}>{qty}</span>
+              <button onClick={()=>setQty(q=>q+1)} style={{...inp,width:26,height:26,padding:0,textAlign:"center",cursor:"pointer",lineHeight:1}}>+</button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Custom tab ── */}
+        {tab==="custom" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+              <div>
+                <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:4}}>Name</div>
+                <input style={{...inp,width:"100%"}} value={customName} onChange={e=>setCustomName(e.target.value)}
+                  placeholder="Item name…" onKeyDown={e=>e.key==="Enter"&&addCustom()}/>
+              </div>
+              <div>
+                <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:4}}>Type</div>
+                <select style={{...inp,width:"100%"}} value={customType} onChange={e=>setCustomType(e.target.value)}>
+                  {Object.entries(itemTypes).map(([k,v])=><option key={k} value={k}>{v.label||k}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,color:"var(--text-muted)",marginBottom:4}}>Description (optional)</div>
+              <input style={{...inp,width:"100%"}} value={customDesc} onChange={e=>setCustomDesc(e.target.value)} placeholder="Stats, notes…"/>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{fontSize:12,color:"var(--text-muted)"}}>Qty:</span>
+              <button onClick={()=>setQty(q=>Math.max(1,q-1))} style={{...inp,width:26,height:26,padding:0,textAlign:"center",cursor:"pointer",lineHeight:1}}>−</button>
+              <span style={{fontFamily:"var(--font-display)",color:"var(--accent)",minWidth:20,textAlign:"center"}}>{qty}</span>
+              <button onClick={()=>setQty(q=>q+1)} style={{...inp,width:26,height:26,padding:0,textAlign:"center",cursor:"pointer",lineHeight:1}}>+</button>
+              <button onClick={addCustom} style={{ marginLeft:"auto", padding:"8px 20px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:6, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>
+                {added?"✓ Added!":"Add to Inventory"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function WizardEquipmentStep({ char, setChar, gameData }) {
   const { classes, backgrounds, itemTypes, weapons:weaponLib=[], gear:gearLib=[] } = gameData;
   const classData = classes?.[char.class];
@@ -1027,16 +1189,13 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
         </div>
       </div>
 
-      {/* ── Custom item adder ── */}
+      {/* ── Add Item ── */}
       <div style={{marginTop:16}}>
-        <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Custom Item</div>
-        <div style={{display:"grid",gridTemplateColumns:"3fr 1fr auto",gap:8}}>
-          <input style={{...inp,width:"100%"}} value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="Item name…" onKeyDown={e=>e.key==="Enter"&&addCustom()}/>
-          <select style={{...inp,width:"100%"}} value={customType} onChange={e=>setCustomType(e.target.value)}>
-            {Object.entries(itemTypes||{}).map(([k,v])=><option key={k} value={k}>{v.label||k}</option>)}
-          </select>
-          <button onClick={addCustom} style={{padding:"8px 16px",background:"var(--accent)",border:"none",color:"var(--bg)",borderRadius:8,cursor:"pointer",fontFamily:"var(--font-display)",fontSize:13,whiteSpace:"nowrap"}}>Add</button>
-        </div>
+        <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Item to Inventory</div>
+        <LibraryItemAdder
+          gameData={gameData}
+          onAdd={item => setChar(c => ({ ...c, inventory:[...(c.inventory||[]), item] }))}
+        />
       </div>
     </div>
   );
@@ -2218,17 +2377,15 @@ function PersonalItemsSection({ char, onUpdate }) {
 function InventoryTab({ char, gameData, onUpdate }) {
   const { itemTypes } = gameData;
   const [showAdd, setShowAdd] = useState(false);
-  const [ni, setNi] = useState({ name:"", type:"misc", quantity:1, weight:0, description:"", equipped:false });
   const inv  = char.inventory || [];
   const curr = char.currencies || { cp:0, sp:0, ep:0, gp:0, pp:0 };
   const tw   = inv.reduce((s, i) => s + (i.weight || 0) * (i.quantity || 1), 0);
   const cap  = char.abilities.str * 15;
 
-  const addItem  = () => { if (!ni.name) return; onUpdate({ ...char, inventory:[...inv, { ...ni, id:Date.now() }] }); setNi({ name:"", type:"misc", quantity:1, weight:0, description:"", equipped:false }); setShowAdd(false); };
-  const rem      = id   => onUpdate({ ...char, inventory:inv.filter(i => i.id !== id) });
-  const teq      = id   => onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, equipped:!i.equipped } : i) });
-  const uq       = (id, qty) => onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, quantity:Math.max(1, qty) } : i) });
-  const ucu      = (t, v) => onUpdate({ ...char, currencies:{ ...curr, [t]:Math.max(0, +v || 0) } });
+  const rem  = id      => onUpdate({ ...char, inventory:inv.filter(i => i.id !== id) });
+  const teq  = id      => onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, equipped:!i.equipped } : i) });
+  const uq   = (id,qty)=> onUpdate({ ...char, inventory:inv.map(i => i.id === id ? { ...i, quantity:Math.max(1,qty) } : i) });
+  const ucu  = (t, v)  => onUpdate({ ...char, currencies:{ ...curr, [t]:Math.max(0, +v || 0) } });
 
   const inp  = { background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:14, fontFamily:"var(--font-body)", width:"100%", boxSizing:"border-box" };
   const lbl  = { display:"block", color:"var(--text-muted)", fontSize:11, textTransform:"uppercase", letterSpacing:1, marginBottom:4 };
@@ -2260,27 +2417,17 @@ function InventoryTab({ char, gameData, onUpdate }) {
           Weight: <strong style={{ color: tw > cap ? "var(--danger)" : "var(--text)" }}>{tw} lbs</strong>
           <span style={{ color:"var(--text-dim)" }}> / {cap} lbs</span>
         </span>
-        <button onClick={() => setShowAdd(!showAdd)} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>+ Add Item</button>
+        <button onClick={() => setShowAdd(!showAdd)} style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>
+          {showAdd ? "▲ Hide Adder" : "+ Add Item"}
+        </button>
       </div>
 
       {showAdd && (
-        <div style={{ background:"var(--card)", border:"1px solid var(--accent)", borderRadius:10, padding:16, marginBottom:14 }}>
-          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>New Item</div>
-          <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:10, marginBottom:10 }}>
-            <div><label style={lbl}>Name</label><input style={inp} value={ni.name} onChange={e => setNi({ ...ni, name:e.target.value })} placeholder="Item name…" /></div>
-            <div><label style={lbl}>Type</label>
-              <select style={inp} value={ni.type} onChange={e => setNi({ ...ni, type:e.target.value })}>
-                {Object.entries(itemTypes || {}).map(([k, v]) => <option key={k} value={k}>{v.label || k}</option>)}
-              </select>
-            </div>
-            <div><label style={lbl}>Qty</label><input type="number" style={inp} value={ni.quantity} min={1} onChange={e => setNi({ ...ni, quantity:+e.target.value })} /></div>
-            <div><label style={lbl}>Weight</label><input type="number" style={inp} value={ni.weight} min={0} onChange={e => setNi({ ...ni, weight:+e.target.value })} /></div>
-          </div>
-          <div style={{ marginBottom:10 }}><label style={lbl}>Description</label><input style={inp} value={ni.description} onChange={e => setNi({ ...ni, description:e.target.value })} placeholder="Optional…" /></div>
-          <div style={{ display:"flex", gap:8 }}>
-            <button onClick={addItem} style={{ padding:"8px 20px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:6, cursor:"pointer", fontFamily:"var(--font-display)" }}>Add</button>
-            <button onClick={() => setShowAdd(false)} style={{ padding:"8px 20px", background:"transparent", border:"1px solid var(--border)", color:"var(--text)", borderRadius:6, cursor:"pointer" }}>Cancel</button>
-          </div>
+        <div style={{ marginBottom:16 }}>
+          <LibraryItemAdder
+            gameData={gameData}
+            onAdd={item => { onUpdate({ ...char, inventory:[...inv, item] }); }}
+          />
         </div>
       )}
 
