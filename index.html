@@ -923,7 +923,43 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
           <div>
             <div style={ws.optGrid}>
               {Object.entries(backgrounds || {}).map(([n, d]) => (
-                <div key={n} style={ws.optCard(char.background === n)} onClick={() => setChar({ ...char, background:n })}>
+                <div key={n} style={ws.optCard(char.background === n)} onClick={() => setChar(c => {
+                  if (c.background === n) return c; // no change
+                  // Strip skill proficiencies sourced from the old background
+                  const newSources = Object.fromEntries(
+                    Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Background")
+                  );
+                  const newProfs = (c.skillProficiencies || []).filter(sk =>
+                    (c.skillProfSources||{})[sk] !== "Background"
+                  );
+                  const newExpertise = (c.skillExpertise || []).filter(s => newProfs.includes(s));
+                  // Clear feature choices from old background features
+                  const oldBgFeatureNames = new Set(
+                    (backgrounds?.[c.background]?.features || []).map(f => f.name)
+                  );
+                  const newChoices = Object.fromEntries(
+                    Object.entries(c.featureChoices || {}).filter(([k]) => !oldBgFeatureNames.has(k))
+                  );
+                  // Clear languages that were chosen on the old background's language_choice features
+                  // (keep species auto-languages and any chosen from species/class)
+                  const bgLangCount = (backgrounds?.[c.background]?.features || [])
+                    .filter(f => f.type === "language_choice")
+                    .reduce((sum, f) => sum + (f.count || 0), 0);
+                  // We can't easily track which languages came from background vs elsewhere,
+                  // so we reset languages entirely and let the user re-pick on the new background.
+                  // Auto-languages from species are re-added at finalise, so this is safe.
+                  const keptLanguages = (c.languages || []).filter(l =>
+                    (speciesDb?.[c.species]?.autoLanguages || []).includes(l)
+                  );
+                  return {
+                    ...c, background: n,
+                    skillProfSources: newSources,
+                    skillProficiencies: newProfs,
+                    skillExpertise: newExpertise,
+                    featureChoices: newChoices,
+                    languages: keptLanguages,
+                  };
+                })}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>(f.fixed||f.from||[]).slice(0,2).join(", ")).join(" • ")}
