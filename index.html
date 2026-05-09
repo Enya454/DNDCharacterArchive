@@ -211,6 +211,7 @@ const spellCombatLine = (spell, charLevel) => {
 };
 
 
+const getSavingThrows = (char, classes) => {
   const cd = classes?.[char.class], pb = profBonus(char.level);
   return Object.keys(ABILITY_NAMES).reduce((acc, ab) => {
     const mod = calcMod(char.abilities[ab]), prof = cd?.savingThrows?.includes(ab) || false;
