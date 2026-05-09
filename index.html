@@ -107,7 +107,7 @@ const DEFAULT_CHAR = {
   speciesAbilityChoices:{},
   skillProficiencies:[], skillExpertise:[], skillProfSources:{},
   featureChoices:{}, asiChoices:{},
-  languages:[],
+  languages:[], languageSources:{},
   alignment:"True Neutral",
   personalityTraits:"", ideals:"", bonds:"", flaws:"", notes:"", appearance:"",
   inventory:[], spells:[],
@@ -212,8 +212,9 @@ function SkillPicker({ title, count, from, allSkills, current, onToggle, skillSo
 // ASI-capable interactive feature panel
 // ============================================================
 function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillToggle,
-    expertiseProfs, onExpertiseToggle, allSkills, languages, onLanguageChoice,
-    languageList, autoLanguages, subclass, onSubclassChoice, subclasses, source,
+    expertiseProfs, onExpertiseToggle, allSkills, languages, languageSources,
+    onLanguageChoice, languageList, autoLanguages, thisLanguageSource,
+    subclass, onSubclassChoice, subclasses, source,
     asiChoices, onAsiChange, currentAbilities, skillSources, thisSource }) {
 
   const [open, setOpen] = useState(!locked);
@@ -233,7 +234,12 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         return owned.length >= (feature.count || 0);
       }
       case "expertise_choice":   return (expertiseProfs || []).length >= (feature.count || 0);
-      case "language_choice":    return (languages || []).filter(l => !(autoLanguages||[]).includes(l)).length >= (feature.count || 0);
+      case "language_choice":    {
+        const autoL = autoLanguages || [];
+        const src = thisLanguageSource || "";
+        const myPicks = (languages || []).filter(l => (languageSources||{})[l] === src && !autoL.includes(l));
+        return myPicks.length >= (feature.count || 0);
+      }
       case "asi":                return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
       case "asi_points":         return Object.values(asiChoices?.[feature.name] || {}).filter(v=>v>0).length >= (feature.points || 2);
       default:                   return true;
@@ -351,22 +357,23 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           {/* Language choice */}
           {!locked && feature.type === "language_choice" && (() => {
             const autoLangs = autoLanguages || [];
-            // Languages the user explicitly chose that are NOT auto-granted count against slots.
-            // If a user chose a language that is now auto-granted by their species,
-            // that choice is "covered" — the slot is freed and they can pick something else.
-            const userChosen = (languages || []).filter(l => !autoLangs.includes(l));
-            const coveredBySpecies = (languages || []).filter(l => autoLangs.includes(l));
-            const remaining = feature.count - userChosen.length;
+            const sources   = languageSources || {};
+            const mySource  = thisLanguageSource || "";
+
+            // Languages this source has chosen
+            const myChosen = (languages || []).filter(l => sources[l] === mySource && !autoLangs.includes(l));
+            // Languages chosen by OTHER sources (shown as taken but not mine to deselect)
+            const otherChosen = (languages || []).filter(l => sources[l] && sources[l] !== mySource && !autoLangs.includes(l));
+            // Languages that were picked by me but are now auto-granted (slot freed)
+            const coveredBySpecies = myChosen.filter(l => autoLangs.includes(l)); // shouldn't happen but safety
+
+            const remaining = feature.count - myChosen.length;
             const isComplete = remaining <= 0;
+
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
-                  Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> language(s).
-                  {coveredBySpecies.length > 0 && (
-                    <span style={{ color:"var(--info)", marginLeft:6, fontSize:12 }}>
-                      ({coveredBySpecies.join(", ")} covered by species — slot freed)
-                    </span>
-                  )}
+                  Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> language(s) for <em>{mySource}</em>.
                   {isComplete
                     ? <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>
                     : <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({remaining} remaining)</span>}
@@ -374,23 +381,28 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
                   {(languageList || []).map(lang => {
                     const isAuto    = autoLangs.includes(lang);
-                    const isChosen  = userChosen.includes(lang);
-                    const canAdd    = !isAuto && (isChosen || remaining > 0);
+                    const isMine    = myChosen.includes(lang);
+                    const isOthers  = otherChosen.includes(lang);
+                    // Can add if: not auto, not taken by another source, (mine already OR have remaining slots)
+                    const canAdd    = !isAuto && !isOthers && (isMine || remaining > 0);
                     return (
-                      <div key={lang} onClick={() => !isAuto && canAdd && onLanguageChoice(lang)} style={{
+                      <div key={lang} onClick={() => !isAuto && !isOthers && canAdd && onLanguageChoice(lang)} style={{
                         padding:"6px 10px", borderRadius:6, fontSize:13, transition:"all 0.15s",
-                        cursor: isAuto ? "default" : canAdd ? "pointer" : "not-allowed",
+                        cursor: isAuto || isOthers ? "default" : canAdd ? "pointer" : "not-allowed",
                         background: isAuto
                           ? "rgba(100,100,200,0.12)"
-                          : isChosen
+                          : isMine
                             ? "rgba(201,162,39,0.08)"
-                            : "var(--surface)",
-                        border:`1px solid ${isAuto ? "var(--info)" : isChosen ? "var(--accent)" : "var(--border)"}`,
-                        opacity: !isAuto && !canAdd ? 0.4 : 1,
+                            : isOthers
+                              ? "rgba(100,100,100,0.08)"
+                              : "var(--surface)",
+                        border:`1px solid ${isAuto ? "var(--info)" : isMine ? "var(--accent)" : isOthers ? "var(--border)" : "var(--border)"}`,
+                        opacity: (!isAuto && !isMine && (!canAdd || isOthers)) ? 0.4 : 1,
                         display:"flex", alignItems:"center", justifyContent:"space-between", gap:4
                       }}>
-                        <span>{isAuto ? "🔒 " : isChosen ? "✓ " : ""}{lang}</span>
-                        {isAuto && <span style={{ fontSize:10, color:"var(--info)" }}>species</span>}
+                        <span>{isAuto ? "🔒 " : isMine ? "✓ " : ""}{lang}</span>
+                        {isAuto   && <span style={{ fontSize:10, color:"var(--info)" }}>species</span>}
+                        {isOthers && <span style={{ fontSize:10, color:"var(--text-dim)" }}>{sources[lang]}</span>}
                       </div>
                     );
                   })}
@@ -744,13 +756,21 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     const newExpertise = (c.skillExpertise || []).filter(s => newProfs.includes(s));
     return { ...c, subclass: sc, skillProfSources: newSources, skillProficiencies: newProfs, skillExpertise: newExpertise, featureChoices: newChoices };
   });
-  const toggleLanguage = lang => setChar(c => {
+  const toggleLanguage = (lang, sourceLabel) => setChar(c => {
     // Never allow toggling an auto-granted species language
     if (autoLangs.includes(lang)) return c;
     const cur = c.languages || [];
-    return { ...c, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] };
+    const curSources = c.languageSources || {};
+    if (cur.includes(lang)) {
+      // Only allow deselect if this source owns it
+      if (curSources[lang] && curSources[lang] !== sourceLabel) return c;
+      const newSources = { ...curSources };
+      delete newSources[lang];
+      return { ...c, languages: cur.filter(l => l !== lang), languageSources: newSources };
+    } else {
+      return { ...c, languages: [...cur, lang], languageSources: { ...curSources, [lang]: sourceLabel } };
+    }
   });
-
   const setAsi = (featureName, val) => setChar(c => ({
     ...c, asiChoices: { ...(c.asiChoices||{}), [featureName]: val }
   }));
@@ -793,9 +813,11 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     onExpertiseToggle: toggleExpertise,
     allSkills: allSkills || [],
     languages: char.languages,
-    onLanguageChoice: toggleLanguage,
-    languageList: languageList || [],   // full list — auto-langs shown locked inside the panel
-    autoLanguages: autoLangs,           // passed so panel knows what's already granted
+    languageSources: char.languageSources || {},
+    onLanguageChoice: lang => toggleLanguage(lang, sourceLabel),
+    languageList: languageList || [],
+    autoLanguages: autoLangs,
+    thisLanguageSource: sourceLabel,
     subclass: char.subclass, onSubclassChoice: setSubclass,
     subclasses: classData?.subclasses,
     skillSources, thisSource: sourceLabel,
@@ -850,12 +872,28 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
         if (!char.background) return false;
         const pc = requiredProfCountForStep(2);
         if (pc && pc.have < pc.required) return false;
+        // Check background language choices are complete
+        const bgLangFeats = bgData?.features?.filter(f => f.type === "language_choice") || [];
+        for (const feat of bgLangFeats) {
+          const myPicks = (char.languages || []).filter(l =>
+            (char.languageSources||{})[l] === "Background" && !(autoLangs||[]).includes(l)
+          );
+          if (myPicks.length < (feat.count || 0)) return false;
+        }
         return true;
       }
       case 3: {
         if (!char.species) return false;
         const pc = requiredProfCountForStep(3);
         if (pc && pc.have < pc.required) return false;
+        // Check species language choices are complete
+        const spLangFeats = speciesData?.features?.filter(f => f.type === "language_choice") || [];
+        for (const feat of spLangFeats) {
+          const myPicks = (char.languages || []).filter(l =>
+            (char.languageSources||{})[l] === "Species" && !(autoLangs||[]).includes(l)
+          );
+          if (myPicks.length < (feat.count || 0)) return false;
+        }
         // Check asi_points complete
         const asiFeature = speciesData?.features?.find(f => f.type === "asi_points");
         if (asiFeature) {
@@ -872,7 +910,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   });
 
 
-  // Show ! on steps that are incomplete AND at or before the current step
+  // Show red dot on steps that are incomplete AND at or before the current step
   const StepBar = () => (
     <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
       {STEPS.map((name, i) => {
@@ -880,29 +918,24 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
         const incomplete = !stepComplete[i] && i <= step;
         return (
           <div key={i} onClick={() => setStep(i)} style={{
+            position:"relative",
             padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
             letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s", cursor:"pointer",
-            border: isCurrent
-              ? `1px solid var(--accent)`
-              : incomplete
-                ? "1px solid #e67e22"
-                : "1px solid var(--border)",
-            background: isCurrent
-              ? "var(--accent)"
-              : incomplete
-                ? "rgba(230,126,34,0.15)"
-                : i < step
-                  ? "var(--accent2)"
-                  : "var(--surface)",
-            color: isCurrent
-              ? "var(--bg)"
-              : incomplete
-                ? "#e67e22"
-                : i < step
-                  ? "var(--bg)"
-                  : "var(--text-muted)"
+            border: isCurrent ? "1px solid var(--accent)" : "1px solid var(--border)",
+            background: isCurrent ? "var(--accent)" : i < step ? "var(--accent2)" : "var(--surface)",
+            color: isCurrent ? "var(--bg)" : i < step ? "var(--bg)" : "var(--text-muted)"
           }}>
-            {incomplete ? "! " : ""}{i+1}. {name}
+            {i+1}. {name}
+            {incomplete && (
+              <span style={{
+                position:"absolute", top:-5, right:-5,
+                width:14, height:14, borderRadius:"50%",
+                background:"#e74c3c", border:"2px solid var(--bg)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:9, color:"#fff", fontWeight:"bold", lineHeight:1,
+                pointerEvents:"none"
+              }}>!</span>
+            )}
           </div>
         );
       })}
@@ -967,16 +1000,13 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                   const newChoices = Object.fromEntries(
                     Object.entries(c.featureChoices || {}).filter(([k]) => !oldBgFeatureNames.has(k))
                   );
-                  // Clear languages that were chosen on the old background's language_choice features
-                  // (keep species auto-languages and any chosen from species/class)
-                  const bgLangCount = (backgrounds?.[c.background]?.features || [])
-                    .filter(f => f.type === "language_choice")
-                    .reduce((sum, f) => sum + (f.count || 0), 0);
-                  // We can't easily track which languages came from background vs elsewhere,
-                  // so we reset languages entirely and let the user re-pick on the new background.
-                  // Auto-languages from species are re-added at finalise, so this is safe.
+                  // Reset languages chosen by the old background (keep species auto-langs and species choices)
                   const keptLanguages = (c.languages || []).filter(l =>
-                    (speciesDb?.[c.species]?.autoLanguages || []).includes(l)
+                    (speciesDb?.[c.species]?.autoLanguages || []).includes(l) ||
+                    (c.languageSources||{})[l] === "Species"
+                  );
+                  const keptLangSources = Object.fromEntries(
+                    Object.entries(c.languageSources || {}).filter(([l]) => keptLanguages.includes(l))
                   );
                   return {
                     ...c, background: n,
@@ -985,6 +1015,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     skillExpertise: newExpertise,
                     featureChoices: newChoices,
                     languages: keptLanguages,
+                    languageSources: keptLangSources,
                   };
                 })}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
@@ -1043,10 +1074,19 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     const newChoices = Object.fromEntries(
                       Object.entries(c.featureChoices || {}).filter(([k]) => !oldSpeciesFeatureNames.has(k))
                     );
+                    // Clear languages chosen by old species (keep background choices and other sources)
+                    const newLangs = (c.languages || []).filter(l =>
+                      (c.languageSources||{})[l] !== "Species" &&
+                      !(speciesDb?.[c.species]?.autoLanguages||[]).includes(l)
+                    );
+                    const newLangSources = Object.fromEntries(
+                      Object.entries(c.languageSources || {}).filter(([l]) => newLangs.includes(l))
+                    );
                     return {
                       ...c, species: n,
                       speciesAbilityChoices: {},
-                      languages: (c.languages || []).filter(l => !(speciesDb?.[c.species]?.autoLanguages||[]).includes(l) || (d.autoLanguages||[]).includes(l)),
+                      languages: newLangs,
+                      languageSources: newLangSources,
                       skillProfSources: newSources,
                       skillProficiencies: newProfs,
                       skillExpertise: newExpertise,
