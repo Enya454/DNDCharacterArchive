@@ -235,6 +235,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
       case "expertise_choice":   return (expertiseProfs || []).length >= (feature.count || 0);
       case "language_choice":    return (languages || []).length >= (feature.count || 0);
       case "asi":                return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= 2;
+      case "asi_points":         return (Object.values(asiChoices?.[feature.name] || {}).reduce((s,v)=>s+v,0)) >= (feature.points || 2);
       default:                   return true;
     }
   })();
@@ -412,6 +413,48 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
               </div>
             );
           })()}
+
+          {/* asi_points — species flexible bonus e.g. Half-Elf +1/+1, stackable */}
+          {!locked && feature.type === "asi_points" && (() => {
+            const totalPts = feature.points || 2;
+            const asi = asiChoices?.[feature.name] || {};
+            const spent = Object.values(asi).reduce((s,v)=>s+(v||0),0);
+            const rem = totalPts - spent;
+            const excluded = feature.exclude || [];
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
+                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong>. You can put multiple points into the same ability. Excluded: {excluded.map(ab=>ABILITY_SHORT[ab]).join(", ") || "none"}. Max 20.
+                  {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
+                           : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+                  {Object.keys(ABILITY_NAMES).filter(ab => !excluded.includes(ab)).map(ab => {
+                    const base = currentAbilities?.[ab] || 10;
+                    const bonus = asi[ab] || 0;
+                    const total = base + bonus;
+                    const atMax = total >= 20;
+                    return (
+                      <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
+                        background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
+                        <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                        <div style={{ fontSize:18, fontFamily:"var(--font-display)", color:bonus>0?"var(--accent)":"var(--text)" }}>
+                          {total}{bonus>0&&<span style={{ fontSize:12 }}> (+{bonus})</span>}
+                        </div>
+                        <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
+                          <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
+                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
+                        </div>
+                        {atMax && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:2 }}>max</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -531,13 +574,15 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const classData   = classes?.[char.class];
   const bgData      = backgrounds?.[char.background];
 
-  // Effective ability = base + fixed species bonus + chosen species bonus + ASI bonuses
+  // Effective ability = base + fixed species bonus + asi_points species choices + ASI from class features
   const totalAb = ab => {
     const base   = char.abilities[ab] || 10;
     const fixed  = speciesData?.abilityBonuses?.[ab] || 0;
-    const chosen = char.speciesAbilityChoices?.[ab] || 0;
+    // Points spent in asi_points species features (stored in speciesAbilityChoices)
+    const speciesPoints = char.speciesAbilityChoices?.[ab] || 0;
+    // Points spent in ASI class features (stored in asiChoices)
     const asi    = Object.values(char.asiChoices || {}).reduce((s, v) => s + (v?.[ab] || 0), 0);
-    return base + fixed + chosen + asi;
+    return base + fixed + speciesPoints + asi;
   };
   const maxHP = classData ? calcHP(classData, char.level || 1, calcMod(totalAb("con"))) : 0;
 
@@ -572,7 +617,24 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   });
 
   const setChoice      = (name, val) => setChar(c => ({ ...c, featureChoices:{ ...c.featureChoices, [name]:val } }));
-  const setSubclass    = sc          => setChar(c => ({ ...c, subclass:sc }));
+  const setSubclass = sc => setChar(c => {
+    // When switching subclass, strip ALL skill sources and expertise from the OLD subclass
+    const oldSC = c.subclass;
+    if (!oldSC || oldSC === sc) return { ...c, subclass: sc };
+    const newSources = Object.fromEntries(
+      Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== oldSC)
+    );
+    const newProfs = (c.skillProficiencies || []).filter(sk => newSources[sk] !== undefined || !Object.keys(c.skillProfSources||{}).includes(sk) || c.skillProfSources[sk] !== oldSC);
+    // Also clean feature choices that came from old subclass features
+    const oldSubFeatureNames = new Set(
+      (classData?.subclasses?.[oldSC]?.features || []).map(f => f.name)
+    );
+    const newChoices = Object.fromEntries(
+      Object.entries(c.featureChoices || {}).filter(([k]) => !oldSubFeatureNames.has(k))
+    );
+    const newExpertise = (c.skillExpertise || []).filter(s => newProfs.includes(s));
+    return { ...c, subclass: sc, skillProfSources: newSources, skillProficiencies: newProfs, skillExpertise: newExpertise, featureChoices: newChoices };
+  });
   const toggleLanguage = lang        => setChar(c => {
     const cur = c.languages || [];
     return { ...c, languages: cur.includes(lang) ? cur.filter(l => l !== lang) : [...cur, lang] };
@@ -580,6 +642,14 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
   const setAsi = (featureName, val) => setChar(c => ({
     ...c, asiChoices: { ...(c.asiChoices||{}), [featureName]: val }
   }));
+  const setSpeciesAsi = (featureName, val) => {
+    // Flatten all asi_points feature values into speciesAbilityChoices
+    const merged = Object.keys(ABILITY_NAMES).reduce((acc, ab) => {
+      acc[ab] = val[ab] || 0;
+      return acc;
+    }, {});
+    setChar(c => ({ ...c, speciesAbilityChoices: merged }));
+  };
 
   const finalize = () => {
     const fa = Object.keys(char.abilities).reduce((acc, ab) => { acc[ab] = totalAb(ab); return acc; }, {});
@@ -599,23 +669,31 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
     ...((subclassName && classData?.subclasses?.[subclassName]?.features) || []).map(f => ({ ...f, _source: subclassName }))
   ].sort((a, b) => a.level - b.level);
 
+  // Auto-granted languages from current species (shouldn't be re-selectable)
+  const autoLangs = speciesData?.autoLanguages || [];
+
   // Shared FeaturePanel props builder
-  const fpProps = (sourceLabel) => ({
+  const fpProps = (sourceLabel, isSpecies = false) => ({
     choices: char.featureChoices, onChoice: setChoice,
     skillProfs: char.skillProficiencies,
     onSkillToggle: skill => toggleSkillForSource(skill, sourceLabel),
     expertiseProfs: (char.skillExpertise||[]).filter(s=>(char.skillProficiencies||[]).includes(s)),
     onExpertiseToggle: toggleExpertise,
     allSkills: allSkills || [],
-    languages: char.languages, onLanguageChoice: toggleLanguage,
-    languageList: languageList || [],
+    languages: char.languages,
+    onLanguageChoice: toggleLanguage,
+    // Exclude auto-granted languages from the choosable list
+    languageList: (languageList || []).filter(l => !autoLangs.includes(l)),
     subclass: char.subclass, onSubclassChoice: setSubclass,
     subclasses: classData?.subclasses,
     skillSources, thisSource: sourceLabel,
-    asiChoices: char.asiChoices || {}, onAsiChange: setAsi,
+    // Species asi_points write to speciesAbilityChoices; class ASI writes to asiChoices
+    asiChoices: isSpecies
+      ? { "Ability Score Increase": char.speciesAbilityChoices || {} }
+      : char.asiChoices || {},
+    onAsiChange: isSpecies ? setSpeciesAsi : setAsi,
     currentAbilities: char.abilities,
   });
-
 
 
   // Step indicator dots
@@ -729,6 +807,13 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
 
             {speciesData && (
               <div style={{ marginTop:20 }}>
+                {/* Auto-granted languages */}
+                {autoLangs.length > 0 && (
+                  <div style={{ ...ws.card, fontSize:13 }}>
+                    <span style={{ color:"var(--text-muted)" }}>Automatically known languages: </span>
+                    {autoLangs.map(l => <span key={l} style={ws.tag}>{l}</span>)}
+                  </div>
+                )}
                 {/* Fixed ability bonuses */}
                 {Object.keys(speciesData.abilityBonuses || {}).length > 0 && (
                   <div style={{ ...ws.card, fontSize:13 }}>
@@ -738,52 +823,11 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     ))}
                   </div>
                 )}
-
-                {/* Flexible ability bonus choices e.g. Half-Elf +1/+1 */}
-                {speciesData.abilityBonusChoices && (() => {
-                  const cfg = speciesData.abilityBonusChoices;
-                  const choices = char.speciesAbilityChoices || {};
-                  const chosen  = Object.keys(choices).filter(k => choices[k] > 0);
-                  return (
-                    <div style={ws.card}>
-                      <div style={ws.secTitle}>{cfg.description || `Choose ${cfg.count} abilities (+${cfg.amount} each)`}</div>
-                      <p style={{ fontSize:13, color:"var(--text-muted)", margin:"0 0 12px" }}>{chosen.length}/{cfg.count} chosen</p>
-                      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
-                        {Object.keys(ABILITY_NAMES)
-                          .filter(ab => !cfg.exclude || !cfg.exclude.includes(ab))
-                          .map(ab => {
-                            const isSel = !!choices[ab];
-                            const canAdd = isSel || chosen.length < cfg.count;
-                            return (
-                              <div key={ab} onClick={() => {
-                                if (!canAdd) return;
-                                const newC = { ...choices };
-                                if (isSel) delete newC[ab]; else newC[ab] = cfg.amount;
-                                setChar(c => ({ ...c, speciesAbilityChoices:newC }));
-                              }} style={{
-                                padding:10, borderRadius:8, textAlign:"center",
-                                cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
-                                border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                                background: isSel ? "rgba(201,162,39,0.1)" : "var(--surface)",
-                                opacity: !canAdd ? 0.4 : 1
-                              }}>
-                                <div style={{ fontSize:12, color:"var(--text-muted)", textTransform:"uppercase" }}>{ABILITY_SHORT[ab]}</div>
-                                <div style={{ fontFamily:"var(--font-display)", color: isSel ? "var(--accent)" : "var(--text)", fontSize:18 }}>
-                                  {isSel ? `+${cfg.amount}` : "—"}
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Species feature list */}
+                {/* Species features (including asi_points for flex bonuses) */}
                 <div style={ws.secTitle}>Species Features</div>
                 {(speciesData.features || []).map(feat => (
                   <FeaturePanel key={feat.name} feature={feat} locked={false}
-                    {...fpProps("Species")} />
+                    {...fpProps("Species", true)} />
                 ))}
               </div>
             )}
@@ -849,33 +893,48 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
         {/* ── STEP 4: Abilities ── */}
         {step === 4 && (
           <div>
-            {speciesData && (
-              <div style={{ ...ws.card, fontSize:13, marginBottom:16 }}>
-                <span style={{ color:"var(--text-muted)" }}>Species bonuses applied: </span>
-                {Object.entries(speciesData.abilityBonuses || {}).map(([ab, v]) => (
-                  <span key={ab} style={{ color:"var(--accent)", marginRight:8 }}>+{v} {ABILITY_SHORT[ab]}</span>
-                ))}
-                {Object.entries(char.speciesAbilityChoices || {}).filter(([,v]) => v > 0).map(([ab, v]) => (
-                  <span key={ab+"-c"} style={{ color:"var(--accent)", marginRight:8 }}>+{v} {ABILITY_SHORT[ab]} (choice)</span>
-                ))}
-              </div>
-            )}
             <AbilityRoller abilities={char.abilities} onChange={abs => setChar({ ...char, abilities:abs })} />
             <div style={{ ...ws.card, marginTop:18 }}>
-              <div style={{ color:"var(--text-muted)", fontSize:11, marginBottom:10, textTransform:"uppercase", letterSpacing:1 }}>
-                Final Scores (with species bonuses)
+              <div style={{ color:"var(--text-muted)", fontSize:11, marginBottom:12, textTransform:"uppercase", letterSpacing:1 }}>
+                Score Breakdown (Base + All Bonuses)
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:8 }}>
-                {Object.keys(char.abilities).map(ab => {
-                  const t = totalAb(ab);
-                  return (
-                    <div key={ab} style={{ textAlign:"center", padding:10, background:"var(--surface)", borderRadius:8, border:"1px solid var(--border)" }}>
-                      <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                      <div style={{ fontSize:22, fontFamily:"var(--font-display)", color:"var(--accent)" }}>{t}</div>
-                      <div style={{ fontSize:12, color:"var(--text-muted)" }}>{modStr(calcMod(t))}</div>
-                    </div>
-                  );
-                })}
+              <div style={{ overflowX:"auto" }}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+                  <thead>
+                    <tr>
+                      <td style={{ padding:"4px 8px", color:"var(--text-muted)", fontSize:11 }}>Source</td>
+                      {Object.keys(char.abilities).map(ab => <td key={ab} style={{ padding:"4px 8px", textAlign:"center", color:"var(--text-muted)", fontSize:11, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</td>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderTop:"1px solid var(--border)" }}>
+                      <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>Base (rolled/assigned)</td>
+                      {Object.keys(char.abilities).map(ab => <td key={ab} style={{ padding:"5px 8px", textAlign:"center", fontFamily:"var(--font-display)", color:"var(--text)" }}>{char.abilities[ab]}</td>)}
+                    </tr>
+                    {speciesData && Object.keys(speciesData.abilityBonuses||{}).some(ab=>speciesData.abilityBonuses[ab]>0) && (
+                      <tr style={{ borderTop:"1px solid var(--border)" }}>
+                        <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>{char.species} (fixed)</td>
+                        {Object.keys(char.abilities).map(ab => { const v=speciesData.abilityBonuses[ab]||0; return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)" }}>{v>0?`+${v}`:""}</td>; })}
+                      </tr>
+                    )}
+                    {Object.values(char.speciesAbilityChoices||{}).some(v=>v>0) && (
+                      <tr style={{ borderTop:"1px solid var(--border)" }}>
+                        <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>{char.species} (choice)</td>
+                        {Object.keys(char.abilities).map(ab => { const v=char.speciesAbilityChoices?.[ab]||0; return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)" }}>{v>0?`+${v}`:""}</td>; })}
+                      </tr>
+                    )}
+                    {Object.entries(char.asiChoices||{}).filter(([,v])=>Object.values(v).some(n=>n>0)).map(([feat,vals]) => (
+                      <tr key={feat} style={{ borderTop:"1px solid var(--border)" }}>
+                        <td style={{ padding:"5px 8px", color:"var(--text-muted)" }}>ASI: {feat}</td>
+                        {Object.keys(char.abilities).map(ab => { const v=vals[ab]||0; return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)" }}>{v>0?`+${v}`:""}</td>; })}
+                      </tr>
+                    ))}
+                    <tr style={{ borderTop:"2px solid var(--accent2)", fontWeight:"bold" }}>
+                      <td style={{ padding:"5px 8px", color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:12 }}>TOTAL</td>
+                      {Object.keys(char.abilities).map(ab => { const t=totalAb(ab); return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:16 }}>{t}<span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:3 }}>({modStr(calcMod(t))})</span></td>; })}
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1584,6 +1643,45 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
             <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", gap:22 }}>
               {/* Left: abilities + saves */}
               <div>
+                {/* Bonus breakdown */}
+                {(() => {
+                  const sData = speciesData;
+                  const hasChoices = Object.values(char.speciesAbilityChoices||{}).some(v=>v>0);
+                  const hasASI = Object.values(char.asiChoices||{}).some(v=>Object.values(v).some(n=>n>0));
+                  if (!sData && !hasASI) return null;
+                  const rows = [];
+                  if (sData && Object.keys(sData.abilityBonuses||{}).some(ab=>sData.abilityBonuses[ab]>0))
+                    rows.push({ label:`${char.species} (fixed)`, vals: sData.abilityBonuses });
+                  if (hasChoices)
+                    rows.push({ label:`${char.species} (choice)`, vals: char.speciesAbilityChoices });
+                  Object.entries(char.asiChoices||{}).filter(([,v])=>Object.values(v).some(n=>n>0))
+                    .forEach(([feat,vals]) => rows.push({ label:`ASI: ${feat}`, vals }));
+                  if (rows.length === 0) return null;
+                  return (
+                    <div style={{ marginBottom:14 }}>
+                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:8 }}>Bonus Breakdown</div>
+                      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, overflow:"hidden" }}>
+                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                          <thead>
+                            <tr style={{ background:"rgba(0,0,0,0.2)" }}>
+                              <td style={{ padding:"4px 8px", color:"var(--text-dim)" }}>Source</td>
+                              {Object.keys(char.abilities).map(ab=><td key={ab} style={{ padding:"4px 6px", textAlign:"center", color:"var(--text-dim)", textTransform:"uppercase" }}>{ABILITY_SHORT[ab]}</td>)}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((row,i)=>(
+                              <tr key={i} style={{ borderTop:"1px solid var(--border)" }}>
+                                <td style={{ padding:"4px 8px", color:"var(--text-muted)", whiteSpace:"nowrap", maxWidth:90, overflow:"hidden", textOverflow:"ellipsis" }}>{row.label}</td>
+                                {Object.keys(char.abilities).map(ab=>{ const v=row.vals[ab]||0; return <td key={ab} style={{ padding:"4px 6px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)", fontFamily:"var(--font-display)" }}>{v>0?`+${v}`:""}</td>; })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:10 }}>Ability Scores</div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9 }}>
                   {Object.keys(char.abilities).map(ab => {

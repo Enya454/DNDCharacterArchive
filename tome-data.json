@@ -1,108 +1,118 @@
 {
   "_notes": {
-    "featureTypes": "passive=just text shown, proficiency_choice=pick N skills from list, expertise_choice=pick N skills for expertise, choice=pick one option from named list, asi_choice=assign N bonus points to abilities (half-elf style), language_choice=pick N languages",
-    "leveledFeatures": "features is an array of feature objects. Each unlocks at a given level. locked=true features are shown but greyed out above the character's level.",
-    "subclasses": "Each class can have a 'subclasses' object. Key = subclass name, value = object with 'features' array (same format) and optional 'spellcastingAbility'.",
-    "speciesFeatures": "Same feature format as classes. 'auto' features are displayed as granted. Choice features prompt the user to pick."
+    "featureTypes": "passive=just text shown, proficiency_choice=pick N skills from list, expertise_choice=pick N skills for expertise, choice=pick one option from named list, language_choice=pick N extra languages, asi_points=spend N points on abilities (stackable)",
+    "languages": "autoLanguages = languages the species always knows (shown as granted, not re-selectable). language_choice features let them pick additional ones.",
+    "abilityBonusChoices": "Use asi_points type feature instead of the old abilityBonusChoices field. Set 'points' to total points to spend, 'exclude' to ability keys that can't receive points.",
+    "subclasses": "Each class can have a 'subclasses' object. Key = subclass name, value = object with 'features' array (same format).",
+    "version": "1.1"
   },
 
   "species": {
     "Human": {
       "abilityBonuses": { "str":1,"dex":1,"con":1,"int":1,"wis":1,"cha":1 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common"],
       "features": [
         { "name": "Ability Score Increase", "level": 1, "type": "passive", "description": "Your ability scores each increase by 1." },
-        { "name": "Extra Language",          "level": 1, "type": "language_choice", "count": 1, "description": "You can speak, read, and write one extra language of your choice." },
-        { "name": "Extra Skill",             "level": 1, "type": "proficiency_choice", "count": 1, "from": "all", "description": "You gain proficiency in one skill of your choice." }
+        { "name": "Extra Language", "level": 1, "type": "language_choice", "count": 1, "description": "You can speak, read, and write one extra language of your choice." },
+        { "name": "Extra Skill",    "level": 1, "type": "proficiency_choice", "count": 1, "from": "all", "description": "You gain proficiency in one skill of your choice." }
       ]
     },
     "Elf": {
       "abilityBonuses": { "dex":2, "int":1 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Elvish"],
       "features": [
-        { "name": "Darkvision",    "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
-        { "name": "Keen Senses",   "level": 1, "type": "passive", "description": "You have proficiency in the Perception skill.", "grantsSkills": ["Perception"] },
-        { "name": "Fey Ancestry",  "level": 1, "type": "passive", "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep." },
-        { "name": "Trance",        "level": 1, "type": "passive", "description": "Elves don't need to sleep. Instead, they meditate deeply for 4 hours a day." }
+        { "name": "Darkvision",   "level": 1, "type": "passive", "description": "Accustomed to the twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colour in darkness, only shades of grey." },
+        { "name": "Keen Senses",  "level": 1, "type": "passive", "description": "You have proficiency in the Perception skill.", "grantsSkills": ["Perception"] },
+        { "name": "Fey Ancestry", "level": 1, "type": "passive", "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep." },
+        { "name": "Trance",       "level": 1, "type": "passive", "description": "Elves don't need to sleep. Instead, they meditate deeply for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep." }
       ]
     },
     "Dwarf": {
       "abilityBonuses": { "con":2, "wis":1 },
       "speed": 25, "size": "Medium",
+      "autoLanguages": ["Common", "Dwarvish"],
       "features": [
-        { "name": "Darkvision",           "level": 1, "type": "passive", "description": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
-        { "name": "Dwarven Resilience",   "level": 1, "type": "passive", "description": "You have advantage on saving throws against poison, and you have resistance against poison damage." },
-        { "name": "Dwarven Combat Training","level": 1,"type": "passive", "description": "You have proficiency with the battleaxe, handaxe, light hammer, and warhammer." },
-        { "name": "Stonecunning",         "level": 1, "type": "passive", "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus." },
-        { "name": "Tool Proficiency",     "level": 1, "type": "choice", "description": "You gain proficiency with the artisan's tools of your choice.", "options": ["Smith's Tools","Brewer's Supplies","Mason's Tools"] },
-        { "name": "Dwarven Language",     "level": 1, "type": "passive", "description": "You can speak, read, and write Common and Dwarvish." }
+        { "name": "Darkvision",              "level": 1, "type": "passive", "description": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Dwarven Resilience",      "level": 1, "type": "passive", "description": "You have advantage on saving throws against poison, and you have resistance against poison damage." },
+        { "name": "Dwarven Combat Training", "level": 1, "type": "passive", "description": "You have proficiency with the battleaxe, handaxe, light hammer, and warhammer." },
+        { "name": "Tool Proficiency",        "level": 1, "type": "choice",  "description": "You gain proficiency with the artisan's tools of your choice: smith's tools, brewer's supplies, or mason's tools.", "options": ["Smith's Tools","Brewer's Supplies","Mason's Tools"] },
+        { "name": "Stonecunning",            "level": 1, "type": "passive", "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus." }
       ]
     },
     "Halfling": {
       "abilityBonuses": { "dex":2, "cha":1 },
       "speed": 25, "size": "Small",
+      "autoLanguages": ["Common", "Halfling"],
       "features": [
-        { "name": "Lucky",              "level": 1, "type": "passive", "description": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll." },
-        { "name": "Brave",              "level": 1, "type": "passive", "description": "You have advantage on saving throws against being frightened." },
-        { "name": "Halfling Nimbleness","level": 1, "type": "passive", "description": "You can move through the space of any creature that is of a size larger than yours." },
-        { "name": "Naturally Stealthy", "level": 1, "type": "passive", "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you." }
+        { "name": "Lucky",               "level": 1, "type": "passive", "description": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll." },
+        { "name": "Brave",               "level": 1, "type": "passive", "description": "You have advantage on saving throws against being frightened." },
+        { "name": "Halfling Nimbleness", "level": 1, "type": "passive", "description": "You can move through the space of any creature that is of a size larger than yours." },
+        { "name": "Naturally Stealthy",  "level": 1, "type": "passive", "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you." }
       ]
     },
     "Gnome": {
       "abilityBonuses": { "int":2, "dex":1 },
       "speed": 25, "size": "Small",
+      "autoLanguages": ["Common", "Gnomish"],
       "features": [
-        { "name": "Darkvision",    "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Darkvision",    "level": 1, "type": "passive", "description": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
         { "name": "Gnome Cunning", "level": 1, "type": "passive", "description": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic." }
       ]
     },
     "Half-Elf": {
       "abilityBonuses": { "cha":2 },
-      "abilityBonusChoices": { "count": 2, "amount": 1, "exclude": ["cha"], "description": "Choose 2 different ability scores (not Charisma) to each increase by 1." },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Elvish"],
       "features": [
-        { "name": "Darkvision",      "level": 1, "type": "passive", "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Ability Score Increase", "level": 1, "type": "asi_points", "points": 2, "exclude": ["cha"], "description": "Two ability scores of your choice each increase by 1. You cannot increase Charisma (already covered by the fixed +2). You may put both points into the same ability for a +2." },
+        { "name": "Darkvision",      "level": 1, "type": "passive", "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
         { "name": "Fey Ancestry",    "level": 1, "type": "passive", "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep." },
-        { "name": "Skill Versatility","level": 1,"type": "proficiency_choice", "count": 2, "from": "all", "description": "You gain proficiency in two skills of your choice." },
+        { "name": "Skill Versatility","level": 1, "type": "proficiency_choice", "count": 2, "from": "all", "description": "You gain proficiency in two skills of your choice." },
         { "name": "Extra Language",  "level": 1, "type": "language_choice", "count": 1, "description": "You can speak, read, and write one extra language of your choice." }
       ]
     },
     "Half-Orc": {
       "abilityBonuses": { "str":2, "con":1 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Orc"],
       "features": [
-        { "name": "Darkvision",         "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
-        { "name": "Menacing",           "level": 1, "type": "passive", "description": "You gain proficiency in the Intimidation skill.", "grantsSkills": ["Intimidation"] },
-        { "name": "Relentless Endurance","level": 1,"type": "passive", "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest." },
-        { "name": "Savage Attacks",     "level": 1, "type": "passive", "description": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit." }
+        { "name": "Darkvision",          "level": 1, "type": "passive", "description": "Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Menacing",            "level": 1, "type": "passive", "description": "You gain proficiency in the Intimidation skill.", "grantsSkills": ["Intimidation"] },
+        { "name": "Relentless Endurance","level": 1, "type": "passive", "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest." },
+        { "name": "Savage Attacks",      "level": 1, "type": "passive", "description": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit." }
       ]
     },
     "Tiefling": {
       "abilityBonuses": { "int":1, "cha":2 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Infernal"],
       "features": [
-        { "name": "Darkvision",      "level": 1, "type": "passive", "description": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
-        { "name": "Hellish Resistance","level": 1,"type": "passive", "description": "You have resistance to fire damage." },
-        { "name": "Infernal Legacy", "level": 1, "type": "passive", "description": "You know the thaumaturgy cantrip. At 3rd level you can cast hellish rebuke once per long rest. At 5th level you can cast darkness once per long rest." }
+        { "name": "Darkvision",       "level": 1, "type": "passive", "description": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Hellish Resistance","level": 1, "type": "passive", "description": "You have resistance to fire damage." },
+        { "name": "Infernal Legacy",  "level": 1, "type": "passive", "description": "You know the thaumaturgy cantrip. When you reach 3rd level, you can cast the hellish rebuke spell as a 2nd-level spell once with this trait and regain the ability to do so when you finish a long rest. When you reach 5th level, you can cast the darkness spell once with this trait and regain the ability to do so when you finish a long rest. Charisma is your spellcasting ability for these spells." }
       ]
     },
     "Dragonborn": {
       "abilityBonuses": { "str":2, "cha":1 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Draconic"],
       "features": [
-        { "name": "Draconic Ancestry", "level": 1, "type": "choice", "description": "Choose the type of dragon your character descends from. This determines your breath weapon damage type and damage resistance.", "options": ["Black (Acid)","Blue (Lightning)","Brass (Fire)","Bronze (Lightning)","Copper (Acid)","Gold (Fire)","Green (Poison)","Red (Fire)","Silver (Cold)","White (Cold)"] },
-        { "name": "Breath Weapon",     "level": 1, "type": "passive", "description": "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area must make a saving throw. DC = 8 + Con modifier + proficiency bonus. You can use this a number of times equal to your proficiency bonus, and regain all uses on a long rest." },
+        { "name": "Draconic Ancestry", "level": 1, "type": "choice",  "description": "You have draconic ancestry of a particular type of dragon. Choose one type of dragon from the Draconic Ancestry table. This determines your breath weapon and damage resistance.", "options": ["Black — Acid (5 by 30 ft. line, Dex save)","Blue — Lightning (5 by 30 ft. line, Dex save)","Brass — Fire (5 by 30 ft. line, Dex save)","Bronze — Lightning (5 by 30 ft. line, Dex save)","Copper — Acid (5 by 30 ft. line, Dex save)","Gold — Fire (15 ft. cone, Dex save)","Green — Poison (15 ft. cone, Con save)","Red — Fire (15 ft. cone, Dex save)","Silver — Cold (15 ft. cone, Con save)","White — Cold (15 ft. cone, Con save)"] },
+        { "name": "Breath Weapon",     "level": 1, "type": "passive", "description": "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level. After you use your breath weapon, you can't use it again until you complete a short or long rest." },
         { "name": "Damage Resistance", "level": 1, "type": "passive", "description": "You have resistance to the damage type associated with your draconic ancestry." }
       ]
     },
     "Aasimar": {
       "abilityBonuses": { "cha":2, "wis":1 },
       "speed": 30, "size": "Medium",
+      "autoLanguages": ["Common", "Celestial"],
       "features": [
-        { "name": "Darkvision",       "level": 1, "type": "passive", "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light." },
-        { "name": "Celestial Resistance","level": 1,"type": "passive","description": "You have resistance to necrotic damage and radiant damage." },
-        { "name": "Healing Hands",    "level": 1, "type": "passive", "description": "As an action, you can touch a creature and cause it to regain a number of hit points equal to your level. Once you use this trait, you can't use it again until you finish a long rest." },
-        { "name": "Light Bearer",     "level": 1, "type": "passive", "description": "You know the light cantrip. Charisma is your spellcasting ability for it." }
+        { "name": "Darkvision",          "level": 1, "type": "passive", "description": "Blessed with a radiant soul, your vision can easily cut through darkness. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light." },
+        { "name": "Celestial Resistance","level": 1, "type": "passive", "description": "You have resistance to necrotic damage and radiant damage." },
+        { "name": "Healing Hands",       "level": 1, "type": "passive", "description": "As an action, you can touch a creature and cause it to regain a number of hit points equal to your level. Once you use this trait, you can't use it again until you finish a long rest." },
+        { "name": "Light Bearer",        "level": 1, "type": "passive", "description": "You know the light cantrip. Charisma is your spellcasting ability for it." }
       ]
     }
   },
@@ -587,106 +597,111 @@
 
   "backgrounds": {
     "Acolyte": {
-      "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods.",
+      "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods, acting as an intermediary between the realm of the holy and the mortal world.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Insight","Religion"], "fixed": ["Insight","Religion"], "description": "You gain proficiency in Insight and Religion." },
         { "name": "Languages",           "type": "language_choice",    "count": 2, "description": "You can speak, read, and write two additional languages of your choice." },
-        { "name": "Shelter of the Faithful","type":"passive", "description": "As an acolyte, you command the respect of those who share your faith, and you can perform the religious ceremonies of your deity. You and your adventuring companions can expect to receive free healing and care at a temple, shrine, or other established presence of your faith." }
+        { "name": "Shelter of the Faithful","type":"passive", "description": "As an acolyte, you command the respect of those who share your faith and can perform religious ceremonies of your deity. You and your companions can expect free healing and care at a temple of your faith, though you must provide material components for spells. Those who share your religion will support you at a modest lifestyle. You might have a residence at a specific temple where you have a home." }
       ]
     },
     "Charlatan": {
-      "description": "You have always had a way with people. You know what makes them tick and can read them like children's books.",
+      "description": "You have always had a way with people. You know what makes them tick, you can tease out their hearts desires after a few minutes of conversation, and with a few leading questions you can read them like they were children's books.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Deception","Sleight of Hand"], "fixed": ["Deception","Sleight of Hand"], "description": "You gain proficiency in Deception and Sleight of Hand." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with a Disguise Kit and a Forgery Kit." },
-        { "name": "False Identity",      "type": "passive", "description": "You have created a second identity that includes documentation, established acquaintances, and disguises that allow you to assume that persona. Additionally, you can forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or the handwriting you are trying to copy." }
+        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with a disguise kit and a forgery kit." },
+        { "name": "False Identity",      "type": "passive", "description": "You have created a second identity including documentation, established acquaintances, and disguises. You can also forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or handwriting you are trying to copy." }
       ]
     },
     "Criminal": {
-      "description": "You are an experienced criminal with a history of breaking the law.",
+      "description": "You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Deception","Stealth"], "fixed": ["Deception","Stealth"], "description": "You gain proficiency in Deception and Stealth." },
-        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with Thieves' Tools and one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
-        { "name": "Criminal Contact",    "type": "passive", "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances; specifically, you know the local messengers, corrupt caravan masters, and seedy sailors who can deliver messages for you." }
+        { "name": "Gaming Set",          "type": "choice", "description": "You gain proficiency with one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Thieves Tools",       "type": "passive", "description": "You gain proficiency with thieves tools." },
+        { "name": "Criminal Contact",    "type": "passive", "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances, through messengers, corrupt caravan masters, and seedy sailors." }
       ]
     },
     "Entertainer": {
-      "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them.",
+      "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them. Your poetics can stir the hearts of those who hear you, awakening grief or joy, laughter or anger.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Acrobatics","Performance"], "fixed": ["Acrobatics","Performance"], "description": "You gain proficiency in Acrobatics and Performance." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with a Disguise Kit and one type of musical instrument of your choice." },
-        { "name": "By Popular Demand",   "type": "passive", "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, at a theater, or even in a noble's court. At such a place, you receive free lodging and food of a modest or comfortable standard (depending on the quality of the establishment), as long as you perform each night." }
+        { "name": "Musical Instrument",  "type": "passive", "description": "You gain proficiency with one musical instrument of your choice." },
+        { "name": "Disguise Kit",        "type": "passive", "description": "You gain proficiency with a disguise kit." },
+        { "name": "By Popular Demand",   "type": "passive", "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, theatre, or noble's court. You receive free lodging and food of a modest or comfortable standard as long as you perform each night. Your performance makes you something of a local figure wherever you have performed." }
       ]
     },
     "Folk Hero": {
-      "description": "You come from a humble social rank, but you are destined for so much more.",
+      "description": "You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion, and your destiny calls you to stand against the tyrants and monsters that threaten the common folk everywhere.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Animal Handling","Survival"], "fixed": ["Animal Handling","Survival"], "description": "You gain proficiency in Animal Handling and Survival." },
-        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of artisan's tools of your choice and with Vehicles (Land).", "options": ["Alchemist's Supplies","Brewer's Supplies","Calligrapher's Supplies","Carpenter's Tools","Cartographer's Tools","Cobbler's Tools","Cook's Utensils","Glassblower's Tools","Jeweler's Tools","Leatherworker's Tools","Mason's Tools","Painter's Supplies","Potter's Tools","Smith's Tools","Tinker's Tools","Weaver's Tools","Woodcarver's Tools"] },
-        { "name": "Rustic Hospitality", "type": "passive", "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you." }
+        { "name": "Artisans Tools",      "type": "choice", "description": "You gain proficiency with one type of artisan's tools of your choice.", "options": ["Alchemist's Supplies","Brewer's Supplies","Calligrapher's Supplies","Carpenter's Tools","Cartographer's Tools","Cobbler's Tools","Cook's Utensils","Glassblower's Tools","Jeweler's Tools","Leatherworker's Tools","Mason's Tools","Painter's Supplies","Potter's Tools","Smith's Tools","Tinker's Tools","Weaver's Tools","Woodcarver's Tools"] },
+        { "name": "Vehicles (Land)",     "type": "passive", "description": "You gain proficiency with vehicles (land)." },
+        { "name": "Rustic Hospitality",  "type": "passive", "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you." }
       ]
     },
     "Hermit": {
-      "description": "You lived in seclusion — either in a sheltered community such as a monastery, or entirely alone.",
+      "description": "You lived in seclusion either in a sheltered community such as a monastery, or entirely alone for a formative part of your life. In your time apart from the clamour of society, you found quiet, solitude, and perhaps some of the answers you were looking for.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Medicine","Religion"], "fixed": ["Medicine","Religion"], "description": "You gain proficiency in Medicine and Religion." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with an Herbalism Kit." },
+        { "name": "Herbalism Kit",       "type": "passive", "description": "You gain proficiency with an herbalism kit." },
         { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
-        { "name": "Discovery",           "type": "passive", "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature." }
+        { "name": "Discovery",           "type": "passive", "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It might be a site that no one else has ever seen, or a fact long forgotten, or a relic of the past that could rewrite history." }
       ]
     },
     "Noble": {
-      "description": "You understand wealth, power, and privilege. You carry a noble title and your family wields significant political influence.",
+      "description": "You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["History","Persuasion"], "fixed": ["History","Persuasion"], "description": "You gain proficiency in History and Persuasion." },
-        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Gaming Set",          "type": "choice", "description": "You gain proficiency with one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
         { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
-        { "name": "Position of Privilege","type":"passive", "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere." }
+        { "name": "Position of Privilege","type":"passive", "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to." }
       ]
     },
     "Outlander": {
-      "description": "You grew up in the wilds, far from civilization and the comforts of town and technology.",
+      "description": "You grew up in the wilds, far from civilisation and the comforts of town and technology. You have witnessed the migration of herds larger than forests and survived weather more extreme than any city-dweller could comprehend.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Survival"], "fixed": ["Athletics","Survival"], "description": "You gain proficiency in Athletics and Survival." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with one type of musical instrument of your choice." },
+        { "name": "Musical Instrument",  "type": "passive", "description": "You gain proficiency with one musical instrument of your choice." },
         { "name": "Language",            "type": "language_choice", "count": 1, "description": "You can speak, read, and write one additional language of your choice." },
         { "name": "Wanderer",            "type": "passive", "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth." }
       ]
     },
     "Sage": {
-      "description": "You spent years learning the lore of the multiverse, scouring manuscripts and studying under sages.",
+      "description": "You spent years learning the lore of the multiverse. You scoured manuscripts, studied under sages, and pored over anything you could get your hands on. Your efforts have paid off with a wealth of arcane knowledge.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Arcana","History"], "fixed": ["Arcana","History"], "description": "You gain proficiency in Arcana and History." },
         { "name": "Languages",           "type": "language_choice", "count": 2, "description": "You can speak, read, and write two additional languages of your choice." },
-        { "name": "Researcher",          "type": "passive", "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this information comes from a library, scriptorium, university, or a sage or other learned person or creature." }
+        { "name": "Researcher",          "type": "passive", "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually this comes from a library, scriptorium, university, or sage. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign." }
       ]
     },
     "Sailor": {
-      "description": "You sailed on a seagoing vessel for years, facing mighty storms, monsters of the deep, and pirates.",
+      "description": "You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft to the bottomless depths.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Perception"], "fixed": ["Athletics","Perception"], "description": "You gain proficiency in Athletics and Perception." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with Navigator's Tools and Vehicles (Water)." },
-        { "name": "Ship's Passage",      "type": "passive", "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return, you are expected to assist the crew during the voyage." }
+        { "name": "Navigators Tools",    "type": "passive", "description": "You gain proficiency with navigator's tools." },
+        { "name": "Vehicles (Water)",    "type": "passive", "description": "You gain proficiency with vehicles (water)." },
+        { "name": "Ships Passage",       "type": "passive", "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return for your free passage, you and your companions are expected to assist the crew during the voyage." }
       ]
     },
     "Soldier": {
-      "description": "War has been your life for as long as you care to remember. You trained as a youth and studied weapons and armor.",
+      "description": "War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, and learned basic survival techniques, including how to stay alive on the battlefield.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Athletics","Intimidation"], "fixed": ["Athletics","Intimidation"], "description": "You gain proficiency in Athletics and Intimidation." },
-        { "name": "Tool Proficiencies",  "type": "choice", "description": "You gain proficiency with one type of gaming set and with Vehicles (Land).", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
-        { "name": "Military Rank",       "type": "passive", "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use." }
+        { "name": "Gaming Set",          "type": "choice", "description": "You gain proficiency with one type of gaming set of your choice.", "options": ["Dice Set","Dragonchess Set","Playing Card Set","Three-Dragon Ante Set"] },
+        { "name": "Vehicles (Land)",     "type": "passive", "description": "You gain proficiency with vehicles (land)." },
+        { "name": "Military Rank",       "type": "passive", "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organisation still recognise your authority and influence, and defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can usually gain access to friendly military encampments and fortresses where your rank is recognised." }
       ]
     },
     "Urchin": {
-      "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you, so you learned to provide for yourself.",
+      "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you or to provide for you, so you learned to provide for yourself. You fought fiercely over food and kept a constant watch out for other desperate souls who might take what you had.",
       "features": [
         { "name": "Skill Proficiencies", "type": "proficiency_choice", "count": 2, "from": ["Sleight of Hand","Stealth"], "fixed": ["Sleight of Hand","Stealth"], "description": "You gain proficiency in Sleight of Hand and Stealth." },
-        { "name": "Tool Proficiencies",  "type": "passive", "description": "You gain proficiency with Thieves' Tools and a Disguise Kit." },
+        { "name": "Disguise Kit",        "type": "passive", "description": "You gain proficiency with a disguise kit." },
+        { "name": "Thieves Tools",       "type": "passive", "description": "You gain proficiency with thieves tools." },
         { "name": "City Secrets",        "type": "passive", "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow." }
       ]
     }
   },
-
   "spells": {
     "Wizard": [
       { "name": "Fire Bolt",       "level": 0, "school": "Evocation",    "castingTime": "1 action",         "range": "120 ft", "components": "V, S",    "duration": "Instantaneous",    "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On hit, 1d10 fire damage (2d10 at level 5, 3d10 at 11, 4d10 at 17)." },
