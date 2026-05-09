@@ -162,7 +162,55 @@ const calcSpellAtk = (char, classes) => {
   return profBonus(char.level) + calcMod(char.abilities[info.ability] || 10);
 };
 
-const getSavingThrows = (char, classes) => {
+// Produces a compact combat line for inline display on spell cards, e.g.:
+// "Ranged spell attack • 1d10 fire • +1d10 at 5th/11th/17th"
+// "Con save • 2d8 thunder • +1d8 per slot • pushed 10 ft on fail"
+// charLevel is used to show current cantrip damage tier
+const spellCombatLine = (spell, charLevel) => {
+  const c = spell.combat;
+  if (!c) return null;
+  const parts = [];
+
+  // Attack type
+  if (c.attack === "ranged") parts.push("Ranged spell attack");
+  else if (c.attack === "melee") parts.push("Melee spell attack");
+  else if (c.save) parts.push(`${ABILITY_SHORT[c.save] || c.save.toUpperCase()} save`);
+
+  // Damage / healing — apply cantrip scaling
+  if (c.damage) {
+    let dmg = c.damage;
+    if (c.cantripScale) {
+      // Standard cantrip scaling: +1 die at 5th, 11th, 17th
+      const tiers = [1, 5, 11, 17];
+      const tier = tiers.filter(t => (charLevel || 1) >= t).length;
+      // tier 1 = base, tier 2 = 2x, etc.
+      const base = c.cantripScale; // e.g. "1d10"
+      const match = base.match(/^(\d+)(d\d+)$/);
+      if (match) {
+        dmg = `${tier}${match[2]}`;
+      }
+    }
+    parts.push(`${dmg} ${c.damageType || ""}`.trim());
+  } else if (c.healing) {
+    parts.push(`Heals ${c.healing}${c.healSlotScale ? ` (${c.healSlotScale})` : ""}`);
+  }
+
+  // Slot scaling
+  if (c.slotScale && !c.cantripScale) parts.push(c.slotScale + " per slot");
+  // Cantrip scaling note
+  if (c.cantripScale) {
+    const lvl = charLevel || 1;
+    const nextTier = lvl < 5 ? 5 : lvl < 11 ? 11 : lvl < 17 ? 17 : null;
+    if (nextTier) parts.push(`+1 die at ${nextTier}th`);
+  }
+
+  // Notes
+  if (c.notes) parts.push(c.notes);
+
+  return parts.length > 0 ? parts.join(" • ") : null;
+};
+
+
   const cd = classes?.[char.class], pb = profBonus(char.level);
   return Object.keys(ABILITY_NAMES).reduce((acc, ab) => {
     const mod = calcMod(char.abilities[ab]), prof = cd?.savingThrows?.includes(ab) || false;
@@ -810,26 +858,30 @@ function WizardSpellPicker({ char, setChar, gameData }) {
       </div>
 
       {/* Spell list */}
-      {displayed.map(spell => {
+        {displayed.map(spell => {
         const isK = known.some(s => s.name === spell.name);
         const isCantrip = spell.level === 0;
         const slotOk = isCantrip || spell.level <= maxSlotLevel;
         const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
         const isE = expanded === spell.name;
         const disabled = !isK && (!slotOk || !capOk);
+        const combatLine = spellCombatLine(spell, char.level);
 
         return (
           <div key={spell.name} style={{ background:"var(--card)", border:`1px solid ${isK?"var(--accent2)":disabled?"var(--border)":"var(--border)"}`, borderRadius:10, padding:12, marginBottom:8, opacity: disabled ? 0.45 : 1 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
               <div style={{ flex:1 }}>
-                <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)", marginRight:4 }}>{spell.name}</span>
-                <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
-                <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:6 }}>{spell.school}</span>
-                {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:8 }}>no slot</span>}
-                {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:8 }}>{isCantrip?"cantrip cap":"spell cap"}</span>}
+                <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                  <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)" }}>{spell.name}</span>
+                  <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
+                  <span style={{ fontSize:10, color:"var(--text-dim)" }}>{spell.school}</span>
+                  {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>no slot</span>}
+                  {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>{isCantrip?"cantrip cap":"spell cap"}</span>}
+                </div>
+                {combatLine && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{combatLine}</div>}
               </div>
               <button onClick={e => { e.stopPropagation(); toggleKnown(spell); }} disabled={disabled} style={{
-                padding:"4px 12px", borderRadius:6, fontSize:12, cursor: disabled?"not-allowed":"pointer",
+                padding:"4px 12px", borderRadius:6, fontSize:12, cursor: disabled?"not-allowed":"pointer", marginLeft:8, flexShrink:0,
                 border:`1px solid ${isK?"var(--danger)":disabled?"var(--border)":"var(--accent)"}`,
                 background: isK?"transparent":disabled?"var(--surface)":"var(--accent)",
                 color: isK?"var(--danger)":disabled?"var(--text-dim)":"var(--bg)", opacity: disabled?0.5:1
@@ -1338,7 +1390,45 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                         const raw = e.target.value;
                         if (raw === "") { setChar(c => ({ ...c, level:0 })); return; }
                         const n = parseInt(raw, 10);
-                        if (!isNaN(n)) setChar(c => ({ ...c, level: Math.min(20, Math.max(1, n)) }));
+                        if (!isNaN(n)) {
+                          const newLevel = Math.min(20, Math.max(1, n));
+                          setChar(c => {
+                            // Strip feature choices that belong to features above the new level
+                            const allFeatures = [
+                              ...(classData?.features || []),
+                              ...((c.subclass && classData?.subclasses?.[c.subclass]?.features) || [])
+                            ];
+                            const lockedFeatureNames = new Set(
+                              allFeatures.filter(f => f.level > newLevel).map(f => f.name)
+                            );
+                            const newChoices = Object.fromEntries(
+                              Object.entries(c.featureChoices || {}).filter(([k]) => !lockedFeatureNames.has(k))
+                            );
+                            // Strip ASI choices from features above new level
+                            const newAsi = Object.fromEntries(
+                              Object.entries(c.asiChoices || {}).filter(([k]) => {
+                                const feat = allFeatures.find(f => f.name === k);
+                                return !feat || feat.level <= newLevel;
+                              })
+                            );
+                            // Strip subclass if its unlock level exceeds new level
+                            const subclassUnlockLevel = allFeatures.find(f => f.type === "subclass_choice")?.level || 1;
+                            const newSubclass = newLevel < subclassUnlockLevel ? "" : c.subclass;
+                            // Strip spells that require a slot level the character no longer has
+                            const newLimits = getSpellLimits({ ...c, level: newLevel, subclass: newSubclass }, classes);
+                            const newMaxSlot = newLimits?.maxSlotLevel || 0;
+                            const newCantripsMax = newLimits?.cantripsKnown || 0;
+                            const newSpellsMax = newLimits?.spellsKnown || 99;
+                            // Remove spells that are now too high level
+                            let newSpells = (c.spells || []).filter(s => s.level === 0 || s.level <= newMaxSlot);
+                            // Trim cantrips to new cap
+                            const cantrips = newSpells.filter(s => s.level === 0);
+                            const leveled  = newSpells.filter(s => s.level > 0);
+                            if (cantrips.length > newCantripsMax) newSpells = [...cantrips.slice(0, newCantripsMax), ...leveled];
+                            if (leveled.length  > newSpellsMax)  newSpells = [...newSpells.filter(s=>s.level===0), ...leveled.slice(0, newSpellsMax)];
+                            return { ...c, level: newLevel, subclass: newSubclass, featureChoices: newChoices, asiChoices: newAsi, spells: newSpells };
+                          });
+                        }
                       }}
                       onBlur={e => { if (!e.target.value || +e.target.value < 1) setChar(c => ({ ...c, level:1 })); }}
                       style={{ ...ws.input, width:100, fontSize:28, fontFamily:"var(--font-display)", textAlign:"center", padding:"8px" }}
@@ -1703,19 +1793,23 @@ function SpellsTab({ char, gameData, onUpdate }) {
         const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
         const disabled = !isK && (!slotOk || !capOk);
         const isE = expanded === spell.name;
+        const combatLine = spellCombatLine(spell, char.level);
 
         return (
           <div key={spell.name} style={{ background:"var(--card)", border:`1px solid ${isK?"var(--accent2)":"var(--border)"}`, borderRadius:10, padding:12, marginBottom:8, opacity:disabled?0.45:1 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
               <div style={{ flex:1 }}>
-                <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)", marginRight:4 }}>{spell.name}</span>
-                <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
-                <span style={{ marginLeft:6, fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
-                {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:8 }}>no slot available</span>}
-                {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:8 }}>{isCantrip?"cantrip limit reached":"spell limit reached"}</span>}
+                <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                  <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)" }}>{spell.name}</span>
+                  <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
+                  <span style={{ fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
+                  {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>no slot available</span>}
+                  {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>{isCantrip?"cantrip limit reached":"spell limit reached"}</span>}
+                </div>
+                {combatLine && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{combatLine}</div>}
               </div>
               <button onClick={e => { e.stopPropagation(); toggleKnown(spell); }} disabled={disabled} style={{
-                padding:"4px 12px", borderRadius:6, fontSize:12, cursor:disabled?"not-allowed":"pointer",
+                padding:"4px 12px", borderRadius:6, fontSize:12, cursor:disabled?"not-allowed":"pointer", marginLeft:8, flexShrink:0,
                 border:`1px solid ${isK?"var(--danger)":disabled?"var(--border)":"var(--accent)"}`,
                 background:isK?"transparent":disabled?"var(--surface)":"var(--accent)",
                 color:isK?"var(--danger)":disabled?"var(--text-dim)":"var(--bg)", opacity:disabled?0.5:1

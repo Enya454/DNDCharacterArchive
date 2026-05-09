@@ -5739,7 +5739,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn't being worn or carried. Damage increases to 2d10 at 5th level, 3d10 at 11th, and 4d10 at 17th."
+        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn't being worn or carried. Damage increases to 2d10 at 5th level, 3d10 at 11th, and 4d10 at 17th.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d10",
+          "damageType": "fire",
+          "cantripScale": "1d10"
+        }
       },
       {
         "name": "Mage Hand",
@@ -5749,7 +5755,10 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it as an action. The hand vanishes if it is ever more than 30 feet from you or if you cast this spell again. You can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial."
+        "description": "A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it as an action. The hand vanishes if it is ever more than 30 feet from you or if you cast this spell again. You can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial.",
+        "combat": {
+          "notes": "Spectral hand manipulates objects up to 10 lbs"
+        }
       },
       {
         "name": "Prestidigitation",
@@ -5759,7 +5768,10 @@
         "range": "10 ft",
         "components": "V, S",
         "duration": "Up to 1 hour",
-        "description": "This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects: a harmless sensory effect, light or snuff a flame, clean or soil an object, chill/warm/flavor food, make a colour/mark/symbol appear, or create a small trinket or illusory image."
+        "description": "This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects: a harmless sensory effect, light or snuff a flame, clean or soil an object, chill/warm/flavor food, make a colour/mark/symbol appear, or create a small trinket or illusory image.",
+        "combat": {
+          "notes": "Minor magical trick; countless minor effects"
+        }
       },
       {
         "name": "Ray of Frost",
@@ -5769,7 +5781,14 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack. On a hit, it takes 1d8 cold damage and its speed is reduced by 10 feet until the start of your next turn. Damage increases to 2d8 at 5th, 3d8 at 11th, 4d8 at 17th."
+        "description": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack. On a hit, it takes 1d8 cold damage and its speed is reduced by 10 feet until the start of your next turn. Damage increases to 2d8 at 5th, 3d8 at 11th, 4d8 at 17th.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d8",
+          "damageType": "cold",
+          "cantripScale": "1d8",
+          "notes": "\u221210 ft speed on hit"
+        }
       },
       {
         "name": "Shocking Grasp",
@@ -5779,7 +5798,14 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Lightning springs from your hand to deliver a shock to a creature you try to touch. Make a melee spell attack against the target. You have advantage on the attack roll if the target is wearing armour made of metal. On a hit, the target takes 1d8 lightning damage and can't take reactions until the start of its next turn."
+        "description": "Lightning springs from your hand to deliver a shock to a creature you try to touch. Make a melee spell attack against the target. You have advantage on the attack roll if the target is wearing armour made of metal. On a hit, the target takes 1d8 lightning damage and can't take reactions until the start of its next turn.",
+        "combat": {
+          "attack": "melee",
+          "damage": "1d8",
+          "damageType": "lightning",
+          "cantripScale": "1d8",
+          "notes": "target can't take reactions"
+        }
       },
       {
         "name": "Minor Illusion",
@@ -5789,7 +5815,10 @@
         "range": "30 ft",
         "components": "S, M",
         "duration": "1 minute",
-        "description": "You create a sound or an image of an object within range that lasts for the duration. The illusion also ends if you dismiss it as an action or cast this spell again. If you create a sound, its volume can range from a whisper to a scream."
+        "description": "You create a sound or an image of an object within range that lasts for the duration. The illusion also ends if you dismiss it as an action or cast this spell again. If you create a sound, its volume can range from a whisper to a scream.",
+        "combat": {
+          "notes": "Sound or image illusion; Investigation check to see through"
+        }
       },
       {
         "name": "Poison Spray",
@@ -5799,7 +5828,13 @@
         "range": "10 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You extend your hand toward a creature you can see within range and project a puff of noxious gas. The creature must succeed on a Constitution saving throw or take 1d12 poison damage. Damage increases to 2d12 at 5th, 3d12 at 11th, 4d12 at 17th."
+        "description": "You extend your hand toward a creature you can see within range and project a puff of noxious gas. The creature must succeed on a Constitution saving throw or take 1d12 poison damage. Damage increases to 2d12 at 5th, 3d12 at 11th, 4d12 at 17th.",
+        "combat": {
+          "save": "con",
+          "damage": "1d12",
+          "damageType": "poison",
+          "cantripScale": "1d12"
+        }
       },
       {
         "name": "Chill Touch",
@@ -5809,7 +5844,14 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "1 round",
-        "description": "You create a ghostly, skeletal hand in the space of a creature within range. Make a ranged spell attack. On a hit, 1d8 necrotic damage and the target can't regain hit points until the start of your next turn. If undead, it also has disadvantage on attack rolls against you. Damage scales at higher levels."
+        "description": "You create a ghostly, skeletal hand in the space of a creature within range. Make a ranged spell attack. On a hit, 1d8 necrotic damage and the target can't regain hit points until the start of your next turn. If undead, it also has disadvantage on attack rolls against you. Damage scales at higher levels.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d8",
+          "damageType": "necrotic",
+          "cantripScale": "1d8",
+          "notes": "can't regain HP until your next turn"
+        }
       },
       {
         "name": "Magic Missile",
@@ -5819,7 +5861,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several. When you cast this spell using a spell slot of 2nd level or higher, the spell creates one more dart for each slot level above 1st."
+        "description": "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several. When you cast this spell using a spell slot of 2nd level or higher, the spell creates one more dart for each slot level above 1st.",
+        "combat": {
+          "damage": "3\u00d7(1d4+1)",
+          "damageType": "force",
+          "slotScale": "+1 dart",
+          "notes": "auto-hit, no roll needed"
+        }
       },
       {
         "name": "Shield",
@@ -5839,7 +5887,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "Concentration, up to 10 minutes",
-        "description": "For the duration, you sense the presence of magic within 30 feet of you. If you sense magic in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magic, and you learn its school of magic, if any. This spell can penetrate most barriers, but is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt."
+        "description": "For the duration, you sense the presence of magic within 30 feet of you. If you sense magic in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magic, and you learn its school of magic, if any. This spell can penetrate most barriers, but is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt.",
+        "combat": {
+          "notes": "Sense magic within 30 ft; see school of magic"
+        }
       },
       {
         "name": "Mage Armor",
@@ -5849,7 +5900,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "8 hours",
-        "description": "You touch a willing creature who isn't wearing armour, and a protective magical force surrounds it until the spell ends. The target's base AC becomes 13 + its Dexterity modifier. The spell ends if the target dons armour or if you dismiss the spell as an action."
+        "description": "You touch a willing creature who isn't wearing armour, and a protective magical force surrounds it until the spell ends. The target's base AC becomes 13 + its Dexterity modifier. The spell ends if the target dons armour or if you dismiss the spell as an action.",
+        "combat": {
+          "notes": "AC = 13 + Dex modifier (no armour required)"
+        }
       },
       {
         "name": "Thunderwave",
@@ -5859,7 +5913,14 @@
         "range": "Self (15-ft cube)",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn't pushed. +1d8 per slot above 1st."
+        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn't pushed. +1d8 per slot above 1st.",
+        "combat": {
+          "save": "con",
+          "damage": "2d8",
+          "damageType": "thunder",
+          "slotScale": "+1d8",
+          "notes": "pushed 10 ft on fail"
+        }
       },
       {
         "name": "Sleep",
@@ -5869,7 +5930,10 @@
         "range": "90 ft",
         "components": "V, S, M",
         "duration": "1 minute",
-        "description": "This spell sends creatures into a magical slumber. Roll 5d8; the total is how many hit points of creatures this spell can affect, starting with the creature with the lowest current HP. Unconscious creatures are prioritised. Each sleeping creature is unconscious until the spell ends, the sleeper takes damage, or someone uses an action to shake or slap the sleeper awake. +2d8 per slot above 1st."
+        "description": "This spell sends creatures into a magical slumber. Roll 5d8; the total is how many hit points of creatures this spell can affect, starting with the creature with the lowest current HP. Unconscious creatures are prioritised. Each sleeping creature is unconscious until the spell ends, the sleeper takes damage, or someone uses an action to shake or slap the sleeper awake. +2d8 per slot above 1st.",
+        "combat": {
+          "notes": "Affects 5d8 HP of creatures; +2d8 per slot above 1st"
+        }
       },
       {
         "name": "Chromatic Orb",
@@ -5879,7 +5943,13 @@
         "range": "90 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "You hurl a 4-inch-diameter sphere of energy at a creature you can see. Choose acid, cold, fire, lightning, poison, or thunder for the damage type. Make a ranged spell attack. On a hit, the creature takes 3d8 damage of the chosen type. +1d8 per slot above 1st."
+        "description": "You hurl a 4-inch-diameter sphere of energy at a creature you can see. Choose acid, cold, fire, lightning, poison, or thunder for the damage type. Make a ranged spell attack. On a hit, the creature takes 3d8 damage of the chosen type. +1d8 per slot above 1st.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "3d8",
+          "damageType": "(choice)",
+          "slotScale": "+1d8"
+        }
       },
       {
         "name": "Misty Step",
@@ -5889,7 +5959,10 @@
         "range": "Self",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see.",
+        "combat": {
+          "notes": "Teleport 30 ft as a bonus action"
+        }
       },
       {
         "name": "Mirror Image",
@@ -5899,7 +5972,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions. Each time a creature targets you with an attack, roll a d20 to determine whether the attack instead targets one of your duplicates. If you have 3 duplicates, you must roll a 6 or higher. With 2 duplicates you must roll an 8 or higher. With 1 duplicate you must roll an 11 or higher."
+        "description": "Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions. Each time a creature targets you with an attack, roll a d20 to determine whether the attack instead targets one of your duplicates. If you have 3 duplicates, you must roll a 6 or higher. With 2 duplicates you must roll an 8 or higher. With 1 duplicate you must roll an 11 or higher.",
+        "combat": {
+          "notes": "3 duplicates reduce hit chance (d20 \u2265 6/8/11)"
+        }
       },
       {
         "name": "Scorching Ray",
@@ -5909,7 +5985,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You create three rays of fire and hurl them at targets within range. You can hurl them at one target or several. Make a ranged spell attack for each ray. On a hit, the target takes 2d6 fire damage. When you cast this spell using a spell slot of 3rd level or higher, you create one additional ray for each slot level above 2nd."
+        "description": "You create three rays of fire and hurl them at targets within range. You can hurl them at one target or several. Make a ranged spell attack for each ray. On a hit, the target takes 2d6 fire damage. When you cast this spell using a spell slot of 3rd level or higher, you create one additional ray for each slot level above 2nd.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "3\u00d72d6",
+          "damageType": "fire",
+          "slotScale": "+1 ray"
+        }
       },
       {
         "name": "Hold Person",
@@ -5919,7 +6001,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target. When using a slot of 3rd or higher, you can target one additional humanoid for each slot level above 2nd."
+        "description": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target. When using a slot of 3rd or higher, you can target one additional humanoid for each slot level above 2nd.",
+        "combat": {
+          "save": "wis",
+          "notes": "Paralyzed; +1 target per slot above 2nd"
+        }
       },
       {
         "name": "Suggestion",
@@ -5929,7 +6015,11 @@
         "range": "30 ft",
         "components": "V, M",
         "duration": "Concentration, up to 8 hours",
-        "description": "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see that can hear and understand you. Creatures that can't be charmed are immune. The target must succeed on a Wisdom saving throw or follow the suggestion to the best of its ability. The suggestion must be worded so that the course of action sounds reasonable."
+        "description": "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see that can hear and understand you. Creatures that can't be charmed are immune. The target must succeed on a Wisdom saving throw or follow the suggestion to the best of its ability. The suggestion must be worded so that the course of action sounds reasonable.",
+        "combat": {
+          "save": "wis",
+          "notes": "Target follows reasonable 1-2 sentence suggestion"
+        }
       },
       {
         "name": "Fireball",
@@ -5939,7 +6029,14 @@
         "range": "150 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame. Each creature in a 20-foot-radius sphere centered on that point must make a Dexterity saving throw. A target takes 8d6 fire damage on a failed save, or half as much on a successful one. +1d6 fire damage per slot above 3rd."
+        "description": "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame. Each creature in a 20-foot-radius sphere centered on that point must make a Dexterity saving throw. A target takes 8d6 fire damage on a failed save, or half as much on a successful one. +1d6 fire damage per slot above 3rd.",
+        "combat": {
+          "save": "dex",
+          "damage": "8d6",
+          "damageType": "fire",
+          "slotScale": "+1d6",
+          "notes": "20-ft radius; half on save"
+        }
       },
       {
         "name": "Counterspell",
@@ -5949,7 +6046,10 @@
         "range": "60 ft",
         "components": "S",
         "duration": "Instantaneous",
-        "description": "You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails and has no effect. If it is casting a spell of 4th level or higher, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a success, the creature's spell fails."
+        "description": "You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails and has no effect. If it is casting a spell of 4th level or higher, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a success, the creature's spell fails.",
+        "combat": {
+          "notes": "Counters spells 3rd level and lower automatically"
+        }
       },
       {
         "name": "Fly",
@@ -5959,7 +6059,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "You touch a willing creature. The target gains a flying speed of 60 feet for the duration. When the spell ends, the target falls if it is still aloft, unless it can stop the fall. When you cast this spell using a slot of 4th level or higher, you can target one additional creature for each slot level above 3rd."
+        "description": "You touch a willing creature. The target gains a flying speed of 60 feet for the duration. When the spell ends, the target falls if it is still aloft, unless it can stop the fall. When you cast this spell using a slot of 4th level or higher, you can target one additional creature for each slot level above 3rd.",
+        "combat": {
+          "notes": "60 ft fly speed; +1 target per slot above 3rd"
+        }
       },
       {
         "name": "Haste",
@@ -5969,7 +6072,10 @@
         "range": "30 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Choose a willing creature that you can see within range. Until the spell ends, the target's speed is doubled, it gains a +2 bonus to AC, it has advantage on Dexterity saving throws, and it gains an additional action on each of its turns. When the spell ends, the target can't move or take actions until after its next turn."
+        "description": "Choose a willing creature that you can see within range. Until the spell ends, the target's speed is doubled, it gains a +2 bonus to AC, it has advantage on Dexterity saving throws, and it gains an additional action on each of its turns. When the spell ends, the target can't move or take actions until after its next turn.",
+        "combat": {
+          "notes": "Double speed, +2 AC, advantage on Dex saves, extra action"
+        }
       },
       {
         "name": "Polymorph",
@@ -5979,7 +6085,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "This spell transforms a creature that you can see within range into a new form. An unwilling creature must make a Wisdom saving throw to avoid the effect. The transformation lasts for the duration, or until the target drops to 0 hit points or dies. The new form can be any beast whose challenge rating is equal to or less than the target's (or the target's level, if it doesn't have a challenge rating)."
+        "description": "This spell transforms a creature that you can see within range into a new form. An unwilling creature must make a Wisdom saving throw to avoid the effect. The transformation lasts for the duration, or until the target drops to 0 hit points or dies. The new form can be any beast whose challenge rating is equal to or less than the target's (or the target's level, if it doesn't have a challenge rating).",
+        "combat": {
+          "save": "wis",
+          "notes": "Transform creature into beast of CR \u2264 target level"
+        }
       },
       {
         "name": "Greater Invisibility",
@@ -5989,7 +6099,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "You or a creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. Unlike regular invisibility, this spell doesn't end when you attack or cast a spell."
+        "description": "You or a creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. Unlike regular invisibility, this spell doesn't end when you attack or cast a spell.",
+        "combat": {
+          "notes": "Invisible for duration; doesn't end on attack/cast"
+        }
       },
       {
         "name": "Telekinesis",
@@ -5999,7 +6112,10 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Concentration, up to 10 minutes",
-        "description": "You gain the ability to move or manipulate creatures or objects by thought. When you cast the spell, and as your action each round for the duration, you can exert your will on one creature or object that you can see within range, causing the appropriate effect below. You can affect the same target round after round, or choose a new one at any time."
+        "description": "You gain the ability to move or manipulate creatures or objects by thought. When you cast the spell, and as your action each round for the duration, you can exert your will on one creature or object that you can see within range, causing the appropriate effect below. You can affect the same target round after round, or choose a new one at any time.",
+        "combat": {
+          "notes": "Move creature (Str save) or object up to 1,000 lbs"
+        }
       },
       {
         "name": "Wall of Force",
@@ -6009,7 +6125,10 @@
         "range": "120 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "An invisible wall of force springs into existence at a point you choose within range. The wall appears in any orientation you choose, as a horizontal or vertical barrier or at an angle. It can be free floating or resting on a solid surface. You can form it into a hemispherical dome or a sphere with a radius of up to 10 feet, or you can shape a flat surface made up of ten 10-by-10-foot panels."
+        "description": "An invisible wall of force springs into existence at a point you choose within range. The wall appears in any orientation you choose, as a horizontal or vertical barrier or at an angle. It can be free floating or resting on a solid surface. You can form it into a hemispherical dome or a sphere with a radius of up to 10 feet, or you can shape a flat surface made up of ten 10-by-10-foot panels.",
+        "combat": {
+          "notes": "Impenetrable invisible wall; immune to damage"
+        }
       }
     ],
     "Cleric": [
@@ -6021,7 +6140,14 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw. Damage increases to 2d8 at 5th, 3d8 at 11th, 4d8 at 17th."
+        "description": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw. Damage increases to 2d8 at 5th, 3d8 at 11th, 4d8 at 17th.",
+        "combat": {
+          "save": "dex",
+          "damage": "1d8",
+          "damageType": "radiant",
+          "cantripScale": "1d8",
+          "notes": "no cover benefit"
+        }
       },
       {
         "name": "Guidance",
@@ -6031,7 +6157,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check. The spell then ends."
+        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check. The spell then ends.",
+        "combat": {
+          "notes": "+1d4 to one ability check before spell ends"
+        }
       },
       {
         "name": "Spare the Dying",
@@ -6041,7 +6170,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs."
+        "description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs.",
+        "combat": {
+          "notes": "Stabilise creature at 0 HP"
+        }
       },
       {
         "name": "Resistance",
@@ -6051,7 +6183,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one saving throw of its choice. It can roll the die before or after making the saving throw. The spell then ends."
+        "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one saving throw of its choice. It can roll the die before or after making the saving throw. The spell then ends.",
+        "combat": {
+          "notes": "+1d4 to one saving throw before spell ends"
+        }
       },
       {
         "name": "Thaumaturgy",
@@ -6061,7 +6196,10 @@
         "range": "30 ft",
         "components": "V",
         "duration": "Up to 1 minute",
-        "description": "You manifest a minor wonder, a sign of supernatural power, within range. You create one of the following magical effects within range: your voice booms up to three times as loud, flames flicker dramatically, harmless tremors shudder, an unlocked door flies open or slams, your eyes flare with burning intensity, or you alter the appearance of your eyes for 1 minute."
+        "description": "You manifest a minor wonder, a sign of supernatural power, within range. You create one of the following magical effects within range: your voice booms up to three times as loud, flames flicker dramatically, harmless tremors shudder, an unlocked door flies open or slams, your eyes flare with burning intensity, or you alter the appearance of your eyes for 1 minute.",
+        "combat": {
+          "notes": "Minor divine effects: loud voice, flames, tremors, etc."
+        }
       },
       {
         "name": "Cure Wounds",
@@ -6071,7 +6209,12 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs. When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st."
+        "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs. When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.",
+        "combat": {
+          "healing": "1d8",
+          "healSlotScale": "+1d8",
+          "notes": "+ spellcasting modifier"
+        }
       },
       {
         "name": "Bless",
@@ -6081,7 +6224,10 @@
         "range": "30 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw. When you cast this spell using a slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
+        "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw. When you cast this spell using a slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.",
+        "combat": {
+          "notes": "+1d4 to attack rolls and saves for up to 3 creatures; +1 target per slot"
+        }
       },
       {
         "name": "Inflict Wounds",
@@ -6091,7 +6237,13 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Make a melee spell attack against a creature you can reach. On a hit, the target takes 3d10 necrotic damage. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st."
+        "description": "Make a melee spell attack against a creature you can reach. On a hit, the target takes 3d10 necrotic damage. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st.",
+        "combat": {
+          "attack": "melee",
+          "damage": "3d10",
+          "damageType": "necrotic",
+          "slotScale": "+1d10"
+        }
       },
       {
         "name": "Guiding Bolt",
@@ -6101,7 +6253,14 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "1 round",
-        "description": "A flash of light streaks toward a creature of your choice within range. Make a ranged spell attack against the target. On a hit, the target takes 4d6 radiant damage, and the next attack roll made against this target before the end of your next turn has advantage. +1d6 per slot above 1st."
+        "description": "A flash of light streaks toward a creature of your choice within range. Make a ranged spell attack against the target. On a hit, the target takes 4d6 radiant damage, and the next attack roll made against this target before the end of your next turn has advantage. +1d6 per slot above 1st.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "4d6",
+          "damageType": "radiant",
+          "slotScale": "+1d6",
+          "notes": "next attack vs target has advantage"
+        }
       },
       {
         "name": "Healing Word",
@@ -6111,7 +6270,12 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs. +1d4 per slot above 1st."
+        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs. +1d4 per slot above 1st.",
+        "combat": {
+          "healing": "1d4",
+          "healSlotScale": "+1d4",
+          "notes": "bonus action; + spellcasting modifier"
+        }
       },
       {
         "name": "Shield of Faith",
@@ -6121,7 +6285,10 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration."
+        "description": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration.",
+        "combat": {
+          "notes": "+2 bonus to AC for duration"
+        }
       },
       {
         "name": "Spiritual Weapon",
@@ -6131,7 +6298,13 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "You create a floating, spectral weapon within range that lasts for the duration or until you cast this spell again. When you cast the spell, you can make a melee spell attack against a creature within 5 feet of the weapon. On a hit, the target takes force damage equal to 1d8 + your spellcasting ability modifier. As a bonus action on your turn, you can move the weapon up to 20 feet and repeat the attack."
+        "description": "You create a floating, spectral weapon within range that lasts for the duration or until you cast this spell again. When you cast the spell, you can make a melee spell attack against a creature within 5 feet of the weapon. On a hit, the target takes force damage equal to 1d8 + your spellcasting ability modifier. As a bonus action on your turn, you can move the weapon up to 20 feet and repeat the attack.",
+        "combat": {
+          "attack": "melee",
+          "damage": "1d8",
+          "damageType": "force",
+          "notes": "bonus action weapon; move + attack each turn; + spellcasting modifier"
+        }
       },
       {
         "name": "Lesser Restoration",
@@ -6141,7 +6314,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You touch a creature and can end either one disease or one condition afflicting it. The condition can be blinded, deafened, paralyzed, or poisoned."
+        "description": "You touch a creature and can end either one disease or one condition afflicting it. The condition can be blinded, deafened, paralyzed, or poisoned.",
+        "combat": {
+          "notes": "End one disease or condition (blinded/deafened/paralyzed/poisoned)"
+        }
       },
       {
         "name": "Hold Person",
@@ -6151,7 +6327,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends. +1 target per slot above 2nd."
+        "description": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends. +1 target per slot above 2nd.",
+        "combat": {
+          "save": "wis",
+          "notes": "Paralyzed; +1 target per slot above 2nd"
+        }
       },
       {
         "name": "Silence",
@@ -6161,7 +6341,10 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Concentration, up to 10 minutes",
-        "description": "For the duration, no sound can be created within or pass through a 20-foot-radius sphere centered on a point you choose within range. Any creature or object entirely inside the sphere is immune to thunder damage, and creatures are deafened while entirely inside it. Casting a spell that includes a verbal component is impossible there."
+        "description": "For the duration, no sound can be created within or pass through a 20-foot-radius sphere centered on a point you choose within range. Any creature or object entirely inside the sphere is immune to thunder damage, and creatures are deafened while entirely inside it. Casting a spell that includes a verbal component is impossible there.",
+        "combat": {
+          "notes": "20-ft radius; no sound in/out; verbal spells impossible"
+        }
       },
       {
         "name": "Spirit Guardians",
@@ -6171,7 +6354,13 @@
         "range": "Self (15-ft radius)",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "You call forth spirits to protect you. They flit around you to a distance of 15 feet for the duration. If you are good or neutral, their spectral form appears angelic or fey. If you are evil, they appear fiendish. When you cast this spell, you can designate any number of creatures you can see to be unaffected by it. An affected creature's speed is halved, and when the creature enters the area for the first time on a turn or starts its turn there, it must make a Wisdom saving throw. On a failed save, the creature takes 3d8 radiant or necrotic damage (your choice). On a successful save, the creature takes half as much damage."
+        "description": "You call forth spirits to protect you. They flit around you to a distance of 15 feet for the duration. If you are good or neutral, their spectral form appears angelic or fey. If you are evil, they appear fiendish. When you cast this spell, you can designate any number of creatures you can see to be unaffected by it. An affected creature's speed is halved, and when the creature enters the area for the first time on a turn or starts its turn there, it must make a Wisdom saving throw. On a failed save, the creature takes 3d8 radiant or necrotic damage (your choice). On a successful save, the creature takes half as much damage.",
+        "combat": {
+          "save": "wis",
+          "damage": "3d8",
+          "damageType": "radiant/necrotic",
+          "notes": "15-ft aura; half speed; +1d8 per slot above 3rd"
+        }
       },
       {
         "name": "Mass Healing Word",
@@ -6181,7 +6370,12 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "As you call out words of restoration, up to six creatures of your choice that you can see within range regain hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs. +1d4 per slot above 3rd."
+        "description": "As you call out words of restoration, up to six creatures of your choice that you can see within range regain hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs. +1d4 per slot above 3rd.",
+        "combat": {
+          "healing": "1d4",
+          "healSlotScale": "+1d4",
+          "notes": "up to 6 creatures; bonus action"
+        }
       },
       {
         "name": "Banishment",
@@ -6191,7 +6385,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You attempt to send one creature that you can see within range to another place of existence. The target must succeed on a Charisma saving throw or be banished. If the target is native to the plane of existence you're on, you banish the target to a harmless demiplane. While there, the target is incapacitated. The target remains there until the spell ends, at which point the target reappears in the space it left or in the nearest unoccupied space if that space is occupied."
+        "description": "You attempt to send one creature that you can see within range to another place of existence. The target must succeed on a Charisma saving throw or be banished. If the target is native to the plane of existence you're on, you banish the target to a harmless demiplane. While there, the target is incapacitated. The target remains there until the spell ends, at which point the target reappears in the space it left or in the nearest unoccupied space if that space is occupied.",
+        "combat": {
+          "save": "cha",
+          "notes": "Target banished on fail; permanent if on different native plane"
+        }
       },
       {
         "name": "Guardian of Faith",
@@ -6201,7 +6399,13 @@
         "range": "30 ft",
         "components": "V",
         "duration": "8 hours",
-        "description": "A Large spectral guardian appears and hovers for the duration in an unoccupied space of your choice that you can see within range. The guardian occupies that space and is indistinct except for a gleaming sword and shield emblazoned with the symbol of your deity. Any creature hostile to you that moves to a space within 10 feet of the guardian for the first time on a turn must succeed on a Dexterity saving throw. The creature takes 20 radiant damage on a failed save, or half as much on a successful one."
+        "description": "A Large spectral guardian appears and hovers for the duration in an unoccupied space of your choice that you can see within range. The guardian occupies that space and is indistinct except for a gleaming sword and shield emblazoned with the symbol of your deity. Any creature hostile to you that moves to a space within 10 feet of the guardian for the first time on a turn must succeed on a Dexterity saving throw. The creature takes 20 radiant damage on a failed save, or half as much on a successful one.",
+        "combat": {
+          "save": "dex",
+          "damage": "20",
+          "damageType": "radiant",
+          "notes": "10 ft from spectral guardian; no scaling"
+        }
       },
       {
         "name": "Greater Restoration",
@@ -6211,7 +6415,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "You imbue a creature you touch with positive energy to undo a debilitating effect. You can reduce the target's exhaustion level by one, or end one of the following effects on the target: one effect that charmed or petrified the target, one curse, any reduction to an ability score, or one effect reducing the target's hit point maximum."
+        "description": "You imbue a creature you touch with positive energy to undo a debilitating effect. You can reduce the target's exhaustion level by one, or end one of the following effects on the target: one effect that charmed or petrified the target, one curse, any reduction to an ability score, or one effect reducing the target's hit point maximum.",
+        "combat": {
+          "notes": "Remove exhaustion, charm, petrify, curse, ability reduction, or HP max reduction"
+        }
       },
       {
         "name": "Flame Strike",
@@ -6221,7 +6428,13 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "A vertical column of divine fire roars down from the heavens in a location you specify. Each creature in a 10-foot-radius, 40-foot-high cylinder centered on a point within range must make a Dexterity saving throw. A creature takes 4d6 fire damage and 4d6 radiant damage on a failed save, or half as much on a successful one. +1d6 fire and +1d6 radiant per slot above 5th."
+        "description": "A vertical column of divine fire roars down from the heavens in a location you specify. Each creature in a 10-foot-radius, 40-foot-high cylinder centered on a point within range must make a Dexterity saving throw. A creature takes 4d6 fire damage and 4d6 radiant damage on a failed save, or half as much on a successful one. +1d6 fire and +1d6 radiant per slot above 5th.",
+        "combat": {
+          "save": "dex",
+          "damage": "4d6+4d6",
+          "damageType": "fire+radiant",
+          "slotScale": "+1d6 fire +1d6 radiant"
+        }
       }
     ],
     "Druid": [
@@ -6233,7 +6446,10 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Whispering to the spirits of nature, you create one of the following effects within range: a tiny, harmless sensory effect predicting the weather; cause a flower to bloom; create an instantaneous, harmless sensory effect such as falling leaves or a puff of wind; or light or snuff a candle, torch, or small campfire."
+        "description": "Whispering to the spirits of nature, you create one of the following effects within range: a tiny, harmless sensory effect predicting the weather; cause a flower to bloom; create an instantaneous, harmless sensory effect such as falling leaves or a puff of wind; or light or snuff a candle, torch, or small campfire.",
+        "combat": {
+          "notes": "Minor nature effects: weather prediction, cause flower to bloom, etc."
+        }
       },
       {
         "name": "Shillelagh",
@@ -6243,7 +6459,13 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "1 minute",
-        "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon's damage die becomes a d8. The weapon also becomes magical, if it isn't already."
+        "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon's damage die becomes a d8. The weapon also becomes magical, if it isn't already.",
+        "combat": {
+          "attack": "melee",
+          "damage": "1d8",
+          "damageType": "bludgeoning",
+          "notes": "Uses spellcasting modifier instead of STR"
+        }
       },
       {
         "name": "Thorn Whip",
@@ -6253,7 +6475,14 @@
         "range": "30 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target. If the attack hits, the creature takes 1d6 piercing damage, and if the creature is Large or smaller, you pull the creature up to 10 feet closer to you. Damage increases at higher levels."
+        "description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target. If the attack hits, the creature takes 1d6 piercing damage, and if the creature is Large or smaller, you pull the creature up to 10 feet closer to you. Damage increases at higher levels.",
+        "combat": {
+          "attack": "melee",
+          "damage": "1d6",
+          "damageType": "piercing",
+          "cantripScale": "1d6",
+          "notes": "pull Large or smaller 10 ft closer"
+        }
       },
       {
         "name": "Entangle",
@@ -6263,7 +6492,11 @@
         "range": "90 ft",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain. A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained by the entangling plants until the spell ends."
+        "description": "Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain. A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained by the entangling plants until the spell ends.",
+        "combat": {
+          "save": "str",
+          "notes": "Restrained in 20-ft square; difficult terrain for duration"
+        }
       },
       {
         "name": "Speak with Animals",
@@ -6273,7 +6506,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "10 minutes",
-        "description": "You gain the ability to comprehend and verbally communicate with beasts for the duration. The knowledge and awareness of many beasts is limited by their intelligence, but at minimum, a beast can give you information about nearby locations and monsters, including whatever it can perceive or has perceived within the past day."
+        "description": "You gain the ability to comprehend and verbally communicate with beasts for the duration. The knowledge and awareness of many beasts is limited by their intelligence, but at minimum, a beast can give you information about nearby locations and monsters, including whatever it can perceive or has perceived within the past day.",
+        "combat": {
+          "notes": "Communicate verbally with beasts for 10 minutes"
+        }
       },
       {
         "name": "Healing Word",
@@ -6283,7 +6519,12 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot above 1st."
+        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot above 1st.",
+        "combat": {
+          "healing": "1d4",
+          "healSlotScale": "+1d4",
+          "notes": "bonus action; + spellcasting modifier"
+        }
       },
       {
         "name": "Moonbeam",
@@ -6293,7 +6534,13 @@
         "range": "120 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high cylinder centered on a point within range. Until the spell ends, dim light fills the cylinder. When a creature enters the spell's area for the first time on a turn or starts its turn there, it is engulfed in ghostly flames that cause searing pain, and it must make a Constitution saving throw. It takes 2d10 radiant damage on a failed save, or half as much on a successful one."
+        "description": "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high cylinder centered on a point within range. Until the spell ends, dim light fills the cylinder. When a creature enters the spell's area for the first time on a turn or starts its turn there, it is engulfed in ghostly flames that cause searing pain, and it must make a Constitution saving throw. It takes 2d10 radiant damage on a failed save, or half as much on a successful one.",
+        "combat": {
+          "save": "con",
+          "damage": "2d10",
+          "damageType": "radiant",
+          "notes": "5-ft cylinder; Con save each turn"
+        }
       },
       {
         "name": "Barkskin",
@@ -6303,7 +6550,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "You touch a willing creature. Until the spell ends, the target's skin has a rough, bark-like appearance, and the target's AC can't be less than 16, regardless of what kind of armour it is wearing."
+        "description": "You touch a willing creature. Until the spell ends, the target's skin has a rough, bark-like appearance, and the target's AC can't be less than 16, regardless of what kind of armour it is wearing.",
+        "combat": {
+          "notes": "AC can't be less than 16 regardless of armour"
+        }
       },
       {
         "name": "Call Lightning",
@@ -6313,7 +6563,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Concentration, up to 10 minutes",
-        "description": "A storm cloud appears in the shape of a cylinder that is 10 feet tall with a 60-foot radius, centered on a point you can see within range directly above you. The spell fails if you can't see a point in the air where the storm cloud could appear. When you cast the spell, choose a point you can see under the cloud. A bolt of lightning flashes down to that point. Each creature within 5 feet of that point must make a Dexterity saving throw, taking 3d10 lightning damage on a failed save, or half as much on a successful one."
+        "description": "A storm cloud appears in the shape of a cylinder that is 10 feet tall with a 60-foot radius, centered on a point you can see within range directly above you. The spell fails if you can't see a point in the air where the storm cloud could appear. When you cast the spell, choose a point you can see under the cloud. A bolt of lightning flashes down to that point. Each creature within 5 feet of that point must make a Dexterity saving throw, taking 3d10 lightning damage on a failed save, or half as much on a successful one.",
+        "combat": {
+          "save": "dex",
+          "damage": "3d10",
+          "damageType": "lightning",
+          "notes": "Call bolt each round as bonus action; +1d10 per slot above 3rd"
+        }
       },
       {
         "name": "Plant Growth",
@@ -6323,7 +6579,10 @@
         "range": "150 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "This spell channels vitality into plants within a specific area. There are two possible uses for the spell, granting either immediate or long-term benefits. If you cast this spell using 1 action, choose a point within range. All normal plants in a 100-foot radius centered on that point become thick and overgrown. A creature moving through the area must spend 4 feet of movement for every 1 foot it moves."
+        "description": "This spell channels vitality into plants within a specific area. There are two possible uses for the spell, granting either immediate or long-term benefits. If you cast this spell using 1 action, choose a point within range. All normal plants in a 100-foot radius centered on that point become thick and overgrown. A creature moving through the area must spend 4 feet of movement for every 1 foot it moves.",
+        "combat": {
+          "notes": "Difficult terrain in 100-ft radius; OR enrich land over 8 hours"
+        }
       },
       {
         "name": "Stoneskin",
@@ -6333,7 +6592,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "This spell turns the flesh of a willing creature you touch as hard as stone. Until the spell ends, the target has resistance to nonmagical bludgeoning, piercing, and slashing damage."
+        "description": "This spell turns the flesh of a willing creature you touch as hard as stone. Until the spell ends, the target has resistance to nonmagical bludgeoning, piercing, and slashing damage.",
+        "combat": {
+          "notes": "Resistance to nonmagical B/P/S damage"
+        }
       },
       {
         "name": "Conjure Woodland Beings",
@@ -6343,7 +6605,10 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "You summon fey creatures that appear in unoccupied spaces that you can see within range. Choose one of the following options for what appears: one fey creature of challenge rating 2 or lower, two fey creatures of challenge rating 1 or lower, four fey creatures of challenge rating 1/2 or lower, or eight fey creatures of challenge rating 1/4 or lower."
+        "description": "You summon fey creatures that appear in unoccupied spaces that you can see within range. Choose one of the following options for what appears: one fey creature of challenge rating 2 or lower, two fey creatures of challenge rating 1 or lower, four fey creatures of challenge rating 1/2 or lower, or eight fey creatures of challenge rating 1/4 or lower.",
+        "combat": {
+          "notes": "Summon fey creatures up to CR 2 (or multiple lower CR)"
+        }
       },
       {
         "name": "Insect Plague",
@@ -6353,7 +6618,14 @@
         "range": "300 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "Swarming, biting locusts fill a 20-foot-radius sphere centered on a point you choose within range. The sphere spreads around corners. The sphere remains for the duration, and its area is lightly obscured. The sphere's area is difficult terrain. When the area appears, each creature in it must make a Constitution saving throw. A creature takes 4d10 piercing damage on a failed save, or half as much on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there."
+        "description": "Swarming, biting locusts fill a 20-foot-radius sphere centered on a point you choose within range. The sphere spreads around corners. The sphere remains for the duration, and its area is lightly obscured. The sphere's area is difficult terrain. When the area appears, each creature in it must make a Constitution saving throw. A creature takes 4d10 piercing damage on a failed save, or half as much on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there.",
+        "combat": {
+          "save": "con",
+          "damage": "4d10",
+          "damageType": "piercing",
+          "slotScale": "+1d10",
+          "notes": "20-ft radius; difficult terrain; repeats each turn"
+        }
       }
     ],
     "Bard": [
@@ -6365,7 +6637,14 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "You unleash a string of insults laced with subtle enchantments at a creature you can see within range. If the target can hear you (though it need not understand you), it must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll it makes before the end of its next turn. Damage increases to 2d4 at 5th, 3d4 at 11th, 4d4 at 17th."
+        "description": "You unleash a string of insults laced with subtle enchantments at a creature you can see within range. If the target can hear you (though it need not understand you), it must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll it makes before the end of its next turn. Damage increases to 2d4 at 5th, 3d4 at 11th, 4d4 at 17th.",
+        "combat": {
+          "save": "wis",
+          "damage": "1d4",
+          "damageType": "psychic",
+          "cantripScale": "1d4",
+          "notes": "disadvantage on next attack roll on fail"
+        }
       },
       {
         "name": "Prestidigitation",
@@ -6375,7 +6654,10 @@
         "range": "10 ft",
         "components": "V, S",
         "duration": "Up to 1 hour",
-        "description": "This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects within range."
+        "description": "This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects within range.",
+        "combat": {
+          "notes": "Minor magical trick; countless minor effects"
+        }
       },
       {
         "name": "Minor Illusion",
@@ -6385,7 +6667,10 @@
         "range": "30 ft",
         "components": "S, M",
         "duration": "1 minute",
-        "description": "You create a sound or an image of an object within range that lasts for the duration. The illusion also ends if you dismiss it as an action or cast this spell again."
+        "description": "You create a sound or an image of an object within range that lasts for the duration. The illusion also ends if you dismiss it as an action or cast this spell again.",
+        "combat": {
+          "notes": "Sound or image illusion; Investigation check to see through"
+        }
       },
       {
         "name": "Mage Hand",
@@ -6395,7 +6680,10 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it as an action."
+        "description": "A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it as an action.",
+        "combat": {
+          "notes": "Spectral hand manipulates objects up to 10 lbs"
+        }
       },
       {
         "name": "Thunderwave",
@@ -6405,7 +6693,14 @@
         "range": "Self (15-ft cube)",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away. On a successful save, the creature takes half as much damage and isn't pushed."
+        "description": "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away. On a successful save, the creature takes half as much damage and isn't pushed.",
+        "combat": {
+          "save": "con",
+          "damage": "2d8",
+          "damageType": "thunder",
+          "slotScale": "+1d8",
+          "notes": "pushed 10 ft on fail"
+        }
       },
       {
         "name": "Charm Person",
@@ -6415,7 +6710,11 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 hour",
-        "description": "You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and does so with advantage if you or your companions are fighting it. If it fails the saving throw, it is charmed by you until the spell ends or until you or your companions do anything harmful to it. +1 target per slot above 1st."
+        "description": "You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and does so with advantage if you or your companions are fighting it. If it fails the saving throw, it is charmed by you until the spell ends or until you or your companions do anything harmful to it. +1 target per slot above 1st.",
+        "combat": {
+          "save": "wis",
+          "notes": "Charmed as friendly; +1 target per slot above 1st"
+        }
       },
       {
         "name": "Healing Word",
@@ -6425,7 +6724,12 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot above 1st."
+        "description": "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. +1d4 per slot above 1st.",
+        "combat": {
+          "healing": "1d4",
+          "healSlotScale": "+1d4",
+          "notes": "bonus action; + spellcasting modifier"
+        }
       },
       {
         "name": "Dissonant Whispers",
@@ -6435,7 +6739,14 @@
         "range": "60 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "You whisper a discordant melody that only one creature of your choice within range can hear, wracking it with terrible pain. The target must make a Wisdom saving throw. On a failed save, it takes 3d6 psychic damage and must immediately use its reaction, if available, to move as far as its speed allows away from you. On a successful save, the creature takes half as much damage and doesn't have to move away. +1d6 per slot above 1st."
+        "description": "You whisper a discordant melody that only one creature of your choice within range can hear, wracking it with terrible pain. The target must make a Wisdom saving throw. On a failed save, it takes 3d6 psychic damage and must immediately use its reaction, if available, to move as far as its speed allows away from you. On a successful save, the creature takes half as much damage and doesn't have to move away. +1d6 per slot above 1st.",
+        "combat": {
+          "save": "wis",
+          "damage": "3d6",
+          "damageType": "psychic",
+          "slotScale": "+1d6",
+          "notes": "target must move away on fail"
+        }
       },
       {
         "name": "Shatter",
@@ -6445,7 +6756,14 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "A sudden loud ringing noise, painfully intense, erupts from a point of your choice within range. Each creature in a 10-foot-radius sphere centered on that point must make a Constitution saving throw. A creature takes 3d8 thunder damage on a failed save, or half as much on a successful one. A creature made of inorganic material such as stone, crystal, or metal has disadvantage on this saving throw. +1d8 per slot above 2nd."
+        "description": "A sudden loud ringing noise, painfully intense, erupts from a point of your choice within range. Each creature in a 10-foot-radius sphere centered on that point must make a Constitution saving throw. A creature takes 3d8 thunder damage on a failed save, or half as much on a successful one. A creature made of inorganic material such as stone, crystal, or metal has disadvantage on this saving throw. +1d8 per slot above 2nd.",
+        "combat": {
+          "save": "con",
+          "damage": "3d8",
+          "damageType": "thunder",
+          "slotScale": "+1d8",
+          "notes": "inorganic materials have disadvantage"
+        }
       },
       {
         "name": "Invisibility",
@@ -6455,7 +6773,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "A creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. The spell ends for a target that attacks or casts a spell. +1 target per slot above 2nd."
+        "description": "A creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person. The spell ends for a target that attacks or casts a spell. +1 target per slot above 2nd.",
+        "combat": {
+          "notes": "Invisible until attack/cast; +1 target per slot above 2nd"
+        }
       },
       {
         "name": "Hypnotic Pattern",
@@ -6465,7 +6786,11 @@
         "range": "120 ft",
         "components": "S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You create a twisting pattern of colours that weaves through the air inside a 30-foot cube within range. The pattern appears for a moment and vanishes. Each creature in the area who sees the pattern must make a Wisdom saving throw. On a failed save, the creature becomes charmed for the duration. While charmed by this spell, the creature is incapacitated and has a speed of 0."
+        "description": "You create a twisting pattern of colours that weaves through the air inside a 30-foot cube within range. The pattern appears for a moment and vanishes. Each creature in the area who sees the pattern must make a Wisdom saving throw. On a failed save, the creature becomes charmed for the duration. While charmed by this spell, the creature is incapacitated and has a speed of 0.",
+        "combat": {
+          "save": "wis",
+          "notes": "Charmed and incapacitated (speed 0) in 30-ft cube"
+        }
       },
       {
         "name": "Dispel Magic",
@@ -6475,7 +6800,10 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Choose any creature, object, or magical effect within range. Any spell of 3rd level or lower on the target ends. For each spell of 4th level or higher on the target, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a successful check, the spell ends."
+        "description": "Choose any creature, object, or magical effect within range. Any spell of 3rd level or lower on the target ends. For each spell of 4th level or higher on the target, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a successful check, the spell ends.",
+        "combat": {
+          "notes": "End spell of 3rd level or lower; ability check for higher"
+        }
       },
       {
         "name": "Dimension Door",
@@ -6485,7 +6813,10 @@
         "range": "500 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. It can be a place you can see, one you can visualize, or one you can describe by stating distance and direction. You can bring along objects as long as their weight doesn't exceed what you can carry. You can also bring one willing creature of your size or smaller who is carrying gear up to its carrying capacity."
+        "description": "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. It can be a place you can see, one you can visualize, or one you can describe by stating distance and direction. You can bring along objects as long as their weight doesn't exceed what you can carry. You can also bring one willing creature of your size or smaller who is carrying gear up to its carrying capacity.",
+        "combat": {
+          "notes": "Teleport self + one creature up to 500 ft"
+        }
       },
       {
         "name": "Dominate Person",
@@ -6495,7 +6826,11 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "You attempt to beguile a humanoid that you can see within range. It must succeed on a Wisdom saving throw or be charmed by you for the duration. While the target is charmed, you have a telepathic link with it as long as the two of you are on the same plane of existence."
+        "description": "You attempt to beguile a humanoid that you can see within range. It must succeed on a Wisdom saving throw or be charmed by you for the duration. While the target is charmed, you have a telepathic link with it as long as the two of you are on the same plane of existence.",
+        "combat": {
+          "save": "wis",
+          "notes": "Charmed humanoid obeys telepathic commands"
+        }
       }
     ],
     "Sorcerer": [
@@ -6507,7 +6842,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, the target takes 1d10 fire damage. Damage increases at higher levels."
+        "description": "A mote of fire hurls toward a creature. Make a ranged spell attack. On a hit, the target takes 1d10 fire damage. Damage increases at higher levels.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d10",
+          "damageType": "fire",
+          "cantripScale": "1d10"
+        }
       },
       {
         "name": "Ray of Frost",
@@ -6517,7 +6858,14 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A frigid beam of blue-white light streaks toward a creature. Make a ranged spell attack. On a hit, 1d8 cold damage and speed reduced by 10 ft. Damage scales at higher levels."
+        "description": "A frigid beam of blue-white light streaks toward a creature. Make a ranged spell attack. On a hit, 1d8 cold damage and speed reduced by 10 ft. Damage scales at higher levels.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d8",
+          "damageType": "cold",
+          "cantripScale": "1d8",
+          "notes": "\u221210 ft speed on hit"
+        }
       },
       {
         "name": "Shocking Grasp",
@@ -6527,7 +6875,14 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Lightning springs from your hand. Make a melee spell attack with advantage against targets wearing metal armour. On a hit, 1d8 lightning damage and can't take reactions until its next turn."
+        "description": "Lightning springs from your hand. Make a melee spell attack with advantage against targets wearing metal armour. On a hit, 1d8 lightning damage and can't take reactions until its next turn.",
+        "combat": {
+          "attack": "melee",
+          "damage": "1d8",
+          "damageType": "lightning",
+          "cantripScale": "1d8",
+          "notes": "target can't take reactions"
+        }
       },
       {
         "name": "Mage Hand",
@@ -6537,7 +6892,10 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "A spectral, floating hand appears at a point you choose within range."
+        "description": "A spectral, floating hand appears at a point you choose within range.",
+        "combat": {
+          "notes": "Spectral hand manipulates objects up to 10 lbs"
+        }
       },
       {
         "name": "Prestidigitation",
@@ -6547,7 +6905,10 @@
         "range": "10 ft",
         "components": "V, S",
         "duration": "Up to 1 hour",
-        "description": "Minor magical effects: sensory effects, light/snuff flames, clean objects, etc."
+        "description": "Minor magical effects: sensory effects, light/snuff flames, clean objects, etc.",
+        "combat": {
+          "notes": "Minor magical trick; countless minor effects"
+        }
       },
       {
         "name": "Burning Hands",
@@ -6557,7 +6918,14 @@
         "range": "Self (15-ft cone)",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much on a successful one. +1d6 per slot above 1st."
+        "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much on a successful one. +1d6 per slot above 1st.",
+        "combat": {
+          "save": "dex",
+          "damage": "3d6",
+          "damageType": "fire",
+          "slotScale": "+1d6",
+          "notes": "15-ft cone; half on save"
+        }
       },
       {
         "name": "Chromatic Orb",
@@ -6567,7 +6935,13 @@
         "range": "90 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "Hurl a 4-inch sphere of energy. Choose acid, cold, fire, lightning, poison, or thunder. Make a ranged spell attack. On a hit, 3d8 damage of the chosen type. +1d8 per slot above 1st."
+        "description": "Hurl a 4-inch sphere of energy. Choose acid, cold, fire, lightning, poison, or thunder. Make a ranged spell attack. On a hit, 3d8 damage of the chosen type. +1d8 per slot above 1st.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "3d8",
+          "damageType": "(choice)",
+          "slotScale": "+1d8"
+        }
       },
       {
         "name": "Thunderwave",
@@ -6577,7 +6951,14 @@
         "range": "Self (15-ft cube)",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Wave of thunderous force. Constitution save or 2d8 thunder damage and pushed 10 feet. +1d8 per slot above 1st."
+        "description": "Wave of thunderous force. Constitution save or 2d8 thunder damage and pushed 10 feet. +1d8 per slot above 1st.",
+        "combat": {
+          "save": "con",
+          "damage": "2d8",
+          "damageType": "thunder",
+          "slotScale": "+1d8",
+          "notes": "pushed 10 ft on fail"
+        }
       },
       {
         "name": "Scorching Ray",
@@ -6587,7 +6968,13 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "Create three rays of fire and hurl them at targets. Make a ranged spell attack for each ray. On a hit, 2d6 fire damage. +1 ray per slot above 2nd."
+        "description": "Create three rays of fire and hurl them at targets. Make a ranged spell attack for each ray. On a hit, 2d6 fire damage. +1 ray per slot above 2nd.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "3\u00d72d6",
+          "damageType": "fire",
+          "slotScale": "+1 ray"
+        }
       },
       {
         "name": "Mirror Image",
@@ -6597,7 +6984,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "Three illusory duplicates appear in your space, making you harder to hit. Attackers must roll to see if they hit you or a duplicate."
+        "description": "Three illusory duplicates appear in your space, making you harder to hit. Attackers must roll to see if they hit you or a duplicate.",
+        "combat": {
+          "notes": "3 duplicates reduce hit chance (d20 \u2265 6/8/11)"
+        }
       },
       {
         "name": "Fireball",
@@ -6607,7 +6997,14 @@
         "range": "150 ft",
         "components": "V, S, M",
         "duration": "Instantaneous",
-        "description": "A bright streak culminates in a 20-foot-radius explosion. Dexterity save or 8d6 fire damage, half on success. +1d6 per slot above 3rd."
+        "description": "A bright streak culminates in a 20-foot-radius explosion. Dexterity save or 8d6 fire damage, half on success. +1d6 per slot above 3rd.",
+        "combat": {
+          "save": "dex",
+          "damage": "8d6",
+          "damageType": "fire",
+          "slotScale": "+1d6",
+          "notes": "20-ft radius; half on save"
+        }
       },
       {
         "name": "Haste",
@@ -6617,7 +7014,10 @@
         "range": "30 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Target's speed doubled, +2 AC, advantage on Dex saves, and gains an additional action each turn."
+        "description": "Target's speed doubled, +2 AC, advantage on Dex saves, and gains an additional action each turn.",
+        "combat": {
+          "notes": "Double speed, +2 AC, advantage on Dex saves, extra action"
+        }
       },
       {
         "name": "Greater Invisibility",
@@ -6627,7 +7027,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "Target becomes invisible for the duration. The spell doesn't end when the target attacks or casts a spell."
+        "description": "Target becomes invisible for the duration. The spell doesn't end when the target attacks or casts a spell.",
+        "combat": {
+          "notes": "Invisible for duration; doesn't end on attack/cast"
+        }
       },
       {
         "name": "Polymorph",
@@ -6637,7 +7040,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "Transform a creature into a beast with CR equal to or less than the target's level/CR."
+        "description": "Transform a creature into a beast with CR equal to or less than the target's level/CR.",
+        "combat": {
+          "save": "wis",
+          "notes": "Transform creature into beast of CR \u2264 target level"
+        }
       },
       {
         "name": "Telekinesis",
@@ -6647,7 +7054,10 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Concentration, up to 10 minutes",
-        "description": "Move or manipulate creatures or objects by thought. Move a creature (Strength save) or move an object weighing up to 1,000 pounds."
+        "description": "Move or manipulate creatures or objects by thought. Move a creature (Strength save) or move an object weighing up to 1,000 pounds.",
+        "combat": {
+          "notes": "Move creature (Str save) or object up to 1,000 lbs"
+        }
       }
     ],
     "Warlock": [
@@ -6659,7 +7069,14 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A beam of crackling energy streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage. The spell creates more than one beam when you reach higher levels: two beams at 5th level, three beams at 11th level, and four beams at 17th level. You can direct the beams at the same target or at different ones. Make a separate attack roll for each beam."
+        "description": "A beam of crackling energy streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage. The spell creates more than one beam when you reach higher levels: two beams at 5th level, three beams at 11th level, and four beams at 17th level. You can direct the beams at the same target or at different ones. Make a separate attack roll for each beam.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d10",
+          "damageType": "force",
+          "cantripScale": "1d10",
+          "notes": "multiple beams at higher levels (2 at 5th, 3 at 11th, 4 at 17th)"
+        }
       },
       {
         "name": "Chill Touch",
@@ -6669,7 +7086,14 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "1 round",
-        "description": "A ghostly skeletal hand reaches out. Make a ranged spell attack. On a hit, 1d8 necrotic damage and the target can't regain HP until your next turn. Scales at higher levels."
+        "description": "A ghostly skeletal hand reaches out. Make a ranged spell attack. On a hit, 1d8 necrotic damage and the target can't regain HP until your next turn. Scales at higher levels.",
+        "combat": {
+          "attack": "ranged",
+          "damage": "1d8",
+          "damageType": "necrotic",
+          "cantripScale": "1d8",
+          "notes": "can't regain HP until your next turn"
+        }
       },
       {
         "name": "Minor Illusion",
@@ -6679,7 +7103,10 @@
         "range": "30 ft",
         "components": "S, M",
         "duration": "1 minute",
-        "description": "Create a sound or image of an object within range."
+        "description": "Create a sound or image of an object within range.",
+        "combat": {
+          "notes": "Sound or image illusion; Investigation check to see through"
+        }
       },
       {
         "name": "Mage Hand",
@@ -6689,7 +7116,10 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 minute",
-        "description": "A spectral, floating hand appears at a point you choose within range."
+        "description": "A spectral, floating hand appears at a point you choose within range.",
+        "combat": {
+          "notes": "Spectral hand manipulates objects up to 10 lbs"
+        }
       },
       {
         "name": "Hex",
@@ -6699,7 +7129,10 @@
         "range": "90 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack. Also, choose one ability when you cast the spell. The target has disadvantage on ability checks made with the chosen ability. Duration increases at higher slots."
+        "description": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack. Also, choose one ability when you cast the spell. The target has disadvantage on ability checks made with the chosen ability. Duration increases at higher slots.",
+        "combat": {
+          "notes": "+1d6 necrotic per hit; disadvantage on chosen ability checks"
+        }
       },
       {
         "name": "Charm Person",
@@ -6709,7 +7142,11 @@
         "range": "30 ft",
         "components": "V, S",
         "duration": "1 hour",
-        "description": "Attempt to charm a humanoid. Wisdom save (advantage if fighting). On a fail, charmed until spell ends or you harm it. +1 target per slot above 1st."
+        "description": "Attempt to charm a humanoid. Wisdom save (advantage if fighting). On a fail, charmed until spell ends or you harm it. +1 target per slot above 1st.",
+        "combat": {
+          "save": "wis",
+          "notes": "Charmed as friendly; +1 target per slot above 1st"
+        }
       },
       {
         "name": "Armor of Agathys",
@@ -6719,7 +7156,10 @@
         "range": "Self",
         "components": "V, S, M",
         "duration": "1 hour",
-        "description": "A protective magical force surrounds you, manifesting as spectral frost that covers you and your gear. You gain 5 temporary hit points for the duration. If a creature hits you with a melee attack while you have these hit points, the creature takes 5 cold damage. +5 temp HP and cold damage per slot above 1st."
+        "description": "A protective magical force surrounds you, manifesting as spectral frost that covers you and your gear. You gain 5 temporary hit points for the duration. If a creature hits you with a melee attack while you have these hit points, the creature takes 5 cold damage. +5 temp HP and cold damage per slot above 1st.",
+        "combat": {
+          "notes": "5 temp HP; 5 cold damage to melee attacker; +5 per slot"
+        }
       },
       {
         "name": "Misty Step",
@@ -6729,7 +7169,10 @@
         "range": "Self",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see.",
+        "combat": {
+          "notes": "Teleport 30 ft as a bonus action"
+        }
       },
       {
         "name": "Hold Person",
@@ -6739,7 +7182,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Choose a humanoid within range. Wisdom save or paralyzed for the duration. +1 target per slot above 2nd."
+        "description": "Choose a humanoid within range. Wisdom save or paralyzed for the duration. +1 target per slot above 2nd.",
+        "combat": {
+          "save": "wis",
+          "notes": "Paralyzed; +1 target per slot above 2nd"
+        }
       },
       {
         "name": "Hunger of Hadar",
@@ -6749,7 +7196,13 @@
         "range": "150 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You open a gateway to the dark between the stars, a region infested with unknown horrors. A 20-foot-radius sphere of blackness and bitter cold appears centered on a point within range. The void is filled with a cacophony of soft whispers and slurping noises. No light can illuminate the area, and creatures fully within the area are blinded. The void creates a warp in the fabric of space, and the area is difficult terrain. Any creature that starts its turn in the area takes 2d6 cold damage. Any creature that ends its turn in the area must succeed on a Dexterity saving throw or take 2d6 acid damage."
+        "description": "You open a gateway to the dark between the stars, a region infested with unknown horrors. A 20-foot-radius sphere of blackness and bitter cold appears centered on a point within range. The void is filled with a cacophony of soft whispers and slurping noises. No light can illuminate the area, and creatures fully within the area are blinded. The void creates a warp in the fabric of space, and the area is difficult terrain. Any creature that starts its turn in the area takes 2d6 cold damage. Any creature that ends its turn in the area must succeed on a Dexterity saving throw or take 2d6 acid damage.",
+        "combat": {
+          "save": "dex",
+          "damage": "2d6+2d6",
+          "damageType": "cold+acid",
+          "notes": "20-ft void sphere; darkness; 2d6 cold at start of turn, 2d6 acid Dex save at end"
+        }
       },
       {
         "name": "Hypnotic Pattern",
@@ -6759,7 +7212,11 @@
         "range": "120 ft",
         "components": "S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Twisting pattern of colours in a 30-foot cube. Wisdom save or charmed, incapacitated, speed 0."
+        "description": "Twisting pattern of colours in a 30-foot cube. Wisdom save or charmed, incapacitated, speed 0.",
+        "combat": {
+          "save": "wis",
+          "notes": "Charmed and incapacitated (speed 0) in 30-ft cube"
+        }
       },
       {
         "name": "Banishment",
@@ -6769,7 +7226,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Send a creature to another plane on a failed Charisma save. If native to your plane, it goes to a harmless demiplane while incapacitated."
+        "description": "Send a creature to another plane on a failed Charisma save. If native to your plane, it goes to a harmless demiplane while incapacitated.",
+        "combat": {
+          "save": "cha",
+          "notes": "Target banished on fail; permanent if on different native plane"
+        }
       },
       {
         "name": "Dimension Door",
@@ -6779,7 +7240,10 @@
         "range": "500 ft",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "Teleport yourself and optionally one willing creature up to 500 feet to a location you can visualise."
+        "description": "Teleport yourself and optionally one willing creature up to 500 feet to a location you can visualise.",
+        "combat": {
+          "notes": "Teleport self + one creature up to 500 ft"
+        }
       },
       {
         "name": "Contact Other Plane",
@@ -6789,7 +7253,11 @@
         "range": "Self",
         "components": "V",
         "duration": "1 minute",
-        "description": "You mentally contact a demigod, the spirit of a long-dead sage, or some other mysterious entity from another plane. Contacting this extraplanar intelligence can strain or even break your mind. When you cast this spell, make a DC 15 Intelligence saving throw. On a failure, you take 6d6 psychic damage and are insane until you finish a long rest."
+        "description": "You mentally contact a demigod, the spirit of a long-dead sage, or some other mysterious entity from another plane. Contacting this extraplanar intelligence can strain or even break your mind. When you cast this spell, make a DC 15 Intelligence saving throw. On a failure, you take 6d6 psychic damage and are insane until you finish a long rest.",
+        "combat": {
+          "save": "int",
+          "notes": "DC 15 Int save or 6d6 psychic and insanity until long rest"
+        }
       }
     ],
     "Paladin": [
@@ -6801,7 +7269,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "Your prayer empowers you with divine radiance. Until the spell ends, your weapon attacks deal an extra 1d4 radiant damage on a hit."
+        "description": "Your prayer empowers you with divine radiance. Until the spell ends, your weapon attacks deal an extra 1d4 radiant damage on a hit.",
+        "combat": {
+          "notes": "+1d4 radiant damage on weapon attacks for duration"
+        }
       },
       {
         "name": "Wrathful Smite",
@@ -6811,7 +7282,10 @@
         "range": "Self",
         "components": "V",
         "duration": "Concentration, up to 1 minute",
-        "description": "The next time you hit with a melee weapon attack during this spell's duration, your attack deals an extra 1d6 psychic damage. Additionally, if the target is a creature, it must make a Wisdom saving throw or be frightened of you until the spell ends."
+        "description": "The next time you hit with a melee weapon attack during this spell's duration, your attack deals an extra 1d6 psychic damage. Additionally, if the target is a creature, it must make a Wisdom saving throw or be frightened of you until the spell ends.",
+        "combat": {
+          "notes": "+1d6 psychic on next hit; Wis save or frightened"
+        }
       },
       {
         "name": "Shield of Faith",
@@ -6821,7 +7295,10 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration."
+        "description": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration.",
+        "combat": {
+          "notes": "+2 bonus to AC for duration"
+        }
       },
       {
         "name": "Bless",
@@ -6831,7 +7308,10 @@
         "range": "30 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "You bless up to three creatures. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add it to the roll. +1 target per slot above 1st."
+        "description": "You bless up to three creatures. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add it to the roll. +1 target per slot above 1st.",
+        "combat": {
+          "notes": "+1d4 to attack rolls and saves for up to 3 creatures; +1 target per slot"
+        }
       },
       {
         "name": "Command",
@@ -6841,7 +7321,11 @@
         "range": "60 ft",
         "components": "V",
         "duration": "1 round",
-        "description": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn. The spell has no effect if the target is undead, if it doesn't understand your language, or if your command is directly harmful to it."
+        "description": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn. The spell has no effect if the target is undead, if it doesn't understand your language, or if your command is directly harmful to it.",
+        "combat": {
+          "save": "wis",
+          "notes": "One-word command: Approach, Drop, Flee, Grovel, Halt"
+        }
       },
       {
         "name": "Zone of Truth",
@@ -6851,7 +7335,11 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "10 minutes",
-        "description": "You create a magical zone that guards against deception in a 15-foot-radius sphere centered on a point of your choice within range. Until the spell ends, a creature that enters the spell's area for the first time on a turn or starts its turn there must make a Charisma saving throw. On a failed save, a creature can't speak a deliberate lie while in the radius."
+        "description": "You create a magical zone that guards against deception in a 15-foot-radius sphere centered on a point of your choice within range. Until the spell ends, a creature that enters the spell's area for the first time on a turn or starts its turn there must make a Charisma saving throw. On a failed save, a creature can't speak a deliberate lie while in the radius.",
+        "combat": {
+          "save": "cha",
+          "notes": "Can't speak deliberate lies within 15-ft sphere"
+        }
       },
       {
         "name": "Misty Step",
@@ -6861,7 +7349,10 @@
         "range": "Self",
         "components": "V",
         "duration": "Instantaneous",
-        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+        "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see.",
+        "combat": {
+          "notes": "Teleport 30 ft as a bonus action"
+        }
       },
       {
         "name": "Lesser Restoration",
@@ -6871,7 +7362,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "You touch a creature and can end either one disease or one condition afflicting it (blinded, deafened, paralyzed, or poisoned)."
+        "description": "You touch a creature and can end either one disease or one condition afflicting it (blinded, deafened, paralyzed, or poisoned).",
+        "combat": {
+          "notes": "End one disease or condition (blinded/deafened/paralyzed/poisoned)"
+        }
       },
       {
         "name": "Aura of Vitality",
@@ -6881,7 +7375,11 @@
         "range": "Self (30-ft radius)",
         "components": "V",
         "duration": "Concentration, up to 1 minute",
-        "description": "Healing energy radiates from you in an aura with a 30-foot radius. Until the spell ends, the aura moves with you, centered on you. You can use a bonus action to cause one creature in the aura (including you) to regain 2d6 hit points."
+        "description": "Healing energy radiates from you in an aura with a 30-foot radius. Until the spell ends, the aura moves with you, centered on you. You can use a bonus action to cause one creature in the aura (including you) to regain 2d6 hit points.",
+        "combat": {
+          "healing": "2d6",
+          "notes": "Bonus action heal 2d6 to one creature in 30-ft aura each turn"
+        }
       },
       {
         "name": "Dispel Magic",
@@ -6891,7 +7389,10 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "End any spell of 3rd level or lower on the target automatically. For higher level spells, make a spellcasting ability check (DC 10 + spell level) to end them."
+        "description": "End any spell of 3rd level or lower on the target automatically. For higher level spells, make a spellcasting ability check (DC 10 + spell level) to end them.",
+        "combat": {
+          "notes": "End spell of 3rd level or lower; ability check for higher"
+        }
       },
       {
         "name": "Death Ward",
@@ -6901,7 +7402,10 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "8 hours",
-        "description": "You touch a creature and grant it a measure of protection from death. The first time the target would drop to 0 hit points as a result of taking damage, the target instead drops to 1 hit point, and the spell ends. If the spell is still in effect when the target is subjected to an effect that would kill it instantaneously without dealing damage, that effect is instead negated against the target, and the spell ends."
+        "description": "You touch a creature and grant it a measure of protection from death. The first time the target would drop to 0 hit points as a result of taking damage, the target instead drops to 1 hit point, and the spell ends. If the spell is still in effect when the target is subjected to an effect that would kill it instantaneously without dealing damage, that effect is instead negated against the target, and the spell ends.",
+        "combat": {
+          "notes": "Once: drop to 1 HP instead of 0; or negate instant-kill effect"
+        }
       },
       {
         "name": "Banishment",
@@ -6911,7 +7415,11 @@
         "range": "60 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 minute",
-        "description": "Charisma save or creature is banished to another plane. If native to your plane, goes to a harmless demiplane while incapacitated."
+        "description": "Charisma save or creature is banished to another plane. If native to your plane, goes to a harmless demiplane while incapacitated.",
+        "combat": {
+          "save": "cha",
+          "notes": "Target banished on fail; permanent if on different native plane"
+        }
       }
     ],
     "Ranger": [
@@ -6923,7 +7431,10 @@
         "range": "90 ft",
         "components": "V",
         "duration": "Concentration, up to 1 hour",
-        "description": "You choose a creature you can see within range and mystically mark it as your quarry. Until the spell ends, you deal an extra 1d6 damage to the target whenever you hit it with a weapon attack, and you have advantage on any Wisdom (Perception) or Wisdom (Survival) check you make to find it. Duration increases at higher slots."
+        "description": "You choose a creature you can see within range and mystically mark it as your quarry. Until the spell ends, you deal an extra 1d6 damage to the target whenever you hit it with a weapon attack, and you have advantage on any Wisdom (Perception) or Wisdom (Survival) check you make to find it. Duration increases at higher slots.",
+        "combat": {
+          "notes": "+1d6 damage to marked target; advantage on Perception/Survival to track"
+        }
       },
       {
         "name": "Ensnaring Strike",
@@ -6933,7 +7444,11 @@
         "range": "Self",
         "components": "V",
         "duration": "Concentration, up to 1 minute",
-        "description": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact, and the target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends."
+        "description": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact, and the target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends.",
+        "combat": {
+          "save": "str",
+          "notes": "Restrained by vines on failed save after next weapon hit"
+        }
       },
       {
         "name": "Fog Cloud",
@@ -6943,7 +7458,10 @@
         "range": "120 ft",
         "components": "V, S",
         "duration": "Concentration, up to 1 hour",
-        "description": "You create a 20-foot-radius sphere of fog centered on a point within range. The sphere spreads around corners, and its area is heavily obscured. It lasts for the duration or until a wind of moderate or greater speed (at least 10 miles per hour) disperses it. +20 ft radius per slot above 1st."
+        "description": "You create a 20-foot-radius sphere of fog centered on a point within range. The sphere spreads around corners, and its area is heavily obscured. It lasts for the duration or until a wind of moderate or greater speed (at least 10 miles per hour) disperses it. +20 ft radius per slot above 1st.",
+        "combat": {
+          "notes": "20-ft heavily obscured sphere; +20 ft radius per slot"
+        }
       },
       {
         "name": "Cure Wounds",
@@ -6953,7 +7471,12 @@
         "range": "Touch",
         "components": "V, S",
         "duration": "Instantaneous",
-        "description": "A creature you touch regains 1d8 + your spellcasting ability modifier hit points. +1d8 per slot above 1st."
+        "description": "A creature you touch regains 1d8 + your spellcasting ability modifier hit points. +1d8 per slot above 1st.",
+        "combat": {
+          "healing": "1d8",
+          "healSlotScale": "+1d8",
+          "notes": "+ spellcasting modifier"
+        }
       },
       {
         "name": "Speak with Animals",
@@ -6963,7 +7486,10 @@
         "range": "Self",
         "components": "V, S",
         "duration": "10 minutes",
-        "description": "You gain the ability to comprehend and verbally communicate with beasts for the duration."
+        "description": "You gain the ability to comprehend and verbally communicate with beasts for the duration.",
+        "combat": {
+          "notes": "Communicate verbally with beasts for 10 minutes"
+        }
       },
       {
         "name": "Pass without Trace",
@@ -6973,7 +7499,10 @@
         "range": "Self",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "A veil of shadows and silence radiates from you, masking you and your companions from detection. For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can't be tracked except by magical means. A creature that receives this bonus leaves behind no tracks or other traces of its passage."
+        "description": "A veil of shadows and silence radiates from you, masking you and your companions from detection. For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can't be tracked except by magical means. A creature that receives this bonus leaves behind no tracks or other traces of its passage.",
+        "combat": {
+          "notes": "+10 Stealth to you and companions; can't be tracked non-magically"
+        }
       },
       {
         "name": "Spike Growth",
@@ -6983,7 +7512,10 @@
         "range": "150 ft",
         "components": "V, S, M",
         "duration": "Concentration, up to 10 minutes",
-        "description": "The ground in a 20-foot radius centered on a point within range twists and sprouts hard spikes and thorns. The area becomes difficult terrain for the duration. When a creature moves into or within the area, it takes 2d4 piercing damage for every 5 feet it travels."
+        "description": "The ground in a 20-foot radius centered on a point within range twists and sprouts hard spikes and thorns. The area becomes difficult terrain for the duration. When a creature moves into or within the area, it takes 2d4 piercing damage for every 5 feet it travels.",
+        "combat": {
+          "notes": "2d4 piercing per 5 ft moved through difficult terrain area"
+        }
       },
       {
         "name": "Conjure Animals",
@@ -6993,7 +7525,10 @@
         "range": "60 ft",
         "components": "V, S",
         "duration": "Concentration, up to 1 hour",
-        "description": "You summon fey spirits that take the form of beasts and appear in unoccupied spaces that you can see within range. Choose one of the following options for what appears: one beast of CR 2, two beasts of CR 1, four beasts of CR 1/2, or eight beasts of CR 1/4."
+        "description": "You summon fey spirits that take the form of beasts and appear in unoccupied spaces that you can see within range. Choose one of the following options for what appears: one beast of CR 2, two beasts of CR 1, four beasts of CR 1/2, or eight beasts of CR 1/4.",
+        "combat": {
+          "notes": "Summon beasts up to CR 2 (or multiple lower CR) for 1 hour"
+        }
       },
       {
         "name": "Lightning Arrow",
@@ -7003,7 +7538,13 @@
         "range": "Self",
         "components": "V, S",
         "duration": "Concentration, up to 1 minute",
-        "description": "The next time you make a ranged weapon attack during the spell's duration, the weapon's ammunition, or the weapon itself if it's a thrown weapon, transforms into a bolt of lightning. Make the attack roll normally. The target takes 4d8 lightning damage on a hit, or half as much on a miss. Whether you hit or miss, each creature within 10 feet of the target must make a Dexterity saving throw, taking 2d8 lightning damage on a failed save, or half as much on a successful one."
+        "description": "The next time you make a ranged weapon attack during the spell's duration, the weapon's ammunition, or the weapon itself if it's a thrown weapon, transforms into a bolt of lightning. Make the attack roll normally. The target takes 4d8 lightning damage on a hit, or half as much on a miss. Whether you hit or miss, each creature within 10 feet of the target must make a Dexterity saving throw, taking 2d8 lightning damage on a failed save, or half as much on a successful one.",
+        "combat": {
+          "save": "dex",
+          "damage": "4d8",
+          "damageType": "lightning",
+          "notes": "Main target 4d8 (half on miss); 2d8 to creatures within 10 ft of target"
+        }
       },
       {
         "name": "Stoneskin",
@@ -7013,7 +7554,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "Concentration, up to 1 hour",
-        "description": "The target's flesh becomes as hard as stone. Until the spell ends, the target has resistance to nonmagical bludgeoning, piercing, and slashing damage."
+        "description": "The target's flesh becomes as hard as stone. Until the spell ends, the target has resistance to nonmagical bludgeoning, piercing, and slashing damage.",
+        "combat": {
+          "notes": "Resistance to nonmagical B/P/S damage"
+        }
       },
       {
         "name": "Freedom of Movement",
@@ -7023,7 +7567,10 @@
         "range": "Touch",
         "components": "V, S, M",
         "duration": "1 hour",
-        "description": "You touch a willing creature. For the duration, the target's movement is unaffected by difficult terrain, and spells and other magical effects can neither reduce the target's speed nor cause the target to be paralyzed or restrained."
+        "description": "You touch a willing creature. For the duration, the target's movement is unaffected by difficult terrain, and spells and other magical effects can neither reduce the target's speed nor cause the target to be paralyzed or restrained.",
+        "combat": {
+          "notes": "Ignore difficult terrain; immune to paralyzed/restrained from spells"
+        }
       }
     ]
   },
