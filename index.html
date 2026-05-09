@@ -859,47 +859,17 @@ function WizardSpellPicker({ char, setChar, gameData }) {
       </div>
 
       {/* Spell list */}
-        {displayed.map(spell => {
+      {displayed.map(spell => {
         const isK = known.some(s => s.name === spell.name);
         const isCantrip = spell.level === 0;
         const slotOk = isCantrip || spell.level <= maxSlotLevel;
         const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
-        const isE = expanded === spell.name;
         const disabled = !isK && (!slotOk || !capOk);
-        const combatLine = spellCombatLine(spell, char.level);
-
+        const disabledReason = !isK && (!slotOk ? "no slot" : !capOk ? (isCantrip ? "cantrip cap" : "spell cap") : null);
         return (
-          <div key={spell.name} style={{ background:"var(--card)", border:`1px solid ${isK?"var(--accent2)":disabled?"var(--border)":"var(--border)"}`, borderRadius:10, padding:12, marginBottom:8, opacity: disabled ? 0.45 : 1 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
-              <div style={{ flex:1 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
-                  <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)" }}>{spell.name}</span>
-                  <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
-                  <span style={{ fontSize:10, color:"var(--text-dim)" }}>{spell.school}</span>
-                  {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>no slot</span>}
-                  {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>{isCantrip?"cantrip cap":"spell cap"}</span>}
-                </div>
-                {combatLine && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{combatLine}</div>}
-              </div>
-              <button onClick={e => { e.stopPropagation(); toggleKnown(spell); }} disabled={disabled} style={{
-                padding:"4px 12px", borderRadius:6, fontSize:12, cursor: disabled?"not-allowed":"pointer", marginLeft:8, flexShrink:0,
-                border:`1px solid ${isK?"var(--danger)":disabled?"var(--border)":"var(--accent)"}`,
-                background: isK?"transparent":disabled?"var(--surface)":"var(--accent)",
-                color: isK?"var(--danger)":disabled?"var(--text-dim)":"var(--bg)", opacity: disabled?0.5:1
-              }}>{isK ? "Remove" : "+ Add"}</button>
-            </div>
-            {isE && (
-              <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
-                <div style={{ display:"flex", gap:14, flexWrap:"wrap", fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
-                  <span>⏱ {spell.castingTime}</span>
-                  <span>📏 {spell.range}</span>
-                  <span>🔮 {spell.components}</span>
-                  <span>⌛ {spell.duration}</span>
-                </div>
-                <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.6, margin:0 }}>{spell.description}</p>
-              </div>
-            )}
-          </div>
+          <SpellCard key={spell.name} spell={spell} charLevel={char.level}
+            isKnown={isK} disabled={disabled} disabledReason={disabledReason}
+            onToggle={() => toggleKnown(spell)} actionLabel={isK ? "Remove" : "+ Add"} />
         );
       })}
     </div>
@@ -907,7 +877,141 @@ function WizardSpellPicker({ char, setChar, gameData }) {
 }
 
 // ============================================================
-// CHARACTER CREATION WIZARD
+// SPELL CARD — shared between WizardSpellPicker and SpellsTab
+// Shows big damage/DC badges when collapsed, vertical details expanded
+// ============================================================
+function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onToggle, actionLabel }) {
+  const [open, setOpen] = useState(false);
+  const c = spell.combat || {};
+
+  // Compute live damage string accounting for cantrip scaling
+  const liveDamage = (() => {
+    if (!c.damage) return null;
+    if (!c.cantripScale) return c.damage;
+    const tiers = [1, 5, 11, 17];
+    const tier = tiers.filter(t => (charLevel || 1) >= t).length;
+    const match = c.cantripScale.match(/^(\d+)(d\d+)$/);
+    if (!match) return c.damage;
+    return `${tier}${match[2]}`;
+  })();
+
+  const hasAttack = !!c.attack;
+  const hasSave   = !!c.save;
+  const hasDamage = !!liveDamage;
+  const hasHeal   = !!c.healing;
+
+  // Next cantrip tier label
+  const nextTierLabel = (() => {
+    if (!c.cantripScale) return null;
+    const lvl = charLevel || 1;
+    return lvl < 5 ? "+1 die at 5th" : lvl < 11 ? "+1 die at 11th" : lvl < 17 ? "+1 die at 17th" : null;
+  })();
+
+  const lvlTag = { display:"inline-block", padding:"2px 8px", borderRadius:10, fontSize:11,
+    background: spell.level===0 ? "rgba(100,100,100,0.2)" : "rgba(201,162,39,0.12)",
+    border:`1px solid ${spell.level===0 ? "var(--border)" : "var(--accent2)"}`,
+    color: spell.level===0 ? "var(--text-muted)" : "var(--accent)" };
+
+  // Big badge style — same height as the action button
+  const badge = (bg, border, text) => ({
+    display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+    padding:"4px 10px", borderRadius:8, border:`1px solid ${border}`,
+    background: bg, minWidth:60, minHeight:44, flexShrink:0,
+    color: text
+  });
+
+  return (
+    <div style={{ background:"var(--card)", border:`1px solid ${isKnown?"var(--accent2)":"var(--border)"}`, borderRadius:10, padding:"10px 14px", marginBottom:8, opacity: disabled ? 0.45 : 1 }}>
+      {/* Collapsed row */}
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+
+        {/* Spell name + tags — clickable to expand */}
+        <div style={{ flex:1, cursor:"pointer", minWidth:0 }} onClick={() => !disabled && setOpen(o => !o)}>
+          <div style={{ fontFamily:"var(--font-display)", fontSize:16, color: isKnown?"var(--accent)":disabled?"var(--text-dim)":"var(--text)", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+            {spell.name}
+            <span style={{ fontSize:12, color:"var(--text-dim)", marginLeft:6 }}>{open?"▲":"▼"}</span>
+          </div>
+          <div style={{ display:"flex", gap:6, alignItems:"center", marginTop:4, flexWrap:"wrap" }}>
+            <span style={lvlTag}>{spell.level===0?"Cantrip":`Level ${spell.level}`}</span>
+            <span style={{ fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
+            {disabledReason && <span style={{ fontSize:11, color:"var(--danger)" }}>{disabledReason}</span>}
+          </div>
+        </div>
+
+        {/* Combat badges — big and obvious */}
+        <div style={{ display:"flex", gap:6, alignItems:"center", flexShrink:0 }}>
+          {/* Damage badge */}
+          {hasDamage && (
+            <div style={badge("rgba(192,57,43,0.15)", "rgba(192,57,43,0.5)", "var(--danger)")}>
+              <div style={{ fontSize:9, textTransform:"uppercase", letterSpacing:1, color:"rgba(192,57,43,0.7)", lineHeight:1 }}>Damage</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:17, lineHeight:1.2, marginTop:2 }}>
+                {liveDamage}
+              </div>
+              <div style={{ fontSize:9, color:"rgba(192,57,43,0.8)", lineHeight:1, marginTop:1 }}>{c.damageType}</div>
+              {c.slotScale && !c.cantripScale && <div style={{ fontSize:9, color:"rgba(192,57,43,0.6)", lineHeight:1 }}>{c.slotScale}</div>}
+              {nextTierLabel && <div style={{ fontSize:9, color:"rgba(192,57,43,0.6)", lineHeight:1 }}>{nextTierLabel}</div>}
+            </div>
+          )}
+          {/* Healing badge */}
+          {hasHeal && !hasDamage && (
+            <div style={badge("rgba(39,174,96,0.12)", "rgba(39,174,96,0.5)", "var(--success)")}>
+              <div style={{ fontSize:9, textTransform:"uppercase", letterSpacing:1, color:"rgba(39,174,96,0.7)", lineHeight:1 }}>Heals</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:17, lineHeight:1.2, marginTop:2 }}>{c.healing}</div>
+              {c.healSlotScale && <div style={{ fontSize:9, color:"rgba(39,174,96,0.6)", lineHeight:1 }}>{c.healSlotScale}</div>}
+            </div>
+          )}
+          {/* Attack / Save badge */}
+          {(hasAttack || hasSave) && (
+            <div style={badge("rgba(41,128,185,0.12)", "rgba(41,128,185,0.5)", "var(--info)")}>
+              {hasAttack && <>
+                <div style={{ fontSize:9, textTransform:"uppercase", letterSpacing:1, color:"rgba(41,128,185,0.7)", lineHeight:1 }}>{c.attack === "ranged" ? "Ranged" : "Melee"}</div>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:13, lineHeight:1.3, marginTop:2, textAlign:"center" }}>Spell<br/>Attack</div>
+              </>}
+              {hasSave && !hasAttack && <>
+                <div style={{ fontSize:9, textTransform:"uppercase", letterSpacing:1, color:"rgba(41,128,185,0.7)", lineHeight:1 }}>Save</div>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:17, lineHeight:1.2, marginTop:2 }}>{ABILITY_SHORT[c.save]}</div>
+              </>}
+            </div>
+          )}
+        </div>
+
+        {/* Add / Remove button */}
+        <button onClick={e => { e.stopPropagation(); onToggle(); }} disabled={disabled} style={{
+          padding:"0 16px", height:44, borderRadius:8, fontSize:13, cursor: disabled?"not-allowed":"pointer",
+          fontFamily:"var(--font-display)", letterSpacing:0.5, flexShrink:0,
+          border:`1px solid ${isKnown?"var(--danger)":disabled?"var(--border)":"var(--accent)"}`,
+          background: isKnown?"transparent":disabled?"var(--surface)":"var(--accent)",
+          color: isKnown?"var(--danger)":disabled?"var(--text-dim)":"var(--bg)", opacity: disabled?0.5:1
+        }}>{actionLabel || (isKnown ? "Remove" : "+ Add")}</button>
+      </div>
+
+      {/* Expanded details — vertical layout */}
+      {open && (
+        <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid var(--border)" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px 24px", marginBottom:12 }}>
+            {[
+              ["Casting Time", spell.castingTime],
+              ["Range",        spell.range],
+              ["Components",   spell.components],
+              ["Duration",     spell.duration],
+            ].map(([label, val]) => (
+              <div key={label}>
+                <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{label}</div>
+                <div style={{ fontSize:14, color:"var(--text)", marginTop:1 }}>{val}</div>
+              </div>
+            ))}
+          </div>
+          {c.notes && (
+            <div style={{ fontSize:13, color:"var(--accent)", fontStyle:"italic", marginBottom:8 }}>{c.notes}</div>
+          )}
+          <p style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, margin:0 }}>{spell.description}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 // Steps: Identity → Class → Species → Background → Abilities
 //        → Equipment & Spells → Finalise
 // ============================================================
@@ -1652,7 +1756,6 @@ function HPTracker({ hp, onUpdate }) {
 function SpellsTab({ char, gameData, onUpdate }) {
   const { classes, spells:spellDb } = gameData;
   const [filter, setFilter] = useState("all");
-  const [expanded, setExpanded] = useState(null);
 
   const limits    = getSpellLimits(char, classes);
   const spellList = limits?.spellList || char.class;
@@ -1793,41 +1896,11 @@ function SpellsTab({ char, gameData, onUpdate }) {
         const slotOk = isCantrip || spell.level <= maxSlotLevel;
         const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
         const disabled = !isK && (!slotOk || !capOk);
-        const isE = expanded === spell.name;
-        const combatLine = spellCombatLine(spell, char.level);
-
+        const disabledReason = !isK && (!slotOk ? "no slot available" : !capOk ? (isCantrip ? "cantrip limit reached" : "spell limit reached") : null);
         return (
-          <div key={spell.name} style={{ background:"var(--card)", border:`1px solid ${isK?"var(--accent2)":"var(--border)"}`, borderRadius:10, padding:12, marginBottom:8, opacity:disabled?0.45:1 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", cursor:"pointer" }} onClick={() => setExpanded(isE ? null : spell.name)}>
-              <div style={{ flex:1 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
-                  <span style={{ fontFamily:"var(--font-display)", color:isK?"var(--accent)":disabled?"var(--text-dim)":"var(--text)" }}>{spell.name}</span>
-                  <span style={lvlTag(spell.level)}>{spell.level===0?"Cantrip":`Lvl ${spell.level}`}</span>
-                  <span style={{ fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
-                  {!slotOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>no slot available</span>}
-                  {slotOk && !capOk && !isK && <span style={{ fontSize:10, color:"var(--danger)" }}>{isCantrip?"cantrip limit reached":"spell limit reached"}</span>}
-                </div>
-                {combatLine && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{combatLine}</div>}
-              </div>
-              <button onClick={e => { e.stopPropagation(); toggleKnown(spell); }} disabled={disabled} style={{
-                padding:"4px 12px", borderRadius:6, fontSize:12, cursor:disabled?"not-allowed":"pointer", marginLeft:8, flexShrink:0,
-                border:`1px solid ${isK?"var(--danger)":disabled?"var(--border)":"var(--accent)"}`,
-                background:isK?"transparent":disabled?"var(--surface)":"var(--accent)",
-                color:isK?"var(--danger)":disabled?"var(--text-dim)":"var(--bg)", opacity:disabled?0.5:1
-              }}>{isK ? "Remove" : "+ Learn"}</button>
-            </div>
-            {isE && (
-              <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
-                <div style={{ display:"flex", gap:14, flexWrap:"wrap", fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
-                  <span>⏱ <strong style={{ color:"var(--text)" }}>{spell.castingTime}</strong></span>
-                  <span>📏 <strong style={{ color:"var(--text)" }}>{spell.range}</strong></span>
-                  <span>🔮 <strong style={{ color:"var(--text)" }}>{spell.components}</strong></span>
-                  <span>⌛ <strong style={{ color:"var(--text)" }}>{spell.duration}</strong></span>
-                </div>
-                <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.6, margin:0 }}>{spell.description}</p>
-              </div>
-            )}
-          </div>
+          <SpellCard key={spell.name} spell={spell} charLevel={char.level}
+            isKnown={isK} disabled={disabled} disabledReason={disabledReason}
+            onToggle={() => toggleKnown(spell)} actionLabel={isK ? "Remove" : "+ Learn"} />
         );
       })}
     </div>
