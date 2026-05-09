@@ -391,7 +391,6 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     const base = currentAbilities?.[ab] || 10;
                     const bonus = asi[ab] || 0;
                     const total = base + bonus;
-                    const atMax = total >= 20;
                     return (
                       <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
                         background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
@@ -402,10 +401,9 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
                           <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
                             style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
-                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
+                          <button onClick={() => { if(rem<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0?"pointer":"not-allowed",fontSize:14,opacity:rem>0?1:0.3,lineHeight:1 }}>+</button>
                         </div>
-                        {atMax && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:2 }}>max</div>}
                       </div>
                     );
                   })}
@@ -424,7 +422,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
-                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong>. You can put multiple points into the same ability. Excluded: {excluded.map(ab=>ABILITY_SHORT[ab]).join(", ") || "none"}. Max 20.
+                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong> across any abilities{excluded.length?` (not ${excluded.map(ab=>ABILITY_SHORT[ab]).join(", ")})`:""}. You can stack points on the same ability.
                   {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
                            : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
                 </div>
@@ -433,7 +431,6 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     const base = currentAbilities?.[ab] || 10;
                     const bonus = asi[ab] || 0;
                     const total = base + bonus;
-                    const atMax = total >= 20;
                     return (
                       <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
                         background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
@@ -444,10 +441,9 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
                           <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
                             style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
-                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
+                          <button onClick={() => { if(rem<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0?"pointer":"not-allowed",fontSize:14,opacity:rem>0?1:0.3,lineHeight:1 }}>+</button>
                         </div>
-                        {atMax && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:2 }}>max</div>}
                       </div>
                     );
                   })}
@@ -792,12 +788,39 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
             <div style={ws.optGrid}>
               {Object.entries(speciesDb || {}).map(([n, d]) => (
                 <div key={n} style={ws.optCard(char.species === n)}
-                  onClick={() => setChar({ ...char, species:n, speciesAbilityChoices:{} })}>
+                  onClick={() => setChar(c => {
+                    if (c.species === n) return c; // no change
+                    // Strip everything sourced from the old species
+                    const newSources = Object.fromEntries(
+                      Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Species")
+                    );
+                    const newProfs = (c.skillProficiencies || []).filter(sk => newSources[sk] !== undefined
+                      || !(c.skillProfSources||{})[sk]
+                      || c.skillProfSources[sk] !== "Species"
+                    );
+                    const newExpertise = (c.skillExpertise || []).filter(s => newProfs.includes(s));
+                    // Clear feature choices that belonged to old species features
+                    const oldSpeciesFeatureNames = new Set(
+                      (speciesDb?.[c.species]?.features || []).map(f => f.name)
+                    );
+                    const newChoices = Object.fromEntries(
+                      Object.entries(c.featureChoices || {}).filter(([k]) => !oldSpeciesFeatureNames.has(k))
+                    );
+                    return {
+                      ...c, species: n,
+                      speciesAbilityChoices: {},
+                      languages: (c.languages || []).filter(l => !(speciesDb?.[c.species]?.autoLanguages||[]).includes(l) || (d.autoLanguages||[]).includes(l)),
+                      skillProfSources: newSources,
+                      skillProficiencies: newProfs,
+                      skillExpertise: newExpertise,
+                      featureChoices: newChoices,
+                    };
+                  })}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {[
                       ...Object.entries(d.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`),
-                      ...(d.abilityBonusChoices ? [`+${d.abilityBonusChoices.amount}×${d.abilityBonusChoices.count} (choice)`] : [])
+                      ...(d.features||[]).filter(f=>f.type==="asi_points").map(f=>`+${f.points} (flex)`)
                     ].join(", ")}
                   </div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.speed}ft • {d.size}</div>
@@ -931,7 +954,15 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     ))}
                     <tr style={{ borderTop:"2px solid var(--accent2)", fontWeight:"bold" }}>
                       <td style={{ padding:"5px 8px", color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:12 }}>TOTAL</td>
-                      {Object.keys(char.abilities).map(ab => { const t=totalAb(ab); return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:16 }}>{t}<span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:3 }}>({modStr(calcMod(t))})</span></td>; })}
+                      {Object.keys(char.abilities).map(ab => {
+                        const t = totalAb(ab);
+                        const over = t > 20;
+                        return <td key={ab} style={{ padding:"5px 8px", textAlign:"center", fontFamily:"var(--font-display)", color: over ? "var(--danger)" : "var(--accent)", fontSize:16 }}>
+                          {t}
+                          <span style={{ fontSize:11, color: over ? "var(--danger)" : "var(--text-muted)", marginLeft:3 }}>({modStr(calcMod(t))})</span>
+                          {over && <div style={{ fontSize:10, color:"var(--danger)" }}>⚠ {t-20} wasted</div>}
+                        </td>;
+                      })}
                     </tr>
                   </tbody>
                 </table>
@@ -1675,6 +1706,17 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
                                 {Object.keys(char.abilities).map(ab=>{ const v=row.vals[ab]||0; return <td key={ab} style={{ padding:"4px 6px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)", fontFamily:"var(--font-display)" }}>{v>0?`+${v}`:""}</td>; })}
                               </tr>
                             ))}
+                            <tr style={{ borderTop:"2px solid var(--accent2)" }}>
+                              <td style={{ padding:"4px 8px", color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:11 }}>TOTAL</td>
+                              {Object.keys(char.abilities).map(ab=>{
+                                const t = char.abilities[ab]; // already finalised on sheet
+                                const over = t > 20;
+                                return <td key={ab} style={{ padding:"4px 6px", textAlign:"center", fontFamily:"var(--font-display)", color: over?"var(--danger)":"var(--accent)", fontSize:14 }}>
+                                  {t}
+                                  {over&&<div style={{ fontSize:9, color:"var(--danger)" }}>⚠ over cap</div>}
+                                </td>;
+                              })}
+                            </tr>
                           </tbody>
                         </table>
                       </div>
