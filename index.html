@@ -3152,7 +3152,17 @@ function InventoryTab({ char, gameData, onUpdate }) {
                     {/* Stats row from library */}
                     {lib && (
                       <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3, display:"flex", gap:10, flexWrap:"wrap" }}>
-                        {lib.damage && <span style={{ color:"var(--danger)" }}>{lib.damage} {lib.damageType}</span>}
+                        {lib.damage && (() => {
+                          const isRanged = lib.range && !lib.properties?.includes("thrown");
+                          const isFin = lib.properties?.includes("finesse");
+                          const mod = isFin
+                            ? Math.max(calcMod(char.abilities.str), calcMod(char.abilities.dex))
+                            : isRanged ? calcMod(char.abilities.dex) : calcMod(char.abilities.str);
+                          const sign = mod > 0 ? "+" : "−";
+                          const dmgStr = mod === 0 ? `${lib.damage} ${lib.damageType}`
+                            : `${lib.damage} ${sign} ${Math.abs(mod)} ${lib.damageType}`;
+                          return <span style={{ color:"var(--danger)" }}>{dmgStr}</span>;
+                        })()}
                         {lib.acFormula && <span style={{ color:"var(--info)" }}>AC: {lib.acFormula}</span>}
                         {lib.properties?.length > 0 && <span>{lib.properties.join(", ")}</span>}
                         {lib.range && <span>Range {lib.range}</span>}
@@ -3414,9 +3424,18 @@ function SettingsTab({ char, gameData, onUpdate }) {
 // CHARACTER SHEET
 // ============================================================
 // ── WeaponCard — proper component so useState works in weapon list ──
-function WeaponCard({ item, lib, proficient, hitBonus }) {
+function WeaponCard({ item, lib, proficient, hitBonus, abilMod }) {
   const [open, setOpen] = useState(false);
   const isRanged = lib?.range && !lib?.properties?.includes("thrown");
+
+  // Full damage string: e.g. "1d6 + 3 slashing" or "1d8 - 1 piercing"
+  const damageStr = (() => {
+    if (!lib?.damage) return null;
+    if (abilMod === 0) return `${lib.damage} ${lib.damageType}`;
+    const sign = abilMod > 0 ? "+" : "−";
+    return `${lib.damage} ${sign} ${Math.abs(abilMod)} ${lib.damageType}`;
+  })();
+  const damageDice = lib?.damage || null;
   return (
     <div style={{ background:"var(--surface)", border:`1px solid ${open?"var(--accent)":"var(--border)"}`, borderRadius:10, marginBottom:8, overflow:"hidden", transition:"border-color 0.15s" }}>
       <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
@@ -3430,10 +3449,10 @@ function WeaponCard({ item, lib, proficient, hitBonus }) {
             <div style={{ fontSize:9, color:"rgba(100,160,255,0.8)", textTransform:"uppercase", letterSpacing:1 }}>To Hit</div>
             <div style={{ fontFamily:"var(--font-display)", color:"var(--info)", fontSize:16 }}>{modStr(hitBonus)}</div>
           </div>
-          {lib?.damage && (
+          {damageStr && (
             <div style={{ textAlign:"center", padding:"3px 10px", background:"rgba(192,57,43,0.12)", border:"1px solid rgba(192,57,43,0.4)", borderRadius:6 }}>
               <div style={{ fontSize:9, color:"rgba(220,80,60,0.8)", textTransform:"uppercase", letterSpacing:1 }}>Damage</div>
-              <div style={{ fontFamily:"var(--font-display)", color:"var(--danger)", fontSize:16 }}>{lib.damage}</div>
+              <div style={{ fontFamily:"var(--font-display)", color:"var(--danger)", fontSize:14, lineHeight:1.2 }}>{damageDice}{abilMod!==0?<span style={{fontSize:12}}> {abilMod>0?"+":"−"} {Math.abs(abilMod)}</span>:""}</div>
               <div style={{ fontSize:9, color:"rgba(192,57,43,0.7)" }}>{lib.damageType}</div>
             </div>
           )}
@@ -3448,8 +3467,8 @@ function WeaponCard({ item, lib, proficient, hitBonus }) {
               ["Range",      lib?.range || "5 ft"],
               ["Properties", lib?.properties?.join(", ") || "—"],
               ["Hit Bonus",  modStr(hitBonus)],
-              ["Damage",     lib?.damage ? `${lib.damage} ${lib.damageType}` : (item.description || "—")],
-              ["Proficiency",proficient ? "✓ Yes" : "✗ No"],
+              ["Damage",     damageStr || (item.description || "—")],
+              ["Proficiency",proficient ? "✓ Yes" : "✗ No (+0 to hit)"],
             ].map(([l,v])=>(
               <div key={l}>
                 <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:2 }}>{l}</div>
@@ -3457,6 +3476,11 @@ function WeaponCard({ item, lib, proficient, hitBonus }) {
               </div>
             ))}
           </div>
+          {abilMod !== 0 && (
+            <div style={{ fontSize:11, color:"var(--text-dim)", marginBottom:8, fontStyle:"italic" }}>
+              {isRanged ? "DEX" : lib?.properties?.includes("finesse") ? "STR or DEX (whichever is higher)" : "STR"} modifier ({modStr(abilMod)}) added to damage.
+            </div>
+          )}
           {lib?.description && <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.5, fontStyle:"italic" }}>{lib.description}</div>}
         </div>
       )}
@@ -3669,8 +3693,8 @@ function ActionsTab({ char, gameData, onUpdate }) {
       {equippedWeapons.length === 0
         ? <div style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic", marginBottom:8 }}>No weapons equipped. Equip weapons in Inventory.</div>
         : equippedWeapons.map(item => {
-            const { lib, proficient, hitBonus } = weaponStats(item);
-            return <WeaponCard key={item.id} item={item} lib={lib} proficient={proficient} hitBonus={hitBonus}/>;
+            const { lib, proficient, hitBonus, abilMod } = weaponStats(item);
+            return <WeaponCard key={item.id} item={item} lib={lib} proficient={proficient} hitBonus={hitBonus} abilMod={abilMod}/>;
           })
       }
 
