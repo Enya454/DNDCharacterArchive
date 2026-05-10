@@ -2581,26 +2581,52 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                     // Labels used when storing class-sourced data
                     const oldClassLabel = oldClass ? `${oldClass} Class` : null;
                     setChar(c => {
-                      // Strip skill profs sourced from old class or old subclass
+                      // Build the set of source labels belonging to the old class
+                      const oldLabels = new Set([
+                        oldClassLabel,
+                        oldSubclass,
+                        // Also catch any variant label formats just in case
+                        oldClass,
+                      ].filter(Boolean));
+
+                      // Strip skill profs sourced from old class or subclass
                       const newSources = Object.fromEntries(
-                        Object.entries(c.skillProfSources || {}).filter(([, src]) =>
-                          src !== oldClassLabel && src !== oldSubclass
-                        )
+                        Object.entries(c.skillProfSources || {}).filter(([, src]) => !oldLabels.has(src))
                       );
-                      const newProfs = (c.skillProficiencies || []).filter(sk => newSources[sk] !== undefined || !(c.skillProfSources||{})[sk]);
+                      // Keep a skill only if it has a surviving source OR has no source record at all
+                      // AND is not sourced from the old class
+                      const newProfs = (c.skillProficiencies || []).filter(sk => {
+                        const src = (c.skillProfSources || {})[sk];
+                        if (!src) return true;          // no source tracking — keep it
+                        return !oldLabels.has(src);     // keep only if not from old class
+                      });
                       const newExpertise = (c.skillExpertise || []).filter(sk => newProfs.includes(sk));
                       // Strip languages sourced from old class/subclass
                       const newLangSources = Object.fromEntries(
-                        Object.entries(c.languageSources || {}).filter(([, src]) =>
-                          src !== oldClassLabel && src !== oldSubclass
-                        )
+                        Object.entries(c.languageSources || {}).filter(([, src]) => !oldLabels.has(src))
                       );
-                      const newLangs = (c.languages || []).filter(l => newLangSources[l] !== undefined || !(c.languageSources||{})[l]);
+                      const newLangs = (c.languages || []).filter(l => {
+                        const src = (c.languageSources || {})[l];
+                        if (!src) return true;
+                        return !oldLabels.has(src);
+                      });
                       // Strip all class feature choices (keep species/background choices)
                       const oldClassFeatureNames = new Set([
                         ...(classes[oldClass]?.features || []).map(f => f.name),
                         ...Object.values(classes[oldClass]?.subclasses || {}).flatMap(sc => (sc.features || []).map(f => f.name)),
                       ]);
+                      // Nuclear option: if old class had a proficiency_choice feature,
+                      // drop ALL skills whose source isn't "Background", "Species", or "Subrace"
+                      const oldClassHadProfChoice = (classes[oldClass]?.features || []).some(f => f.type === "proficiency_choice");
+                      const safeSourcePrefixes = new Set(["Background", "Species", "Subrace"]);
+                      const finalProfs = oldClassHadProfChoice
+                        ? newProfs.filter(sk => {
+                            const src = newSources[sk];
+                            if (!src) return false; // no source = probably class, drop it
+                            return safeSourcePrefixes.has(src) || src.startsWith("Species") || src.startsWith("Subrace");
+                          })
+                        : newProfs;
+                      const finalExpertise = newExpertise.filter(sk => finalProfs.includes(sk));
                       const newFeatureChoices = Object.fromEntries(
                         Object.entries(c.featureChoices || {}).filter(([k]) => !oldClassFeatureNames.has(k))
                       );
@@ -2619,8 +2645,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                         class: n,
                         subclass: "",
                         skillProfSources: newSources,
-                        skillProficiencies: newProfs,
-                        skillExpertise: newExpertise,
+                        skillProficiencies: finalProfs,
+                        skillExpertise: finalExpertise,
                         languageSources: newLangSources,
                         languages: newLangs,
                         featureChoices: newFeatureChoices,
