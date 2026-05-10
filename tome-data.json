@@ -517,10 +517,7 @@
       ]
     },
     "Tiefling": {
-      "abilityBonuses": {
-        "int": 1,
-        "cha": 2
-      },
+      "abilityBonuses": {},
       "speed": 30,
       "size": "Medium",
       "autoLanguages": [
@@ -532,36 +529,257 @@
           "name": "Darkvision",
           "level": 1,
           "type": "passive",
-          "description": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+          "description": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
         },
         {
           "name": "Hellish Resistance",
           "level": 1,
           "type": "passive",
           "description": "You have resistance to fire damage."
-        },
-        {
-          "name": "Infernal Legacy",
-          "level": 1,
-          "type": "spell_grant",
-          "spellcastingAbility": "cha",
-          "grants": [
-            {
-              "spellName": "Thaumaturgy",
-              "minCharLevel": 1
-            },
-            {
-              "spellName": "Hellish Rebuke",
-              "minCharLevel": 3
-            },
-            {
-              "spellName": "Darkness",
-              "minCharLevel": 5
-            }
-          ],
-          "description": "You know the Thaumaturgy cantrip. At 3rd level you can cast Hellish Rebuke as a 2nd-level spell once per long rest. At 5th level you can cast Darkness once per long rest. Charisma is your spellcasting ability."
         }
-      ]
+      ],
+      "subraces": {
+        "Infernal (Standard)": {
+          "abilityBonuses": {
+            "int": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Infernal Legacy",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Thaumaturgy",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Hellish Rebuke",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Darkness",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Thaumaturgy cantrip; Hellish Rebuke (2nd level) 1/long rest at 3rd; Darkness 1/long rest at 5th. CHA is your spellcasting ability."
+            }
+          ]
+        },
+        "Asmodeus": {
+          "abilityBonuses": {
+            "int": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Avernus",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Thaumaturgy",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Hellish Rebuke",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Darkness",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Same as standard Infernal Legacy. Patron of Tieflings who trace their descent to Asmodeus."
+            }
+          ]
+        },
+        "Zariel": {
+          "abilityBonuses": {
+            "str": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Avernus (Zariel)",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Thaumaturgy",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Searing Smite",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Branding Smite",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Thaumaturgy cantrip; Searing Smite 1/long rest at 3rd; Branding Smite 1/long rest at 5th. CHA is your spellcasting ability."
+            }
+          ]
+        },
+        "Dispater": {
+          "abilityBonuses": {
+            "dex": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Dis",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Thaumaturgy",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Disguise Self",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Detect Thoughts",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Thaumaturgy cantrip; Disguise Self 1/long rest at 3rd; Detect Thoughts 1/long rest at 5th."
+            }
+          ]
+        },
+        "Glasya": {
+          "abilityBonuses": {
+            "dex": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Malbolge",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Minor Illusion",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Disguise Self",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Invisibility",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Minor Illusion cantrip; Disguise Self 1/long rest at 3rd; Invisibility 1/long rest at 5th."
+            }
+          ]
+        },
+        "Levistus": {
+          "abilityBonuses": {
+            "con": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Stygia",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Ray of Frost",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Armor of Agathys",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Darkness",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Ray of Frost cantrip; Armor of Agathys 1/long rest at 3rd; Darkness 1/long rest at 5th."
+            }
+          ]
+        },
+        "Mammon": {
+          "abilityBonuses": {
+            "int": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Minauros",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Mage Hand",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Tenser's Floating Disk",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Arcane Lock",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Mage Hand cantrip; Tenser's Floating Disk 1/long rest at 3rd; Arcane Lock 1/long rest at 5th."
+            }
+          ]
+        },
+        "Mephistopheles": {
+          "abilityBonuses": {
+            "int": 1,
+            "cha": 2
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Legacy of Cania",
+              "level": 1,
+              "type": "spell_grant",
+              "spellcastingAbility": "cha",
+              "grants": [
+                {
+                  "spellName": "Mage Hand",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Burning Hands",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Flame Blade",
+                  "minCharLevel": 5
+                }
+              ],
+              "description": "Mage Hand cantrip; Burning Hands 1/long rest at 3rd; Flame Blade 1/long rest at 5th."
+            }
+          ]
+        }
+      }
     },
     "Dragonborn": {
       "abilityBonuses": {
@@ -6238,30 +6456,30 @@
         "cha"
       ],
       "armorProficiencies": [
-        "Light"
+        "Light Armor"
       ],
       "weaponProficiencies": [
-        "Simple"
+        "Simple Weapons"
       ],
       "toolProficiencies": [],
       "spellcaster": true,
       "spellcastingAbility": "cha",
       "features": [
         {
-          "level": 1,
           "name": "Hit Points",
+          "level": 1,
           "type": "passive",
-          "description": "Hit Dice: 1d8 per Warlock level. HP at 1st level: 8 + Constitution modifier."
+          "description": "Hit Dice: 1d8 per Warlock level. Hit Points at 1st Level: 8 + your Constitution modifier. Hit Points at Higher Levels: 1d8 (or 5) + your Constitution modifier per Warlock level after 1st."
         },
         {
-          "level": 1,
           "name": "Proficiencies",
+          "level": 1,
           "type": "passive",
-          "description": "Armor: Light. Weapons: Simple. Saving Throws: Wisdom, Charisma."
+          "description": "Armor: Light armor. Weapons: Simple weapons. Tools: None. Saving Throws: Wisdom, Charisma. Skills: Choose 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, and Religion."
         },
         {
-          "level": 1,
           "name": "Skill Proficiencies",
+          "level": 1,
           "type": "proficiency_choice",
           "count": 2,
           "from": [
@@ -6276,71 +6494,369 @@
           "description": "Choose 2 skills from the Warlock list."
         },
         {
-          "level": 1,
           "name": "Otherworldly Patron",
-          "type": "subclass_choice",
-          "description": "At 1st level, you have struck a bargain with an otherworldly being of your choice."
-        },
-        {
           "level": 1,
+          "type": "subclass_choice",
+          "description": "You have struck a bargain with an otherworldly being. Your choice of patron shapes your Expanded Spell List, and grants you features at 1st, 6th, 10th, and 14th level."
+        },
+        {
           "name": "Pact Magic",
+          "level": 1,
           "type": "passive",
-          "description": "Your arcane research and the magic bestowed on you by your patron have given you facility with spells. You have two 1st-level spell slots that refresh on a short rest. Your spellcasting ability is Charisma."
+          "description": "Your arcane research and the magic bestowed on you by your patron have given you facility with spells. You have a number of pact magic spell slots determined by your level. All your slots are the same level (pact slot level). You regain all expended slots on a short or long rest. You know a number of spells equal to your Warlock level, choosing from the Warlock spell list (plus your Patron's Expanded Spell List)."
         },
         {
-          "level": 2,
           "name": "Eldritch Invocations",
-          "type": "passive",
-          "description": "In your study of occult lore, you have unearthed eldritch invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability. You gain 2 invocations at 2nd level, gaining more as you level up."
+          "level": 2,
+          "type": "choice",
+          "options": [
+            "Agonizing Blast (Eldritch Blast cantrip required) \u2014 add CHA to Eldritch Blast damage",
+            "Armor of Shadows \u2014 cast Mage Armor on yourself at will",
+            "Beast Speech \u2014 speak with animals at will",
+            "Beguiling Influence \u2014 gain proficiency in Deception and Persuasion",
+            "Devil's Sight \u2014 see 120 ft in magical and nonmagical darkness",
+            "Eldritch Mind \u2014 advantage on concentration saves",
+            "Eldritch Sight \u2014 cast Detect Magic at will",
+            "Eldritch Spear (Eldritch Blast, lvl 5+) \u2014 Eldritch Blast range 300 ft",
+            "Eyes of the Rune Keeper \u2014 read all writing",
+            "Fiendish Vigor \u2014 cast False Life on yourself at will (d4+4 temp HP)",
+            "Gaze of Two Minds \u2014 use another creature's senses",
+            "Grasp of Hadar (Eldritch Blast, lvl 5+) \u2014 pull target 10 ft closer on hit",
+            "Improved Pact Weapon (Pact of Blade, lvl 5+) \u2014 +1 magic weapon, use as spellcasting focus",
+            "Lance of Lethargy (Eldritch Blast) \u2014 reduce target speed by 10 ft on hit",
+            "Lifedrinker (Pact of the Blade, lvl 12+) \u2014 add CHA to pact weapon damage",
+            "Mask of Many Faces \u2014 cast Disguise Self at will",
+            "Misty Visions \u2014 cast Silent Image at will",
+            "One with Shadows (lvl 5+) \u2014 become invisible in dim light or darkness as an action",
+            "Repelling Blast (Eldritch Blast) \u2014 push target 10 ft away on hit",
+            "Thief of Five Fates \u2014 cast Bane once per long rest",
+            "Thirsting Blade (Pact of the Blade, lvl 5+) \u2014 attack twice with pact weapon",
+            "Tomb of Levistus (lvl 5+) \u2014 reaction: gain 10\u00d7level temp HP and become restrained in ice until next turn",
+            "Undying Servitude (lvl 5+) \u2014 cast Animate Dead once per long rest",
+            "Voice of the Chain Master (Pact of the Chain) \u2014 communicate telepathically with familiar, perceive through its senses"
+          ],
+          "description": "In your study of occult lore, you have unearthed Eldritch Invocations \u2014 fragments of forbidden knowledge that imbue you with an abiding magical ability. You gain 2 invocations at 2nd level, and an additional invocation at 5th, 7th, 9th, 12th, 15th, and 18th level."
         },
         {
-          "level": 3,
           "name": "Pact Boon",
+          "level": 3,
           "type": "choice",
-          "description": "At 3rd level, your otherworldly patron bestows a gift upon you for your loyal service.",
           "options": [
-            "Pact of the Chain \u2014 You learn Find Familiar and can summon a special familiar",
-            "Pact of the Blade \u2014 You can create a pact weapon in your hand as an action",
-            "Pact of the Tome \u2014 Your patron gives you a grimoire with 3 cantrips from any class list"
-          ]
+            "Pact of the Blade \u2014 create a pact weapon in your hand as an action. You are proficient with it and can use it as a spellcasting focus. It counts as magical. You can transform a magic weapon into your pact weapon by performing a ritual over 1 hour.",
+            "Pact of the Chain \u2014 you learn Find Familiar and can summon special familiars: imp, pseudodragon, quasit, or sprite. Your familiar can attack as a bonus action instead of you.",
+            "Pact of the Tome \u2014 your patron gives you a Book of Shadows containing 3 cantrips from any class's spell list. They count as Warlock cantrips for you.",
+            "Pact of the Talisman \u2014 your patron gives you an amulet. When the wearer fails an ability check, they can add a d4 to the result. You can give it to another creature."
+          ],
+          "description": "Your patron grants you a boon at 3rd level."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. Cannot exceed 20."
+        },
+        {
+          "name": "Mystic Arcanum (6th)",
+          "level": 11,
+          "type": "choice",
+          "options": [
+            "Arcane Gate",
+            "Circle of Death",
+            "Conjure Fey",
+            "Create Undead",
+            "Eyebite",
+            "Mass Suggestion",
+            "Scatter",
+            "Soul Cage"
+          ],
+          "description": "Your patron bestows upon you a magical secret called an arcanum. Choose one 6th-level spell from the Warlock spell list as this arcanum. You can cast it once without expending a spell slot. You must finish a long rest before you can do so again."
+        },
+        {
+          "name": "Mystic Arcanum (7th)",
+          "level": 13,
+          "type": "choice",
+          "options": [
+            "Etherealness",
+            "Finger of Death",
+            "Forcecage",
+            "Plane Shift"
+          ],
+          "description": "Choose one 7th-level spell from the Warlock spell list as your arcanum. Once per long rest without a spell slot."
+        },
+        {
+          "name": "Mystic Arcanum (8th)",
+          "level": 15,
+          "type": "choice",
+          "options": [
+            "Demiplane",
+            "Dominate Monster",
+            "Glibness",
+            "Maddening Darkness"
+          ],
+          "description": "Choose one 8th-level spell from the Warlock spell list as your arcanum. Once per long rest without a spell slot."
+        },
+        {
+          "name": "Mystic Arcanum (9th)",
+          "level": 17,
+          "type": "choice",
+          "options": [
+            "Astral Projection",
+            "Foresight",
+            "Gate",
+            "Imprisonment",
+            "Power Word Kill",
+            "True Polymorph",
+            "Weird"
+          ],
+          "description": "Choose one 9th-level spell from the Warlock spell list as your arcanum. Once per long rest without a spell slot."
+        },
+        {
+          "name": "Eldritch Master",
+          "level": 20,
+          "type": "passive",
+          "description": "You can draw on your inner reserve of mystical power while entreating your patron to regain expended spell slots. You can spend 1 minute entreating your patron for aid to regain all your expended pact magic spell slots. Once you regain spell slots with this feature, you must finish a long rest before you can do so again."
         }
       ],
       "subclasses": {
         "The Fiend": {
+          "spellcaster": true,
+          "spellcastingAbility": "cha",
           "features": [
             {
+              "name": "Expanded Spell List (Fiend)",
               "level": 1,
+              "type": "passive",
+              "description": "The Fiend lets you choose from an expanded list of spells. Fiend Expanded Spells: 1st: Burning Hands, Command; 2nd: Blindness/Deafness, Scorching Ray; 3rd: Fireball, Stinking Cloud; 4th: Fire Shield, Wall of Fire; 5th: Flame Strike, Hallow."
+            },
+            {
               "name": "Dark One's Blessing",
+              "level": 1,
               "type": "passive",
-              "description": "Starting at 1st level, when you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier + your warlock level (minimum of 1)."
+              "description": "Starting at 1st level, when you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier + your Warlock level (minimum of 1)."
             },
             {
-              "level": 6,
               "name": "Dark One's Own Luck",
-              "type": "passive",
-              "description": "Starting at 6th level, you can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur."
+              "level": 6,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "Starting at 6th level, you can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur. Once you use this feature, you can't use it again until you finish a short or long rest."
             },
             {
-              "level": 10,
               "name": "Fiendish Resilience",
-              "type": "passive",
+              "level": 10,
+              "type": "choice",
+              "options": [
+                "Acid",
+                "Cold",
+                "Fire",
+                "Lightning",
+                "Poison",
+                "Thunder",
+                "Necrotic",
+                "Radiant",
+                "Bludgeoning",
+                "Piercing",
+                "Slashing"
+              ],
               "description": "Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature."
+            },
+            {
+              "name": "Hurl Through Hell",
+              "level": 14,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "long"
+              },
+              "description": "Starting at 14th level, when you hit a creature with an attack, you can use this feature to instantly transport the target through the lower planes. The creature disappears and hurtles through a nightmare landscape. At the end of your next turn, the target returns to the space it previously occupied. The creature takes 10d10 psychic damage as it reels from its horrific experience."
             }
           ]
         },
         "The Archfey": {
+          "spellcaster": true,
+          "spellcastingAbility": "cha",
           "features": [
             {
+              "name": "Expanded Spell List (Archfey)",
               "level": 1,
-              "name": "Fey Presence",
               "type": "passive",
-              "description": "Starting at 1st level, your patron bestows upon you the ability to project the beguiling and fearsome presence of the fey. As an action, you can cause each creature in a 10-foot cube originating from you to make a Wisdom saving throw against your warlock spell save DC."
+              "description": "Archfey Expanded Spells: 1st: Faerie Fire, Sleep; 2nd: Calm Emotions, Phantasmal Force; 3rd: Blink, Plant Growth; 4th: Dominate Beast, Greater Invisibility; 5th: Dominate Person, Seeming."
             },
             {
-              "level": 6,
+              "name": "Fey Presence",
+              "level": 1,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "Starting at 1st level, your patron bestows upon you the ability to project the beguiling and fearsome presence of the fey. As an action, you can cause each creature in a 10-foot cube originating from you to make a Wisdom saving throw against your warlock spell save DC. The creatures that fail are all charmed or frightened (your choice) until the end of your next turn."
+            },
+            {
               "name": "Misty Escape",
+              "level": 6,
+              "type": "action",
+              "actionType": "reaction",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "Starting at 6th level, you can vanish in a puff of mist in response to harm. When you take damage, you can use your reaction to turn invisible and teleport up to 60 feet to an unoccupied space you can see. You remain invisible until the start of your next turn or until you attack or cast a spell."
+            },
+            {
+              "name": "Beguiling Defenses",
+              "level": 10,
               "type": "passive",
-              "description": "Starting at 6th level, you can vanish in a puff of mist in response to harm. When you take damage, you can use your reaction to turn invisible and teleport up to 60 feet to an unoccupied space you can see."
+              "description": "Beginning at 10th level, your patron teaches you how to turn the mind-affecting magic of your enemies against them. You are immune to being charmed, and when another creature attempts to charm you, you can use your reaction to attempt to turn the charm back on that creature."
+            },
+            {
+              "name": "Dark Delirium",
+              "level": 14,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "Starting at 14th level, you can plunge a creature into an illusory realm. As an action, choose a creature that you can see within 60 feet. It must make a Wisdom saving throw against your warlock spell save DC. On a failed save, it is charmed or frightened (your choice) for 1 minute. Until the spell ends, the creature is under a hallucination of your choosing."
+            }
+          ]
+        },
+        "The Great Old One": {
+          "spellcaster": true,
+          "spellcastingAbility": "cha",
+          "features": [
+            {
+              "name": "Expanded Spell List (Great Old One)",
+              "level": 1,
+              "type": "passive",
+              "description": "Great Old One Expanded Spells: 1st: Dissonant Whispers, Tasha's Hideous Laughter; 2nd: Detect Thoughts, Phantasmal Force; 3rd: Clairvoyance, Sending; 4th: Dominate Beast, Evard's Black Tentacles; 5th: Dominate Person, Telekinesis."
+            },
+            {
+              "name": "Awakened Mind",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, your alien knowledge gives you the ability to touch the minds of other creatures. You can communicate telepathically with any creature you can see within 30 feet. You don't need to share a language, but the creature must be able to understand at least one language."
+            },
+            {
+              "name": "Entropic Ward",
+              "level": 6,
+              "type": "action",
+              "actionType": "reaction",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "At 6th level, you learn to magically ward yourself against attack and turn an enemy's failed strike into good luck for yourself. When a creature makes an attack roll against you, you can use your reaction to impose disadvantage on that roll. If the attack misses you, your next attack roll against the creature has advantage."
+            },
+            {
+              "name": "Thought Shield",
+              "level": 10,
+              "type": "passive",
+              "description": "Starting at 10th level, your thoughts can't be read by telepathy or other means unless you allow it. You also have resistance to psychic damage, and whenever a creature deals psychic damage to you, that creature takes the same amount of damage."
+            },
+            {
+              "name": "Create Thrall",
+              "level": 14,
+              "type": "action",
+              "actionType": "action",
+              "description": "At 14th level, you gain the ability to infect a humanoid's mind with the alien magic of your patron. You can use your action to touch an incapacitated humanoid. That creature is then charmed by you until a Remove Curse spell is cast on it or until you use this feature again."
+            }
+          ]
+        },
+        "The Celestial": {
+          "spellcaster": true,
+          "spellcastingAbility": "cha",
+          "features": [
+            {
+              "name": "Expanded Spell List (Celestial)",
+              "level": 1,
+              "type": "passive",
+              "description": "Celestial Expanded Spells: 1st: Cure Wounds, Guiding Bolt; 2nd: Flaming Sphere, Lesser Restoration; 3rd: Daylight, Revivify; 4th: Guardian of Faith, Wall of Fire; 5th: Flame Strike, Greater Restoration."
+            },
+            {
+              "name": "Bonus Cantrips",
+              "level": 1,
+              "type": "passive",
+              "description": "At 1st level, you learn the Light and Sacred Flame cantrips. They count as warlock cantrips for you, but they don't count against your number of cantrips known."
+            },
+            {
+              "name": "Healing Light",
+              "level": 1,
+              "type": "action",
+              "actionType": "bonus",
+              "description": "At 1st level, you gain the ability to channel celestial energy to heal wounds. You have a pool of d6s that you spend to fuel this healing. The number of dice in the pool equals 1 + your warlock level. As a bonus action, you can heal one creature you can see within 60 feet by spending up to half your warlock level (rounded up) dice from the pool. The creature regains hit points equal to the rolled total. Your pool regains all expended dice when you finish a long rest."
+            },
+            {
+              "name": "Radiant Soul",
+              "level": 6,
+              "type": "passive",
+              "description": "Starting at 6th level, your link to the Celestial allows you to serve as a conduit for radiant energy. You have resistance to radiant damage, and when you cast a spell that deals radiant or fire damage, you add your Charisma modifier to one radiant or fire damage roll of that spell."
+            },
+            {
+              "name": "Celestial Resilience",
+              "level": 10,
+              "type": "passive",
+              "description": "Starting at 10th level, you gain temporary hit points whenever you finish a short or long rest. These temporary hit points equal your warlock level + your Charisma modifier. Additionally, choose up to five creatures you can see at the end of the rest. Those creatures each gain temporary hit points equal to half your warlock level + your Charisma modifier."
+            },
+            {
+              "name": "Searing Vengeance",
+              "level": 14,
+              "type": "action",
+              "actionType": "reaction",
+              "description": "Starting at 14th level, the radiant energy you channel allows you to resist death. When you have to make a death saving throw at the start of your turn, you can instead spring back to your feet with a burst of radiant energy. You regain hit points equal to half your hit point maximum, and then you stand up. Each creature of your choice that is within 30 feet of you takes radiant damage equal to 2d8 + your Charisma modifier."
+            }
+          ]
+        },
+        "The Undying": {
+          "spellcaster": true,
+          "spellcastingAbility": "cha",
+          "features": [
+            {
+              "name": "Expanded Spell List (Undying)",
+              "level": 1,
+              "type": "passive",
+              "description": "Undying Expanded Spells: 1st: False Life, Ray of Sickness; 2nd: Blindness/Deafness, Silence; 3rd: Feign Death, Speak with Dead; 4th: Aura of Life, Death Ward; 5th: Contagion, Legend Lore."
+            },
+            {
+              "name": "Among the Dead",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, you learn the Spare the Dying cantrip, which counts as a warlock cantrip for you. You also have advantage on saving throws against any disease. Additionally, undead have difficulty harming you. If an undead targets you directly with an attack or a harmful spell, that creature must make a Wisdom saving throw against your spell save DC (an undead needn't make the save when it includes you in an area effect, such as the explosion of fireball)."
+            },
+            {
+              "name": "Defy Death",
+              "level": 6,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "long"
+              },
+              "description": "Starting at 6th level, you can give yourself vitality when you cheat death or when you help someone else cheat it. You can regain hit points equal to 1d8 + your Constitution modifier (minimum of 1 hit point) when you succeed on a death saving throw or when you stabilize a creature with Spare the Dying."
+            },
+            {
+              "name": "Undying Nature",
+              "level": 10,
+              "type": "passive",
+              "description": "Beginning at 10th level, you can hold your breath indefinitely, and you don't require food, water, or sleep, although you still require rest to reduce exhaustion and still benefit from finishing short and long rests. In addition, you age at a slower rate. For every 10 years that pass, your body ages only 1 year, and you are immune to being magically aged."
+            },
+            {
+              "name": "Indestructible Life",
+              "level": 14,
+              "type": "action",
+              "actionType": "bonus",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "When you reach 14th level, you partake of some of the true secrets of the Undying. On your turn, you can use a bonus action to regain hit points equal to 1d8 + your warlock level. Additionally, if you put a severed body part of yours back in place when you use this feature, the part reattaches."
             }
           ]
         }
@@ -6348,15 +6864,14 @@
       "spellcastingTable": {
         "type": "pact",
         "spellcastingAbility": "cha",
-        "ritualCasting": false,
-        "spellcastingFocus": true,
-        "note": "Warlocks use Pact Magic \u2014 short-rest slots, all the same level. Slots listed are total pact slots.",
         "table": {
           "1": {
             "cantrips": 2,
             "spellsKnown": 2,
+            "pactSlots": 1,
+            "pactSlotLevel": 1,
             "slots": [
-              1,
+              0,
               0,
               0,
               0,
@@ -6365,15 +6880,15 @@
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 1,
-            "pactSlots": 1
+            ]
           },
           "2": {
             "cantrips": 2,
             "spellsKnown": 3,
+            "pactSlots": 2,
+            "pactSlotLevel": 1,
             "slots": [
-              2,
+              0,
               0,
               0,
               0,
@@ -6382,16 +6897,16 @@
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 1,
-            "pactSlots": 2
+            ]
           },
           "3": {
             "cantrips": 2,
             "spellsKnown": 4,
+            "pactSlots": 2,
+            "pactSlotLevel": 2,
             "slots": [
               0,
-              2,
+              0,
               0,
               0,
               0,
@@ -6399,16 +6914,16 @@
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 2,
-            "pactSlots": 2
+            ]
           },
           "4": {
             "cantrips": 3,
             "spellsKnown": 5,
+            "pactSlots": 2,
+            "pactSlotLevel": 2,
             "slots": [
               0,
-              2,
+              0,
               0,
               0,
               0,
@@ -6416,281 +6931,279 @@
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 2,
-            "pactSlots": 2
+            ]
           },
           "5": {
             "cantrips": 3,
             "spellsKnown": 6,
+            "pactSlots": 2,
+            "pactSlotLevel": 3,
             "slots": [
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 3,
-            "pactSlots": 2
+            ]
           },
           "6": {
             "cantrips": 3,
             "spellsKnown": 7,
+            "pactSlots": 2,
+            "pactSlotLevel": 3,
             "slots": [
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 3,
-            "pactSlots": 2
+            ]
           },
           "7": {
             "cantrips": 3,
             "spellsKnown": 8,
+            "pactSlots": 2,
+            "pactSlotLevel": 4,
             "slots": [
               0,
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 4,
-            "pactSlots": 2
+            ]
           },
           "8": {
             "cantrips": 3,
             "spellsKnown": 9,
+            "pactSlots": 2,
+            "pactSlotLevel": 4,
             "slots": [
               0,
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 4,
-            "pactSlots": 2
+            ]
           },
           "9": {
             "cantrips": 3,
             "spellsKnown": 10,
+            "pactSlots": 2,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 2
+            ]
           },
           "10": {
             "cantrips": 4,
             "spellsKnown": 10,
+            "pactSlots": 2,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              2,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 2
+            ]
           },
           "11": {
             "cantrips": 4,
             "spellsKnown": 11,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "12": {
             "cantrips": 4,
             "spellsKnown": 11,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "13": {
             "cantrips": 4,
             "spellsKnown": 12,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "14": {
             "cantrips": 4,
             "spellsKnown": 12,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "15": {
             "cantrips": 4,
             "spellsKnown": 13,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "16": {
             "cantrips": 4,
             "spellsKnown": 13,
+            "pactSlots": 3,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              3,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 3
+            ]
           },
           "17": {
             "cantrips": 4,
             "spellsKnown": 14,
+            "pactSlots": 4,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              4,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 4
+            ]
           },
           "18": {
             "cantrips": 4,
             "spellsKnown": 14,
+            "pactSlots": 4,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              4,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 4
+            ]
           },
           "19": {
-            "cantrips": 4,
+            "cantrips": 5,
             "spellsKnown": 15,
+            "pactSlots": 4,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              4,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 4
+            ]
           },
           "20": {
-            "cantrips": 4,
+            "cantrips": 5,
             "spellsKnown": 15,
+            "pactSlots": 4,
+            "pactSlotLevel": 5,
             "slots": [
               0,
               0,
               0,
               0,
-              4,
+              0,
               0,
               0,
               0,
               0
-            ],
-            "pactSlotLevel": 5,
-            "pactSlots": 4
+            ]
           }
         }
       },
@@ -8005,7 +8518,8 @@
       },
       "classes": [
         "Wizard",
-        "Sorcerer"
+        "Sorcerer",
+        "Warlock"
       ]
     },
     {
@@ -8061,7 +8575,8 @@
         "notes": "Target follows reasonable 1-2 sentence suggestion"
       },
       "classes": [
-        "Wizard"
+        "Wizard",
+        "Warlock"
       ]
     },
     {
@@ -8098,7 +8613,8 @@
         "notes": "Counters spells 3rd level and lower automatically"
       },
       "classes": [
-        "Wizard"
+        "Wizard",
+        "Warlock"
       ]
     },
     {
@@ -8114,7 +8630,8 @@
         "notes": "60 ft fly speed; +1 target per slot above 3rd"
       },
       "classes": [
-        "Wizard"
+        "Wizard",
+        "Warlock"
       ]
     },
     {
@@ -8847,7 +9364,8 @@
         "notes": "inorganic materials have disadvantage"
       },
       "classes": [
-        "Bard"
+        "Bard",
+        "Warlock"
       ]
     },
     {
@@ -8863,7 +9381,8 @@
         "notes": "Invisible until attack/cast; +1 target per slot above 2nd"
       },
       "classes": [
-        "Bard"
+        "Bard",
+        "Warlock"
       ]
     },
     {
@@ -8898,7 +9417,8 @@
       },
       "classes": [
         "Bard",
-        "Paladin"
+        "Paladin",
+        "Warlock"
       ]
     },
     {
@@ -9376,6 +9896,1119 @@
         "damage": "2d10",
         "damageType": "fire",
         "notes": "Reaction when damaged; +1d10 per slot above 1st"
+      }
+    },
+    {
+      "name": "Blade Ward",
+      "level": 0,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "1 round",
+      "description": "You extend your hand and trace a sigil of warding. Until the end of your next turn, you have resistance against bludgeoning, piercing, and slashing damage dealt by weapon attacks.",
+      "classes": [
+        "Warlock"
+      ]
+    },
+    {
+      "name": "Booming Blade",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "S, M",
+      "duration": "1 round",
+      "description": "You brandish the weapon used in the spell's casting and make a melee attack with it. On a hit, the target suffers the weapon attack's normal effects and becomes sheathed in booming energy. If the target willingly moves before then, it takes 1d8 thunder damage, and the spell ends. At 5th level the initial hit deals +1d8 thunder; at 11th +2d8; at 17th +3d8.",
+      "classes": [
+        "Warlock"
+      ],
+      "combat": {
+        "damage": "1d8",
+        "damageType": "thunder",
+        "notes": "Extra damage only if target moves voluntarily"
+      }
+    },
+    {
+      "name": "Friends",
+      "level": 0,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You gain advantage on all Charisma checks directed at one creature of your choice that isn't hostile toward you. When the spell ends, the creature realizes it was charmed and may become hostile.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard",
+        "Bard"
+      ]
+    },
+    {
+      "name": "Infestation",
+      "level": 0,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "A cloud of mites, fleas, and other parasites briefly infests one creature you can see. The target must succeed on a Constitution saving throw or take 1d6 poison damage and move 5 feet in a random direction.",
+      "classes": [
+        "Warlock",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "1d6",
+        "damageType": "poison",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Toll the Dead",
+      "level": 0,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You point at one creature, and the sound of a dolorous bell fills the air around it. The target must succeed on a Wisdom saving throw or take 1d8 necrotic damage. If the target is missing any hit points, it instead takes 1d12 necrotic damage.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "damage": "1d8",
+        "damageType": "necrotic",
+        "cantripScale": "1d8"
+      }
+    },
+    {
+      "name": "True Strike",
+      "level": 0,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "S",
+      "duration": "Concentration, up to 1 round",
+      "description": "Your magic grants you a brief insight into the target's defenses. On your next turn, you gain advantage on your first attack roll against the target.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Arms of Hadar",
+      "level": 1,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Self (10-ft radius)",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "Tendrils of dark energy erupt from you and batter all creatures within 10 feet. Each creature in the area must make a Strength saving throw. On a failed save it takes 2d6 necrotic damage and can't take reactions until its next turn. On a success it takes half damage.",
+      "classes": [
+        "Warlock"
+      ],
+      "combat": {
+        "save": "str",
+        "damage": "2d6",
+        "damageType": "necrotic",
+        "slotScale": "+1d6 per slot"
+      }
+    },
+    {
+      "name": "Cause Fear",
+      "level": 1,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You awaken the sense of mortality in one creature you can see. The target must succeed on a Wisdom saving throw or become frightened until the spell ends. Each round the target can repeat the save, ending the effect on a success.",
+      "classes": [
+        "Warlock"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Frightened condition"
+      }
+    },
+    {
+      "name": "Comprehend Languages",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "You understand the literal meaning of any spoken language you hear. You also understand any written language you see, provided you touch the surface on which the words are written.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Expeditious Retreat",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "1 bonus action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "This spell allows you to move at an incredible pace. When you cast this spell, and as a bonus action on each of your turns until the spell ends, you can take the Dash action.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Illusory Script",
+      "level": 1,
+      "school": "Illusion",
+      "castingTime": "1 minute (ritual)",
+      "range": "Touch",
+      "components": "S, M",
+      "duration": "10 days",
+      "description": "You write on parchment, paper, or other suitable material and imbue it with a potent illusion that lasts for the duration. To others, the writing appears to be no different from a legitimate document, or it might appear to be unintelligible.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Protection from Evil and Good",
+      "level": 1,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "Until the spell ends, one willing creature you touch is protected against certain types of creatures: aberrations, celestials, elementals, fey, fiends, and undead. The protection grants advantage on saving throws against these creature types, they can't frighten or charm the target, and attacks against the target from those creatures are made with disadvantage.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Paladin",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Unseen Servant",
+      "level": 1,
+      "school": "Conjuration",
+      "castingTime": "1 action (ritual)",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "This spell creates an invisible, mindless, shapeless, Medium force that performs simple tasks at your command until the spell ends. It has AC 10, 1 HP, Str 2, and can't attack.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Witch Bolt",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "A beam of crackling, blue energy lances out toward a creature within range, forming a sustained arc of lightning. On a hit, the target takes 1d12 lightning damage, and on each of your turns for the duration, you can use your action to deal 1d12 lightning damage automatically. The spell ends if you use your action for anything else or if the target is out of range.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "attack": "ranged",
+        "damage": "1d12",
+        "damageType": "lightning",
+        "slotScale": "+1d12 per slot"
+      }
+    },
+    {
+      "name": "Cloud of Daggers",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You fill the air with spinning daggers in a cube 5 feet on each side, centered on a point you choose. A creature takes 4d4 slashing damage when it enters the spell's area or starts its turn there.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "damage": "4d4",
+        "damageType": "slashing",
+        "slotScale": "+2d4 per slot",
+        "notes": "Damages on entry or start of turn"
+      }
+    },
+    {
+      "name": "Crown of Madness",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "One humanoid of your choice must succeed on a Wisdom saving throw or become charmed by you. The charmed target must use its action to make a melee attack against a creature other than itself you choose. You must use your action each round to maintain control.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Forces melee attack on ally each round"
+      }
+    },
+    {
+      "name": "Enthrall",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "1 minute",
+      "description": "You weave a distracting string of words causing creatures of your choice to make a Wisdom saving throw or have disadvantage on Perception checks until the spell ends.",
+      "classes": [
+        "Warlock",
+        "Bard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Disadvantage on Perception checks"
+      }
+    },
+    {
+      "name": "Ray of Enfeeblement",
+      "level": 2,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "A black beam of enervating energy springs from your finger toward a creature. Make a ranged spell attack. On a hit, the target deals only half damage with weapon attacks that use Strength until the spell ends.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "attack": "ranged",
+        "notes": "Halves Strength-based weapon damage"
+      }
+    },
+    {
+      "name": "Spider Climb",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "Until the spell ends, one willing creature can move up, down, and across vertical surfaces and upside down along ceilings, while leaving its hands free.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Enemies Abound",
+      "level": 3,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You reach into the mind of one creature and force it to make an Intelligence saving throw. On a failure, the target loses the ability to distinguish friend from foe and regards all creatures as enemies until the spell ends.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "int",
+        "notes": "Target treats all creatures as enemies"
+      }
+    },
+    {
+      "name": "Fear",
+      "level": 3,
+      "school": "Illusion",
+      "castingTime": "1 action",
+      "range": "Self (30-ft cone)",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You project a phantasmal image of a creature's worst fears. Each creature in a 30-foot cone must succeed on a Wisdom saving throw or drop whatever it is holding and become frightened.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Frightened; must use movement to flee"
+      }
+    },
+    {
+      "name": "Gaseous Form",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You transform a willing creature into a misty cloud. The target has a flying speed of 10 feet, resistance to nonmagical damage, and can't take actions or speak while transformed.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Magic Circle",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "1 minute",
+      "range": "10 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "You create a 10-foot-radius, 20-foot-tall cylinder of magical energy. Choose a creature type: aberrations, celestials, elementals, fey, fiends, or undead. The circle prevents those creatures from entering or charming those inside.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Paladin",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Pact of the Blade (ritual)",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Until dispelled",
+      "description": "Flavour feature \u2014 see Pact Boon feature. You can use your action to create a pact weapon in your empty hand.",
+      "classes": [
+        "Warlock"
+      ]
+    },
+    {
+      "name": "Remove Curse",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "At your touch, all curses affecting one creature or object end. If the object is a cursed magic item, its curse remains, but the spell breaks its owner's attunement so it can be removed.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Paladin",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Tongues",
+      "level": 3,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, M",
+      "duration": "1 hour",
+      "description": "This spell grants the creature you touch the ability to understand any spoken language it hears. Moreover, when the target speaks, any creature that knows at least one language and can hear the target understands what it says.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Vampiric Touch",
+      "level": 3,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "The touch of your shadow-wreathed hand can siphon life force. Make a melee spell attack on a hit for 3d6 necrotic damage and regain HP equal to half the damage dealt.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "attack": "melee",
+        "damage": "3d6",
+        "damageType": "necrotic",
+        "slotScale": "+1d6 per slot",
+        "notes": "Regain HP equal to half damage dealt"
+      }
+    },
+    {
+      "name": "Blight",
+      "level": 4,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "Necromantic energy washes over a creature. It must make a Constitution saving throw taking 8d8 necrotic on a fail or half on success. Plants have disadvantage on the save.",
+      "classes": [
+        "Warlock",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "8d8",
+        "damageType": "necrotic",
+        "slotScale": "+1d8 per slot"
+      }
+    },
+    {
+      "name": "Charm Monster",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S",
+      "duration": "1 hour",
+      "description": "You attempt to charm a creature you can see. It must make a Wisdom saving throw. On a failure it is charmed by you until the spell ends or until you harm it. One additional target per slot above 4th.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Charmed creature is friendly"
+      }
+    },
+    {
+      "name": "Hallucinatory Terrain",
+      "level": 4,
+      "school": "Illusion",
+      "castingTime": "10 minutes",
+      "range": "300 ft",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "You make natural terrain look, sound, and smell like some other sort of natural terrain in a 150-foot cube. Open fields can be made to look like hills, forests, or swamps.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Druid",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Shadow of Moil",
+      "level": 4,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "Flame-like shadows wreathe your body until the spell ends. The shadows turn dim light to darkness and bright light to dim within 10 feet of you. When a creature hits you with a melee attack, the shadows deal 2d8 necrotic damage.",
+      "classes": [
+        "Warlock"
+      ],
+      "combat": {
+        "damage": "2d8",
+        "damageType": "necrotic",
+        "notes": "Reactive damage when hit by melee"
+      }
+    },
+    {
+      "name": "Sickening Radiance",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "Dim, greenish light spreads within a 30-foot-radius sphere. Each creature that starts its turn in the area must succeed on a Constitution saving throw or take 4d10 radiant damage and suffer 1 level of exhaustion.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "4d10",
+        "damageType": "radiant",
+        "notes": "Also causes exhaustion on failed save"
+      }
+    },
+    {
+      "name": "Dream",
+      "level": 5,
+      "school": "Illusion",
+      "castingTime": "1 minute",
+      "range": "Special",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "You, or a willing creature you touch, enters a trance-like state and the target messenger visits a creature within range while it sleeps and delivers a short message. The messenger can shape the dreamscape and create nightmares.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Hold Monster",
+      "level": 5,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "90 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "Choose a creature you can see. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. Works on any creature type.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Paralyzed \u2014 auto-crit on melee attack"
+      }
+    },
+    {
+      "name": "Mislead",
+      "level": 5,
+      "school": "Illusion",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You become invisible and simultaneously an illusory double appears where you are standing. The double lasts for the duration and you can use your action to move it up to double your speed.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Planar Binding",
+      "level": 5,
+      "school": "Abjuration",
+      "castingTime": "24 hours",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "Attempt to bind a celestial, elemental, fey, or fiend within range to your service. It must make a Charisma saving throw. On a failure it must obey your commands for the duration.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "cha"
+      }
+    },
+    {
+      "name": "Scrying",
+      "level": 5,
+      "school": "Divination",
+      "castingTime": "10 minutes",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "You can see and hear a particular creature you choose that is on the same plane. The target makes a Wisdom saving throw, modified by how well you know the target.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis"
+      }
+    },
+    {
+      "name": "Synaptic Static",
+      "level": 5,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You choose a point within range and cause psychic energy to explode there. Each creature in a 20-foot-radius sphere must make an Intelligence saving throw. On a failure it takes 8d6 psychic damage and rolls a d6 and subtracts it from attack rolls, ability checks, and concentration saves for 1 minute.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "int",
+        "damage": "8d6",
+        "damageType": "psychic",
+        "notes": "Failed save also imposes -1d6 penalty on attacks/checks for 1 min"
+      }
+    },
+    {
+      "name": "Teleportation Circle",
+      "level": 5,
+      "school": "Conjuration",
+      "castingTime": "1 minute",
+      "range": "10 ft",
+      "components": "V, M",
+      "duration": "1 round",
+      "description": "As you cast the spell, you draw a 10-foot-diameter circle on the ground inscribed with sigils. A shimmering portal opens within the circle and leads to a permanent teleportation circle of your choice that you know.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Wall of Light",
+      "level": 5,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "A shimmering wall of bright light appears at a point you choose. Any creature that starts its turn within 10 feet must make a Constitution saving throw or be blinded until the next turn. The wall can launch rays of radiant light.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "4d8",
+        "damageType": "radiant",
+        "notes": "Blinded on failed save; 4d8 radiant ray as an action"
+      }
+    },
+    {
+      "name": "Arcane Gate",
+      "level": 6,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "500 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "You create linked teleportation portals that remain open for the duration. Choose two points on the ground that you can see, one up to 10 feet away and the other up to 500 feet away.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Circle of Death",
+      "level": 6,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "150 ft",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "A sphere of negative energy ripples out in a 60-foot-radius sphere. Each creature must make a Constitution saving throw, taking 8d6 necrotic damage on a failure or half on a success.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "8d6",
+        "damageType": "necrotic",
+        "slotScale": "+2d6 per slot"
+      }
+    },
+    {
+      "name": "Conjure Fey",
+      "level": 6,
+      "school": "Conjuration",
+      "castingTime": "1 minute",
+      "range": "90 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You summon a fey creature of challenge rating 6 or lower. It appears in an unoccupied space you can see. If you lose concentration, the creature remains if it is hostile to you.",
+      "classes": [
+        "Warlock",
+        "Druid"
+      ]
+    },
+    {
+      "name": "Create Undead",
+      "level": 6,
+      "school": "Necromancy",
+      "castingTime": "1 minute",
+      "range": "10 ft",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You can cast this spell only at night. Choose up to three corpses within range. Each corpse becomes a ghoul under your control.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Eyebite",
+      "level": 6,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "For the duration your eyes become an inky void. One creature must make a Wisdom saving throw or be affected by one of three effects of your choice: asleep, panicked, or sickened.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Choose: asleep, panicked (frightened+must flee), or sickened (disadvantage on attacks/checks)"
+      }
+    },
+    {
+      "name": "Mass Suggestion",
+      "level": 6,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, M",
+      "duration": "24 hours",
+      "description": "You suggest a course of activity to up to 12 creatures. Each must make a Wisdom saving throw or follow the suggestion for the duration.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis"
+      }
+    },
+    {
+      "name": "Scatter",
+      "level": 6,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V",
+      "duration": "Instantaneous",
+      "description": "The will of your patron bends space. Choose up to five creatures you can see. Each unwilling creature must succeed on a Wisdom saving throw or be teleported to an unoccupied space you can see within 120 feet.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis"
+      }
+    },
+    {
+      "name": "Soul Cage",
+      "level": 6,
+      "school": "Necromancy",
+      "castingTime": "1 reaction",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "This spell snatches the soul of a humanoid as it dies and traps it inside a tiny cage you fashion from silver wire. You can exploit the soul to gain advantage on saving throws, gain the soul's knowledge, or create undead.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Etherealness",
+      "level": 7,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Up to 8 hours",
+      "description": "You step into the border regions of the Ethereal Plane, in the area where it overlaps with your current plane. You remain in the Border Ethereal for the duration or until you use your action to dismiss the spell.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Finger of Death",
+      "level": 7,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You send negative energy coursing through a creature. The target must make a Constitution saving throw, taking 7d8+30 necrotic damage on a failure or half on a success. A humanoid killed by this spell rises as a zombie under your control.",
+      "classes": [
+        "Warlock",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "7d8",
+        "damageType": "necrotic",
+        "notes": "+30 damage; killed humanoids rise as zombies"
+      }
+    },
+    {
+      "name": "Forcecage",
+      "level": 7,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "100 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "An immovable prison of force springs into existence around you. You create a cage or box of force. Creatures inside can't leave by nonmagical means.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Plane Shift",
+      "level": 7,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You and up to eight willing creatures grasp hands and teleport to a different plane. As an attack, you make a melee spell attack; on a hit you send the target to a plane of your choice (Wisdom save to avoid).",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Demiplane",
+      "level": 8,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "S",
+      "duration": "1 hour",
+      "description": "You create a shadowy door on a flat solid surface that you can see within range. The door leads to a demiplane that appears to be an empty room 30 feet in each dimension.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Dominate Monster",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You attempt to beguile a creature you can see. The target must succeed on a Wisdom saving throw or be charmed by you for the duration. The charmed target obeys your commands to the best of its ability.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Full mental domination; telepathic commands"
+      }
+    },
+    {
+      "name": "Glibness",
+      "level": 8,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V",
+      "duration": "1 hour",
+      "description": "Until the spell ends, when you make a Charisma check, you can replace the number you roll with a 15. Additionally, no matter what you say, magic that would determine if you are telling the truth indicates that you are being truthful.",
+      "classes": [
+        "Warlock",
+        "Bard"
+      ]
+    },
+    {
+      "name": "Maddening Darkness",
+      "level": 8,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "150 ft",
+      "components": "V, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "Magical darkness spreads from a point you choose. Each creature must make a Wisdom saving throw when it enters the area or starts its turn there, taking 8d8 psychic damage on a fail or half on success.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "damage": "8d8",
+        "damageType": "psychic"
+      }
+    },
+    {
+      "name": "Astral Projection",
+      "level": 9,
+      "school": "Necromancy",
+      "castingTime": "1 hour",
+      "range": "10 ft",
+      "components": "V, S, M",
+      "duration": "Special",
+      "description": "You and up to eight willing creatures project your astral bodies into the Astral Plane. You leave your physical bodies behind, unconscious. Your astral form can explore freely, and death in the astral form returns you to your body.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Foresight",
+      "level": 9,
+      "school": "Divination",
+      "castingTime": "1 minute",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "You touch a willing creature and bestow a limited ability to see into the immediate future. For the duration, the target has advantage on attack rolls, ability checks, and saving throws, and other creatures have disadvantage on attack rolls against it.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Druid",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Gate",
+      "level": 9,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You conjure a portal linking an unoccupied space you can see within range to a precise location on a different plane. The portal is a circular opening between 5 and 20 feet in diameter.",
+      "classes": [
+        "Warlock",
+        "Cleric",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Imprisonment",
+      "level": 9,
+      "school": "Abjuration",
+      "castingTime": "1 minute",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Until dispelled",
+      "description": "You create a magical restraint to hold a creature. The target must make a Wisdom saving throw. On a failure it is imprisoned by one of several methods of your choice.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Choose: buried, chained, hedged prison, minimus containment, slumber"
+      }
+    },
+    {
+      "name": "Power Word Kill",
+      "level": 9,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V",
+      "duration": "Instantaneous",
+      "description": "You utter a word of power that compels one creature you can see to die instantly. If the creature has 100 hit points or fewer, it dies. Otherwise, the spell has no effect.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "notes": "Instant death if target has \u2264100 HP"
+      }
+    },
+    {
+      "name": "True Polymorph",
+      "level": 9,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "Choose one creature or nonmagical object. On a failed Wisdom saving throw the target is transformed into a beast, humanoid, or object (your choice). If you concentrate for the full hour the transformation becomes permanent.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis"
+      }
+    },
+    {
+      "name": "Weird",
+      "level": 9,
+      "school": "Illusion",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You draw upon the power of the Far Realm to create illusory creatures in the minds of all creatures in a 30-foot-radius sphere. Each target must make a Wisdom saving throw. On a failure it takes 4d10 psychic damage and is frightened.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "wis",
+        "damage": "4d10",
+        "damageType": "psychic",
+        "notes": "Frightened; repeated saves each turn"
       }
     }
   ],
