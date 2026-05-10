@@ -4636,6 +4636,69 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 // ============================================================
 // CHARACTER CARD (home screen)
 // ============================================================
+const SYMBOLS = [
+  // Musical / bardic
+  "♩","♪","♫","♬",
+  // Celestial / holy
+  "✦","✧","★","☆","✴","⊕",
+  // Runic / magical
+  "ᛏ","ᚨ","ᛉ","ᚱ","ᛊ","ᛗ","ᛟ","ᚷ","ᛒ","ᚦ",
+  // Arcane
+  "⊗","⊙","◈","⬡","⬟","⌘",
+  // Geometric / holy
+  "△","▽","◇","⬦","✩","⁕",
+];
+
+function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
+  const count  = density === "subtle" ? 12 : density === "off" ? 0 : 20;
+  const pool   = symbolSet?.length > 0 ? symbolSet : SYMBOLS;
+  const opMul  = symbolOpacity !== undefined ? symbolOpacity : 1;
+  const symbols = React.useMemo(() => {
+    if (count === 0) return [];
+    return Array.from({ length: count }, (_, i) => {
+      const left     = (i * 97 + 11) % 100;
+      const startTop = 100 + (i * 37) % 40;
+      const delay    = (i * 3.7) % 20;
+      const dur      = 18 + (i * 4.1) % 22;
+      const size     = 12 + (i * 7) % 18;
+      const sym      = pool[i % pool.length];
+      const anim     = i % 2 === 0 ? "floatUp" : "floatUpSway";
+      const baseA    = [0.28, 0.22, 0.20, 0.22, 0.15];
+      const colours  = [
+        `rgba(201,162,39,${(baseA[0]*opMul).toFixed(2)})`,
+        `rgba(180,130,255,${(baseA[1]*opMul).toFixed(2)})`,
+        `rgba(120,180,255,${(baseA[2]*opMul).toFixed(2)})`,
+        `rgba(255,245,210,${(baseA[3]*opMul).toFixed(2)})`,
+        `rgba(255,255,255,${(baseA[4]*opMul).toFixed(2)})`,
+      ];
+      const colour = colours[i % colours.length];
+      return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
+    });
+  }, [count, pool.join(""), opMul]);
+
+  return (
+    <>
+      <div className="bg-glow-tl"/>
+      <div className="bg-glow-br"/>
+      <div className="bg-glow-center"/>
+      {symbols.map(s => (
+        <span
+          key={s.id}
+          className="mystic-symbol"
+          style={{
+            left:      `${s.left}%`,
+            top:       `${s.startTop}vh`,
+            fontSize:  `${s.size}px`,
+            color:     s.colour,
+            animation: `${s.anim} ${s.dur}s linear ${s.delay}s infinite`,
+          }}>
+          {s.sym}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
   const { themes } = gameData;
   const theme = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
@@ -4700,68 +4763,6 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
 // MYSTIC BACKGROUND — floating runes / symbols, subtle glows
 // Renders fixed behind everything, pointer-events:none
 // ============================================================
-const SYMBOLS = [
-  // Musical / bardic
-  "♩","♪","♫","♬",
-  // Celestial / holy
-  "✦","✧","★","☆","✴","⊕",
-  // Runic / magical
-  "ᛏ","ᚨ","ᛉ","ᚱ","ᛊ","ᛗ","ᛟ","ᚷ","ᛒ","ᚦ",
-  // Arcane
-  "⊗","⊙","◈","⬡","⬟","⌘",
-  // Geometric / holy
-  "△","▽","◇","⬦","✩","⁕",
-];
-
-function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
-  const count  = density === "subtle" ? 12 : density === "off" ? 0 : 20;
-  const pool   = symbolSet?.length > 0 ? symbolSet : SYMBOLS;
-  const opMul  = symbolOpacity !== undefined ? symbolOpacity : 1;
-  const symbols = React.useMemo(() => {
-    if (count === 0) return [];
-    return Array.from({ length: count }, (_, i) => {
-      const left     = (i * 97 + 11) % 100;
-      const startTop = 100 + (i * 37) % 40;
-      const delay    = (i * 3.7) % 20;
-      const dur      = 18 + (i * 4.1) % 22;
-      const size     = 12 + (i * 7) % 18;
-      const sym      = pool[i % pool.length];
-      const anim     = i % 2 === 0 ? "floatUp" : "floatUpSway";
-      const baseA    = [0.28, 0.22, 0.20, 0.22, 0.15];
-      const colours  = [
-        `rgba(201,162,39,${(baseA[0]*opMul).toFixed(2)})`,
-        `rgba(180,130,255,${(baseA[1]*opMul).toFixed(2)})`,
-        `rgba(120,180,255,${(baseA[2]*opMul).toFixed(2)})`,
-        `rgba(255,245,210,${(baseA[3]*opMul).toFixed(2)})`,
-        `rgba(255,255,255,${(baseA[4]*opMul).toFixed(2)})`,
-      ];
-      const colour = colours[i % colours.length];
-      return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
-    });
-  }, [count, pool.join(""), opMul]);
-
-  return (
-    <>
-      <div className="bg-glow-tl"/>
-      <div className="bg-glow-br"/>
-      <div className="bg-glow-center"/>
-      {symbols.map(s => (
-        <span
-          key={s.id}
-          className="mystic-symbol"
-          style={{
-            left:      `${s.left}%`,
-            top:       `${s.startTop}vh`,
-            fontSize:  `${s.size}px`,
-            color:     s.colour,
-            animation: `${s.anim} ${s.dur}s linear ${s.delay}s infinite`,
-          }}>
-          {s.sym}
-        </span>
-      ))}
-    </>
-  );
-}
 
 // ============================================================
 // LOGIN SCREEN
