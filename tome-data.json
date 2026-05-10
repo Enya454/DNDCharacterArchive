@@ -6508,34 +6508,229 @@
         {
           "name": "Eldritch Invocations",
           "level": 2,
-          "type": "choice",
-          "options": [
-            "Agonizing Blast (Eldritch Blast cantrip required) \u2014 add CHA to Eldritch Blast damage",
-            "Armor of Shadows \u2014 cast Mage Armor on yourself at will",
-            "Beast Speech \u2014 speak with animals at will",
-            "Beguiling Influence \u2014 gain proficiency in Deception and Persuasion",
-            "Devil's Sight \u2014 see 120 ft in magical and nonmagical darkness",
-            "Eldritch Mind \u2014 advantage on concentration saves",
-            "Eldritch Sight \u2014 cast Detect Magic at will",
-            "Eldritch Spear (Eldritch Blast, lvl 5+) \u2014 Eldritch Blast range 300 ft",
-            "Eyes of the Rune Keeper \u2014 read all writing",
-            "Fiendish Vigor \u2014 cast False Life on yourself at will (d4+4 temp HP)",
-            "Gaze of Two Minds \u2014 use another creature's senses",
-            "Grasp of Hadar (Eldritch Blast, lvl 5+) \u2014 pull target 10 ft closer on hit",
-            "Improved Pact Weapon (Pact of Blade, lvl 5+) \u2014 +1 magic weapon, use as spellcasting focus",
-            "Lance of Lethargy (Eldritch Blast) \u2014 reduce target speed by 10 ft on hit",
-            "Lifedrinker (Pact of the Blade, lvl 12+) \u2014 add CHA to pact weapon damage",
-            "Mask of Many Faces \u2014 cast Disguise Self at will",
-            "Misty Visions \u2014 cast Silent Image at will",
-            "One with Shadows (lvl 5+) \u2014 become invisible in dim light or darkness as an action",
-            "Repelling Blast (Eldritch Blast) \u2014 push target 10 ft away on hit",
-            "Thief of Five Fates \u2014 cast Bane once per long rest",
-            "Thirsting Blade (Pact of the Blade, lvl 5+) \u2014 attack twice with pact weapon",
-            "Tomb of Levistus (lvl 5+) \u2014 reaction: gain 10\u00d7level temp HP and become restrained in ice until next turn",
-            "Undying Servitude (lvl 5+) \u2014 cast Animate Dead once per long rest",
-            "Voice of the Chain Master (Pact of the Chain) \u2014 communicate telepathically with familiar, perceive through its senses"
+          "type": "eldritch_invocations",
+          "description": "In your study of occult lore, you have unearthed Eldritch Invocations \u2014 fragments of forbidden knowledge. You gain 2 invocations at 2nd level. You gain an additional invocation at 5th, 7th, 9th, 12th, 15th, and 18th level. If an invocation has a prerequisite, you must meet it to learn that invocation. Whenever you gain a warlock level, you can replace one invocation with another.",
+          "invocations": [
+            {
+              "name": "Armor of Shadows",
+              "description": "You can cast Mage Armor on yourself at will, without expending a spell slot or material components.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Beast Speech",
+              "description": "You can cast Speak with Animals at will, without expending a spell slot.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Beguiling Influence",
+              "description": "You gain proficiency in the Deception and Persuasion skills.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Devil's Sight",
+              "description": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Eldritch Mind",
+              "description": "You have advantage on Constitution saving throws that you make to maintain your concentration on a spell.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Eldritch Sight",
+              "description": "You can cast Detect Magic at will, without expending a spell slot.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Eyes of the Rune Keeper",
+              "description": "You can read all writing.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Fiendish Vigor",
+              "description": "You can cast False Life on yourself at will as a 1st-level spell, without expending a spell slot or material components.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Gaze of Two Minds",
+              "description": "You can use your action to touch a willing humanoid and perceive through its senses until the end of your next turn.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Mask of Many Faces",
+              "description": "You can cast Disguise Self at will, without expending a spell slot.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Misty Visions",
+              "description": "You can cast Silent Image at will, without expending a spell slot or material components.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Thief of Five Fates",
+              "description": "You can cast Bane once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Agonizing Blast",
+              "description": "When you cast Eldritch Blast, add your Charisma modifier to the damage it deals on a hit.",
+              "levelReq": 1,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Lance of Lethargy",
+              "description": "Once per turn when you hit a creature with your Eldritch Blast, you can reduce that creature's speed by 10 feet until the end of your next turn.",
+              "levelReq": 1,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Repelling Blast",
+              "description": "When you hit a creature with Eldritch Blast, you can push the creature up to 10 feet away from you in a straight line.",
+              "levelReq": 1,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Eldritch Spear",
+              "description": "When you cast Eldritch Blast, its range is 300 feet.",
+              "levelReq": 5,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Grasp of Hadar",
+              "description": "Once on each of your turns when you hit a creature with your Eldritch Blast, you can move that creature in a straight line 10 feet closer to you.",
+              "levelReq": 5,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "One with Shadows",
+              "description": "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or a reaction.",
+              "levelReq": 5,
+              "prereq": null
+            },
+            {
+              "name": "Thirsting Blade",
+              "description": "You can attack with your pact weapon twice, instead of once, whenever you take the Attack action on your turn.",
+              "levelReq": 5,
+              "prereq": "Pact of the Blade"
+            },
+            {
+              "name": "Tomb of Levistus",
+              "description": "As a reaction when you take damage, you can entomb yourself in ice, which melts away at the end of your next turn. You gain 10 temporary hit points per warlock level, which take as much of the triggering damage as possible. You are then vulnerable to fire damage and restrained until the effect ends.",
+              "levelReq": 5,
+              "prereq": null
+            },
+            {
+              "name": "Undying Servitude",
+              "description": "You can cast Animate Dead without using a spell slot. Once you do so, you can't cast it this way again until you finish a long rest.",
+              "levelReq": 5,
+              "prereq": null
+            },
+            {
+              "name": "Bewitching Whispers",
+              "description": "You can cast Compulsion once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
+              "prereq": null
+            },
+            {
+              "name": "Dreadful Word",
+              "description": "You can cast Confusion once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
+              "prereq": null
+            },
+            {
+              "name": "Sculptor of Flesh",
+              "description": "You can cast Polymorph once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
+              "prereq": null
+            },
+            {
+              "name": "Ascendant Step",
+              "description": "You can cast Levitate on yourself at will, without expending a spell slot or material components.",
+              "levelReq": 9,
+              "prereq": null
+            },
+            {
+              "name": "Minions of Chaos",
+              "description": "You can cast Conjure Elemental once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 9,
+              "prereq": null
+            },
+            {
+              "name": "Otherworldly Leap",
+              "description": "You can cast Jump on yourself at will, without expending a spell slot or material components.",
+              "levelReq": 9,
+              "prereq": null
+            },
+            {
+              "name": "Improved Pact Weapon",
+              "description": "You can use any weapon you summon with your Pact of the Blade feature as a spellcasting focus for your warlock spells. In addition, the weapon gains a +1 bonus to its attack and damage rolls, unless it is a magic weapon that already has a bonus to those rolls. Finally, the weapon you conjure can be a shortbow, longbow, light crossbow, or hand crossbow.",
+              "levelReq": 12,
+              "prereq": "Pact of the Blade"
+            },
+            {
+              "name": "Gift of the Depths",
+              "description": "You can breathe underwater, and you gain a swimming speed equal to your walking speed. You can also cast Water Breathing without expending a spell slot. Once you do so, you can't cast it this way again until you finish a long rest.",
+              "levelReq": 12,
+              "prereq": null
+            },
+            {
+              "name": "Chains of Carceri",
+              "description": "You can cast Hold Monster at will \u2014 targeting a celestial, fiend, or elemental \u2014 without expending a spell slot or material components. You must finish a long rest before you can use this invocation on the same creature again.",
+              "levelReq": 15,
+              "prereq": "Pact of the Chain"
+            },
+            {
+              "name": "Shroud of Shadow",
+              "description": "You can cast Invisibility at will, without expending a spell slot.",
+              "levelReq": 15,
+              "prereq": null
+            },
+            {
+              "name": "Witch Sight",
+              "description": "You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic while the creature is within 30 feet of you and within line of sight.",
+              "levelReq": 15,
+              "prereq": null
+            },
+            {
+              "name": "Voice of the Chain Master",
+              "description": "You can communicate telepathically with your familiar and perceive through your familiar's senses as long as you are on the same plane of existence. Additionally, while perceiving through your familiar's senses, you can also speak through your familiar in your own voice, even if your familiar is normally incapable of speech.",
+              "levelReq": 1,
+              "prereq": "Pact of the Chain"
+            },
+            {
+              "name": "Book of Ancient Secrets",
+              "description": "You can now inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list. The spells appear in the book and don't count against the number of spells you know. With your Book of Shadows in hand, you can cast the chosen spells as rituals.",
+              "levelReq": 1,
+              "prereq": "Pact of the Tome"
+            },
+            {
+              "name": "Lifedrinker",
+              "description": "When you hit a creature with your pact weapon, the creature takes extra necrotic damage equal to your Charisma modifier (minimum 1).",
+              "levelReq": 12,
+              "prereq": "Pact of the Blade"
+            }
           ],
-          "description": "In your study of occult lore, you have unearthed Eldritch Invocations \u2014 fragments of forbidden knowledge that imbue you with an abiding magical ability. You gain 2 invocations at 2nd level, and an additional invocation at 5th, 7th, 9th, 12th, 15th, and 18th level."
+          "countByLevel": {
+            "2": 2,
+            "5": 3,
+            "7": 4,
+            "9": 5,
+            "12": 6,
+            "15": 7,
+            "18": 8
+          }
         },
         {
           "name": "Pact Boon",
@@ -7901,15 +8096,8 @@
           "name": "Skill Proficiencies",
           "type": "proficiency_choice",
           "count": 2,
-          "from": [
-            "Arcana",
-            "History"
-          ],
-          "fixed": [
-            "Arcana",
-            "History"
-          ],
-          "description": "You gain proficiency in Arcana and History."
+          "from": "all",
+          "description": "Choose any 2 skills to be proficient in."
         },
         {
           "name": "Languages",
@@ -11150,19 +11338,19 @@
     "Chaotic Evil"
   ],
   "languages": [
+    "Abyssal",
+    "Celestial",
     "Common",
+    "Deep Speech",
+    "Draconic",
     "Dwarvish",
     "Elvish",
     "Giant",
     "Gnomish",
     "Goblin",
     "Halfling",
-    "Orc",
-    "Abyssal",
-    "Celestial",
-    "Draconic",
-    "Deep Speech",
     "Infernal",
+    "Orc",
     "Primordial",
     "Sylvan",
     "Undercommon"

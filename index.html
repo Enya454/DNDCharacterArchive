@@ -284,9 +284,11 @@ const getSpellLimits = (char, classes) => {
   const mod = calcMod(char.abilities[ab] || 10);
   const lvl = char.level || 1;
 
-  // Max slot level = highest level with >0 slots
+  // Max slot level = highest level with >0 slots, OR pact slot level for pact magic
   const slots = row.slots || [];
-  const maxSlotLevel = slots.reduce((max, count, idx) => count > 0 ? idx + 1 : max, 0);
+  const maxSlotLevel = type === "pact"
+    ? (row.pactSlotLevel || 0)
+    : slots.reduce((max, count, idx) => count > 0 ? idx + 1 : max, 0);
 
   let spellsKnown = null;
   let isPrepared = false;
@@ -585,8 +587,17 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
       case "passive":            return true;
       case "choice":             return !!chosen;
       case "subclass_choice":    return !!subclass;
+      case "eldritch_invocations": {
+        // Count how many invocations the char should have at this level
+        const countByLevel = feature.countByLevel || {"2":2};
+        let maxCount = 0;
+        for (const [lvl, cnt] of Object.entries(countByLevel)) {
+          if ((charLevel || 1) >= +lvl) maxCount = Math.max(maxCount, cnt);
+        }
+        const picked = (choices?.[feature.name] || []).length;
+        return picked >= maxCount;
+      }
       case "proficiency_choice": {
-        const owned = skillSources && thisSource
           ? Object.entries(skillSources).filter(([,s]) => s === thisSource).map(([sk]) => sk)
           : (skillProfs || []);
         return owned.length >= (feature.count || 0);
@@ -746,7 +757,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     : <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({remaining} remaining)</span>}
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
-                  {(languageList || []).map(lang => {
+                  {(languageList || []).slice().sort().map(lang => {
                     const isAuto    = autoLangs.includes(lang);
                     const isMine    = myChosen.includes(lang);
                     const isOthers  = otherChosen.includes(lang);
@@ -822,45 +833,92 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             );
           })()}
 
-          {/* spell_grant — racial spells auto-added at certain levels */}
-          {feature.type === "spell_grant" && (() => {
-            const level = charLevel || 1;
-            const allSpells = gameData?.spells || [];
+          {/* spell_grant — racial spells auto-granted at certain levels */}
+
+          {/* eldritch_invocations — multi-select with level + prereq gating */}
+          {!locked && feature.type === "eldritch_invocations" && (() => {
+            const countByLevel = feature.countByLevel || {"2":2};
+            let maxCount = 0;
+            for (const [lvl, cnt] of Object.entries(countByLevel)) {
+              if ((charLevel||1) >= +lvl) maxCount = Math.max(maxCount, cnt);
+            }
+            const picked = (choices?.[feature.name] || []);
+            const pickedNames = Array.isArray(picked) ? picked : [];
+            const pactBoon = choices?.["Pact Boon"] || "";
+
+            const meetsPrereq = inv => {
+              if (!inv.prereq) return true;
+              if (inv.prereq.includes("Eldritch Blast")) {
+                const spells = gameData?._charSpells || [];
+                // Allow if they know Eldritch Blast or will — always allowed since it's a core cantrip
+                return true;
+              }
+              if (inv.prereq.includes("Pact of the Blade")) return pactBoon.includes("Blade");
+              if (inv.prereq.includes("Pact of the Chain")) return pactBoon.includes("Chain");
+              if (inv.prereq.includes("Pact of the Tome"))  return pactBoon.includes("Tome");
+              return true;
+            };
+            const meetsLevel = inv => (charLevel||1) >= (inv.levelReq||1);
+
+            const toggle = inv => {
+              if (!meetsLevel(inv) || !meetsPrereq(inv)) return;
+              const isP = pickedNames.includes(inv.name);
+              const newList = isP
+                ? pickedNames.filter(n => n !== inv.name)
+                : pickedNames.length < maxCount ? [...pickedNames, inv.name] : pickedNames;
+              onChoice && onChoice(feature.name, newList);
+            };
+
             return (
               <div>
-                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
-                  Spells granted by your heritage. They are always known and don't count against your spell limit.
-                  {feature.spellcastingAbility && <span style={{ marginLeft:6, color:"var(--accent)" }}>({ABILITY_SHORT[feature.spellcastingAbility]} for spellcasting)</span>}
+                <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:10}}>
+                  Choose {maxCount} invocation{maxCount!==1?"s":""} — {pickedNames.length}/{maxCount} selected.
+                  {charLevel >= 5 && " (More unlock at higher levels.)"}
                 </div>
-                {(feature.grants || []).map(grant => {
-                  const spell = allSpells.find(s => s.name.toLowerCase() === grant.spellName.toLowerCase());
-                  const available = level >= (grant.minCharLevel || 1);
-                  const isGranted = (racialSpells || []).some(s => s.name === grant.spellName);
-                  return (
-                    <div key={grant.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px",
-                      marginBottom:6, borderRadius:8, background:"var(--surface)",
-                      border:`1px solid ${isGranted ? "var(--accent2)" : "var(--border)"}`,
-                      opacity: available ? 1 : 0.45 }}>
-                      <div style={{ flex:1 }}>
-                        <span style={{ fontFamily:"var(--font-display)", color: isGranted ? "var(--accent)" : available ? "var(--text)" : "var(--text-dim)", fontSize:14 }}>
-                          {grant.spellName}
-                        </span>
-                        {spell && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>{spell.level===0?"Cantrip":`Level ${spell.level}`} • {spell.school}</span>}
-                        {!available && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>unlocks at level {grant.minCharLevel}</span>}
-                      </div>
-                      {available && !locked && (
-                        <button onClick={() => onRacialSpellToggle && onRacialSpellToggle(grant.spellName, feature.name, spell)}
-                          style={{ padding:"3px 12px", borderRadius:6, fontSize:12, cursor:"pointer",
-                            border:`1px solid ${isGranted?"var(--danger)":"var(--accent)"}`,
-                            background: isGranted?"transparent":"var(--accent)",
-                            color: isGranted?"var(--danger)":"var(--bg)" }}>
-                          {isGranted ? "Remove" : "+ Grant"}
-                        </button>
-                      )}
-                      {isGranted && <span style={{ fontSize:10, color:"var(--accent2)", padding:"2px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>Racial</span>}
-                    </div>
-                  );
-                })}
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+                  {(feature.invocations||[]).map(inv => {
+                    const isPicked = pickedNames.includes(inv.name);
+                    const canLevel = meetsLevel(inv);
+                    const canPrereq = meetsPrereq(inv);
+                    const canPick = canLevel && canPrereq && (isPicked || pickedNames.length < maxCount);
+                    return (
+                      <button key={inv.name} onClick={()=>toggle(inv)}
+                        style={{padding:"5px 12px",borderRadius:20,cursor:canPick||isPicked?"pointer":"not-allowed",
+                          fontSize:12,fontFamily:"var(--font-display)",transition:"all 0.15s",
+                          border:`1px solid ${isPicked?"var(--accent)":!canLevel||!canPrereq?"var(--border)":"var(--border)"}`,
+                          background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                          color:isPicked?"var(--accent)":!canLevel||!canPrereq?"var(--text-dim)":"var(--text)",
+                          opacity:!canLevel||!canPrereq?0.45:1,
+                          position:"relative"}}>
+                        {inv.name}
+                        {inv.levelReq > 1 && !canLevel && <span style={{fontSize:9,marginLeft:4,color:"var(--text-dim)"}}>(lvl {inv.levelReq})</span>}
+                        {inv.prereq && <span style={{fontSize:9,marginLeft:4,color:"var(--text-dim)"}}>*</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Show descriptions for picked invocations */}
+                {pickedNames.length > 0 && (
+                  <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8,overflow:"hidden"}}>
+                    {pickedNames.map(name => {
+                      const inv = (feature.invocations||[]).find(i=>i.name===name);
+                      if (!inv) return null;
+                      return (
+                        <div key={name} style={{padding:"10px 14px",borderBottom:"1px solid var(--border)"}}>
+                          <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13,marginBottom:4}}>{inv.name}
+                            {inv.prereq && <span style={{fontSize:10,color:"var(--text-dim)",marginLeft:8}}>Requires: {inv.prereq}</span>}
+                            {inv.levelReq > 1 && <span style={{fontSize:10,color:"var(--text-dim)",marginLeft:8}}>Lvl {inv.levelReq}+</span>}
+                          </div>
+                          <div style={{fontSize:12,color:"var(--text-muted)",lineHeight:1.6}}>{inv.description}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Legend for prereq */}
+                {(feature.invocations||[]).some(i=>i.prereq) && (
+                  <div style={{fontSize:10,color:"var(--text-dim)",marginTop:6}}>* = has a prerequisite (hover/select to see). Pact Boon prereqs become available after choosing your Pact Boon.</div>
+                )}
               </div>
             );
           })()}
@@ -910,6 +968,54 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     );
                   })}
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* spell_grant — racial spells auto-granted at certain levels */}
+          {feature.type === "spell_grant" && (() => {
+            const level = charLevel || 1;
+            const allSpells = gameData?.spells || [];
+            const toAutoGrant = (feature.grants || []).filter(grant => {
+              const available = level >= (grant.minCharLevel || 1);
+              const isGranted = (racialSpells || []).some(s => s.name === grant.spellName);
+              return available && !isGranted;
+            });
+            if (toAutoGrant.length > 0 && onRacialSpellToggle) {
+              setTimeout(() => {
+                toAutoGrant.forEach(grant => {
+                  const spell = allSpells.find(s => s.name.toLowerCase() === grant.spellName.toLowerCase());
+                  onRacialSpellToggle(grant.spellName, feature.name, spell);
+                });
+              }, 0);
+            }
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                  Spells granted by your heritage — automatically known and don't count against your spell limit.
+                  {feature.spellcastingAbility && <span style={{ marginLeft:6, color:"var(--accent)" }}>({ABILITY_SHORT[feature.spellcastingAbility]} for spellcasting)</span>}
+                </div>
+                {(feature.grants || []).map(grant => {
+                  const spell = allSpells.find(s => s.name.toLowerCase() === grant.spellName.toLowerCase());
+                  const available = level >= (grant.minCharLevel || 1);
+                  const isGranted = (racialSpells || []).some(s => s.name === grant.spellName);
+                  return (
+                    <div key={grant.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 12px",
+                      marginBottom:6, borderRadius:8, background:"var(--surface)",
+                      border:`1px solid ${isGranted ? "var(--accent2)" : "var(--border)"}`,
+                      opacity: available ? 1 : 0.45 }}>
+                      <div style={{ flex:1 }}>
+                        <span style={{ fontFamily:"var(--font-display)", color: isGranted ? "var(--accent)" : available ? "var(--text)" : "var(--text-dim)", fontSize:14 }}>
+                          {grant.spellName}
+                        </span>
+                        {spell && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>{spell.level===0?"Cantrip":`Level ${spell.level}`} • {spell.school}</span>}
+                        {!available && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>unlocks at level {grant.minCharLevel}</span>}
+                      </div>
+                      {isGranted && <span style={{ fontSize:10, color:"var(--accent2)", padding:"2px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>✓ Granted</span>}
+                      {available && !isGranted && <span style={{ fontSize:11, color:"var(--text-dim)", fontStyle:"italic" }}>granting…</span>}
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
@@ -1069,16 +1175,19 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 // ============================================================
 // ABILITY ROLLER
 // ============================================================
-function AbilityRoller({ abilities, onChange }) {
-  const [method, setMethod] = useState("standard");
-  const [rolls,  setRolls]  = useState({});
-  const [pb, setPb] = useState({ str:8, dex:8, con:8, int:8, wis:8, cha:8 });
-  // Standard array pool allocation
+function AbilityRoller({ abilities, onChange, char, setChar }) {
+  const saved = char._abilityMethod;
+  const [method, setMethod] = useState(saved || "standard");
+  const [rolls,  setRolls]  = useState(char._rolls || {});
+  const [pb, setPb] = useState(char._pb || { str:8, dex:8, con:8, int:8, wis:8, cha:8 });
   const STANDARD = [15, 14, 13, 12, 10, 8];
-  const [assigned, setAssigned] = useState({}); // ab -> value
-  const [manualRolls, setManualRolls] = useState({}); // ab -> string input
+  const [assigned, setAssigned] = useState(char._assigned || {});
+  const [manualRolls, setManualRolls] = useState({});
 
-  // Point Buy
+  const persist = (patch) => setChar(c => ({...c, ...patch}));
+
+  const setMethodP = m => { setMethod(m); persist({_abilityMethod:m}); };
+
   const PB_COST  = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
   const MAX_PTS  = 27;
   const usedPts  = Object.values(pb).reduce((s, v) => s + (PB_COST[v] || 0), 0);
@@ -1090,7 +1199,9 @@ function AbilityRoller({ abilities, onChange }) {
       nr[ab] = { rolls:dice, total:dice.slice(1).reduce((a,b) => a+b, 0) };
       na[ab] = nr[ab].total;
     });
-    setRolls(nr); setManualRolls({}); onChange(na);
+    setRolls(nr); setManualRolls({});
+    persist({_rolls:nr});
+    onChange(na);
   };
 
   // Standard array: which values are still in the pool
@@ -1113,13 +1224,22 @@ function AbilityRoller({ abilities, onChange }) {
   const assignStat = (ab, val) => {
     const newAssigned = { ...assigned, [ab]: val };
     setAssigned(newAssigned);
+    persist({_assigned:newAssigned});
     onChange({ ...abilities, ...Object.fromEntries(Object.entries(newAssigned)) });
   };
   const clearStat = (ab) => {
     const newAssigned = { ...assigned };
     delete newAssigned[ab];
     setAssigned(newAssigned);
+    persist({_assigned:newAssigned});
     onChange({ ...abilities, [ab]: 8 });
+  };
+
+  const setPbVal = (ab, val) => {
+    const np = {...pb, [ab]:val};
+    setPb(np);
+    persist({_pb:np});
+    onChange({...abilities, ...np});
   };
 
   const mBtn = a => ({ padding:"6px 16px", borderRadius:6, marginRight:8, cursor:"pointer", fontSize:13,
@@ -1136,7 +1256,7 @@ function AbilityRoller({ abilities, onChange }) {
     <div>
       <div style={{ marginBottom:16 }}>
         {[["standard","Standard Array"],["pointbuy","Point Buy"],["roll","Roll Dice"]].map(([m,l]) =>
-          <button key={m} style={mBtn(method === m)} onClick={() => setMethod(m)}>{l}</button>)}
+          <button key={m} style={mBtn(method === m)} onClick={() => setMethodP(m)}>{l}</button>)}
       </div>
 
       {/* ── Standard Array ── */}
@@ -1204,12 +1324,12 @@ function AbilityRoller({ abilities, onChange }) {
             <div key={ab} style={card}>
               <div style={lbl}>{ABILITY_SHORT[ab]}</div>
               <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:8 }}>
-                <button style={pbB} onClick={() => { const v = Math.max(8, pb[ab]-1); const n = {...pb,[ab]:v}; setPb(n); onChange(n); }}>−</button>
+                <button style={pbB} onClick={() => { const v = Math.max(8, pb[ab]-1); setPbVal(ab, v); }}>−</button>
                 <span style={{ fontSize:22, fontFamily:"var(--font-display)", color:"var(--accent)", minWidth:30, textAlign:"center" }}>{pb[ab]}</span>
                 <button style={pbB} onClick={() => {
                   const nv = Math.min(15, pb[ab]+1);
                   const cost = Object.entries({...pb,[ab]:nv}).reduce((s,[,v]) => s + (PB_COST[v] || 0), 0);
-                  if (cost <= MAX_PTS) { const n = {...pb,[ab]:nv}; setPb(n); onChange(n); }
+                  if (cost <= MAX_PTS) setPbVal(ab, nv);
                 }}>+</button>
               </div>
               <span style={mod}>{modStr(calcMod(pb[ab]))}</span>
@@ -1225,27 +1345,35 @@ function AbilityRoller({ abilities, onChange }) {
             <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)" }}>🎲 Roll All (4d6 drop lowest)</button>
             <span style={{ fontSize:12, color:"var(--text-muted)" }}>or enter your own rolls below:</span>
           </div>
-          <div style={grid}>{Object.keys(abilities).map(ab => (
-            <div key={ab} style={{ ...card, border:`1px solid ${abilities[ab] !== 10 || rolls[ab] ? "var(--accent)" : "var(--border)"}` }}>
+          <div style={grid}>{Object.keys(abilities).map(ab => {
+            const hasRoll = !!rolls[ab];
+            const hasManual = manualRolls[ab] !== undefined && manualRolls[ab] !== "";
+            const displayVal = hasManual ? manualRolls[ab] : hasRoll ? abilities[ab] : "";
+            const highlighted = hasRoll || hasManual;
+            return (
+            <div key={ab} style={{ ...card, border:`1px solid ${highlighted ? "var(--accent)" : "var(--border)"}` }}>
               <div style={lbl}>{ABILITY_SHORT[ab]}</div>
               <input
                 type="number" min={3} max={18}
-                value={manualRolls[ab] !== undefined ? manualRolls[ab] : abilities[ab]}
+                value={displayVal}
+                placeholder="--"
                 onChange={e => {
                   const raw = e.target.value;
                   setManualRolls(r => ({...r, [ab]: raw}));
                   const n = parseInt(raw, 10);
                   if (!isNaN(n) && n >= 3 && n <= 18) {
-                    setRolls(r => ({...r, [ab]: null}));
+                    const nr = {...rolls, [ab]: null};
+                    setRolls(nr);
+                    persist({_rolls:nr});
                     onChange({ ...abilities, [ab]: n });
                   }
                 }}
                 style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--accent)", padding:"6px 8px", borderRadius:6, fontSize:26, fontFamily:"var(--font-display)", textAlign:"center", marginTop:6, boxSizing:"border-box" }}
               />
               {rolls[ab] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4 }}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
-              <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
+              {highlighted && <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>}
             </div>
-          ))}</div>
+          );})}</div>
           <p style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>
             Click "Roll All" to auto-roll, or type any value 3–18 directly into each box.
           </p>
@@ -1431,6 +1559,67 @@ function LibraryItemAdder({ gameData, onAdd }) {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function WizardSpellPicker({ char, setChar, gameData }) {
+  const { classes } = gameData;
+  const [spellFilter, setSpellFilter] = useState("all");
+  const limits = getSpellLimits(char, classes);
+  if (!limits) return <p style={{color:"var(--text-muted)",fontSize:13}}>This class doesn't use spells.</p>;
+  const spellList = limits.spellList || char.class;
+  const allClassSpells = Array.isArray(gameData?.spells)
+    ? gameData.spells.filter(s => (s.classes||[]).includes(spellList))
+    : [];
+  const known = char.spells || [];
+  const knownCantrips = known.filter(s => s.level === 0);
+  const knownSpells   = known.filter(s => s.level > 0);
+  const canAddCantrip = knownCantrips.length < (limits.cantripsKnown || 0);
+  const canAddSpell   = knownSpells.length   < (limits.spellsKnown   || 0);
+  const fBtn = a => ({padding:"4px 10px",borderRadius:20,cursor:"pointer",fontSize:12,transition:"all 0.15s",
+    border:`1px solid ${a?"var(--accent)":"var(--border)"}`,background:a?"var(--accent)":"transparent",
+    color:a?"var(--bg)":"var(--text-muted)"});
+  const toggle = spell => {
+    const isK = known.some(s => s.name === spell.name);
+    if (isK) { setChar(c => ({...c, spells: known.filter(s => s.name !== spell.name)})); return; }
+    if (spell.level === 0 && !canAddCantrip) return;
+    if (spell.level > 0 && !canAddSpell) return;
+    if (spell.level > limits.maxSlotLevel) return;
+    setChar(c => ({...c, spells: [...known, {...spell, prepared:false}]}));
+  };
+  const displayed = allClassSpells.filter(sp => spellFilter === "all" || sp.level === +spellFilter);
+  return (
+    <div>
+      <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:12,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8}}>
+        <span style={{fontSize:13,color:"var(--text-muted)"}}>Cantrips:</span>
+        <strong style={{color:"var(--accent)"}}>{knownCantrips.length}/{limits.cantripsKnown}</strong>
+        <span style={{fontSize:13,color:"var(--text-muted)",marginLeft:8}}>Spells known:</span>
+        <strong style={{color:"var(--accent)"}}>{knownSpells.length}/{limits.spellsKnown ?? "∞"}</strong>
+        <span style={{fontSize:11,color:"var(--text-dim)",marginLeft:8}}>Max slot level: {limits.maxSlotLevel}</span>
+      </div>
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
+        <button style={fBtn(spellFilter==="all")} onClick={()=>setSpellFilter("all")}>All</button>
+        {limits.cantripsKnown > 0 && <button style={fBtn(spellFilter==="0")} onClick={()=>setSpellFilter("0")}>Cantrips</button>}
+        {[1,2,3,4,5].filter(l=>l<=limits.maxSlotLevel).map(l=>(
+          <button key={l} style={fBtn(spellFilter===String(l))} onClick={()=>setSpellFilter(String(l))}>Lvl {l}</button>
+        ))}
+      </div>
+      <div style={{maxHeight:420,overflowY:"auto"}}>
+        {displayed.map(spell => {
+          const isK = known.some(s => s.name === spell.name);
+          const isCantrip = spell.level === 0;
+          const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
+          const slotOk = isCantrip || spell.level <= limits.maxSlotLevel;
+          const disabled = !isK && (!slotOk || !capOk);
+          return (
+            <SpellCard key={spell.name} spell={spell} charLevel={char.level}
+              isKnown={isK} disabled={disabled}
+              disabledReason={!isK&&(!slotOk?"slot too high":!capOk?"limit reached":null)}
+              onToggle={()=>toggle(spell)} actionLabel={isK?"Remove":"+ Learn"}/>
+          );
+        })}
       </div>
     </div>
   );
@@ -1652,10 +1841,18 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
   return (
     <div>
       {/* Mode toggle */}
-      <div style={{display:"flex",gap:10,marginBottom:20}}>
-        <button style={mBtn(mode==="equipment")} onClick={()=>setMode("equipment")}>⚔️ Choose by Equipment</button>
-        <button style={mBtn(mode==="gold")}      onClick={()=>setMode("gold")}>🪙 Choose by Gold</button>
+      <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap"}}>
+        <button style={mBtn(mode==="equipment")} onClick={()=>setMode("equipment")}>⚔️ Equipment</button>
+        <button style={mBtn(mode==="gold")}      onClick={()=>setMode("gold")}>🪙 Gold</button>
+        {(() => {
+          const info = getSpellcastingInfo(char, classes);
+          if (!info) return null;
+          return <button style={mBtn(mode==="spells")} onClick={()=>setMode("spells")}>✨ Choose Spells</button>;
+        })()}
       </div>
+
+      {/* ── Spell picker mode ── */}
+      {mode==="spells" && <WizardSpellPicker char={char} setChar={setChar} gameData={gameData}/>}
 
       {/* ── Equipment mode ── */}
       {mode==="equipment" && (
@@ -2862,7 +3059,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
         {/* ── STEP 4: Abilities ── */}
         {step === 4 && (
           <div>
-            <AbilityRoller abilities={char.abilities} onChange={abs => setChar({ ...char, abilities:abs })} />
+            <AbilityRoller abilities={char.abilities} char={char} setChar={setChar} onChange={abs => setChar(c => ({ ...c, abilities:abs }))} />
             <div style={{ ...ws.card, marginTop:18 }}>
               <div style={{ color:"var(--text-muted)", fontSize:11, marginBottom:12, textTransform:"uppercase", letterSpacing:1 }}>
                 Score Breakdown (Base + All Bonuses)
@@ -4439,7 +4636,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 // ============================================================
 // CHARACTER CARD (home screen)
 // ============================================================
-function CharacterCard({ char, gameData, onClick }) {
+function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
   const { themes } = gameData;
   const theme = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
   const hp    = char.hp || { current:0, max:1 };
@@ -4448,37 +4645,49 @@ function CharacterCard({ char, gameData, onClick }) {
   const label = char.subclass ? `${char.class} (${char.subclass})` : char.class;
 
   return (
-    <div onClick={onClick} style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, cursor:"pointer", transition:"all 0.22s", position:"relative", overflow:"hidden" }}
+    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, transition:"all 0.22s", position:"relative", overflow:"hidden" }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; }}>
       <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary || theme.accent})` }} />
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
-        <div>
-          <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:20, lineHeight:1.2 }}>{char.name}</div>
-          <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
-            <span style={{ color:theme.text }}>{char.species}</span>
-            {char.species && label ? " · " : ""}<span>{label}</span>
+      {/* Main clickable area */}
+      <div onClick={onClick} style={{ cursor:"pointer" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+          <div>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:20, lineHeight:1.2 }}>{char.name}</div>
+            <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
+              <span style={{ color:theme.text }}>{char.species}</span>
+              {char.species && label ? " · " : ""}<span>{label}</span>
+            </div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
+            <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
           </div>
         </div>
-        <div style={{ textAlign:"right" }}>
-          <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
-          <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
+        <div style={{ marginBottom:12 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
+            <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
+          </div>
+          <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
+          </div>
+        </div>
+        <div style={{ fontSize:12, color:theme.textMuted, marginBottom:12 }}>
+          <span>{char.background}</span>
+          <span style={{ color:theme.textDim, marginLeft:8 }}>{char.alignment}</span>
         </div>
       </div>
-      <div style={{ marginBottom:12 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
-          <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
-        </div>
-        <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
-          <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
-        </div>
-      </div>
-      <div style={{ display:"flex", justifyContent:"space-between", fontSize:12 }}>
-        <span style={{ color:theme.textMuted }}>{char.background}</span>
-        <div style={{ display:"flex", gap:8 }}>
-          {char.music && char.music !== "none" && <span>🎵</span>}
-          <span style={{ color:theme.textDim }}>{char.alignment}</span>
-        </div>
+      {/* Action buttons */}
+      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, paddingTop:10 }}>
+        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(201,162,39,0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
+          Open
+        </button>
+        <button onClick={e=>{e.stopPropagation();onEdit();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.border}`, background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:12 }}>
+          ✏️ Edit
+        </button>
+        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}} style={{ padding:"6px 10px", borderRadius:6, border:`1px solid ${theme.danger}`, background:"transparent", color:theme.danger, cursor:"pointer", fontSize:12 }}>
+          🗑
+        </button>
       </div>
     </div>
   );
@@ -4922,7 +5131,11 @@ function App() {
                 {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
-                {characters.map(c => <CharacterCard key={c.id} char={c} gameData={gameData} onClick={() => { setSelId(c.id); setView("sheet"); }} />)}
+                {characters.map(c => <CharacterCard key={c.id} char={c} gameData={gameData}
+                  onClick={() => { setSelId(c.id); setView("sheet"); }}
+                  onEdit={() => { setSelId(c.id); setView("edit"); }}
+                  onDelete={delChar}
+                />)}
               </div>
             </>
           )}
