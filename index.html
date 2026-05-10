@@ -427,20 +427,28 @@ const DEFAULT_CHAR = {
 };
 
 // ── Theme wrapper ──
-const TW = ({ themeKey, themes, children }) => {
+const TW = ({ themeKey, themes, children, charCustom }) => {
   const t = themes?.[themeKey] || themes?.[Object.keys(themes || {})[0]] || {};
+  // charCustom overrides individual tokens if set
+  const cc = charCustom || {};
+  const bg     = cc.bgColor    || t.bg      || "#0d0d0f";
+  const accent = cc.accentColor|| t.accent  || "#c9a227";
+  const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel Decorative',serif";
+  const fontB  = cc.fontBody   || t.fontBody    || "serif";
   return (
     <div style={{
-      "--bg":t.bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
-      "--accent":t.accent,"--accent2":t.accentSecondary,"--text":t.text,
+      "--bg":bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
+      "--accent":accent,"--accent2":t.accentSecondary,"--text":t.text,
       "--text-muted":t.textMuted,"--text-dim":t.textDim,
       "--danger":t.danger,"--success":t.success,"--info":t.info,
-      "--font-display":t.fontDisplay,"--font-body":t.fontBody,"--gradient-hero":t.gradientHero,
-      background:`radial-gradient(ellipse at 15% 0%, rgba(60,20,100,0.22) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(80,40,10,0.18) 0%, transparent 50%), ${t.bg||"#0d0d0f"}`,
+      "--font-display":fontD,"--font-body":fontB,"--gradient-hero":t.gradientHero,
+      background:`radial-gradient(ellipse at 15% 0%, rgba(60,20,100,0.22) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(80,40,10,0.18) 0%, transparent 50%), ${bg}`,
       color:t.text||"#e8e0d0",
-      minHeight:"100vh", fontFamily:t.fontBody||"serif", position:"relative", overflow:"hidden"
+      minHeight:"100vh", fontFamily:fontB, position:"relative", overflow:"hidden"
     }}>
-      <MysticBackground density="subtle"/>
+      <MysticBackground density="subtle"
+        symbolSet={cc.symbolSet || null}
+        symbolOpacity={cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1}/>
       <div style={{ position:"relative", zIndex:1 }}>{children}</div>
     </div>
   );
@@ -3570,69 +3578,250 @@ function NotesTab({ char, onUpdate }) {
 // ============================================================
 // SETTINGS TAB
 // ============================================================
+// Symbol category presets for picker
+const SYMBOL_PRESETS = {
+  "All":       null, // null = use full SYMBOLS array
+  "Music":     ["♩","♪","♫","♬","𝄞","𝄢"],
+  "Celestial": ["✦","✧","★","☆","✴","⊕","✩","⁕"],
+  "Runic":     ["ᛏ","ᚨ","ᛉ","ᚱ","ᛊ","ᛗ","ᛟ","ᚷ","ᛒ","ᚦ"],
+  "Arcane":    ["⊗","⊙","◈","⬡","⬟","⌘","△","▽","◇"],
+  "None":      [],
+};
+
+const FONT_OPTIONS = [
+  ["'Cinzel Decorative',serif",           "Cinzel (Fantasy)"],
+  ["'MedievalSharp',serif",               "Medieval Sharp"],
+  ["Georgia,serif",                        "Georgia (Classic)"],
+  ["'Palatino Linotype',serif",            "Palatino"],
+  ["'Courier New',monospace",              "Courier (Typewriter)"],
+  ["'Crimson Pro',serif",                  "Crimson Pro"],
+  ["'Philosopher',serif",                  "Philosopher"],
+  ["'Libre Baskerville',serif",            "Libre Baskerville"],
+];
+
 function SettingsTab({ char, gameData, onUpdate, onEdit }) {
-  const { themes, music } = gameData;
-  const [cu, setCu] = useState(char.customMusicUrl || "");
-  const tracks = music?.tracks || [];
+  const cc = char.custom || {};
+  const updCustom = patch => onUpdate({ ...char, custom: { ...cc, ...patch } });
+
+  // Audio state — local blob URL for uploaded files
+  const audioRef   = useRef(null);
+  const musicRef   = useRef(null); // file input
+  const [playing,  setPlaying]  = useState(false);
+  const [volume,   setVolume]   = useState(cc.musicVolume ?? 0.5);
+  const [muted,    setMuted]    = useState(cc.musicMuted ?? false);
+
+  // Load music src on mount or when musicData changes
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const src = cc.musicData || cc.musicUrl || "";
+    if (src) {
+      audioRef.current.src = src;
+      audioRef.current.volume = volume;
+      audioRef.current.muted  = muted;
+    } else {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      setPlaying(false);
+    }
+  }, [cc.musicData, cc.musicUrl]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume;
+  }, [volume]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.muted = muted;
+  }, [muted]);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (playing) { audioRef.current.pause(); setPlaying(false); }
+    else         { audioRef.current.play().then(()=>setPlaying(true)).catch(()=>{}); }
+  };
+
+  const handleMusicUpload = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    const url = URL.createObjectURL(file);
+    // Store as data URL for persistence
+    const reader = new FileReader();
+    reader.onload = ev => {
+      updCustom({ musicData: ev.target.result, musicName: file.name });
+      if (audioRef.current) {
+        audioRef.current.src = ev.target.result;
+        audioRef.current.volume = volume;
+        audioRef.current.play().then(()=>setPlaying(true)).catch(()=>{});
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const sectionHead = txt => (
+    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10, marginTop:18, paddingBottom:5, borderBottom:"1px solid rgba(201,162,39,0.2)" }}>{txt}</div>
+  );
+  const label = { display:"block", fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:5 };
+  const inp   = { width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)", boxSizing:"border-box" };
+
   return (
     <div>
-      {/* Edit character */}
-      <div style={{ background:"var(--card)", border:"1px solid var(--accent2)", borderRadius:10, padding:16, marginBottom:16 }}>
-        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:8 }}>Edit Character</div>
-        <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12, lineHeight:1.6 }}>
-          Return to the character builder to change your class, species, abilities, skills, spells, and equipment.
-        </div>
-        <button onClick={onEdit} style={{ padding:"9px 22px", background:"rgba(201,162,39,0.12)", border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:14 }}>
+      <audio ref={audioRef} loop/>
+      <input ref={musicRef} type="file" accept="audio/*" onChange={handleMusicUpload} style={{ display:"none" }}/>
+
+      {/* ── Edit Character ── */}
+      <div style={{ marginBottom:6 }}>
+        {sectionHead("Character")}
+        <button onClick={onEdit} style={{ padding:"8px 20px", background:"rgba(201,162,39,0.1)", border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:8, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>
           ✏️ Edit Character
         </button>
+        <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:6 }}>Created: {char.createdAt ? new Date(char.createdAt).toLocaleDateString() : "—"} · ID: {char.id}</div>
       </div>
-      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:16 }}>
-        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Visual Theme</div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))", gap:10 }}>
-          {Object.entries(themes || {}).map(([k, t]) => (
-            <div key={k} onClick={() => onUpdate({ ...char, theme:k })} style={{
-              padding:12, borderRadius:8, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
-              border:`2px solid ${char.theme === k ? t.accent : "var(--border)"}`,
-              background: "var(--surface)"
-            }}>
-              <div style={{ width:26, height:26, borderRadius:"50%", background:t.accent, margin:"0 auto 6px", border:`3px solid ${t.accentSecondary || t.accent}` }} />
-              <div style={{ fontSize:13 }}>{t.name}</div>
-            </div>
-          ))}
+
+      {/* ── Music ── */}
+      {sectionHead("Music")}
+      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:14 }}>
+        {/* Track name + upload */}
+        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+          <div style={{ flex:1, fontSize:13, color: cc.musicName ? "var(--text)" : "var(--text-dim)", fontStyle: cc.musicName ? "normal" : "italic", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+            {cc.musicName || "No track loaded"}
+          </div>
+          <button onClick={()=>musicRef.current.click()} style={{ padding:"6px 14px", borderRadius:7, border:"1px solid var(--border)", background:"var(--surface)", color:"var(--text-muted)", cursor:"pointer", fontSize:12, flexShrink:0 }}>
+            📂 Load MP3
+          </button>
+          {cc.musicData && (
+            <button onClick={()=>{ updCustom({ musicData:undefined, musicName:undefined }); if(audioRef.current){audioRef.current.pause();audioRef.current.src="";} setPlaying(false); }}
+              style={{ padding:"6px 10px", borderRadius:7, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:12, flexShrink:0 }}>×</button>
+          )}
         </div>
-      </div>
-      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:16 }}>
-        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Background Music</div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
-          {tracks.map(t => (
-            <div key={t.id} onClick={() => onUpdate({ ...char, music:t.id })} style={{
-              padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.2s",
-              border:`1px solid ${char.music === t.id ? "var(--accent)" : "var(--border)"}`,
-              background: char.music === t.id ? "rgba(201,162,39,0.08)" : "var(--surface)"
-            }}>
-              {char.music === t.id ? "🎵 " : "♪ "}{t.name}
-              {!t.url && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:6 }}>(no URL)</span>}
-            </div>
-          ))}
-        </div>
-        <div>
-          <label style={{ display:"block", color:"var(--text-muted)", fontSize:12, textTransform:"uppercase", marginBottom:6 }}>Custom Music URL (.mp3 / .ogg)</label>
+
+        {/* Alternatively a URL */}
+        <div style={{ marginBottom:12 }}>
+          <label style={label}>Or enter a stream URL (.mp3 / .ogg)</label>
           <div style={{ display:"flex", gap:8 }}>
-            <input value={cu} onChange={e => setCu(e.target.value)} placeholder="https://example.com/music.mp3"
-              style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 12px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)" }} />
-            <button onClick={() => onUpdate({ ...char, music:"custom", customMusicUrl:cu })}
-              style={{ padding:"8px 16px", background:"var(--accent)", border:"none", color:"var(--bg)", borderRadius:6, cursor:"pointer", fontFamily:"var(--font-display)", fontSize:13 }}>Set</button>
+            <input value={cc.musicUrl || ""} onChange={e=>updCustom({musicUrl:e.target.value})}
+              placeholder="https://example.com/track.mp3"
+              style={{...inp, flex:1}}/>
+            <button onClick={()=>{
+              if(!cc.musicUrl) return;
+              updCustom({musicData:undefined, musicName: cc.musicUrl.split('/').pop()});
+              if(audioRef.current){ audioRef.current.src=cc.musicUrl; audioRef.current.play().then(()=>setPlaying(true)).catch(()=>{}); }
+            }} style={{ padding:"7px 14px", borderRadius:7, border:"1px solid var(--accent)", background:"transparent", color:"var(--accent)", cursor:"pointer", fontSize:12 }}>Load</button>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          {/* Play/pause */}
+          <button onClick={togglePlay} disabled={!cc.musicData && !cc.musicUrl}
+            style={{ width:36, height:36, borderRadius:"50%", border:"1px solid var(--accent)", background: playing?"var(--accent)":"transparent",
+              color: playing?"var(--bg)":"var(--accent)", cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            {playing ? "⏸" : "▶"}
+          </button>
+          {/* Mute */}
+          <button onClick={()=>{ const m=!muted; setMuted(m); updCustom({musicMuted:m}); }}
+            style={{ width:32, height:32, borderRadius:"50%", border:`1px solid ${muted?"var(--danger)":"var(--border)"}`, background:"transparent",
+              color:muted?"var(--danger)":"var(--text-muted)", cursor:"pointer", fontSize:14, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            {muted ? "🔇" : "🔊"}
+          </button>
+          {/* Volume slider */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", gap:8 }}>
+            <span style={{ fontSize:10, color:"var(--text-dim)" }}>Vol</span>
+            <input type="range" min={0} max={1} step={0.01} value={volume}
+              onChange={e=>{ const v=+e.target.value; setVolume(v); updCustom({musicVolume:v}); }}
+              style={{ flex:1, accentColor:"var(--accent)" }}/>
+            <span style={{ fontSize:11, color:"var(--text-muted)", minWidth:28 }}>{Math.round(volume*100)}%</span>
           </div>
         </div>
       </div>
-      <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16 }}>
-        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12 }}>Character Info</div>
-        <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:2.2 }}>
-          <div>Created: {char.createdAt ? new Date(char.createdAt).toLocaleDateString() : "—"}</div>
-          <div>Updated: {char.updatedAt ? new Date(char.updatedAt).toLocaleDateString() : "—"}</div>
-          <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>ID: {char.id}</div>
+
+      {/* ── Appearance ── */}
+      {sectionHead("Appearance")}
+
+      {/* Background colour */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Background Colour</label>
+        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <input type="color" value={cc.bgColor || "#0d0d0f"} onChange={e=>updCustom({bgColor:e.target.value})}
+            style={{ width:44, height:36, border:"1px solid var(--border)", borderRadius:6, cursor:"pointer", background:"transparent", padding:2 }}/>
+          <input value={cc.bgColor || "#0d0d0f"} onChange={e=>updCustom({bgColor:e.target.value})}
+            style={{...inp, width:120, fontFamily:"monospace"}}/>
+          <button onClick={()=>updCustom({bgColor:undefined})} style={{ padding:"6px 10px", borderRadius:6, border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)", cursor:"pointer", fontSize:11 }}>Reset</button>
         </div>
       </div>
+
+      {/* Accent colour */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Accent Colour</label>
+        <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+          <input type="color" value={cc.accentColor || "#c9a227"} onChange={e=>updCustom({accentColor:e.target.value})}
+            style={{ width:44, height:36, border:"1px solid var(--border)", borderRadius:6, cursor:"pointer", background:"transparent", padding:2 }}/>
+          <input value={cc.accentColor || "#c9a227"} onChange={e=>updCustom({accentColor:e.target.value})}
+            style={{...inp, width:120, fontFamily:"monospace"}}/>
+          <button onClick={()=>updCustom({accentColor:undefined})} style={{ padding:"6px 10px", borderRadius:6, border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)", cursor:"pointer", fontSize:11 }}>Reset</button>
+        </div>
+      </div>
+
+      {/* Display font */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Title Font</label>
+        <select value={cc.fontDisplay || "'Cinzel Decorative',serif"} onChange={e=>updCustom({fontDisplay:e.target.value})}
+          style={{...inp, cursor:"pointer"}}>
+          {FONT_OPTIONS.map(([v,l])=><option key={v} value={v} style={{fontFamily:v}}>{l}</option>)}
+        </select>
+        <div style={{ marginTop:6, fontFamily: cc.fontDisplay || "'Cinzel Decorative',serif", color:"var(--accent)", fontSize:16 }}>
+          Preview: The Tome of Heroes
+        </div>
+      </div>
+
+      {/* Body font */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Body Font</label>
+        <select value={cc.fontBody || "'Crimson Pro',serif"} onChange={e=>updCustom({fontBody:e.target.value})}
+          style={{...inp, cursor:"pointer"}}>
+          {FONT_OPTIONS.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+        </select>
+        <div style={{ marginTop:6, fontFamily: cc.fontBody || "'Crimson Pro',serif", fontSize:14, color:"var(--text-muted)" }}>
+          Preview: Strength 16, Dexterity 14, Constitution 13
+        </div>
+      </div>
+
+      {/* Floating symbols */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Floating Symbol Style</label>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:8 }}>
+          {Object.keys(SYMBOL_PRESETS).map(preset => {
+            const curKey = cc.symbolPreset || "All";
+            const active = curKey === preset;
+            return (
+              <button key={preset} onClick={()=>updCustom({ symbolPreset:preset, symbolSet: SYMBOL_PRESETS[preset] })}
+                style={{ padding:"5px 12px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+                  border:`1px solid ${active?"var(--accent)":"var(--border)"}`,
+                  background:active?"rgba(201,162,39,0.1)":"var(--surface)",
+                  color:active?"var(--accent)":"var(--text-muted)" }}>
+                {preset}
+              </button>
+            );
+          })}
+        </div>
+        {/* Opacity slider */}
+        <label style={label}>Symbol Opacity</label>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <input type="range" min={0} max={1} step={0.05}
+            value={cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1}
+            onChange={e=>updCustom({symbolOpacity:+e.target.value})}
+            style={{ flex:1, accentColor:"var(--accent)" }}/>
+          <span style={{ fontSize:12, color:"var(--text-muted)", minWidth:36 }}>
+            {Math.round((cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1) * 100)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Reset all */}
+      <button onClick={()=>onUpdate({...char, custom:{}})} style={{ marginTop:8, padding:"8px 18px", borderRadius:7, border:"1px solid var(--danger)", background:"rgba(192,57,43,0.08)", color:"var(--danger)", cursor:"pointer", fontSize:12 }}>
+        ↺ Reset all appearance changes
+      </button>
     </div>
   );
 }
@@ -3965,7 +4154,6 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
   const [tab,  setTab]    = useState("actions");
   const [saved, setSaved] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const audioRef  = useRef(null);
   const saveTimer = useRef(null);
   const fileRef   = useRef(null);
 
@@ -3977,7 +4165,6 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
   const pb          = profBonus(char.level);
   const saves       = getSavingThrows(char, classes);
   const skills      = getSkillBonuses(char);
-  const tracks      = music?.tracks || [];
   const isSpellcaster = !!getSpellcastingInfo(char, classes);
 
   const upd = useCallback(u => {
@@ -3992,34 +4179,30 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
     }, 800);
   }, []);
 
-  useEffect(() => {
-    const t = tracks.find(t => t.id === char.music);
-    const url = char.music === "custom" ? char.customMusicUrl : t?.url;
-    if (audioRef.current) {
-      if (url) { audioRef.current.src = url; audioRef.current.play().catch(() => {}); }
-      else     { audioRef.current.pause(); audioRef.current.src = ""; }
-    }
-  }, [char.music, char.customMusicUrl]);
+
 
   // Profile picture upload
   const handleImageUpload = e => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = "";
     const reader = new FileReader();
     reader.onload = ev => {
       const img = ev.target.result;
-      // Use functional updater so we always have the latest char state
-      setChar(c => {
-        const updated = { ...c, profileImage: img, updatedAt: new Date().toISOString() };
-        // Save immediately — don't wait for debounce since image data is set once
-        const all = loadChars();
-        const idx = all.findIndex(x => x.id === updated.id);
-        if (idx >= 0) all[idx] = updated; else all.push(updated);
-        saveChars(all);
-        setSaved(true); setTimeout(() => setSaved(false), 2000);
-        return updated;
-      });
+      // Update display state directly
+      setChar(c => ({ ...c, profileImage: img, updatedAt: new Date().toISOString() }));
       setImgError(false);
+      // Save to localStorage immediately (outside the state updater — keeps it pure)
+      const all = loadChars();
+      const cur = all.find(x => x.id === initial.id);
+      if (cur) {
+        cur.profileImage = img;
+        cur.updatedAt = new Date().toISOString();
+        saveChars(all);
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     };
     reader.readAsDataURL(file);
   };
@@ -4072,8 +4255,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
   );
 
   return (
-    <TW themeKey={char.theme} themes={themes}>
-      <audio ref={audioRef} loop style={{ display:"none" }} />
+    <TW themeKey={char.theme} themes={themes} charCustom={char.custom || {}}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
       {/* ── Sticky top bar ── */}
@@ -4086,7 +4268,6 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
           </span>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-          {char.music && char.music !== "none" && <span style={{ fontSize:13 }}>🎵</span>}
           <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 9px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:11 }}>✓ Saved</div>
           <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:24,height:24,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
           <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"4px 9px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
@@ -4173,15 +4354,17 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
         <div style={{ display:"flex", flexDirection:"column", height:"100%", overflow:"hidden", borderRadius:12, border:`1px solid ${theme.border}`, background:theme.card }}>
 
           {/* ── Top strip: HP + combat stats ── */}
-          <div style={{ padding:"12px 16px", borderBottom:`1px solid ${theme.border}`, flexShrink:0, display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", borderRadius:"12px 12px 0 0", background:`rgba(0,0,0,0.15)` }}>
-            {/* HP tracker inline */}
-            <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
-            {/* Combat stat pills */}
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginLeft:"auto" }}>
+          <div style={{ padding:"10px 14px", borderBottom:`1px solid ${theme.border}`, flexShrink:0, display:"flex", alignItems:"center", gap:12, borderRadius:"12px 12px 0 0", background:`rgba(0,0,0,0.15)`, flexWrap:"nowrap", overflow:"hidden" }}>
+            {/* HP tracker — fixed width, never shrinks */}
+            <div style={{ flexShrink:0 }}>
+              <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
+            </div>
+            {/* Combat stat pills — scrollable row so they never wrap onto a new line */}
+            <div style={{ display:"flex", gap:6, marginLeft:"auto", flexShrink:0, overflowX:"auto", paddingBottom:2 }}>
               {combatStats.map(s=>(
-                <div key={s.l} style={{ textAlign:"center", padding:"4px 10px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:7 }}>
-                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:16, lineHeight:1.2 }}>{s.v}</div>
+                <div key={s.l} style={{ textAlign:"center", padding:"3px 8px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:6, flexShrink:0 }}>
+                  <div style={{ fontSize:8, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1, whiteSpace:"nowrap" }}>{s.l}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:15, lineHeight:1.2 }}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -4303,32 +4486,32 @@ const SYMBOLS = [
   "△","▽","◇","⬦","✩","⁕",
 ];
 
-function MysticBackground({ density = "normal" }) {
-  const count = density === "subtle" ? 12 : 20;
+function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
+  const count  = density === "subtle" ? 12 : density === "off" ? 0 : 20;
+  const pool   = symbolSet?.length > 0 ? symbolSet : SYMBOLS;
+  const opMul  = symbolOpacity !== undefined ? symbolOpacity : 1;
   const symbols = React.useMemo(() => {
-    // Use a seeded-ish spread so symbols are evenly distributed
+    if (count === 0) return [];
     return Array.from({ length: count }, (_, i) => {
-      // Deterministic-ish spread via golden ratio columns
-      const left     = (i * 97 + 11) % 100;            // 0–100 vw
-      const startTop = 100 + (i * 37) % 40;            // 100–140vh (below viewport)
-      const delay    = (i * 3.7) % 20;                 // 0–20s stagger
-      const dur      = 18 + (i * 4.1) % 22;            // 18–40s float
-      const size     = 12 + (i * 7) % 18;              // 12–30px
-      const sym      = SYMBOLS[i % SYMBOLS.length];
-      // Alternate sway direction
+      const left     = (i * 97 + 11) % 100;
+      const startTop = 100 + (i * 37) % 40;
+      const delay    = (i * 3.7) % 20;
+      const dur      = 18 + (i * 4.1) % 22;
+      const size     = 12 + (i * 7) % 18;
+      const sym      = pool[i % pool.length];
       const anim     = i % 2 === 0 ? "floatUp" : "floatUpSway";
-
-      const colours = [
-        "rgba(201,162,39,0.28)",   // gold
-        "rgba(180,130,255,0.22)",  // violet
-        "rgba(120,180,255,0.20)",  // ice-blue
-        "rgba(255,245,210,0.22)",  // warm ivory
-        "rgba(255,255,255,0.15)",  // white
+      const baseA    = [0.28, 0.22, 0.20, 0.22, 0.15];
+      const colours  = [
+        `rgba(201,162,39,${(baseA[0]*opMul).toFixed(2)})`,
+        `rgba(180,130,255,${(baseA[1]*opMul).toFixed(2)})`,
+        `rgba(120,180,255,${(baseA[2]*opMul).toFixed(2)})`,
+        `rgba(255,245,210,${(baseA[3]*opMul).toFixed(2)})`,
+        `rgba(255,255,255,${(baseA[4]*opMul).toFixed(2)})`,
       ];
       const colour = colours[i % colours.length];
       return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
     });
-  }, [count]);
+  }, [count, pool.join(""), opMul]);
 
   return (
     <>
