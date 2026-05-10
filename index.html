@@ -98,6 +98,7 @@
   GitHub Pages needs no extra steps.
   ============================================================ -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -400,28 +401,39 @@ const getSkillBonuses = char => {
   }, {});
 };
 
-// ── Storage ──
+// ── Supabase ──
+const SUPABASE_URL = "https://pxlrjtserdzememhsgxu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_RPN2SjOR4vmvZsEhf4PCHg_Y9ch_XY3";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Auth helpers
+const getSession  = async () => { const { data } = await sb.auth.getSession(); return data.session; };
+const signUp      = (email, password) => sb.auth.signUp({ email, password });
+const signIn      = (email, password) => sb.auth.signInWithPassword({ email, password });
+const signOut     = () => sb.auth.signOut();
+
+// Character CRUD
+const dbLoadChars = async () => {
+  const { data, error } = await sb.from("characters").select("data").order("updated_at", { ascending:false });
+  if (error) { console.error("Load error:", error); return []; }
+  return (data || []).map(row => row.data);
+};
+const dbSaveChar = async char => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const row = { id: char.id, user_id: session.user.id, data: char, updated_at: new Date().toISOString() };
+  const { error } = await sb.from("characters").upsert(row, { onConflict: "id" });
+  if (error) console.error("Save error:", error);
+};
+const dbDeleteChar = async id => {
+  const { error } = await sb.from("characters").delete().eq("id", id);
+  if (error) console.error("Delete error:", error);
+};
+
+// Keep localStorage as offline fallback
 const SK = "tome_of_heroes_v1";
-const MK = "tome_music_v1"; // separate key — audio data can be several MB
-const loadChars = () => { try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : []; } catch { return []; } };
-const saveChars = chars => {
-  // Strip musicData before saving characters — stored separately
-  const stripped = chars.map(c => {
-    if (!c.custom?.musicData) return c;
-    const { musicData, ...restCustom } = c.custom;
-    return { ...c, custom: restCustom };
-  });
-  localStorage.setItem(SK, JSON.stringify(stripped));
-};
-// Music data store — keyed by character id
-const loadMusicData = id => { try { const d = localStorage.getItem(MK); return d ? JSON.parse(d)[id] || null : null; } catch { return null; } };
-const saveMusicData = (id, data) => {
-  try {
-    const all = JSON.parse(localStorage.getItem(MK) || "{}");
-    if (data) all[id] = data; else delete all[id];
-    localStorage.setItem(MK, JSON.stringify(all));
-  } catch(e) { console.warn("Music save failed (quota exceeded?):", e); }
-};
+const loadChars  = () => { try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : []; } catch { return []; } };
+const saveChars  = chars => { try { localStorage.setItem(SK, JSON.stringify(chars)); } catch {} };
 
 // ── Default character ──
 const DEFAULT_CHAR = {
@@ -4081,7 +4093,7 @@ function ActionsTab({ char, gameData, onUpdate }) {
   );
 }
 
-function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
+function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, cloudSync }) {
   const [char, setChar]   = useState(initial);
   const [tab,  setTab]    = useState("actions");
   const [saved, setSaved] = useState(false);
@@ -4107,9 +4119,11 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
       const all = loadChars();
       const idx = all.findIndex(c => c.id === s.id);
       if (idx >= 0) all[idx] = s; else all.push(s);
-      saveChars(all); setSaved(true); setTimeout(() => setSaved(false), 2000);
+      saveChars(all);
+      if (cloudSync) cloudSync(s);
+      setSaved(true); setTimeout(() => setSaved(false), 2000);
     }, 800);
-  }, []);
+  }, [cloudSync]);
 
 
 
@@ -4468,24 +4482,122 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
   );
 }
 
+// ============================================================
+// LOGIN SCREEN
+// ============================================================
+function LoginScreen({ onLogin }) {
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [mode,     setMode]     = useState("login"); // "login" | "signup"
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState(null);
+  const [msg,      setMsg]      = useState(null);
+
+  const submit = async () => {
+    if (!email || !password) { setError("Please enter your email and password."); return; }
+    setLoading(true); setError(null); setMsg(null);
+    try {
+      const { error: err } = mode === "login" ? await signIn(email, password) : await signUp(email, password);
+      if (err) { setError(err.message); }
+      else if (mode === "signup") { setMsg("Check your email to confirm your account, then log in."); setMode("login"); }
+      else { onLogin(); }
+    } finally { setLoading(false); }
+  };
+
+  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
+  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
+
+  return (
+    <div style={{ background:"radial-gradient(ellipse at 20% 10%, rgba(60,20,100,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(80,40,10,0.2) 0%, transparent 55%), #0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Crimson Pro',serif", position:"relative", overflow:"hidden" }}>
+      <MysticBackground density="normal"/>
+      <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth:420, padding:"0 24px" }}>
+        {/* Title */}
+        <div style={{ textAlign:"center", marginBottom:36 }}>
+          <div className="tome-title-text" style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
+          <div style={{ color:"#8a8070", fontSize:14, fontStyle:"italic" }}>Your personal D&D 5e character compendium</div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, margin:"14px auto 0", maxWidth:280 }}>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
+            <span style={{ color:"rgba(201,162,39,0.4)", fontSize:14 }}>✦</span>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(201,162,39,0.35), transparent)" }}/>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div style={{ background:"rgba(26,26,31,0.92)", border:"1px solid rgba(201,162,39,0.2)", borderRadius:14, padding:32, backdropFilter:"blur(8px)", boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
+            {mode === "login" ? "Welcome Back" : "Create Account"}
+          </div>
+
+          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{error}</div>}
+          {msg   && <div style={{ background:"rgba(39,174,96,0.12)",  border:"1px solid #27ae60", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#27ae60" }}>{msg}</div>}
+
+          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp}
+            onKeyDown={e=>e.key==="Enter"&&submit()}/>
+          <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={inp}
+            onKeyDown={e=>e.key==="Enter"&&submit()}/>
+
+          <button onClick={submit} style={btn(true)} disabled={loading}>
+            {loading ? "…" : mode === "login" ? "Enter the Tome" : "Create Account"}
+          </button>
+
+          <div style={{ textAlign:"center", marginTop:16, fontSize:13, color:"#554f45" }}>
+            {mode === "login"
+              ? <><span>No account? </span><span onClick={()=>{setMode("signup");setError(null);setMsg(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Sign up</span></>
+              : <><span>Have an account? </span><span onClick={()=>{setMode("login");setError(null);setMsg(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Log in</span></>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const { data:gameData, error } = useGameData();
-  const [characters, setCharacters] = useState(() => loadChars());
-  const [view,   setView]   = useState("home");
-  const [selId,  setSelId]  = useState(null);
+  const [session,    setSession]    = useState(undefined); // undefined = checking, null = logged out
+  const [characters, setCharacters] = useState([]);
+  const [view,       setView]       = useState("home");
+  const [selId,      setSelId]      = useState(null);
+  const [charLoading,setCharLoading]= useState(false);
   const selChar = characters.find(c => c.id === selId);
 
-  // Loading
-  if (!gameData && !error) return (
+  // ── Auth state listener ──
+  useEffect(() => {
+    sb.auth.getSession().then(({ data }) => setSession(data.session ?? null));
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      if (!sess) { setCharacters([]); setView("home"); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ── Load characters when session appears ──
+  useEffect(() => {
+    if (!session) return;
+    setCharLoading(true);
+    dbLoadChars().then(chars => {
+      setCharacters(chars);
+      // Migrate any local chars on first login (offer once)
+      const local = loadChars();
+      if (local.length > 0 && chars.length === 0) {
+        Promise.all(local.map(c => dbSaveChar(c))).then(() => {
+          saveChars([]); // clear local after migration
+        });
+        setCharacters(local);
+      }
+    }).finally(() => setCharLoading(false));
+  }, [session?.user?.id]);
+
+  // ── Loading states ──
+  if (session === undefined || (!gameData && !error)) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
         <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
-        <div style={{ color:"#8a8070" }}>Loading game data…</div>
+        <div style={{ color:"#8a8070" }}>Loading…</div>
       </div>
     </div>
   );
 
-  // Error
   if (error) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
@@ -4495,27 +4607,46 @@ function App() {
         <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
           Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
           Quick server: <code style={{ color:"#c9a227" }}>python -m http.server 8000</code><br />
-          Then visit: <code style={{ color:"#c9a227" }}>http://localhost:8000</code><br />
-          Validate JSON: <strong style={{ color:"#c9a227" }}>jsonlint.com</strong>
+          Then visit: <code style={{ color:"#c9a227" }}>http://localhost:8000</code>
         </div>
       </div>
     </div>
   );
 
-  const saveChar = char => {
-    const upd = characters.find(c => c.id === char.id)
+  // ── Not logged in ──
+  if (!session) return <LoginScreen onLogin={() => {}} />;
+
+  // ── Save / delete ──
+  const saveChar = async char => {
+    const list = characters.find(c => c.id === char.id)
       ? characters.map(c => c.id === char.id ? char : c)
       : [...characters, char];
-    setCharacters(upd); saveChars(upd); setSelId(char.id); setView("sheet");
+    setCharacters(list);
+    saveChars(list); // local backup
+    await dbSaveChar(char);
+    setSelId(char.id); setView("sheet");
   };
-  const delChar = id => {
-    const upd = characters.filter(c => c.id !== id);
-    setCharacters(upd); saveChars(upd); setView("home");
+
+  const delChar = async id => {
+    const list = characters.filter(c => c.id !== id);
+    setCharacters(list);
+    saveChars(list);
+    await dbDeleteChar(id);
+    setView("home");
+  };
+
+  // Also wire upd in CharacterSheet to cloud-save — handled via saveChar above for full saves.
+  // For live edits (HP, spells etc) we piggyback on the debounced local save + push to cloud.
+  const cloudSyncChar = async char => {
+    const list = characters.map(c => c.id === char.id ? char : c);
+    setCharacters(list);
+    saveChars(list);
+    await dbSaveChar(char);
   };
 
   if (view === "create") return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("home")} />;
   if (view === "edit" && selChar) return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("sheet")} editChar={selChar} />;
-  if (view === "sheet" && selChar) return <CharacterSheet char={selChar} gameData={gameData} onBack={() => setView("home")} onDelete={delChar} onEdit={() => setView("edit")} />;
+  if (view === "sheet" && selChar) return <CharacterSheet char={selChar} gameData={gameData} onBack={() => setView("home")} onDelete={delChar} onEdit={() => setView("edit")} cloudSync={cloudSyncChar} />;
 
   const themes = gameData.themes || {};
   const dt     = themes[Object.keys(themes)[0]] || {};
@@ -4533,6 +4664,12 @@ function App() {
         {/* Hero banner */}
         <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(201,162,39,0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",
           background:"linear-gradient(180deg, rgba(40,15,80,0.45) 0%, rgba(20,10,40,0.25) 60%, transparent 100%)" }}>
+
+          {/* User info + logout — top right */}
+          <div style={{ position:"absolute", top:16, right:20, display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:12, color:dt.textMuted || "#8a8070" }}>{session.user.email}</span>
+            <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Log out</button>
+          </div>
 
           {/* Inner hero radial glow */}
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 65%)", animation:"heroGlow 4s ease-in-out infinite", pointerEvents:"none" }}/>
