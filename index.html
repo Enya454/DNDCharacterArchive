@@ -3347,9 +3347,266 @@ function SettingsTab({ char, gameData, onUpdate }) {
 // ============================================================
 // CHARACTER SHEET
 // ============================================================
+// ============================================================
+// ACTIONS TAB
+// ============================================================
+function ActionsTab({ char, gameData }) {
+  const { classes, species:speciesDb, weapons:weaponLib=[], standardActions=[] } = gameData;
+  const classData   = classes?.[char.class];
+  const speciesData = speciesDb?.[char.species];
+  const subraceData = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
+  const pb          = profBonus(char.level);
+
+  // Scroll-to anchors
+  const refs = {
+    weapons:  React.useRef(null),
+    standard: React.useRef(null),
+    class:    React.useRef(null),
+    bonus:    React.useRef(null),
+    reaction: React.useRef(null),
+  };
+  const scrollTo = key => refs[key]?.current?.scrollIntoView({ behavior:"smooth", block:"start" });
+
+  // ── Equipped weapons ──
+  const equippedWeapons = (char.inventory || []).filter(i => i.equipped && i.type === "weapon");
+
+  // Extra attack count
+  const allClassFeats = [
+    ...(classData?.features || []),
+    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || []),
+  ];
+  const extraAttackFeat = allClassFeats
+    .filter(f => f.attackCount && char.level >= f.level)
+    .sort((a, b) => b.attackCount - a.attackCount)[0];
+  const attackCount = extraAttackFeat?.attackCount || 1;
+
+  // Resolve weapon stats from library
+  const weaponStats = item => {
+    const lib = lookupLibraryItem(item.name, gameData);
+    const proficient = lib ? isItemProficient(lib, char, classes) : false;
+    const abilMod = lib?.properties?.includes("finesse")
+      ? Math.max(calcMod(char.abilities.str), calcMod(char.abilities.dex))
+      : lib?.category?.includes("Ranged") || lib?.category === "simpleRanged" || lib?.category === "martialRanged"
+        ? calcMod(char.abilities.dex)
+        : calcMod(char.abilities.str);
+    const hitBonus = abilMod + (proficient ? pb : 0);
+    return { lib, proficient, hitBonus, abilMod };
+  };
+
+  // ── All class+species features with actionType ──
+  const allFeatures = [
+    ...(classData?.features || []),
+    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || []),
+    ...(speciesData?.features || []),
+    ...(subraceData?.features || []),
+  ].filter(f => f.actionType && char.level >= (f.level || 1));
+
+  const byType = type => allFeatures.filter(f => f.actionType === type);
+
+  // Uses display
+  const usesLabel = (uses, char) => {
+    if (!uses) return null;
+    let max = uses.max;
+    if (max === "charismaModifier") max = Math.max(1, calcMod(char.abilities.cha));
+    else if (max === "charismaModifier+1") max = Math.max(1, calcMod(char.abilities.cha) + 1);
+    else if (max === "level*5") max = char.level * 5;
+    return `${max} / ${uses.per === "short" ? "Short Rest" : uses.per === "long" ? "Long Rest" : "Turn"}`;
+  };
+
+  // ── Styles ──
+  const sHead = (ref, label) => (
+    <div ref={ref} style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"20px 0 10px", paddingBottom:5, borderBottom:"1px solid rgba(201,162,39,0.2)", display:"flex", alignItems:"center", gap:8 }}>
+      {label}
+    </div>
+  );
+
+  const FeatureAction = ({ feat }) => {
+    const [open, setOpen] = useState(false);
+    const ul = usesLabel(feat.uses, char);
+    return (
+      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 12px", marginBottom:6 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
+          <div style={{ flex:1 }}>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14 }}>{feat.name}</span>
+            {feat.note && <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:8 }}>{feat.note}</span>}
+          </div>
+          {ul && (
+            <div style={{ padding:"2px 10px", borderRadius:12, background:"rgba(201,162,39,0.12)", border:"1px solid var(--accent2)", fontSize:11, color:"var(--accent)", flexShrink:0 }}>
+              {ul}
+            </div>
+          )}
+          <span style={{ color:"var(--text-dim)", fontSize:10 }}>{open?"▲":"▼"}</span>
+        </div>
+        {open && feat.description && (
+          <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>
+            {feat.description}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {/* ── Quick-nav buttons ── */}
+      <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:4, paddingBottom:12, borderBottom:"1px solid var(--border)" }}>
+        {[
+          ["weapons",  "⚔️ Weapons"],
+          ["standard", "📋 Standard"],
+          ["class",    "⭐ Class & Racial"],
+          ["bonus",    "⚡ Bonus"],
+          ["reaction", "🔄 Reactions"],
+        ].map(([key, label]) => (
+          <button key={key} onClick={()=>scrollTo(key)} style={{ padding:"5px 12px", borderRadius:20, cursor:"pointer", fontSize:12, fontFamily:"var(--font-display)", border:"1px solid var(--border)", background:"var(--surface)", color:"var(--text-muted)", transition:"all 0.15s" }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="var(--accent)";e.currentTarget.style.color="var(--accent)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text-muted)";}}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Weapons ── */}
+      {sHead(refs.weapons, `⚔️ Weapon Attacks${attackCount > 1 ? ` — ${attackCount} Attacks per Attack Action` : ""}`)}
+      {equippedWeapons.length === 0
+        ? <div style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic", marginBottom:8 }}>No weapons equipped. Equip weapons in Inventory.</div>
+        : equippedWeapons.map(item => {
+            const { lib, proficient, hitBonus } = weaponStats(item);
+            const [open, setOpen] = useState(false);
+            const isRanged = lib?.range && !lib?.properties?.includes("thrown");
+            return (
+              <div key={item.id} style={{ background:"var(--surface)", border:`1px solid ${open?"var(--accent)":"var(--border)"}`, borderRadius:10, marginBottom:8, overflow:"hidden", transition:"border-color 0.15s" }}>
+                {/* Collapsed row */}
+                <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
+                  <div style={{ flex:1 }}>
+                    <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15 }}>{item.name}</span>
+                    {!proficient && <span style={{ fontSize:10, color:"#e67e22", marginLeft:8, padding:"1px 6px", border:"1px solid #e67e22", borderRadius:4 }}>Not proficient</span>}
+                  </div>
+                  {/* Key stats — always visible */}
+                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                    {lib?.range && <span style={{ fontSize:11, color:"var(--text-muted)" }}>{lib.range}</span>}
+                    <div style={{ textAlign:"center", padding:"3px 10px", background:"rgba(41,128,185,0.12)", border:"1px solid rgba(41,128,185,0.4)", borderRadius:6 }}>
+                      <div style={{ fontSize:9, color:"rgba(100,160,255,0.8)", textTransform:"uppercase", letterSpacing:1 }}>To Hit</div>
+                      <div style={{ fontFamily:"var(--font-display)", color:"var(--info)", fontSize:16 }}>{modStr(hitBonus)}</div>
+                    </div>
+                    {lib?.damage && (
+                      <div style={{ textAlign:"center", padding:"3px 10px", background:"rgba(192,57,43,0.12)", border:"1px solid rgba(192,57,43,0.4)", borderRadius:6 }}>
+                        <div style={{ fontSize:9, color:"rgba(220,80,60,0.8)", textTransform:"uppercase", letterSpacing:1 }}>Damage</div>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--danger)", fontSize:16 }}>{lib.damage}</div>
+                        <div style={{ fontSize:9, color:"rgba(192,57,43,0.7)" }}>{lib.damageType}</div>
+                      </div>
+                    )}
+                    <span style={{ color:"var(--text-dim)", fontSize:10 }}>{open?"▲":"▼"}</span>
+                  </div>
+                </div>
+                {/* Expanded detail */}
+                {open && (
+                  <div style={{ padding:"10px 14px", borderTop:"1px solid var(--border)", background:"rgba(0,0,0,0.15)" }}>
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:10 }}>
+                      {[
+                        ["Type",       isRanged ? "Ranged" : "Melee"],
+                        ["Range",      lib?.range || "5 ft"],
+                        ["Properties", lib?.properties?.join(", ") || "—"],
+                        ["Hit Bonus",  modStr(hitBonus)],
+                        ["Damage",     lib?.damage ? `${lib.damage} ${lib.damageType}` : (item.description || "—")],
+                        ["Proficiency",proficient ? "✓ Yes" : "✗ No"],
+                      ].map(([l,v])=>(
+                        <div key={l}>
+                          <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:2 }}>{l}</div>
+                          <div style={{ fontSize:13, color:"var(--text)" }}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {lib?.description && <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.5, fontStyle:"italic" }}>{lib.description}</div>}
+                  </div>
+                )}
+              </div>
+            );
+          })
+      }
+
+      {/* ── Standard actions ── */}
+      {sHead(refs.standard, "📋 Standard Actions")}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:4 }}>
+        {standardActions.filter(a=>a.actionType==="action").map(a=>{
+          const [open,setOpen] = useState(false);
+          return (
+            <div key={a.name} onClick={()=>setOpen(o=>!o)}
+              style={{ padding:"5px 12px", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"var(--font-display)", transition:"all 0.15s", userSelect:"none",
+                border:`1px solid ${open?"var(--accent)":"var(--border)"}`,
+                background:open?"rgba(201,162,39,0.08)":"var(--surface)",
+                color:open?"var(--accent)":"var(--text)" }}>
+              {a.name}
+            </div>
+          );
+        })}
+      </div>
+      {/* Expanded standard action descriptions */}
+      {standardActions.filter(a=>a.actionType==="action").map(a=>{
+        // We need a way to track open state per action without useState in a map
+        // Use a wrapper component instead
+        return null; // handled below
+      })}
+      {/* Rewrite: use a sub-component so hooks work */}
+      <StandardActionList actions={standardActions.filter(a=>a.actionType==="action")} />
+
+      {/* ── Class & racial actions ── */}
+      {byType("action").length > 0 && (<>
+        {sHead(refs.class, "⭐ Class & Racial Actions")}
+        {byType("action").map(f=><FeatureAction key={f.name} feat={f}/>)}
+        {byType("special").map(f=><FeatureAction key={f.name} feat={f}/>)}
+      </>)}
+
+      {/* ── Bonus actions ── */}
+      {sHead(refs.bonus, "⚡ Bonus Actions")}
+      <StandardActionList actions={standardActions.filter(a=>a.actionType==="bonus")} />
+      {byType("bonus").map(f=><FeatureAction key={f.name} feat={f}/>)}
+
+      {/* ── Reactions ── */}
+      {sHead(refs.reaction, "🔄 Reactions")}
+      <StandardActionList actions={standardActions.filter(a=>a.actionType==="reaction")} />
+      {byType("reaction").map(f=><FeatureAction key={f.name} feat={f}/>)}
+
+      {/* ── Free actions ── */}
+      {standardActions.filter(a=>a.actionType==="free").length > 0 && (<>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"16px 0 8px", paddingBottom:5, borderBottom:"1px solid rgba(201,162,39,0.2)" }}>Other</div>
+        <StandardActionList actions={standardActions.filter(a=>a.actionType==="free")} />
+      </>)}
+    </div>
+  );
+}
+
+// Sub-component so useState works per-item without IIFE
+function StandardActionList({ actions }) {
+  return (
+    <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:8 }}>
+      {actions.map(a => <StandardActionPill key={a.name} action={a}/>)}
+    </div>
+  );
+}
+function StandardActionPill({ action: a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginBottom: open ? 8 : 0, width: open ? "100%" : "auto" }}>
+      <div onClick={()=>setOpen(o=>!o)}
+        style={{ display:"inline-block", padding:"5px 12px", borderRadius:8, cursor:"pointer", fontSize:12,
+          fontFamily:"var(--font-display)", transition:"all 0.15s", userSelect:"none",
+          border:`1px solid ${open?"var(--accent)":"var(--border)"}`,
+          background:open?"rgba(201,162,39,0.08)":"var(--surface)",
+          color:open?"var(--accent)":"var(--text)" }}>
+        {a.name}
+      </div>
+      {open && (
+        <div style={{ marginTop:4, padding:"8px 12px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--border)", borderRadius:6, fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>
+          {a.description}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
   const [char, setChar]   = useState(initial);
-  const [tab,  setTab]    = useState("spells");
+  const [tab,  setTab]    = useState("actions");
   const [saved, setSaved] = useState(false);
   const [imgError, setImgError] = useState(false);
   const audioRef  = useRef(null);
@@ -3398,11 +3655,13 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
   };
 
   const TABS = [
-    { id:"spells",    l:"✨ Spells"    },
-    { id:"inventory", l:"🎒 Inventory" },
-    { id:"features",  l:"⭐ Features"  },
-    { id:"notes",     l:"📜 Notes"     },
-    { id:"settings",  l:"⚙️ Settings" },
+    { id:"actions",    l:"⚔️ Actions"    },
+    ...(isSpellcaster ? [{ id:"spells", l:"✨ Spells" }] : []),
+    { id:"inventory",  l:"🎒 Inventory"  },
+    { id:"features",   l:"⭐ Features"   },
+    { id:"background", l:"📜 Background" },
+    { id:"notes",      l:"✏️ Notes"      },
+    { id:"settings",   l:"⚙️ Settings"  },
   ];
 
   const ts = active => ({
@@ -3566,9 +3825,35 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
             </div>
             {/* Tab content — scrolls independently */}
             <div style={{ flex:1, overflowY:"auto", padding:16 }}>
+              {tab==="actions"    && <ActionsTab     char={char} gameData={gameData}/>}
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="features"  && <FeaturesTab   char={char} gameData={gameData}/>}
+              {tab==="background"&& (
+                <div>
+                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:16, marginBottom:14 }}>{char.background}</div>
+                  {gameData.backgrounds?.[char.background]?.description
+                    ? <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, marginBottom:16 }}>{gameData.backgrounds[char.background].description}</p>
+                    : <p style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic" }}>No background description available.</p>}
+                  {gameData.backgrounds?.[char.background]?.features?.length > 0 && (<>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:10 }}>Background Features</div>
+                    {gameData.backgrounds[char.background].features.map(f=>(
+                      <div key={f.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", marginBottom:8 }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:4 }}>{f.name}</div>
+                        <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
+                      </div>
+                    ))}
+                  </>)}
+                  {char.personalItems?.length > 0 && (<>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"16px 0 10px" }}>Personal Effects & Mementos</div>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                      {char.personalItems.map(p=>(
+                        <span key={p.id} style={{ padding:"4px 10px", background:"rgba(100,100,200,0.08)", border:"1px solid rgba(100,100,200,0.3)", borderRadius:8, fontSize:13, color:"var(--text)" }}>{p.name}</span>
+                      ))}
+                    </div>
+                  </>)}
+                </div>
+              )}
               {tab==="notes"     && <NotesTab       char={char} onUpdate={upd}/>}
               {tab==="settings"  && <SettingsTab    char={char} gameData={gameData} onUpdate={upd}/>}
             </div>

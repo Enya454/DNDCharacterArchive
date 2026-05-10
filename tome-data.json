@@ -597,7 +597,13 @@
           "name": "Breath Weapon",
           "level": 1,
           "type": "passive",
-          "description": "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level. After you use your breath weapon, you can't use it again until you complete a short or long rest."
+          "description": "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level. After you use your breath weapon, you can't use it again until you complete a short or long rest.",
+          "actionType": "action",
+          "uses": {
+            "max": 1,
+            "per": "short"
+          },
+          "note": "Exhale energy in a cone or line; DEX save for half damage"
         },
         {
           "name": "Damage Resistance",
@@ -642,7 +648,13 @@
               "minCharLevel": 1
             }
           ],
-          "description": "As an action, you can touch a creature and cause it to regain hit points equal to your level. Once per long rest."
+          "description": "As an action, you can touch a creature and cause it to regain hit points equal to your level. Once per long rest.",
+          "actionType": "action",
+          "uses": {
+            "max": 1,
+            "per": "long"
+          },
+          "note": "Touch a creature; restore HP equal to your level"
         },
         {
           "name": "Light Bearer",
@@ -711,7 +723,13 @@
           "level": 1,
           "name": "Rage",
           "type": "passive",
-          "description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging you gain advantage on Strength checks and saving throws, a bonus to damage rolls, and resistance to bludgeoning, piercing, and slashing damage. You can rage 2 times per long rest at 1st level, increasing as you level up."
+          "description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging you gain advantage on Strength checks and saving throws, a bonus to damage rolls, and resistance to bludgeoning, piercing, and slashing damage. You can rage 2 times per long rest at 1st level, increasing as you level up.",
+          "actionType": "bonus",
+          "uses": {
+            "max": 2,
+            "per": "long"
+          },
+          "note": "Advantage on STR checks/saves, resistance to B/P/S damage"
         },
         {
           "level": 1,
@@ -723,7 +741,10 @@
           "level": 2,
           "name": "Reckless Attack",
           "type": "passive",
-          "description": "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly, giving you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn."
+          "description": "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly, giving you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn.",
+          "actionType": "action",
+          "uses": null,
+          "note": "Advantage on STR attacks this turn; attacks against you have advantage"
         },
         {
           "level": 2,
@@ -747,7 +768,10 @@
           "level": 5,
           "name": "Extra Attack",
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
+          "actionType": "special",
+          "attackCount": 2,
+          "note": "Attack twice instead of once when you take the Attack action"
         },
         {
           "level": 5,
@@ -1000,7 +1024,10 @@
           "level": 1,
           "name": "Sneak Attack",
           "type": "passive",
-          "description": "Beginning at 1st level, you know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. This extra damage increases as you gain Rogue levels: 2d6 at 3rd, 3d6 at 5th, 4d6 at 7th, 5d6 at 9th..."
+          "description": "Beginning at 1st level, you know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. This extra damage increases as you gain Rogue levels: 2d6 at 3rd, 3d6 at 5th, 4d6 at 7th, 5d6 at 9th...",
+          "actionType": "special",
+          "uses": null,
+          "note": "Once per turn on attack with advantage or with ally adjacent to target"
         },
         {
           "level": 1,
@@ -1012,7 +1039,10 @@
           "level": 2,
           "name": "Cunning Action",
           "type": "passive",
-          "description": "Starting at 2nd level, your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."
+          "description": "Starting at 2nd level, your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action.",
+          "actionType": "bonus",
+          "uses": null,
+          "note": "Dash, Disengage, or Hide as a bonus action"
         },
         {
           "level": 3,
@@ -1030,7 +1060,10 @@
           "level": 5,
           "name": "Uncanny Dodge",
           "type": "passive",
-          "description": "Starting at 5th level, when an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."
+          "description": "Starting at 5th level, when an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you.",
+          "actionType": "reaction",
+          "uses": null,
+          "note": "Halve damage from one attack you can see"
         },
         {
           "level": 6,
@@ -1637,13 +1670,25 @@
           "level": 1,
           "name": "Second Wind",
           "type": "passive",
-          "description": "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level. Once you use this feature, you must finish a short or long rest before you can use it again."
+          "description": "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level. Once you use this feature, you must finish a short or long rest before you can use it again.",
+          "actionType": "bonus",
+          "uses": {
+            "max": 1,
+            "per": "short"
+          },
+          "note": "Regain 1d10 + Fighter level HP"
         },
         {
           "level": 2,
           "name": "Action Surge",
           "type": "passive",
-          "description": "Starting at 2nd level, you can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."
+          "description": "Starting at 2nd level, you can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn.",
+          "actionType": "action",
+          "uses": {
+            "max": 1,
+            "per": "short"
+          },
+          "note": "Take one additional action this turn"
         },
         {
           "level": 3,
@@ -1661,7 +1706,10 @@
           "level": 5,
           "name": "Extra Attack",
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn. The number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level."
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn. The number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level.",
+          "actionType": "special",
+          "attackCount": 2,
+          "note": "Attack twice instead of once when you take the Attack action"
         },
         {
           "level": 9,
@@ -1673,13 +1721,19 @@
           "level": 11,
           "name": "Extra Attack (2)",
           "type": "passive",
-          "description": "You can attack three times when you take the Attack action."
+          "description": "You can attack three times when you take the Attack action.",
+          "actionType": "special",
+          "attackCount": 3,
+          "note": "Attack three times when you take the Attack action"
         },
         {
           "level": 20,
           "name": "Extra Attack (3)",
           "type": "passive",
-          "description": "You can attack four times when you take the Attack action."
+          "description": "You can attack four times when you take the Attack action.",
+          "actionType": "special",
+          "attackCount": 4,
+          "note": "Attack four times when you take the Attack action"
         }
       ],
       "subclasses": {
@@ -2792,7 +2846,13 @@
           "level": 10,
           "name": "Divine Intervention",
           "type": "passive",
-          "description": "Beginning at 10th level, you can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes."
+          "description": "Beginning at 10th level, you can call on your deity to intervene on your behalf when your need is great. Imploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes.",
+          "actionType": "action",
+          "uses": {
+            "max": 1,
+            "per": "long"
+          },
+          "note": "Roll d100; if \u2264 cleric level, deity intervenes"
         }
       ],
       "subclasses": {
@@ -3310,7 +3370,13 @@
           "level": 1,
           "name": "Bardic Inspiration",
           "type": "passive",
-          "description": "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6. This increases to d8 at 5th level, d10 at 10th, and d12 at 15th."
+          "description": "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6. This increases to d8 at 5th level, d10 at 10th, and d12 at 15th.",
+          "actionType": "bonus",
+          "uses": {
+            "max": "charismaModifier",
+            "per": "long"
+          },
+          "note": "Grant a creature a Bardic Inspiration die (d6\u2013d12)"
         },
         {
           "level": 2,
@@ -3347,7 +3413,10 @@
           "level": 6,
           "name": "Countercharm",
           "type": "passive",
-          "description": "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed."
+          "description": "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed.",
+          "actionType": "action",
+          "uses": null,
+          "note": "Grant advantage on saves vs being frightened/charmed to nearby allies"
         }
       ],
       "subclasses": {
@@ -3399,7 +3468,10 @@
               "level": 6,
               "name": "Extra Attack",
               "type": "passive",
-              "description": "Starting at 6th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+              "description": "Starting at 6th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
+              "actionType": "special",
+              "attackCount": 2,
+              "note": "Attack twice instead of once when you take the Attack action"
             },
             {
               "level": 14,
@@ -3870,13 +3942,25 @@
           "level": 1,
           "name": "Divine Sense",
           "type": "passive",
-          "description": "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces until the end of your next turn."
+          "description": "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces until the end of your next turn.",
+          "actionType": "action",
+          "uses": {
+            "max": "charismaModifier+1",
+            "per": "long"
+          },
+          "note": "Detect celestials, fiends, undead within 60 ft"
         },
         {
           "level": 1,
           "name": "Lay on Hands",
           "type": "passive",
-          "description": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level \u00d7 5."
+          "description": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level \u00d7 5.",
+          "actionType": "action",
+          "uses": {
+            "max": "level*5",
+            "per": "long"
+          },
+          "note": "Restore HP from a pool equal to 5 \u00d7 Paladin level"
         },
         {
           "level": 2,
@@ -3900,7 +3984,10 @@
           "level": 2,
           "name": "Divine Smite",
           "type": "passive",
-          "description": "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8."
+          "description": "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8.",
+          "actionType": "special",
+          "uses": null,
+          "note": "On melee hit, expend spell slot for 2d8 + 1d8/slot radiant damage"
         },
         {
           "level": 3,
@@ -3912,7 +3999,10 @@
           "level": 5,
           "name": "Extra Attack",
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
+          "actionType": "special",
+          "attackCount": 2,
+          "note": "Attack twice instead of once when you take the Attack action"
         },
         {
           "level": 6,
@@ -4456,7 +4546,10 @@
           "level": 5,
           "name": "Extra Attack",
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
+          "actionType": "special",
+          "attackCount": 2,
+          "note": "Attack twice instead of once when you take the Attack action"
         }
       ],
       "subclasses": {
@@ -4970,7 +5063,13 @@
           "level": 2,
           "name": "Wild Shape",
           "type": "passive",
-          "description": "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice, regaining uses on a short or long rest."
+          "description": "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice, regaining uses on a short or long rest.",
+          "actionType": "action",
+          "uses": {
+            "max": 2,
+            "per": "short"
+          },
+          "note": "Transform into a beast you have seen"
         },
         {
           "level": 2,
@@ -5451,7 +5550,10 @@
           "level": 1,
           "name": "Martial Arts",
           "type": "passive",
-          "description": "At 1st level, your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons. You can use Dexterity instead of Strength for attack and damage rolls, and your unarmed strike deals 1d4 (increasing with level)."
+          "description": "At 1st level, your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons. You can use Dexterity instead of Strength for attack and damage rolls, and your unarmed strike deals 1d4 (increasing with level).",
+          "actionType": "bonus",
+          "uses": null,
+          "note": "After Attack action with unarmed/monk weapon, make one unarmed strike"
         },
         {
           "level": 2,
@@ -5475,13 +5577,19 @@
           "level": 5,
           "name": "Extra Attack",
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
+          "actionType": "special",
+          "attackCount": 2,
+          "note": "Attack twice instead of once when you take the Attack action"
         },
         {
           "level": 5,
           "name": "Stunning Strike",
           "type": "passive",
-          "description": "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike."
+          "description": "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike.",
+          "actionType": "special",
+          "uses": null,
+          "note": "On hit, spend 1 ki point; target makes CON save or is stunned until your next turn"
         }
       ],
       "subclasses": {
@@ -10849,6 +10957,83 @@
         "label": "Choose 4 weapons",
         "count": 4
       }
+    }
+  ],
+  "standardActions": [
+    {
+      "name": "Attack",
+      "actionType": "action",
+      "description": "Make one melee or ranged weapon attack (or unarmed strike)."
+    },
+    {
+      "name": "Dash",
+      "actionType": "action",
+      "description": "Gain extra movement equal to your speed this turn."
+    },
+    {
+      "name": "Disengage",
+      "actionType": "action",
+      "description": "Your movement doesn't provoke opportunity attacks for the rest of the turn."
+    },
+    {
+      "name": "Dodge",
+      "actionType": "action",
+      "description": "Attack rolls against you have disadvantage; you have advantage on DEX saves. Ends if you're incapacitated or speed drops to 0."
+    },
+    {
+      "name": "Help",
+      "actionType": "action",
+      "description": "Aid another creature \u2014 give advantage on their next ability check, or give advantage on the next attack against a creature within 5 ft."
+    },
+    {
+      "name": "Hide",
+      "actionType": "action",
+      "description": "Make a Stealth check to become hidden from enemies."
+    },
+    {
+      "name": "Ready",
+      "actionType": "action",
+      "description": "Prepare a specific action to trigger on a specific event before your next turn."
+    },
+    {
+      "name": "Search",
+      "actionType": "action",
+      "description": "Devote your attention to finding something. Make a Perception or Investigation check."
+    },
+    {
+      "name": "Use an Object",
+      "actionType": "action",
+      "description": "Interact with a second object or use a magic item that requires an action."
+    },
+    {
+      "name": "Grapple",
+      "actionType": "action",
+      "description": "Replace one attack: STR (Athletics) vs target's STR (Athletics) or DEX (Acrobatics). On success, target is grappled."
+    },
+    {
+      "name": "Shove",
+      "actionType": "action",
+      "description": "Replace one attack: STR (Athletics) vs target's STR/DEX. On success, push 5 ft away or knock prone."
+    },
+    {
+      "name": "Two-Weapon Fighting",
+      "actionType": "bonus",
+      "description": "After Attack action with a light weapon, attack once with a different light weapon in your off hand. No ability mod to damage."
+    },
+    {
+      "name": "Interact with Object",
+      "actionType": "free",
+      "description": "Once per turn: draw or sheathe a weapon, open a door, pick up a dropped item, etc."
+    },
+    {
+      "name": "Opportunity Attack",
+      "actionType": "reaction",
+      "description": "When a creature you can see moves out of your reach, make one melee weapon attack against it."
+    },
+    {
+      "name": "Readied Action",
+      "actionType": "reaction",
+      "description": "Trigger the action you readied when your specified condition is met."
     }
   ]
 }
