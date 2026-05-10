@@ -2761,8 +2761,8 @@ function HPTracker({ hp, onUpdate }) {
           <span style={{ fontSize:18, fontFamily:"var(--font-display)", color:"var(--text-muted)", lineHeight:1 }}>{hp.max}</span>
           {hp.temp > 0 && <span style={{ fontSize:11, color:"var(--info)", marginLeft:4 }}>+{hp.temp}</span>}
         </div>
-        <div style={{ height:5, background:"var(--bg)", borderRadius:3, marginTop:4, overflow:"hidden", width:120 }}>
-          <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:3, transition:"all 0.3s" }}/>
+        <div style={{ height:10, background:"var(--bg)", borderRadius:5, marginTop:5, overflow:"hidden", width:130 }}>
+          <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:5, transition:"all 0.3s" }}/>
         </div>
       </div>
       {/* Amount input + damage/heal */}
@@ -3465,10 +3465,11 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
       </div>
 
       {/* ── Two-column body ── */}
-      <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"calc(100vh - 44px)", overflow:"hidden" }}>
+      <div style={{ padding:"12px 16px 16px", height:"calc(100vh - 44px)", boxSizing:"border-box", overflow:"hidden" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:12, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
-        <div style={{ borderRight:`1px solid ${theme.border}`, overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
+        <div style={{ borderRadius:12, border:`1px solid ${theme.border}`, background:theme.card, overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
 
           {/* Portrait */}
           <div style={{ textAlign:"center", marginBottom:12 }}>
@@ -3540,10 +3541,10 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
         </div>
 
         {/* ══ RIGHT SIDE: top strip + tab panel ══ */}
-        <div style={{ display:"flex", flexDirection:"column", height:"100%", overflow:"hidden" }}>
+        <div style={{ display:"flex", flexDirection:"column", height:"100%", overflow:"hidden", borderRadius:12, border:`1px solid ${theme.border}`, background:theme.card }}>
 
           {/* ── Top strip: HP + combat stats ── */}
-          <div style={{ padding:"10px 16px", borderBottom:`1px solid ${theme.border}`, background:theme.bg, flexShrink:0, display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+          <div style={{ padding:"12px 16px", borderBottom:`1px solid ${theme.border}`, flexShrink:0, display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", borderRadius:"12px 12px 0 0", background:`rgba(0,0,0,0.15)` }}>
             {/* HP tracker inline */}
             <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
             {/* Combat stat pills */}
@@ -3560,11 +3561,11 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
           {/* ── Tab panel: fills remaining height ── */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
             {/* Tab bar */}
-            <div style={{ display:"flex", borderBottom:`1px solid ${theme.border}`, background:theme.bg, flexShrink:0, paddingLeft:12, paddingTop:10 }}>
+            <div style={{ display:"flex", borderBottom:`1px solid ${theme.border}`, flexShrink:0, paddingLeft:12, paddingTop:10, background:"transparent" }}>
               {TABS.map(t=><button key={t.id} style={ts(tab===t.id)} onClick={()=>setTab(t.id)}>{t.l}</button>)}
             </div>
             {/* Tab content — scrolls independently */}
-            <div style={{ flex:1, overflowY:"auto", background:theme.card, padding:16 }}>
+            <div style={{ flex:1, overflowY:"auto", padding:16 }}>
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="features"  && <FeaturesTab   char={char} gameData={gameData}/>}
@@ -3573,7 +3574,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
             </div>
           </div>
         </div>
-      </div>
+        </div>{/* end grid */}
+      </div>{/* end padding wrapper */}
     </TW>
   );
 }
