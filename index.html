@@ -4292,11 +4292,11 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit }) {
               <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
             </div>
             {/* Combat stat pills — scrollable row so they never wrap onto a new line */}
-            <div style={{ display:"flex", gap:6, marginLeft:"auto", flexShrink:0, overflowX:"auto", paddingBottom:2 }}>
+            <div style={{ display:"flex", gap:8, marginLeft:"auto", flexShrink:0, overflowX:"auto", paddingBottom:2 }}>
               {combatStats.map(s=>(
-                <div key={s.l} style={{ textAlign:"center", padding:"3px 8px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:6, flexShrink:0 }}>
-                  <div style={{ fontSize:8, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1, whiteSpace:"nowrap" }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:15, lineHeight:1.2 }}>{s.v}</div>
+                <div key={s.l} style={{ textAlign:"center", padding:"6px 12px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8, flexShrink:0, minWidth:52 }}>
+                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1, whiteSpace:"nowrap", marginBottom:2 }}>{s.l}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:22, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>
