@@ -2364,23 +2364,94 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
         {/* ── STEP 0: Identity ── */}
         {step === 0 && (
           <div>
+            {/* Name — full width */}
             <div style={ws.card}>
               <label style={ws.label}>Character Name</label>
               <input style={ws.input} value={char.name} placeholder="Enter your hero's name…"
                 onChange={e => setChar({ ...char, name:e.target.value })} />
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+
+            {/* Alignment + Appearance side by side */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:14 }}>
               <div style={ws.card}>
                 <label style={ws.label}>Alignment</label>
                 <select style={ws.input} value={char.alignment} onChange={e => setChar({ ...char, alignment:e.target.value })}>
                   {(alignments || []).map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
+              <div style={ws.card}>
+                <label style={ws.label}>Appearance / Description</label>
+                <textarea style={{ ...ws.input, minHeight:80, resize:"vertical" }} value={char.appearance}
+                  placeholder="Age, hair, eyes, notable features…" onChange={e => setChar({ ...char, appearance:e.target.value })} />
+              </div>
             </div>
+
+            {/* Sheet customisation */}
             <div style={ws.card}>
-              <label style={ws.label}>Appearance / Description</label>
-              <textarea style={{ ...ws.input, minHeight:80, resize:"vertical" }} value={char.appearance}
-                placeholder="Age, hair, eyes, notable features…" onChange={e => setChar({ ...char, appearance:e.target.value })} />
+              <label style={ws.label}>Sheet Style</label>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+
+                {/* Background preset */}
+                <div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Background</div>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
+                    {[
+                      { id:"dungeon",  name:"Dungeon",   bg:"#0d0d0f", g1:"rgba(60,20,100,0.22)",  g2:"rgba(80,40,10,0.18)"  },
+                      { id:"abyss",    name:"Void",      bg:"#050508", g1:"rgba(20,0,80,0.35)",    g2:"rgba(0,20,60,0.25)"   },
+                      { id:"crimson",  name:"Crimson",   bg:"#0e0608", g1:"rgba(120,10,30,0.28)",  g2:"rgba(60,0,10,0.2)"    },
+                      { id:"forest",   name:"Grove",     bg:"#050d07", g1:"rgba(10,60,20,0.30)",   g2:"rgba(30,80,10,0.18)"  },
+                      { id:"ocean",    name:"Abyss Sea", bg:"#030810", g1:"rgba(0,40,120,0.30)",   g2:"rgba(10,20,80,0.22)"  },
+                      { id:"desert",   name:"Desert",    bg:"#0e0c05", g1:"rgba(120,80,10,0.28)",  g2:"rgba(80,40,5,0.20)"   },
+                      { id:"frost",    name:"Frost",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)"},
+                      { id:"infernal", name:"Infernal",  bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)"   },
+                      { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)"  },
+                    ].map(p => {
+                      const cur = (char.custom||{}).bgPreset || "dungeon";
+                      const active = cur === p.id;
+                      return (
+                        <div key={p.id} onClick={()=>setChar(c=>({...c,custom:{...c.custom||{},bgPreset:p.id,bgColor:p.bg,bgG1:p.g1,bgG2:p.g2}}))}
+                          style={{ padding:"8px 4px", borderRadius:7, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
+                            border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                            background:`radial-gradient(ellipse at 30% 20%, ${p.g1} 0%, transparent 70%), ${p.bg}` }}>
+                          <div style={{ fontSize:10, color:active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Accent + symbols */}
+                <div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Accent Colour</div>
+                  <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:16 }}>
+                    {["#c9a227","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
+                      <div key={col} onClick={()=>setChar(c=>({...c,custom:{...c.custom||{},accentColor:col}}))}
+                        style={{ width:24, height:24, borderRadius:"50%", background:col, cursor:"pointer", flexShrink:0,
+                          border:`3px solid ${((char.custom||{}).accentColor||"#c9a227")===col?"white":"transparent"}`,
+                          boxShadow:((char.custom||{}).accentColor||"#c9a227")===col?"0 0 0 2px "+col:"none", transition:"all 0.15s" }}/>
+                    ))}
+                    <input type="color" value={(char.custom||{}).accentColor||"#c9a227"} onChange={e=>setChar(c=>({...c,custom:{...c.custom||{},accentColor:e.target.value}}))}
+                      style={{ width:28,height:28,border:"1px solid var(--border)",borderRadius:6,cursor:"pointer",background:"transparent",padding:2 }} title="Custom"/>
+                  </div>
+
+                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Floating Symbols</div>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {Object.keys(SYMBOL_PRESETS).map(preset => {
+                      const cur = (char.custom||{}).symbolPreset || "All";
+                      const active = cur === preset;
+                      return (
+                        <button key={preset} onClick={()=>setChar(c=>({...c,custom:{...c.custom||{},symbolPreset:preset,symbolSet:SYMBOL_PRESETS[preset],symbolDensity:preset==="None"?"off":"subtle"}}))}
+                          style={{ padding:"4px 10px", borderRadius:16, cursor:"pointer", fontSize:11, transition:"all 0.15s",
+                            border:`1px solid ${active?"var(--accent)":"var(--border)"}`,
+                            background:active?"rgba(201,162,39,0.1)":"var(--surface)",
+                            color:active?"var(--accent)":"var(--text-muted)" }}>
+                          {preset}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
