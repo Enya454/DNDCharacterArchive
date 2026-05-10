@@ -15,61 +15,69 @@
     input, textarea, select { outline: none; }
     input[type=number]::-webkit-inner-spin-button { opacity: 1; }
 
-    /* ── Floating rune / symbol animations ── */
+    /* ── Floating symbol animations ── */
     @keyframes floatUp {
-      0%   { transform: translateY(0px) rotate(0deg);   opacity: 0;    }
-      10%  { opacity: 1; }
-      90%  { opacity: 0.6; }
-      100% { transform: translateY(-120vh) rotate(25deg); opacity: 0; }
+      0%   { transform: translateY(0)        translateX(0px)   rotate(0deg);  opacity: 0; }
+      8%   { opacity: 1; }
+      88%  { opacity: 0.7; }
+      100% { transform: translateY(-130vh)   translateX(18px)  rotate(20deg); opacity: 0; }
     }
-    @keyframes floatSway {
-      0%,100% { margin-left: 0px; }
-      50%      { margin-left: 28px; }
-    }
-    @keyframes pulseGlow {
-      0%,100% { text-shadow: 0 0 8px rgba(201,162,39,0.4), 0 0 20px rgba(201,162,39,0.15); }
-      50%      { text-shadow: 0 0 18px rgba(201,162,39,0.7), 0 0 40px rgba(201,162,39,0.3), 0 0 70px rgba(180,100,255,0.15); }
+    @keyframes floatUpSway {
+      0%   { transform: translateY(0)        translateX(0px)   rotate(0deg);  opacity: 0; }
+      8%   { opacity: 1; }
+      33%  { transform: translateY(-40vh)    translateX(22px)  rotate(5deg);  }
+      66%  { transform: translateY(-85vh)    translateX(-14px) rotate(12deg); }
+      88%  { opacity: 0.7; }
+      100% { transform: translateY(-130vh)   translateX(8px)   rotate(20deg); opacity: 0; }
     }
     @keyframes shimmer {
       0%   { background-position: -200% center; }
       100% { background-position:  200% center; }
     }
     @keyframes heroGlow {
-      0%,100% { opacity: 0.55; }
+      0%,100% { opacity: 0.5; }
       50%      { opacity: 0.85; }
     }
+    @keyframes titlePulse {
+      0%,100% { filter: drop-shadow(0 0 8px rgba(201,162,39,0.5)); }
+      50%      { filter: drop-shadow(0 0 22px rgba(201,162,39,0.85)) drop-shadow(0 0 50px rgba(180,100,255,0.2)); }
+    }
+
+    /* Each symbol starts AT or BELOW the bottom of the viewport
+       (top: 100vh to 120vh) and floats upward */
     .mystic-symbol {
       position: fixed;
       pointer-events: none;
       user-select: none;
-      animation: floatUp linear infinite, floatSway ease-in-out infinite;
       z-index: 0;
       font-style: normal;
       line-height: 1;
+      will-change: transform, opacity;
     }
+
     .tome-title-text {
       background: linear-gradient(135deg, #f0d060 0%, #c9a227 35%, #fff8dc 60%, #c9a227 80%, #8b6914 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: shimmer 4s linear infinite, pulseGlow 3s ease-in-out infinite;
-      -webkit-text-stroke: 0px;
+      animation: shimmer 4s linear infinite, titlePulse 3s ease-in-out infinite;
     }
+
     /* Subtle radial glow overlays */
     .bg-glow-tl {
       position: fixed; top: -20%; left: -10%; width: 60vw; height: 60vw;
-      background: radial-gradient(ellipse, rgba(120,60,220,0.07) 0%, transparent 65%);
+      background: radial-gradient(ellipse, rgba(120,60,220,0.08) 0%, transparent 65%);
       pointer-events: none; z-index: 0;
     }
     .bg-glow-br {
       position: fixed; bottom: -20%; right: -10%; width: 55vw; height: 55vw;
-      background: radial-gradient(ellipse, rgba(201,162,39,0.06) 0%, transparent 65%);
+      background: radial-gradient(ellipse, rgba(201,162,39,0.07) 0%, transparent 65%);
       pointer-events: none; z-index: 0;
     }
     .bg-glow-center {
       position: fixed; top: 30%; left: 30%; width: 40vw; height: 40vw;
-      background: radial-gradient(ellipse, rgba(30,80,180,0.04) 0%, transparent 65%);
+      background: radial-gradient(ellipse, rgba(30,80,180,0.05) 0%, transparent 65%);
       pointer-events: none; z-index: 0;
     }
   </style>
@@ -3665,47 +3673,50 @@ const SYMBOLS = [
 ];
 
 function MysticBackground({ density = "normal" }) {
-  const count = density === "subtle" ? 14 : 22;
+  const count = density === "subtle" ? 12 : 20;
   const symbols = React.useMemo(() => {
+    // Use a seeded-ish spread so symbols are evenly distributed
     return Array.from({ length: count }, (_, i) => {
-      const sym     = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-      const left    = Math.random() * 100;          // vw %
-      const delay   = Math.random() * 18;           // s
-      const dur     = 22 + Math.random() * 28;      // s float duration
-      const swayDur = 6  + Math.random() * 8;       // s sway duration
-      const size    = 10 + Math.random() * 18;      // px
-      const startY  = 20 + Math.random() * 80;      // vh — start partway up
-      // Colour: gold, purple, blue, white — all very dim
+      // Deterministic-ish spread via golden ratio columns
+      const left     = (i * 97 + 11) % 100;            // 0–100 vw
+      const startTop = 100 + (i * 37) % 40;            // 100–140vh (below viewport)
+      const delay    = (i * 3.7) % 20;                 // 0–20s stagger
+      const dur      = 18 + (i * 4.1) % 22;            // 18–40s float
+      const size     = 12 + (i * 7) % 18;              // 12–30px
+      const sym      = SYMBOLS[i % SYMBOLS.length];
+      // Alternate sway direction
+      const anim     = i % 2 === 0 ? "floatUp" : "floatUpSway";
+
       const colours = [
-        "rgba(201,162,39,0.18)",
-        "rgba(180,120,255,0.14)",
-        "rgba(100,160,255,0.14)",
-        "rgba(255,240,200,0.13)",
-        "rgba(255,255,255,0.10)",
+        "rgba(201,162,39,0.28)",   // gold
+        "rgba(180,130,255,0.22)",  // violet
+        "rgba(120,180,255,0.20)",  // ice-blue
+        "rgba(255,245,210,0.22)",  // warm ivory
+        "rgba(255,255,255,0.15)",  // white
       ];
-      const colour = colours[Math.floor(Math.random() * colours.length)];
-      return { sym, left, delay, dur, swayDur, size, startY, colour, id:i };
+      const colour = colours[i % colours.length];
+      return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
     });
   }, [count]);
 
   return (
     <>
-      {/* Radial glow pools */}
       <div className="bg-glow-tl"/>
       <div className="bg-glow-br"/>
       <div className="bg-glow-center"/>
-      {/* Floating symbols */}
       {symbols.map(s => (
-        <span key={s.id} className="mystic-symbol" style={{
-          left:       `${s.left}%`,
-          bottom:     `${-s.startY}vh`,   // start below viewport portion
-          fontSize:   `${s.size}px`,
-          color:      s.colour,
-          animationDuration:  `${s.dur}s, ${s.swayDur}s`,
-          animationDelay:     `${s.delay}s, ${s.delay * 0.4}s`,
-          animationTimingFunction: "linear, ease-in-out",
-          animationIterationCount: "infinite, infinite",
-        }}>{s.sym}</span>
+        <span
+          key={s.id}
+          className="mystic-symbol"
+          style={{
+            left:      `${s.left}%`,
+            top:       `${s.startTop}vh`,
+            fontSize:  `${s.size}px`,
+            color:     s.colour,
+            animation: `${s.anim} ${s.dur}s linear ${s.delay}s infinite`,
+          }}>
+          {s.sym}
+        </span>
       ))}
     </>
   );
