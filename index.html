@@ -404,13 +404,20 @@ const getSkillBonuses = char => {
 // ── Supabase ──
 const SUPABASE_URL = "https://pxlrjtserdzememhsgxu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_RPN2SjOR4vmvZsEhf4PCHg_Y9ch_XY3";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// The UMD bundle exposes itself as window.supabase
+const _supabaseLib = window.supabase || window.Supabase;
+const sb = _supabaseLib
+  ? _supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+if (!sb) console.error("Supabase library failed to load. Check CDN connectivity.");
 
 // Auth helpers
-const getSession  = async () => { const { data } = await sb.auth.getSession(); return data.session; };
-const signUp      = (email, password) => sb.auth.signUp({ email, password });
-const signIn      = (email, password) => sb.auth.signInWithPassword({ email, password });
-const signOut     = () => sb.auth.signOut();
+const getSession  = async () => { if (!sb) return null; const { data } = await sb.auth.getSession(); return data.session; };
+const signUp      = (email, password) => sb?.auth.signUp({ email, password });
+const signIn      = (email, password) => sb?.auth.signInWithPassword({ email, password });
+const signOut     = () => sb?.auth.signOut();
 
 // Character CRUD
 const dbLoadChars = async () => {
@@ -2369,6 +2376,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                   {(alignments || []).map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
+            </div>
             <div style={ws.card}>
               <label style={ws.label}>Appearance / Description</label>
               <textarea style={{ ...ws.input, minHeight:80, resize:"vertical" }} value={char.appearance}
