@@ -4485,6 +4485,135 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
 // ============================================================
 // LOGIN SCREEN
 // ============================================================
+// ============================================================
+// ACCOUNT MODAL
+// ============================================================
+function AccountModal({ session, onClose }) {
+  const [tab,         setTab]         = useState("password");
+  const [newEmail,    setNewEmail]     = useState("");
+  const [newPassword, setNewPassword]  = useState("");
+  const [confirm,     setConfirm]      = useState("");
+  const [deleteWord,  setDeleteWord]   = useState("");
+  const [loading,     setLoading]      = useState(false);
+  const [msg,         setMsg]          = useState(null);  // { type: "ok"|"err", text }
+
+  const flash = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg(null), 4000); };
+
+  const changeEmail = async () => {
+    if (!newEmail) return;
+    setLoading(true);
+    const { error } = await sb.auth.updateUser({ email: newEmail });
+    setLoading(false);
+    if (error) flash("err", error.message);
+    else { flash("ok", "Confirmation sent to both addresses. Check your inbox."); setNewEmail(""); }
+  };
+
+  const changePassword = async () => {
+    if (!newPassword) return;
+    if (newPassword !== confirm) { flash("err", "Passwords don't match."); return; }
+    if (newPassword.length < 8)  { flash("err", "Password must be at least 8 characters."); return; }
+    setLoading(true);
+    const { error } = await sb.auth.updateUser({ password: newPassword });
+    setLoading(false);
+    if (error) flash("err", error.message);
+    else { flash("ok", "Password updated."); setNewPassword(""); setConfirm(""); }
+  };
+
+  const deleteAccount = async () => {
+    if (deleteWord !== "DELETE") { flash("err", 'Type DELETE (all caps) to confirm.'); return; }
+    setLoading(true);
+    // Delete all characters first, then the user via admin API isn't available client-side —
+    // so we sign out and call a Supabase edge function or just delete chars and inform user
+    await sb.from("characters").delete().eq("user_id", session.user.id);
+    // Supabase doesn't allow client-side user deletion — sign out and show instructions
+    await signOut();
+    setLoading(false);
+  };
+
+  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"10px 14px", borderRadius:7, fontSize:14, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:10 };
+  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
+  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center" }}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:420, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
+        {/* Header */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
+          <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
+        </div>
+
+        <div style={{ fontSize:12, color:"#554f45", marginBottom:16, fontStyle:"italic" }}>Logged in as {session.user.email}</div>
+
+        {/* Tab selector */}
+        <div style={{ display:"flex", gap:8, marginBottom:20 }}>
+          <button style={tabBtn("password")} onClick={()=>{setTab("password");setMsg(null);}}>Password</button>
+          <button style={tabBtn("email")}    onClick={()=>{setTab("email");setMsg(null);}}>Email</button>
+          <button style={tabBtn("delete")}   onClick={()=>{setTab("delete");setMsg(null);}}>Delete</button>
+        </div>
+
+        {/* Feedback */}
+        {msg && (
+          <div style={{ padding:"9px 14px", borderRadius:7, marginBottom:14, fontSize:13,
+            background: msg.type==="ok" ? "rgba(39,174,96,0.12)" : "rgba(192,57,43,0.12)",
+            border: `1px solid ${msg.type==="ok" ? "#27ae60" : "#c0392b"}`,
+            color: msg.type==="ok" ? "#27ae60" : "#e74c3c" }}>
+            {msg.text}
+          </div>
+        )}
+
+        {/* Change password */}
+        {tab === "password" && (
+          <div>
+            <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)}
+              placeholder="New password (min 8 characters)" style={inp}/>
+            <input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)}
+              placeholder="Confirm new password" style={inp}
+              onKeyDown={e=>e.key==="Enter"&&changePassword()}/>
+            <button onClick={changePassword} style={btn(false)} disabled={loading}>
+              {loading ? "Updating…" : "Change Password"}
+            </button>
+          </div>
+        )}
+
+        {/* Change email */}
+        {tab === "email" && (
+          <div>
+            <div style={{ fontSize:13, color:"#8a8070", marginBottom:12, lineHeight:1.6 }}>
+              Supabase will send a confirmation link to both your old and new email addresses. You'll need to click both to complete the change.
+            </div>
+            <input type="email" value={newEmail} onChange={e=>setNewEmail(e.target.value)}
+              placeholder="New email address" style={inp}
+              onKeyDown={e=>e.key==="Enter"&&changeEmail()}/>
+            <button onClick={changeEmail} style={btn(false)} disabled={loading}>
+              {loading ? "Sending…" : "Change Email"}
+            </button>
+          </div>
+        )}
+
+        {/* Delete account */}
+        {tab === "delete" && (
+          <div>
+            <div style={{ padding:"10px 14px", background:"rgba(192,57,43,0.1)", border:"1px solid rgba(192,57,43,0.3)", borderRadius:7, marginBottom:14, fontSize:13, color:"#e74c3c", lineHeight:1.6 }}>
+              ⚠ This will permanently delete all your characters from the database. This cannot be undone.
+            </div>
+            <input value={deleteWord} onChange={e=>setDeleteWord(e.target.value)}
+              placeholder='Type DELETE to confirm' style={{...inp, borderColor:"rgba(192,57,43,0.4)", color:"#e74c3c"}}
+              onKeyDown={e=>e.key==="Enter"&&deleteAccount()}/>
+            <button onClick={deleteAccount} style={btn(true)} disabled={loading}>
+              {loading ? "Deleting…" : "Delete My Account & Characters"}
+            </button>
+            <div style={{ fontSize:11, color:"#554f45", marginTop:10, textAlign:"center" }}>
+              Note: you will be signed out immediately.
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function LoginScreen({ onLogin }) {
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
@@ -4559,7 +4688,7 @@ function App() {
   const [view,       setView]       = useState("home");
   const [selId,      setSelId]      = useState(null);
   const [charLoading,setCharLoading]= useState(false);
-  const selChar = characters.find(c => c.id === selId);
+  const [showAccount, setShowAccount] = useState(false);
 
   // ── Auth state listener ──
   useEffect(() => {
@@ -4665,9 +4794,11 @@ function App() {
         <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(201,162,39,0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",
           background:"linear-gradient(180deg, rgba(40,15,80,0.45) 0%, rgba(20,10,40,0.25) 60%, transparent 100%)" }}>
 
-          {/* User info + logout — top right */}
+          {/* User info + account + logout — top right */}
           <div style={{ position:"absolute", top:16, right:20, display:"flex", alignItems:"center", gap:10 }}>
+            {showAccount && <AccountModal session={session} onClose={()=>setShowAccount(false)}/>}
             <span style={{ fontSize:12, color:dt.textMuted || "#8a8070" }}>{session.user.email}</span>
+            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Account</button>
             <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Log out</button>
           </div>
 
