@@ -1390,13 +1390,13 @@ function LibraryItemAdder({ gameData, onAdd }) {
 }
 
 function WizardEquipmentStep({ char, setChar, gameData }) {
-  const { classes, backgrounds, itemTypes, weapons:weaponLib=[], gear:gearLib=[] } = gameData;
+  const { classes, backgrounds, itemTypes, weapons:weaponLib=[], gear:gearLib=[], armor:armorLib=[] } = gameData;
   const classData = classes?.[char.class];
   const bgData    = backgrounds?.[char.background];
 
   const [mode, setMode]         = useState("equipment");
-  const [choices, setChoices]   = useState({});   // { "class-gi": optionIdx, "bg-gi": optionIdx }
-  const [pickSels, setPickSels] = useState({});   // { "class-gi-oi-itemIdx": chosenItemName }
+  const [choices, setChoices]   = useState({});
+  const [pickSels, setPickSels] = useState({});
   const [rolledGold, setRolledGold] = useState(null);
   const [customName, setCustomName] = useState("");
   const [customType, setCustomType] = useState("weapon");
@@ -1406,12 +1406,9 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
   const numDice   = diceMatch ? +diceMatch[1] : 3;
   const dieSize   = diceMatch ? +diceMatch[2] : 4;
 
-  // All items in the weapon/gear library for a category
   const libraryForCategory = cat => {
     if (!cat) return [];
-    const fromWeapons = (weaponLib||[]).filter(w => w.category === cat);
-    const fromGear    = (gearLib||[]).filter(g => g.category === cat);
-    return [...fromWeapons, ...fromGear];
+    return [...weaponLib, ...armorLib, ...gearLib].filter(w => w.category === cat);
   };
 
   const rollGold = () => {
@@ -1420,7 +1417,6 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
     setRolledGold(total);
   };
 
-  // Resolve an item's actual name (substituting pick selection if needed)
   const resolveItem = (item, pickKey) => {
     if (!item.pick) return item;
     const selName = pickSels[pickKey];
@@ -1431,7 +1427,7 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
     return {
       name: found.name,
       qty: item.qty || 1,
-      type: found.damage ? "weapon" : (found.acBase !== undefined ? "armor" : "misc"),
+      type: found.damage ? "weapon" : (found.acBase !== undefined ? (found.category==="shield"?"shield":"armor") : "misc"),
       weight: found.weight || 0,
       description: found.damage
         ? `${found.damage} ${found.damageType}${found.properties?.length ? " — " + found.properties.join(", ") : ""}${found.range ? " — Range " + found.range : ""}`
@@ -1442,25 +1438,59 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
     };
   };
 
-  // Expand an item list: items with qty>1 and a generic plural name become N individual items
-  // e.g. { name:"Two handaxes", qty:2 } → 2× { name:"Handaxe" } if we can match the library
-  // Also items with qty>1 that ARE a specific weapon get expanded to N separate inventory entries
+  const getEquipmentItems = () => {
+    const items = [];
+    (classData?.startingEquipment || []).forEach((group, gi) => {
+      if (!group) return;
+      if (group.fixed) {
+        (group.fixed || []).forEach(it => { if (it) items.push(it); });
+      } else if (group.options) {
+        const oi = choices[`class-${gi}`] ?? 0;
+        const option = group.options[oi] || group.options[0] || [];
+        option.forEach((it, ii) => {
+          if (!it) return;
+          if (it.pick) {
+            const resolved = resolveItem(it, `class-${gi}-${oi}-${ii}`);
+            if (resolved) items.push(resolved);
+            // silently drop unresolved picks (player hasn't chosen yet)
+          } else {
+            items.push(it);
+          }
+        });
+      }
+    });
+    (bgData?.startingItems || []).forEach(it => { if (it) items.push(it); });
+    return items;
+  };
+
+  // Expand qty>1 items: "Two handaxes" → 2× "Handaxe" by matching the library
+  const allLib = [...weaponLib, ...armorLib, ...gearLib];
   const expandItems = rawItems => {
     const expanded = [];
     for (const it of rawItems) {
+      if (!it) continue;
+      if (it.gold && !it.name) continue; // pure gold entry, handled separately
+      if (!it.name) { expanded.push(it); continue; }
       const qty = it.qty || 1;
       if (qty <= 1) { expanded.push(it); continue; }
-      // Try to resolve a library match for the base name
-      const baseName = it.name.replace(/^\d+\s+/, "").replace(/s$/, ""); // strip leading number + trailing s
-      const libMatch = [...(weaponLib||[]), ...(gameData?.armor||[]), ...(gameData?.gear||[])]
-        .find(l => l.name.toLowerCase() === it.name.toLowerCase() || l.name.toLowerCase() === baseName.toLowerCase());
+      const rawName  = String(it.name);
+      const baseName = rawName.replace(/^\d+\s+/i, "").replace(/s$/i, "");
+      const libMatch = allLib.find(l =>
+        l.name.toLowerCase() === rawName.toLowerCase() ||
+        l.name.toLowerCase() === baseName.toLowerCase()
+      );
       if (libMatch) {
-        // Expand into N individual items
         for (let i = 0; i < qty; i++) {
-          expanded.push({ ...it, name: libMatch.name, qty: 1 });
+          expanded.push({
+            ...it,
+            name: libMatch.name,
+            qty: 1,
+            type: libMatch.damage ? "weapon"
+                : libMatch.acBase !== undefined ? (libMatch.category === "shield" ? "shield" : "armor")
+                : (it.type || "misc"),
+          });
         }
       } else {
-        // Can't resolve — keep as-is with qty
         expanded.push(it);
       }
     }
@@ -1468,46 +1498,49 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
   };
 
   const applyEquipment = () => {
-    const rawItems = expandItems(getEquipmentItems());
-    let goldBonus = 0;
-    const invItems = [], personalItems = [];
+    try {
+      const rawItems = expandItems(getEquipmentItems());
+      let goldBonus = 0;
+      const invItems = [], personalItems = [];
+      const equippedArmor   = new Set();
+      const equippedShields = new Set();
 
-    // Track what armor/shields already being added (to avoid auto-equipping duplicates)
-    const equippedArmor   = new Set();
-    const equippedShields = new Set();
+      rawItems.forEach(it => {
+        if (!it) return;
+        if (it.gold && !it.type?.match(/weapon|armor|shield/)) { goldBonus += (it.gold || 0); }
+        if (!it.name) return; // skip nameless entries
+        const type = it.type || "misc";
+        let equip = false;
+        if (type === "weapon") {
+          equip = true;
+        } else if (type === "armor") {
+          if (!equippedArmor.has("armor")) { equip = true; equippedArmor.add("armor"); }
+        } else if (type === "shield") {
+          if (!equippedShields.has("shield")) { equip = true; equippedShields.add("shield"); }
+        }
+        const obj = {
+          id: Date.now() + Math.random(),
+          name: it.name,
+          type,
+          quantity: it.qty || 1,
+          weight: it.weight || 0,
+          description: it.description || "",
+          equipped: equip,
+        };
+        if (it.personal) personalItems.push(obj);
+        else invItems.push(obj);
+      });
 
-    rawItems.forEach(it => {
-      if (it.gold) { goldBonus += it.gold; return; }
-      const type = it.type || "misc";
-      // Auto-equip logic:
-      // Weapons → always equip (can dual-wield)
-      // Armor → equip only first armor, first shield
-      let equip = false;
-      if (type === "weapon") {
-        equip = true;
-      } else if (type === "armor") {
-        if (!equippedArmor.has("armor")) { equip = true; equippedArmor.add("armor"); }
-      } else if (type === "shield") {
-        if (!equippedShields.has("shield")) { equip = true; equippedShields.add("shield"); }
-      }
-      const obj = {
-        id: Date.now() + Math.random(),
-        name: it.name, type,
-        quantity: it.qty || 1,
-        weight: it.weight || 0,
-        description: it.description || "",
-        equipped: equip,
-      };
-      if (it.personal) personalItems.push(obj);
-      else invItems.push(obj);
-    });
-
-    setChar(c => ({
-      ...c,
-      inventory: [...(c.inventory||[]), ...invItems],
-      personalItems: [...(c.personalItems||[]), ...personalItems],
-      currencies: { ...c.currencies, gp:(c.currencies?.gp||0)+goldBonus }
-    }));
+      setChar(c => ({
+        ...c,
+        inventory: [...(c.inventory || []), ...invItems],
+        personalItems: [...(c.personalItems || []), ...personalItems],
+        currencies: { ...c.currencies, gp: (c.currencies?.gp || 0) + goldBonus },
+      }));
+    } catch(err) {
+      console.error("applyEquipment error:", err);
+      alert("Something went wrong applying equipment. Check the console for details.");
+    }
   };
 
   const applyGold = () => {
