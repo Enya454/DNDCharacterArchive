@@ -2369,13 +2369,6 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                   {(alignments || []).map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
-              <div style={ws.card}>
-                <label style={ws.label}>Visual Theme</label>
-                <select style={ws.input} value={char.theme} onChange={e => setChar({ ...char, theme:e.target.value })}>
-                  {Object.entries(themes || {}).map(([k, t]) => <option key={k} value={k}>{t.name}</option>)}
-                </select>
-              </div>
-            </div>
             <div style={ws.card}>
               <label style={ws.label}>Appearance / Description</label>
               <textarea style={{ ...ws.input, minHeight:80, resize:"vertical" }} value={char.appearance}
