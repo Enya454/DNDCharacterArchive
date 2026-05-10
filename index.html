@@ -3350,19 +3350,23 @@ function SettingsTab({ char, gameData, onUpdate }) {
 // ============================================================
 function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
   const [char, setChar]   = useState(initial);
-  const [tab,  setTab]    = useState("stats");
+  const [tab,  setTab]    = useState("spells");
   const [saved, setSaved] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const audioRef  = useRef(null);
   const saveTimer = useRef(null);
+  const fileRef   = useRef(null);
 
   const { classes, species:speciesDb, themes, music } = gameData;
   const theme       = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
   const classData   = classes?.[char.class];
   const speciesData = speciesDb?.[char.species];
+  const subraceData = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
   const pb          = profBonus(char.level);
   const saves       = getSavingThrows(char, classes);
   const skills      = getSkillBonuses(char);
   const tracks      = music?.tracks || [];
+  const isSpellcaster = !!getSpellcastingInfo(char, classes);
 
   const upd = useCallback(u => {
     const s = { ...u, updatedAt: new Date().toISOString() };
@@ -3385,219 +3389,215 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete }) {
     }
   }, [char.music, char.customMusicUrl]);
 
+  // Profile picture upload
+  const handleImageUpload = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { upd({ ...char, profileImage: ev.target.result }); setImgError(false); };
+    reader.readAsDataURL(file);
+  };
+
   const TABS = [
-    { id:"stats",     l:"⚔️ Stats"      },
-    { id:"spells",    l:"✨ Spells"     },
-    { id:"inventory", l:"🎒 Inventory"  },
-    { id:"features",  l:"⭐ Features"   },
-    { id:"notes",     l:"📜 Notes"      },
-    { id:"settings",  l:"⚙️ Settings"  },
+    { id:"spells",    l:"✨ Spells"    },
+    { id:"inventory", l:"🎒 Inventory" },
+    { id:"features",  l:"⭐ Features"  },
+    { id:"notes",     l:"📜 Notes"     },
+    { id:"settings",  l:"⚙️ Settings" },
   ];
 
   const ts = active => ({
-    padding:"10px 16px", borderRadius:"8px 8px 0 0", cursor:"pointer", fontSize:13,
-    whiteSpace:"nowrap", transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
-    background: active ? theme.card   : "transparent",
+    padding:"7px 12px", cursor:"pointer", fontSize:12, whiteSpace:"nowrap",
+    transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
+    background: active ? theme.card : "transparent",
     color:      active ? theme.accent : theme.textMuted,
     border:     `1px solid ${active ? theme.border : "transparent"}`,
-    borderBottom: active ? `1px solid ${theme.card}` : "transparent",
+    borderBottom: active ? `1px solid ${theme.card}` : "none",
+    borderRadius:"6px 6px 0 0",
   });
 
-  const isSpellcaster = !!getSpellcastingInfo(char, classes);
+  const T = k => theme[k] || "var(--"+k.replace(/([A-Z])/g,m=>"-"+m.toLowerCase())+")";
 
-  const qs = [
-    { l:"HP",       v:`${char.hp.current}/${char.hp.max}`,
-      c: char.hp.current < char.hp.max / 4 ? theme.danger : char.hp.current < char.hp.max / 2 ? "#f39c12" : theme.success },
+  // HP colour
+  const hpPct = char.hp.max > 0 ? char.hp.current / char.hp.max : 0;
+  const hpColour = hpPct > 0.5 ? theme.success : hpPct > 0.25 ? "#f39c12" : theme.danger;
+
+  // Stealthy / str warnings
+  const stealthDisadv = hasStealthDisadvantage(char, gameData);
+  const strWarnings   = strRequirementMet(char, gameData);
+
+  // Quick combat stats (beside HP)
+  const combatStats = [
     { l:"AC",       v: calcAC(char, gameData) },
     { l:"Init",     v: modStr(calcMod(char.abilities.dex)) },
     { l:"Speed",    v: `${speciesData?.speed || 30}ft` },
     { l:"Prof",     v: `+${pb}` },
     { l:"Pass Perc",v: 10 + (skills["Perception"]?.value || 0) },
-    ...(isSpellcaster ? [{ l:"Spell DC", v: calcSpellDC(char, classes) || "—" }] : []),
+    ...(isSpellcaster ? [
+      { l:"Spell DC",  v: calcSpellDC(char, classes) ?? "—" },
+      { l:"Spell Atk", v: modStr(calcSpellAtk(char, classes) ?? 0) },
+    ] : []),
   ];
+
+  const sectionLabel = txt => (
+    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
+  );
 
   return (
     <TW themeKey={char.theme} themes={themes}>
       <audio ref={audioRef} loop style={{ display:"none" }} />
+      <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
-      {/* Sticky header */}
-      <div style={{ background:theme.gradientHero || theme.bg, borderBottom:`1px solid ${theme.border}`, padding:"16px 20px", position:"sticky", top:0, zIndex:10 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:14, flexWrap:"wrap" }}>
-          <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"6px 14px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:13 }}>← Back</button>
-          <div style={{ flex:1, minWidth:200 }}>
-            <div style={{ fontFamily:theme.fontDisplay, fontSize:22, color:theme.accent }}>{char.name}</div>
-            <div style={{ fontSize:13, color:theme.textMuted, marginTop:2 }}>
-              {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background, char.alignment].filter(Boolean).join(" • ")}
-            </div>
+      {/* ── Sticky top bar ── */}
+      <div style={{ background:theme.bg, borderBottom:`1px solid ${theme.border}`, padding:"10px 18px", position:"sticky", top:0, zIndex:20, display:"flex", alignItems:"center", gap:12 }}>
+        <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"5px 12px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontFamily:theme.fontDisplay, fontSize:20, color:theme.accent, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{char.name}</div>
+          <div style={{ fontSize:11, color:theme.textMuted, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+            {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background].filter(Boolean).join(" · ")}
           </div>
-          <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"4px 12px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)", fontSize:12 }}>✓ Saved</div>
-          {char.music && char.music !== "none" && <span>🎵</span>}
-          <button onClick={() => { if (confirm("Delete this character permanently?")) onDelete(char.id); }}
-            style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"6px 12px", borderRadius:6, cursor:"pointer", fontSize:13 }}>Delete</button>
         </div>
-
-        {/* Quick stats */}
-        <div style={{ display:"flex", gap:10, marginTop:12, flexWrap:"wrap", alignItems:"center" }}>
-          {qs.map(q => (
-            <div key={q.l} style={{ textAlign:"center", padding:"5px 12px", background:"rgba(0,0,0,0.3)", border:`1px solid ${theme.border}`, borderRadius:8, minWidth:56 }}>
-              <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{q.l}</div>
-              <div style={{ fontFamily:theme.fontDisplay, fontSize:17, color:q.c || theme.accent, lineHeight:1.3 }}>{q.v}</div>
-            </div>
-          ))}
-          <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
-            <span style={{ fontSize:12, color:theme.textMuted }}>Inspiration</span>
-            <div onClick={() => upd({ ...char, inspiration:!char.inspiration })} style={{
-              width:28, height:28, borderRadius:6, cursor:"pointer", display:"flex", alignItems:"center",
-              justifyContent:"center", fontSize:18, transition:"all 0.2s",
-              border:`2px solid ${char.inspiration ? "#ffd700" : theme.border}`,
-              background: char.inspiration ? "rgba(255,215,0,0.18)" : "transparent"
-            }}>{char.inspiration ? "✦" : ""}</div>
-          </div>
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+          {char.music && char.music !== "none" && <span style={{ fontSize:14 }}>🎵</span>}
+          <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"3px 10px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:11 }}>✓ Saved</div>
+          <div onClick={() => upd({ ...char, inspiration:!char.inspiration })} title="Inspiration" style={{
+            width:26, height:26, borderRadius:6, cursor:"pointer", display:"flex", alignItems:"center",
+            justifyContent:"center", fontSize:16, transition:"all 0.2s",
+            border:`2px solid ${char.inspiration ? "#ffd700" : theme.border}`,
+            background: char.inspiration ? "rgba(255,215,0,0.2)" : "transparent"
+          }}>{char.inspiration ? "✦" : "✧"}</div>
+          <button onClick={() => { if (confirm("Delete this character permanently?")) onDelete(char.id); }}
+            style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"5px 10px", borderRadius:6, cursor:"pointer", fontSize:12 }}>Delete</button>
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{ padding:"0 20px 48px", maxWidth:1200, margin:"0 auto" }}>
-        <div style={{ display:"flex", gap:4, marginTop:22, borderBottom:`1px solid ${theme.border}`, flexWrap:"wrap" }}>
-          {TABS.map(t => <button key={t.id} style={ts(tab === t.id)} onClick={() => setTab(t.id)}>{t.l}</button>)}
-        </div>
+      {/* ── Main body: 3-column layout ── */}
+      <div style={{ display:"grid", gridTemplateColumns:"200px 1fr 340px", gap:0, maxWidth:1400, margin:"0 auto", minHeight:"calc(100vh - 50px)", alignItems:"start" }}>
 
-        <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:"0 8px 8px 8px", padding:20 }}>
+        {/* ══ LEFT COLUMN: portrait + abilities + saves ══ */}
+        <div style={{ padding:"16px 12px", borderRight:`1px solid ${theme.border}`, position:"sticky", top:50, maxHeight:"calc(100vh - 50px)", overflowY:"auto" }}>
 
-          {/* STATS TAB */}
-          {tab === "stats" && (
-            <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", gap:22 }}>
-              {/* Left: abilities + saves */}
-              <div>
-                {/* Bonus breakdown */}
-                {(() => {
-                  const sData = speciesData;
-                  const hasChoices = Object.values(char.speciesAbilityChoices||{}).some(v=>v>0);
-                  const hasASI = Object.values(char.asiChoices||{}).some(v=>Object.values(v).some(n=>n>0));
-                  if (!sData && !hasASI) return null;
-                  const rows = [];
-                  if (sData && Object.keys(sData.abilityBonuses||{}).some(ab=>sData.abilityBonuses[ab]>0))
-                    rows.push({ label:`${char.species} (fixed)`, vals: sData.abilityBonuses });
-                  if (hasChoices)
-                    rows.push({ label:`${char.species} (choice)`, vals: char.speciesAbilityChoices });
-                  Object.entries(char.asiChoices||{}).filter(([,v])=>Object.values(v).some(n=>n>0))
-                    .forEach(([feat,vals]) => rows.push({ label:`ASI: ${feat}`, vals }));
-                  if (rows.length === 0) return null;
-                  return (
-                    <div style={{ marginBottom:14 }}>
-                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:8 }}>Bonus Breakdown</div>
-                      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, overflow:"hidden" }}>
-                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
-                          <thead>
-                            <tr style={{ background:"rgba(0,0,0,0.2)" }}>
-                              <td style={{ padding:"4px 8px", color:"var(--text-dim)" }}>Source</td>
-                              {Object.keys(char.abilities).map(ab=><td key={ab} style={{ padding:"4px 6px", textAlign:"center", color:"var(--text-dim)", textTransform:"uppercase" }}>{ABILITY_SHORT[ab]}</td>)}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rows.map((row,i)=>(
-                              <tr key={i} style={{ borderTop:"1px solid var(--border)" }}>
-                                <td style={{ padding:"4px 8px", color:"var(--text-muted)", whiteSpace:"nowrap", maxWidth:90, overflow:"hidden", textOverflow:"ellipsis" }}>{row.label}</td>
-                                {Object.keys(char.abilities).map(ab=>{ const v=row.vals[ab]||0; return <td key={ab} style={{ padding:"4px 6px", textAlign:"center", color:v>0?"var(--success)":"var(--text-dim)", fontFamily:"var(--font-display)" }}>{v>0?`+${v}`:""}</td>; })}
-                              </tr>
-                            ))}
-                            <tr style={{ borderTop:"2px solid var(--accent2)" }}>
-                              <td style={{ padding:"4px 8px", color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:11 }}>TOTAL</td>
-                              {Object.keys(char.abilities).map(ab=>{
-                                const t = char.abilities[ab]; // already finalised on sheet
-                                const over = t > 20;
-                                return <td key={ab} style={{ padding:"4px 6px", textAlign:"center", fontFamily:"var(--font-display)", color: over?"var(--danger)":"var(--accent)", fontSize:14 }}>
-                                  {t}
-                                  {over&&<div style={{ fontSize:9, color:"var(--danger)" }}>⚠ over cap</div>}
-                                </td>;
-                              })}
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:10 }}>Ability Scores</div>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:9 }}>
-                  {Object.keys(char.abilities).map(ab => {
-                    const score = char.abilities[ab];
-                    return (
-                      <div key={ab} style={{ textAlign:"center", padding:12, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:12 }}>
-                        <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                        <div style={{ fontSize:28, fontFamily:"var(--font-display)", color:"var(--accent)", width:50, height:50, borderRadius:"50%", border:"2px solid var(--accent2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"7px auto" }}>{score}</div>
-                        <div style={{ fontSize:15, color:"var(--text)" }}>{modStr(calcMod(score))}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Saving Throws</div>
-                <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                  {Object.entries(saves).map(([ab, sv]) => (
-                    <div key={ab} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 10px", background:"var(--surface)", borderRadius:6, border:"1px solid var(--border)" }}>
-                      <span style={{ width:10, height:10, borderRadius:"50%", flexShrink:0, display:"inline-block",
-                        background: sv.proficient ? "var(--accent)" : "transparent",
-                        border:`2px solid ${sv.proficient ? "var(--accent)" : "var(--border)"}` }} />
-                      <span style={{ flex:1, fontSize:13 }}>{ABILITY_NAMES[ab]}</span>
-                      <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14 }}>{modStr(sv.value)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: HP, skills, proficiencies */}
-              <div>
-                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:8 }}>Hit Points</div>
-                <HPTracker hp={char.hp} onUpdate={hp => upd({ ...char, hp })} />
-
-                <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Skills</div>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
-                  {Object.entries(skills).map(([sk, d]) => (
-                    <div key={sk} style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 10px", background:"var(--surface)", borderRadius:6, border:"1px solid var(--border)" }}>
-                      <span style={{ width:10, height:10, flexShrink:0, display:"inline-block",
-                        borderRadius: d.expertise ? 0 : "50%", transform: d.expertise ? "rotate(45deg)" : "none",
-                        background: d.proficient || d.expertise ? "var(--accent)" : "transparent",
-                        border:`2px solid ${d.proficient || d.expertise ? "var(--accent)" : "var(--border)"}` }} />
-                      <span style={{ flex:1, fontSize:12, color: d.proficient ? "var(--text)" : "var(--text-muted)" }}>{sk}</span>
-                      <span style={{ fontSize:10, color:"var(--text-dim)" }}>({ABILITY_SHORT[SKILLS_MAP[sk]]})</span>
-                      <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, minWidth:28, textAlign:"right" }}>{modStr(d.value)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {classData && (
-                  <>
-                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"18px 0 8px" }}>Proficiencies</div>
-                    <div style={{ padding:12, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, fontSize:13, lineHeight:1.9 }}>
-                      <div><span style={{ color:"var(--text-muted)" }}>Armor: </span>{(classData.armorProficiencies || []).join(", ") || "None"}</div>
-                      <div><span style={{ color:"var(--text-muted)" }}>Weapons: </span>{(classData.weaponProficiencies || []).join(", ")}</div>
-                      <div><span style={{ color:"var(--text-muted)" }}>Saves: </span>{(classData.savingThrows || []).map(ab => ABILITY_NAMES[ab]).join(", ")}</div>
-                    </div>
-                  </>
-                )}
-
-                {/* Armor warnings */}
-                {hasStealthDisadvantage(char, gameData) && (
-                  <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", borderRadius:8, fontSize:12, color:"#e67e22" }}>
-                    ⚠ Stealth disadvantage — equipped armor imposes disadvantage on Dexterity (Stealth) checks.
+          {/* Profile picture */}
+          <div style={{ textAlign:"center", marginBottom:4 }}>
+            <div onClick={() => fileRef.current.click()} style={{ width:130, height:130, borderRadius:12, margin:"0 auto", cursor:"pointer", position:"relative", overflow:"hidden",
+              border:`2px solid ${theme.accent}`, background:theme.surface,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              boxShadow:`0 0 20px rgba(201,162,39,0.2)`, transition:"all 0.2s" }}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow="0 0 28px rgba(201,162,39,0.4)"}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 20px rgba(201,162,39,0.2)"}>
+              {char.profileImage && !imgError
+                ? <img src={char.profileImage} alt="portrait" onError={()=>setImgError(true)}
+                    style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
+                : <div style={{ textAlign:"center", color:theme.textDim }}>
+                    <div style={{ fontSize:36 }}>🧙</div>
+                    <div style={{ fontSize:10, marginTop:6, color:theme.textMuted }}>Click to add portrait</div>
                   </div>
-                )}
-                {strRequirementMet(char, gameData).map(msg => (
-                  <div key={msg} style={{ marginTop:6, padding:"8px 12px", background:"rgba(192,57,43,0.12)", border:`1px solid var(--danger)`, borderRadius:8, fontSize:12, color:"var(--danger)" }}>
-                    ⚠ {msg}
-                  </div>
-                ))}
+              }
+              {/* Hover overlay */}
+              <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.45)", display:"flex", alignItems:"center", justifyContent:"center", opacity:0, transition:"opacity 0.2s" }}
+                onMouseEnter={e=>e.currentTarget.style.opacity=1} onMouseLeave={e=>e.currentTarget.style.opacity=0}>
+                <span style={{ fontSize:11, color:"#fff" }}>📷 Change</span>
               </div>
             </div>
-          )}
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:14, marginTop:8 }}>{char.name}</div>
+          </div>
 
-          {tab === "spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd} />}
-          {tab === "inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd} />}
-          {tab === "features"  && <FeaturesTab   char={char} gameData={gameData} />}
-          {tab === "notes"     && <NotesTab       char={char} onUpdate={upd} />}
-          {tab === "settings"  && <SettingsTab    char={char} gameData={gameData} onUpdate={upd} />}
+          {sectionLabel("Ability Scores")}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6 }}>
+            {Object.keys(char.abilities).map(ab => {
+              const score = char.abilities[ab];
+              const mod   = calcMod(score);
+              return (
+                <div key={ab} style={{ textAlign:"center", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8, padding:"6px 2px" }}>
+                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:theme.accent, lineHeight:1.2, marginTop:3 }}>{score}</div>
+                  <div style={{ fontSize:12, color:theme.text, marginTop:1 }}>{modStr(mod)}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {sectionLabel("Saving Throws")}
+          <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+            {Object.entries(saves).map(([ab, sv]) => (
+              <div key={ab} style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 8px", background:theme.surface, borderRadius:5, border:`1px solid ${theme.border}` }}>
+                <span style={{ width:8, height:8, borderRadius:"50%", flexShrink:0,
+                  background: sv.proficient ? theme.accent : "transparent",
+                  border:`2px solid ${sv.proficient ? theme.accent : theme.border}` }} />
+                <span style={{ flex:1, fontSize:11, color: sv.proficient ? theme.text : theme.textMuted }}>{ABILITY_NAMES[ab]}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:12 }}>{modStr(sv.value)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Proficiencies */}
+          {classData && (<>
+            {sectionLabel("Proficiencies")}
+            <div style={{ background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8, padding:"8px 10px", fontSize:11, lineHeight:2 }}>
+              <div><span style={{ color:theme.textMuted }}>Armor: </span><span style={{ color:theme.text }}>{(classData.armorProficiencies || []).join(", ") || "None"}</span></div>
+              <div><span style={{ color:theme.textMuted }}>Weapons: </span><span style={{ color:theme.text }}>{(classData.weaponProficiencies || []).join(", ") || "None"}</span></div>
+              <div><span style={{ color:theme.textMuted }}>Saves: </span><span style={{ color:theme.text }}>{(classData.savingThrows || []).map(ab => ABILITY_SHORT[ab]).join(", ")}</span></div>
+              {char.skillProficiencies?.length > 0 && (
+                <div><span style={{ color:theme.textMuted }}>Skills: </span><span style={{ color:theme.text }}>{char.skillProficiencies.join(", ")}</span></div>
+              )}
+            </div>
+          </>)}
+
+          {/* Warnings */}
+          {stealthDisadv && <div style={{ marginTop:8, padding:"5px 8px", background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", borderRadius:6, fontSize:10, color:"#e67e22" }}>⚠ Stealth disadvantage</div>}
+          {strWarnings.map(msg => <div key={msg} style={{ marginTop:4, padding:"5px 8px", background:"rgba(192,57,43,0.12)", border:`1px solid ${theme.danger}`, borderRadius:6, fontSize:10, color:theme.danger }}>⚠ {msg}</div>)}
+        </div>
+
+        {/* ══ CENTRE COLUMN: HP + combat stats + skills ══ */}
+        <div style={{ padding:"16px 16px", borderRight:`1px solid ${theme.border}` }}>
+
+          {/* HP tracker at the top */}
+          {sectionLabel("Hit Points")}
+          <HPTracker hp={char.hp} onUpdate={hp => upd({ ...char, hp })} />
+
+          {/* Combat stats row */}
+          {sectionLabel("Combat")}
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:4 }}>
+            {combatStats.map(s => (
+              <div key={s.l} style={{ textAlign:"center", padding:"6px 10px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8, minWidth:58 }}>
+                <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{s.l}</div>
+                <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:18, lineHeight:1.3 }}>{s.v}</div>
+              </div>
+            ))}
+            {/* Inspiration inline */}
+          </div>
+
+          {/* Skills */}
+          {sectionLabel("Skills")}
+          <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+            {Object.entries(skills).map(([sk, d]) => (
+              <div key={sk} style={{ display:"flex", alignItems:"center", gap:7, padding:"3px 8px", background: d.proficient||d.expertise ? "rgba(201,162,39,0.04)" : "transparent", borderRadius:5 }}>
+                <span style={{ width:9, height:9, flexShrink:0, display:"inline-block",
+                  borderRadius: d.expertise ? 0 : "50%", transform: d.expertise ? "rotate(45deg)" : "none",
+                  background: d.proficient || d.expertise ? theme.accent : "transparent",
+                  border:`2px solid ${d.proficient || d.expertise ? theme.accent : theme.border}` }} />
+                <span style={{ flex:1, fontSize:12, color: d.proficient ? theme.text : theme.textMuted }}>{sk}</span>
+                <span style={{ fontSize:10, color:theme.textDim, minWidth:28 }}>({ABILITY_SHORT[SKILLS_MAP[sk]]})</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:13, minWidth:28, textAlign:"right" }}>{modStr(d.value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══ RIGHT COLUMN: tabbed panel ══ */}
+        <div style={{ display:"flex", flexDirection:"column", minHeight:"calc(100vh - 50px)" }}>
+          {/* Tab bar */}
+          <div style={{ display:"flex", gap:0, borderBottom:`1px solid ${theme.border}`, paddingTop:16, paddingLeft:12, flexWrap:"wrap", background:theme.bg, position:"sticky", top:50, zIndex:10 }}>
+            {TABS.map(t => <button key={t.id} style={ts(tab === t.id)} onClick={() => setTab(t.id)}>{t.l}</button>)}
+          </div>
+          {/* Tab content */}
+          <div style={{ flex:1, background:theme.card, border:`1px solid ${theme.border}`, borderTop:"none", padding:16, overflowY:"auto" }}>
+            {tab === "spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd} />}
+            {tab === "inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd} />}
+            {tab === "features"  && <FeaturesTab   char={char} gameData={gameData} />}
+            {tab === "notes"     && <NotesTab       char={char} onUpdate={upd} />}
+            {tab === "settings"  && <SettingsTab    char={char} gameData={gameData} onUpdate={upd} />}
+          </div>
         </div>
       </div>
     </TW>
