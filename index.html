@@ -14,6 +14,64 @@
     ::-webkit-scrollbar-thumb { background: #3a3a45; border-radius: 3px; }
     input, textarea, select { outline: none; }
     input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+    /* ── Floating rune / symbol animations ── */
+    @keyframes floatUp {
+      0%   { transform: translateY(0px) rotate(0deg);   opacity: 0;    }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(-120vh) rotate(25deg); opacity: 0; }
+    }
+    @keyframes floatSway {
+      0%,100% { margin-left: 0px; }
+      50%      { margin-left: 28px; }
+    }
+    @keyframes pulseGlow {
+      0%,100% { text-shadow: 0 0 8px rgba(201,162,39,0.4), 0 0 20px rgba(201,162,39,0.15); }
+      50%      { text-shadow: 0 0 18px rgba(201,162,39,0.7), 0 0 40px rgba(201,162,39,0.3), 0 0 70px rgba(180,100,255,0.15); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    @keyframes heroGlow {
+      0%,100% { opacity: 0.55; }
+      50%      { opacity: 0.85; }
+    }
+    .mystic-symbol {
+      position: fixed;
+      pointer-events: none;
+      user-select: none;
+      animation: floatUp linear infinite, floatSway ease-in-out infinite;
+      z-index: 0;
+      font-style: normal;
+      line-height: 1;
+    }
+    .tome-title-text {
+      background: linear-gradient(135deg, #f0d060 0%, #c9a227 35%, #fff8dc 60%, #c9a227 80%, #8b6914 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite, pulseGlow 3s ease-in-out infinite;
+      -webkit-text-stroke: 0px;
+    }
+    /* Subtle radial glow overlays */
+    .bg-glow-tl {
+      position: fixed; top: -20%; left: -10%; width: 60vw; height: 60vw;
+      background: radial-gradient(ellipse, rgba(120,60,220,0.07) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    .bg-glow-br {
+      position: fixed; bottom: -20%; right: -10%; width: 55vw; height: 55vw;
+      background: radial-gradient(ellipse, rgba(201,162,39,0.06) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+    .bg-glow-center {
+      position: fixed; top: 30%; left: 30%; width: 40vw; height: 40vw;
+      background: radial-gradient(ellipse, rgba(30,80,180,0.04) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
   </style>
 </head>
 <body>
@@ -370,9 +428,13 @@ const TW = ({ themeKey, themes, children }) => {
       "--text-muted":t.textMuted,"--text-dim":t.textDim,
       "--danger":t.danger,"--success":t.success,"--info":t.info,
       "--font-display":t.fontDisplay,"--font-body":t.fontBody,"--gradient-hero":t.gradientHero,
-      background:t.bg||"#0d0d0f", color:t.text||"#e8e0d0",
-      minHeight:"100vh", fontFamily:t.fontBody||"serif"
-    }}>{children}</div>
+      background:`radial-gradient(ellipse at 15% 0%, rgba(60,20,100,0.22) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(80,40,10,0.18) 0%, transparent 50%), ${t.bg||"#0d0d0f"}`,
+      color:t.text||"#e8e0d0",
+      minHeight:"100vh", fontFamily:t.fontBody||"serif", position:"relative", overflow:"hidden"
+    }}>
+      <MysticBackground density="subtle"/>
+      <div style={{ position:"relative", zIndex:1 }}>{children}</div>
+    </div>
   );
 };
 
@@ -662,42 +724,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           })()}
 
           {/* ASI — +2 to one ability or +1/+1 to two, capped at 20 */}
-          {!locked && feature.type === "asi" && (() => {
-            const asi = asiChoices?.[feature.name] || {};
-            const spent = Object.values(asi).reduce((s,v)=>s+(v||0),0);
-            const rem = 2 - spent;
-            return (
-              <div>
-                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
-                  Spend <strong style={{ color:"var(--accent)" }}>2 points</strong>: all to one ability (+2) or split across two (+1/+1). Max 20.
-                  {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
-                           : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
-                </div>
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
-                  {Object.keys(ABILITY_NAMES).map(ab => {
-                    const base = currentAbilities?.[ab] || 10;
-                    const bonus = asi[ab] || 0;
-                    const total = base + bonus;
-                    return (
-                      <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
-                        background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
-                        <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                        <div style={{ fontSize:18, fontFamily:"var(--font-display)", color:bonus>0?"var(--accent)":"var(--text)" }}>
-                          {total}{bonus>0&&<span style={{ fontSize:12 }}> (+{bonus})</span>}
-                        </div>
-                        <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
-                          <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
-                          <button onClick={() => { if(rem<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0?"pointer":"not-allowed",fontSize:14,opacity:rem>0?1:0.3,lineHeight:1 }}>+</button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
+          {/* asi rendered inside the feat-or-ASI block below */}
 
           {/* asi_points — species flexible bonus e.g. Half-Elf +1/+1, stackable */}
           {!locked && feature.type === "asi_points" && (() => {
@@ -922,6 +949,30 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                             {allFeats.find(f=>f.name===chosenFeat).description.slice(0,180)}{allFeats.find(f=>f.name===chosenFeat).description.length>180?"…":""}
                           </div>
                         )}
+                        {/* Sub-choice (e.g. Elemental Adept damage type) */}
+                        {(() => {
+                          const featDef = allFeats.find(f=>f.name===chosenFeat);
+                          const sc = featDef?.subChoice;
+                          if (!sc) return null;
+                          const subKey = `${feature.name}__sub`;
+                          const curSub = (featChoices||{})[subKey] || "";
+                          return (
+                            <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--accent2)" }}>
+                              <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>{sc.label}</div>
+                              {sc.type === "select" && (
+                                <select value={curSub} onChange={e=>onFeatChoice(subKey, e.target.value)} style={{ width:"100%", background:"var(--surface)", border:`1px solid ${curSub?"var(--accent)":"#e67e22"}`, color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:13, fontFamily:"var(--font-body)", cursor:"pointer" }}>
+                                  <option value="">— choose —</option>
+                                  {sc.options.map(o=><option key={o} value={o}>{o}</option>)}
+                                </select>
+                              )}
+                              {(sc.type === "skills" || sc.type === "weapons") && (
+                                <div style={{ fontSize:12, color:"var(--text-dim)", fontStyle:"italic" }}>
+                                  Choose {sc.count} {sc.type === "skills" ? "skills or tools" : "weapons"} on the relevant section of your sheet.
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div>
@@ -967,7 +1018,12 @@ function AbilityRoller({ abilities, onChange }) {
   const [method, setMethod] = useState("standard");
   const [rolls,  setRolls]  = useState({});
   const [pb, setPb] = useState({ str:8, dex:8, con:8, int:8, wis:8, cha:8 });
+  // Standard array pool allocation
   const STANDARD = [15, 14, 13, 12, 10, 8];
+  const [assigned, setAssigned] = useState({}); // ab -> value
+  const [manualRolls, setManualRolls] = useState({}); // ab -> string input
+
+  // Point Buy
   const PB_COST  = { 8:0, 9:1, 10:2, 11:3, 12:4, 13:5, 14:7, 15:9 };
   const MAX_PTS  = 27;
   const usedPts  = Object.values(pb).reduce((s, v) => s + (PB_COST[v] || 0), 0);
@@ -979,7 +1035,36 @@ function AbilityRoller({ abilities, onChange }) {
       nr[ab] = { rolls:dice, total:dice.slice(1).reduce((a,b) => a+b, 0) };
       na[ab] = nr[ab].total;
     });
-    setRolls(nr); onChange(na);
+    setRolls(nr); setManualRolls({}); onChange(na);
+  };
+
+  // Standard array: which values are still in the pool
+  const usedValues = Object.values(assigned);
+  const pool = STANDARD.filter((v, i) => {
+    // Allow duplicates in STANDARD correctly
+    let used = 0;
+    for (const val of usedValues) if (val === v) used++;
+    let poolCount = 0;
+    for (const sv of STANDARD) if (sv === v) poolCount++;
+    return i < poolCount - used + STANDARD.slice(0, i).filter(sv => sv === v).length;
+  });
+  // Simpler: pool = STANDARD minus one entry per assignment
+  const poolRemaining = [...STANDARD];
+  for (const v of usedValues) {
+    const idx = poolRemaining.indexOf(v);
+    if (idx !== -1) poolRemaining.splice(idx, 1);
+  }
+
+  const assignStat = (ab, val) => {
+    const newAssigned = { ...assigned, [ab]: val };
+    setAssigned(newAssigned);
+    onChange({ ...abilities, ...Object.fromEntries(Object.entries(newAssigned)) });
+  };
+  const clearStat = (ab) => {
+    const newAssigned = { ...assigned };
+    delete newAssigned[ab];
+    setAssigned(newAssigned);
+    onChange({ ...abilities, [ab]: 8 });
   };
 
   const mBtn = a => ({ padding:"6px 16px", borderRadius:6, marginRight:8, cursor:"pointer", fontSize:13,
@@ -999,24 +1084,61 @@ function AbilityRoller({ abilities, onChange }) {
           <button key={m} style={mBtn(method === m)} onClick={() => setMethod(m)}>{l}</button>)}
       </div>
 
+      {/* ── Standard Array ── */}
       {method === "standard" && (
         <div>
-          <p style={{ color:"var(--text-muted)", fontSize:13, marginBottom:12 }}>
-            Assign: <strong style={{ color:"var(--accent)" }}>15, 14, 13, 12, 10, 8</strong>
-          </p>
-          <div style={grid}>{Object.keys(abilities).map(ab => (
-            <div key={ab} style={card}>
-              <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-              <select value={abilities[ab]} onChange={e => onChange({ ...abilities, [ab]:+e.target.value })}
-                style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:16, fontFamily:"var(--font-display)", marginTop:6, cursor:"pointer" }}>
-                {STANDARD.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
-              <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
+          {/* Pool of remaining values */}
+          <div style={{ marginBottom:14 }}>
+            <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
+              Available scores — click a stat box to assign, click again to clear:
             </div>
-          ))}</div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {[...new Set(STANDARD)].map(v => {
+                const count = poolRemaining.filter(x => x === v).length;
+                return count > 0 ? (
+                  <div key={v} style={{ padding:"6px 16px", background:"var(--card)", border:"1px solid var(--accent2)", borderRadius:8, fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, position:"relative" }}>
+                    {v}
+                    {count > 1 && <span style={{ position:"absolute", top:-4, right:-4, width:14, height:14, borderRadius:"50%", background:"var(--accent)", fontSize:9, color:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center" }}>{count}</span>}
+                  </div>
+                ) : null;
+              })}
+              {poolRemaining.length === 0 && <span style={{ fontSize:12, color:"var(--success)" }}>✓ All scores assigned</span>}
+            </div>
+          </div>
+          {/* Stat boxes */}
+          <div style={grid}>{Object.keys(abilities).map(ab => {
+            const val = assigned[ab];
+            const isAssigned = val !== undefined;
+            return (
+              <div key={ab} style={{ ...card, border:`1px solid ${isAssigned ? "var(--accent)" : "var(--border)"}`, cursor:"pointer", position:"relative" }}
+                onClick={() => {
+                  if (isAssigned) { clearStat(ab); return; }
+                  if (poolRemaining.length === 0) return;
+                  // Assign the highest remaining value
+                  assignStat(ab, poolRemaining[0]);
+                }}>
+                <div style={lbl}>{ABILITY_SHORT[ab]}</div>
+                {isAssigned ? (
+                  <>
+                    <div style={{ fontSize:26, fontFamily:"var(--font-display)", color:"var(--accent)", marginTop:4 }}>{val}</div>
+                    <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:2 }}>click to clear</div>
+                  </>
+                ) : (
+                  <div style={{ fontSize:15, color:"var(--text-dim)", marginTop:8, fontStyle:"italic" }}>
+                    {poolRemaining.length > 0 ? "click to assign" : "—"}
+                  </div>
+                )}
+                {isAssigned && <span style={mod}>{modStr(calcMod(val))}</span>}
+              </div>
+            );
+          })}</div>
+          <p style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>
+            Scores are assigned in order from the pool. Click a filled box to return its value to the pool.
+          </p>
         </div>
       )}
 
+      {/* ── Point Buy ── */}
       {method === "pointbuy" && (
         <div>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
@@ -1041,17 +1163,37 @@ function AbilityRoller({ abilities, onChange }) {
         </div>
       )}
 
+      {/* ── Roll Dice ── */}
       {method === "roll" && (
         <div>
-          <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)", marginBottom:16 }}>🎲 Roll All</button>
+          <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:16, flexWrap:"wrap" }}>
+            <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)" }}>🎲 Roll All (4d6 drop lowest)</button>
+            <span style={{ fontSize:12, color:"var(--text-muted)" }}>or enter your own rolls below:</span>
+          </div>
           <div style={grid}>{Object.keys(abilities).map(ab => (
-            <div key={ab} style={card}>
+            <div key={ab} style={{ ...card, border:`1px solid ${abilities[ab] !== 10 || rolls[ab] ? "var(--accent)" : "var(--border)"}` }}>
               <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-              <div style={{ fontSize:26, fontFamily:"var(--font-display)", color:"var(--accent)", marginTop:4 }}>{abilities[ab]}</div>
-              {rolls[ab] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:2 }}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
+              <input
+                type="number" min={3} max={18}
+                value={manualRolls[ab] !== undefined ? manualRolls[ab] : abilities[ab]}
+                onChange={e => {
+                  const raw = e.target.value;
+                  setManualRolls(r => ({...r, [ab]: raw}));
+                  const n = parseInt(raw, 10);
+                  if (!isNaN(n) && n >= 3 && n <= 18) {
+                    setRolls(r => ({...r, [ab]: null}));
+                    onChange({ ...abilities, [ab]: n });
+                  }
+                }}
+                style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--accent)", padding:"6px 8px", borderRadius:6, fontSize:26, fontFamily:"var(--font-display)", textAlign:"center", marginTop:6, boxSizing:"border-box" }}
+              />
+              {rolls[ab] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4 }}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
               <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>
             </div>
           ))}</div>
+          <p style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>
+            Click "Roll All" to auto-roll, or type any value 3–18 directly into each box.
+          </p>
         </div>
       )}
     </div>
@@ -2256,47 +2398,38 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
               <div style={{ marginTop:20 }}>
                 {/* Subrace selector — shown when species has subraces */}
                 {speciesData.subraces && Object.keys(speciesData.subraces).length > 0 && (
-                  <div style={{ ...ws.card, marginBottom:14 }}>
-                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>
+                  <div style={{ marginBottom:14 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
                       Choose your {char.species} subrace
                     </div>
-                    <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    <div style={ws.optGrid}>
                       {Object.entries(speciesData.subraces).map(([srName, srData]) => {
                         const isSel = char.subrace === srName;
                         return (
-                          <div key={srName} onClick={() => setChar(c => {
-                            if (c.subrace === srName) return c;
-                            // Clear old subrace choices when changing subrace
-                            const oldSrFeatureNames = new Set(
-                              (speciesData.subraces?.[c.subrace]?.features || []).map(f => f.name)
-                            );
-                            const newChoices = Object.fromEntries(
-                              Object.entries(c.featureChoices || {}).filter(([k]) => !oldSrFeatureNames.has(k))
-                            );
-                            const newSources = Object.fromEntries(
-                              Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Subrace")
-                            );
-                            const newProfs = (c.skillProficiencies || []).filter(sk =>
-                              (c.skillProfSources||{})[sk] !== "Subrace"
-                            );
-                            return { ...c, subrace: srName, featureChoices: newChoices, skillProfSources: newSources, skillProficiencies: newProfs };
-                          })} style={{
-                            padding:"10px 14px", borderRadius:8, cursor:"pointer", transition:"all 0.15s",
-                            border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                            background: isSel ? "rgba(201,162,39,0.08)" : "var(--surface)"
-                          }}>
-                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                              <span style={{ width:14, height:14, borderRadius:"50%", flexShrink:0, display:"inline-block",
-                                border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                                background: isSel ? "var(--accent)" : "transparent" }}/>
-                              <span style={{ fontFamily:"var(--font-display)", color: isSel ? "var(--accent)" : "var(--text)", fontSize:14 }}>{srName}</span>
-                              <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:4 }}>
-                                {Object.entries(srData.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`).join(", ")}
-                              </span>
+                          <div key={srName} style={ws.optCard(isSel)}
+                            onClick={() => setChar(c => {
+                              if (c.subrace === srName) return c;
+                              const oldSrFeatureNames = new Set(
+                                (speciesData.subraces?.[c.subrace]?.features || []).map(f => f.name)
+                              );
+                              const newChoices = Object.fromEntries(
+                                Object.entries(c.featureChoices || {}).filter(([k]) => !oldSrFeatureNames.has(k))
+                              );
+                              const newSources = Object.fromEntries(
+                                Object.entries(c.skillProfSources || {}).filter(([, src]) => src !== "Subrace")
+                              );
+                              const newProfs = (c.skillProficiencies || []).filter(sk =>
+                                (c.skillProfSources||{})[sk] !== "Subrace"
+                              );
+                              return { ...c, subrace: srName, featureChoices: newChoices, skillProfSources: newSources, skillProficiencies: newProfs };
+                            })}>
+                            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{srName}</div>
+                            <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:3 }}>
+                              {Object.entries(srData.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`).join(", ") || "No bonus"}
                             </div>
-                            {isSel && srData.features?.length > 0 && (
-                              <div style={{ marginTop:6, marginLeft:22, fontSize:11, color:"var(--text-dim)" }}>
-                                {srData.features.map(f => f.name).join(" • ")}
+                            {srData.features?.length > 0 && (
+                              <div style={{ fontSize:10, color:"var(--text-dim)" }}>
+                                {srData.features.slice(0,2).map(f => f.name).join(" • ")}{srData.features.length>2?" +more":""}
                               </div>
                             )}
                           </div>
@@ -2304,7 +2437,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
                       })}
                     </div>
                     {!char.subrace && (
-                      <div style={{ marginTop:8, fontSize:12, color:"#e67e22" }}>⚠ Please choose a subrace</div>
+                      <div style={{ marginTop:8, fontSize:12, color:"#e67e22" }}>⚠ Please choose a subrace to continue</div>
                     )}
                   </div>
                 )}
@@ -3514,6 +3647,70 @@ function CharacterCard({ char, gameData, onClick }) {
 // ============================================================
 // ROOT APP
 // ============================================================
+// ============================================================
+// MYSTIC BACKGROUND — floating runes / symbols, subtle glows
+// Renders fixed behind everything, pointer-events:none
+// ============================================================
+const SYMBOLS = [
+  // Musical / bardic
+  "♩","♪","♫","♬",
+  // Celestial / holy
+  "✦","✧","★","☆","✴","⊕",
+  // Runic / magical
+  "ᛏ","ᚨ","ᛉ","ᚱ","ᛊ","ᛗ","ᛟ","ᚷ","ᛒ","ᚦ",
+  // Arcane
+  "⊗","⊙","◈","⬡","⬟","⌘",
+  // Geometric / holy
+  "△","▽","◇","⬦","✩","⁕",
+];
+
+function MysticBackground({ density = "normal" }) {
+  const count = density === "subtle" ? 14 : 22;
+  const symbols = React.useMemo(() => {
+    return Array.from({ length: count }, (_, i) => {
+      const sym     = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+      const left    = Math.random() * 100;          // vw %
+      const delay   = Math.random() * 18;           // s
+      const dur     = 22 + Math.random() * 28;      // s float duration
+      const swayDur = 6  + Math.random() * 8;       // s sway duration
+      const size    = 10 + Math.random() * 18;      // px
+      const startY  = 20 + Math.random() * 80;      // vh — start partway up
+      // Colour: gold, purple, blue, white — all very dim
+      const colours = [
+        "rgba(201,162,39,0.18)",
+        "rgba(180,120,255,0.14)",
+        "rgba(100,160,255,0.14)",
+        "rgba(255,240,200,0.13)",
+        "rgba(255,255,255,0.10)",
+      ];
+      const colour = colours[Math.floor(Math.random() * colours.length)];
+      return { sym, left, delay, dur, swayDur, size, startY, colour, id:i };
+    });
+  }, [count]);
+
+  return (
+    <>
+      {/* Radial glow pools */}
+      <div className="bg-glow-tl"/>
+      <div className="bg-glow-br"/>
+      <div className="bg-glow-center"/>
+      {/* Floating symbols */}
+      {symbols.map(s => (
+        <span key={s.id} className="mystic-symbol" style={{
+          left:       `${s.left}%`,
+          bottom:     `${-s.startY}vh`,   // start below viewport portion
+          fontSize:   `${s.size}px`,
+          color:      s.colour,
+          animationDuration:  `${s.dur}s, ${s.swayDur}s`,
+          animationDelay:     `${s.delay}s, ${s.delay * 0.4}s`,
+          animationTimingFunction: "linear, ease-in-out",
+          animationIterationCount: "infinite, infinite",
+        }}>{s.sym}</span>
+      ))}
+    </>
+  );
+}
+
 function App() {
   const { data:gameData, error } = useGameData();
   const [characters, setCharacters] = useState(() => loadChars());
@@ -3570,38 +3767,61 @@ function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
-      <div style={{ background:dt.bg || "#0d0d0f", minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0" }}>
+      <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
+
+        {/* Floating runes + glow pools */}
+        <MysticBackground density="normal"/>
 
         {/* Hero banner */}
-        <div style={{ background:dt.gradientHero || dt.bg, borderBottom:`1px solid ${dt.border}`, padding:"42px 24px 34px", textAlign:"center", position:"relative", overflow:"hidden" }}>
-          <div style={{ position:"absolute", inset:0, opacity:0.03,
-            backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(201,162,39,0.5) 40px,rgba(201,162,39,0.5) 41px)" }} />
-          <div style={{ fontFamily:dt.fontDisplay, fontSize:"clamp(26px,5vw,50px)", color:dt.accent, letterSpacing:2, textShadow:`0 0 40px ${dt.accentSecondary}`, position:"relative" }}>
+        <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(201,162,39,0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",
+          background:"linear-gradient(180deg, rgba(40,15,80,0.45) 0%, rgba(20,10,40,0.25) 60%, transparent 100%)" }}>
+
+          {/* Inner hero radial glow */}
+          <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 65%)", animation:"heroGlow 4s ease-in-out infinite", pointerEvents:"none" }}/>
+
+          {/* Ornamental divider line */}
+          <div style={{ position:"absolute", top:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.4), rgba(180,120,255,0.3), rgba(201,162,39,0.4), transparent)" }}/>
+
+          <div className="tome-title-text" style={{ fontFamily:dt.fontDisplay, fontSize:"clamp(28px,5.5vw,56px)", letterSpacing:3, position:"relative" }}>
             ⚔️ TOME OF HEROES
           </div>
-          <div style={{ color:dt.textMuted, fontSize:15, marginTop:8, fontStyle:"italic", position:"relative" }}>Your personal D&amp;D 5e character compendium</div>
+          <div style={{ color:dt.textMuted, fontSize:15, marginTop:10, fontStyle:"italic", position:"relative", letterSpacing:0.5 }}>
+            Your personal D&amp;D 5e character compendium
+          </div>
+
+          {/* Ornamental rule below subtitle */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, margin:"18px auto 20px", maxWidth:320 }}>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
+            <span style={{ color:"rgba(201,162,39,0.5)", fontSize:16 }}>✦</span>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(201,162,39,0.35), transparent)" }}/>
+          </div>
+
           <button onClick={() => setView("create")} style={{
-            marginTop:24, padding:"14px 36px", background:dt.accent, border:"none", color:dt.bg || "#0d0d0f",
-            borderRadius:10, cursor:"pointer", fontFamily:dt.fontDisplay, fontSize:16, letterSpacing:1,
-            boxShadow:`0 4px 20px ${dt.accentSecondary}`, transition:"all 0.2s", position:"relative"
+            padding:"14px 40px", border:"1px solid rgba(201,162,39,0.5)", color:dt.bg || "#0d0d0f",
+            borderRadius:10, cursor:"pointer", fontFamily:dt.fontDisplay, fontSize:15, letterSpacing:1.5, position:"relative",
+            background:"linear-gradient(135deg, #c9a227 0%, #e8c84a 40%, #c9a227 70%, #8b6914 100%)",
+            boxShadow:"0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)", transition:"all 0.25s"
           }}
-            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.04)"}
-            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+            onMouseEnter={e => { e.currentTarget.style.transform="scale(1.05)"; e.currentTarget.style.boxShadow="0 6px 32px rgba(201,162,39,0.5), 0 0 80px rgba(201,162,39,0.12)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform="scale(1)";   e.currentTarget.style.boxShadow="0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)"; }}>
             + Create New Character
           </button>
+
+          {/* Bottom ornamental line */}
+          <div style={{ position:"absolute", bottom:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.25), transparent)" }}/>
         </div>
 
         {/* Character grid */}
-        <div style={{ maxWidth:1100, margin:"0 auto", padding:"32px 24px" }}>
+        <div style={{ maxWidth:1100, margin:"0 auto", padding:"36px 24px", position:"relative", zIndex:1 }}>
           {characters.length === 0 ? (
             <div style={{ textAlign:"center", padding:"80px 20px" }}>
-              <div style={{ fontSize:64, marginBottom:18 }}>📖</div>
-              <div style={{ fontFamily:dt.fontDisplay, fontSize:24, color:dt.textMuted, marginBottom:10 }}>The tome is empty</div>
-              <div style={{ color:dt.textDim, fontSize:15 }}>Create your first character to begin your adventure</div>
+              <div style={{ fontSize:72, marginBottom:18, filter:"drop-shadow(0 0 20px rgba(201,162,39,0.3))" }}>📖</div>
+              <div style={{ fontFamily:dt.fontDisplay, fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
+              <div style={{ color:dt.textDim, fontSize:15, fontStyle:"italic" }}>Create your first character to begin your adventure</div>
             </div>
           ) : (
             <>
-              <div style={{ fontFamily:dt.fontDisplay, color:dt.textMuted, fontSize:12, textTransform:"uppercase", letterSpacing:2, marginBottom:18 }}>
+              <div style={{ fontFamily:dt.fontDisplay, color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
                 {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
@@ -3611,8 +3831,10 @@ function App() {
           )}
         </div>
 
-        <div style={{ textAlign:"center", padding:20, borderTop:`1px solid ${dt.border}`, color:dt.textDim, fontSize:12, fontStyle:"italic" }}>
+        <div style={{ position:"relative", zIndex:1, textAlign:"center", padding:24, borderTop:`1px solid rgba(201,162,39,0.12)`, color:dt.textDim, fontSize:12, fontStyle:"italic" }}>
+          <span style={{ color:"rgba(201,162,39,0.3)", marginRight:8 }}>✦</span>
           Tome of Heroes • Edit <strong style={{ color:dt.textMuted }}>tome-data.json</strong> to customise species, classes, spells, themes &amp; more
+          <span style={{ color:"rgba(201,162,39,0.3)", marginLeft:8 }}>✦</span>
         </div>
       </div>
     </>

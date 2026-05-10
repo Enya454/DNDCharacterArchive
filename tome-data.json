@@ -10522,7 +10522,18 @@
       "prerequisites": {
         "spellcasting": true
       },
-      "effects": {}
+      "effects": {},
+      "subChoice": {
+        "type": "select",
+        "label": "Damage Type",
+        "options": [
+          "Acid",
+          "Cold",
+          "Fire",
+          "Lightning",
+          "Thunder"
+        ]
+      }
     },
     {
       "name": "Grappler",
@@ -10604,6 +10615,18 @@
           "cantrips": 2,
           "level1": 1
         }
+      },
+      "subChoice": {
+        "type": "select",
+        "label": "Class Spell List",
+        "options": [
+          "Bard",
+          "Cleric",
+          "Druid",
+          "Sorcerer",
+          "Warlock",
+          "Wizard"
+        ]
       }
     },
     {
@@ -10686,6 +10709,18 @@
           "wis",
           "cha"
         ]
+      },
+      "subChoice": {
+        "type": "select",
+        "label": "Ability Score",
+        "options": [
+          "Strength",
+          "Dexterity",
+          "Constitution",
+          "Intelligence",
+          "Wisdom",
+          "Charisma"
+        ]
       }
     },
     {
@@ -10699,7 +10734,19 @@
           "wis": 13
         }
       },
-      "effects": {}
+      "effects": {},
+      "subChoice": {
+        "type": "select",
+        "label": "Class Spell List",
+        "options": [
+          "Bard",
+          "Cleric",
+          "Druid",
+          "Sorcerer",
+          "Warlock",
+          "Wizard"
+        ]
+      }
     },
     {
       "name": "Savage Attacker",
@@ -10733,6 +10780,11 @@
         "proficiency": {
           "skills": 3
         }
+      },
+      "subChoice": {
+        "type": "skills",
+        "label": "Choose 3 skills or tools",
+        "count": 3
       }
     },
     {
@@ -10791,6 +10843,11 @@
           "str",
           "dex"
         ]
+      },
+      "subChoice": {
+        "type": "weapons",
+        "label": "Choose 4 weapons",
+        "count": 4
       }
     }
   ]
