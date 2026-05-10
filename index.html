@@ -2574,7 +2574,62 @@ function CharacterCreationWizard({ gameData, onSave, onCancel }) {
             <div style={ws.optGrid}>
               {Object.entries(classes || {}).map(([n, d]) => (
                 <div key={n} style={ws.optCard(char.class === n)}
-                  onClick={() => setChar({ ...char, class:n, subclass:"" })}>
+                  onClick={() => {
+                    if (char.class === n) return; // no change
+                    const oldClass = char.class;
+                    const oldSubclass = char.subclass;
+                    // Labels used when storing class-sourced data
+                    const oldClassLabel = oldClass ? `${oldClass} Class` : null;
+                    setChar(c => {
+                      // Strip skill profs sourced from old class or old subclass
+                      const newSources = Object.fromEntries(
+                        Object.entries(c.skillProfSources || {}).filter(([, src]) =>
+                          src !== oldClassLabel && src !== oldSubclass
+                        )
+                      );
+                      const newProfs = (c.skillProficiencies || []).filter(sk => newSources[sk] !== undefined || !(c.skillProfSources||{})[sk]);
+                      const newExpertise = (c.skillExpertise || []).filter(sk => newProfs.includes(sk));
+                      // Strip languages sourced from old class/subclass
+                      const newLangSources = Object.fromEntries(
+                        Object.entries(c.languageSources || {}).filter(([, src]) =>
+                          src !== oldClassLabel && src !== oldSubclass
+                        )
+                      );
+                      const newLangs = (c.languages || []).filter(l => newLangSources[l] !== undefined || !(c.languageSources||{})[l]);
+                      // Strip all class feature choices (keep species/background choices)
+                      const oldClassFeatureNames = new Set([
+                        ...(classes[oldClass]?.features || []).map(f => f.name),
+                        ...Object.values(classes[oldClass]?.subclasses || {}).flatMap(sc => (sc.features || []).map(f => f.name)),
+                      ]);
+                      const newFeatureChoices = Object.fromEntries(
+                        Object.entries(c.featureChoices || {}).filter(([k]) => !oldClassFeatureNames.has(k))
+                      );
+                      // Strip ASI choices from class features
+                      const newAsiChoices = Object.fromEntries(
+                        Object.entries(c.asiChoices || {}).filter(([k]) => !oldClassFeatureNames.has(k))
+                      );
+                      // Strip feat choices from class ASI features
+                      const newFeatChoices = Object.fromEntries(
+                        Object.entries(c.featChoices || {}).filter(([k]) => !oldClassFeatureNames.has(k))
+                      );
+                      // Strip class spells (keep racial spells)
+                      const newSpells = (c.spells || []).filter(s => s.racial);
+                      return {
+                        ...c,
+                        class: n,
+                        subclass: "",
+                        skillProfSources: newSources,
+                        skillProficiencies: newProfs,
+                        skillExpertise: newExpertise,
+                        languageSources: newLangSources,
+                        languages: newLangs,
+                        featureChoices: newFeatureChoices,
+                        asiChoices: newAsiChoices,
+                        featChoices: newFeatChoices,
+                        spells: newSpells,
+                      };
+                    });
+                  }}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.spellcaster ? "✨ Spellcaster" : "⚔️ Martial"}</div>
