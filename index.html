@@ -3247,32 +3247,33 @@ function HPTracker({ hp, onUpdate }) {
     setDelta("");
   };
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-      {/* HP figure + bar */}
-      <div style={{ minWidth:120 }}>
-        <div style={{ display:"flex", alignItems:"baseline", gap:4 }}>
-          <span style={{ fontSize:26, fontFamily:"var(--font-display)", color: pct > 25 ? "var(--accent)" : "var(--danger)", lineHeight:1 }}>{hp.current}</span>
-          <span style={{ color:"var(--text-dim)", fontSize:16 }}>/</span>
-          <span style={{ fontSize:18, fontFamily:"var(--font-display)", color:"var(--text-muted)", lineHeight:1 }}>{hp.max}</span>
-          {hp.temp > 0 && <span style={{ fontSize:11, color:"var(--info)", marginLeft:4 }}>+{hp.temp}</span>}
-        </div>
-        <div style={{ height:10, background:"var(--bg)", borderRadius:5, marginTop:5, overflow:"hidden", width:130 }}>
-          <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:5, transition:"all 0.3s" }}/>
-        </div>
+    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+      {/* HP figure */}
+      <div style={{ flexShrink:0, display:"flex", alignItems:"baseline", gap:4 }}>
+        <span style={{ fontSize:28, fontFamily:"var(--font-display)", color: pct > 25 ? "var(--accent)" : "var(--danger)", lineHeight:1 }}>{hp.current}</span>
+        <span style={{ color:"var(--text-dim)", fontSize:16 }}>/</span>
+        <span style={{ fontSize:20, fontFamily:"var(--font-display)", color:"var(--text-muted)", lineHeight:1 }}>{hp.max}</span>
+        {hp.temp > 0 && <span style={{ fontSize:11, color:"var(--info)", marginLeft:4 }}>+{hp.temp} tmp</span>}
+        <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:4 }}>HP</span>
       </div>
-      {/* Amount input + damage/heal */}
-      <input value={delta} onChange={e=>setDelta(e.target.value)}
-        onKeyDown={e=>e.key==="Enter"&&apply(false)}
-        placeholder="±" style={{ width:52, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"5px 7px", borderRadius:6, fontSize:14, fontFamily:"var(--font-body)", textAlign:"center" }}/>
-      <button onClick={()=>apply(false)} style={{ padding:"5px 10px", background:"rgba(192,57,43,0.15)", border:"1px solid var(--danger)", color:"var(--danger)", borderRadius:6, cursor:"pointer", fontSize:12 }}>DMG</button>
-      <button onClick={()=>apply(true)}  style={{ padding:"5px 10px", background:"rgba(39,174,96,0.15)",  border:"1px solid var(--success)", color:"var(--success)", borderRadius:6, cursor:"pointer", fontSize:12 }}>Heal</button>
-      {/* Rest + temp */}
-      <div style={{ display:"flex", gap:5, alignItems:"center" }}>
+      {/* Bar — flex-grow to fill space */}
+      <div style={{ flex:1, height:10, background:"var(--bg)", borderRadius:5, overflow:"hidden", minWidth:60 }}>
+        <div style={{ height:"100%", width:`${pct}%`, background:bc, borderRadius:5, transition:"all 0.3s" }}/>
+      </div>
+      {/* Controls */}
+      <div style={{ display:"flex", gap:6, alignItems:"center", flexShrink:0 }}>
+        <input value={delta} onChange={e=>setDelta(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&apply(false)}
+          placeholder="±" style={{ width:48, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)", padding:"4px 6px", borderRadius:6, fontSize:14, fontFamily:"var(--font-body)", textAlign:"center" }}/>
+        <button onClick={()=>apply(false)} style={{ padding:"4px 9px", background:"rgba(192,57,43,0.15)", border:"1px solid var(--danger)", color:"var(--danger)", borderRadius:6, cursor:"pointer", fontSize:12 }}>DMG</button>
+        <button onClick={()=>apply(true)}  style={{ padding:"4px 9px", background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)", borderRadius:6, cursor:"pointer", fontSize:12 }}>Heal</button>
         <button onClick={()=>onUpdate({...hp,current:hp.max})} style={{ padding:"4px 8px", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:11 }}>Short</button>
         <button onClick={()=>onUpdate({...hp,current:hp.max,temp:0})} style={{ padding:"4px 8px", background:"var(--surface)", border:"1px solid var(--accent2)", color:"var(--accent)", borderRadius:5, cursor:"pointer", fontSize:11 }}>Long</button>
-        <span style={{ fontSize:10, color:"var(--text-dim)" }}>Tmp:</span>
-        <input type="number" value={hp.temp} min={0} onChange={e=>onUpdate({...hp,temp:Math.max(0,+e.target.value)})}
-          style={{ width:42, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--info)", padding:"3px 4px", borderRadius:5, fontSize:12, textAlign:"center", fontFamily:"var(--font-body)" }}/>
+        <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+          <span style={{ fontSize:10, color:"var(--text-dim)" }}>Tmp:</span>
+          <input type="number" value={hp.temp} min={0} onChange={e=>onUpdate({...hp,temp:Math.max(0,+e.target.value)})}
+            style={{ width:40, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--info)", padding:"3px 4px", borderRadius:5, fontSize:12, textAlign:"center", fontFamily:"var(--font-body)" }}/>
+        </div>
       </div>
     </div>
   );
@@ -4508,24 +4509,29 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
     <TW themeKey={char.theme} themes={themes} charCustom={char.custom || {}}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
-      {/* ── Sticky top bar ── */}
-      <div style={{ background:theme.bg, borderBottom:`1px solid ${theme.border}`, padding:"8px 16px", position:"sticky", top:0, zIndex:20, display:"flex", alignItems:"center", gap:10 }}>
-        <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
-        <div style={{ flex:1, minWidth:0 }}>
-          <span style={{ fontFamily:theme.fontDisplay, fontSize:18, color:theme.accent }}>{char.name}</span>
-          <span style={{ fontSize:11, color:theme.textMuted, marginLeft:10 }}>
-            {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background].filter(Boolean).join(" · ")}
-          </span>
+      {/* ── Sticky top bar — name + HP bar ── */}
+      <div style={{ background:theme.card, borderBottom:`2px solid ${theme.accent}`, padding:"10px 16px", position:"sticky", top:0, zIndex:20 }}>
+        {/* Row 1: back button, name/subtitle, controls */}
+        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+          <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
+          <div style={{ flex:1, minWidth:0 }}>
+            <span style={{ fontFamily:theme.fontDisplay, fontSize:20, color:theme.accent }}>{char.name}</span>
+            <span style={{ fontSize:11, color:theme.textMuted, marginLeft:10 }}>
+              {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Level ${char.level}`, char.background].filter(Boolean).join(" · ")}
+            </span>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+            <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 9px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:11 }}>✓ Saved</div>
+            <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:24,height:24,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
+            <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"4px 9px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
+          </div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-          <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 9px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:11 }}>✓ Saved</div>
-          <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:24,height:24,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
-          <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"4px 9px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
-        </div>
+        {/* Row 2: HP bar inline */}
+        <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
       </div>
 
       {/* ── Two-column body ── */}
-      <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 44px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
+      <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 92px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
         <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
@@ -4600,21 +4606,16 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {strWarnings.map(msg=><div key={msg} style={{ marginTop:4, padding:"4px 8px", background:"rgba(192,57,43,0.12)", border:`1px solid ${theme.danger}`, borderRadius:5, fontSize:10, color:theme.danger }}>⚠ {msg}</div>)}
         </div>
 
-        {/* ══ RIGHT SIDE: top strip + tab panel ══ */}
+        {/* ══ RIGHT SIDE: combat stats grid + tab panel ══ */}
         <div style={{ display:"flex", flexDirection:"column", height:"100%", overflow:"hidden", borderRadius:12, border:`1px solid ${theme.border}`, background:theme.card }}>
 
-          {/* ── Top strip: HP + combat stats ── */}
-          <div style={{ padding:"10px 14px", borderBottom:`1px solid ${theme.border}`, flexShrink:0, display:"flex", alignItems:"center", gap:12, borderRadius:"12px 12px 0 0", background:`rgba(0,0,0,0.15)`, flexWrap:"nowrap", overflow:"hidden" }}>
-            {/* HP tracker — fixed width, never shrinks */}
-            <div style={{ flexShrink:0 }}>
-              <HPTracker hp={char.hp} onUpdate={hp=>upd({...char,hp})}/>
-            </div>
-            {/* Combat stat pills — scrollable row so they never wrap onto a new line */}
-            <div style={{ display:"flex", gap:8, marginLeft:"auto", flexShrink:0, overflowX:"auto", paddingBottom:2 }}>
+          {/* ── Combat stats grid ── */}
+          <div style={{ padding:"12px 16px", borderBottom:`1px solid ${theme.border}`, flexShrink:0, background:`rgba(0,0,0,0.12)` }}>
+            <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length}, 1fr)`, gap:8 }}>
               {combatStats.map(s=>(
-                <div key={s.l} style={{ textAlign:"center", padding:"6px 12px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8, flexShrink:0, minWidth:52 }}>
-                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1, whiteSpace:"nowrap", marginBottom:2 }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:22, lineHeight:1 }}>{s.v}</div>
+                <div key={s.l} style={{ textAlign:"center", padding:"8px 4px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:10 }}>
+                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:4, whiteSpace:"nowrap" }}>{s.l}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:26, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>
