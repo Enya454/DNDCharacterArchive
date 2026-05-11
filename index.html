@@ -644,7 +644,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         {!locked && !isComplete && <span style={{ fontSize:10, padding:"1px 8px", borderRadius:10, background:"rgba(230,126,34,0.15)", border:"1px solid #e67e22", color:"#e67e22", whiteSpace:"nowrap" }}>⚠ incomplete</span>}
         {!locked && isComplete && feature.type !== "passive" && <span style={{ fontSize:10, padding:"1px 8px", borderRadius:10, background:"rgba(39,174,96,0.15)", border:"1px solid var(--success)", color:"var(--success)" }}>✓</span>}
         {!locked && chosen && feature.type === "choice" && (
-          <span style={{ fontSize:10, color:"var(--text-muted)", maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{chosen.split("—")[0].trim()}</span>
+          <span style={{ fontSize:10, color:"var(--text-muted)", maxWidth:120, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{(Array.isArray(chosen) ? chosen.join(", ") : String(chosen).split("—")[0].trim())}</span>
         )}
         {!locked && subclass && feature.type === "subclass_choice" && (
           <span style={{ fontSize:10, color:"var(--text-muted)" }}>{subclass}</span>
@@ -1820,7 +1820,15 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
     (classData?.startingEquipment || []).forEach((group, gi) => {
       if (!group) return;
       if (group.fixed) {
-        (group.fixed || []).forEach(it => { if (it) items.push(it); });
+        (group.fixed || []).forEach((it, ii) => {
+          if (!it) return;
+          if (it.pick) {
+            const resolved = resolveItem(it, `fixed-${gi}-${ii}`);
+            if (resolved) items.push(resolved);
+          } else {
+            items.push(it);
+          }
+        });
       } else if (group.options) {
         const oi = choices[`class-${gi}`] ?? 0;
         const option = group.options[oi] || group.options[0] || [];
@@ -2008,14 +2016,20 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
                 if (group.fixed) return (
                   <div key={gi} style={{marginBottom:12,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8}}>
                     <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>You always get</div>
-                    <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                      {group.fixed.map(it=>(
-                        <div key={it.name} style={{fontSize:13}}>
-                          {it.qty>1?`${it.qty}× `:""}
-                          <strong>{it.name}</strong>
-                          {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
-                        </div>
-                      ))}
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                      {group.fixed.map((it,ii)=>{
+                        if (it.pick) {
+                          const pickKey = `fixed-${gi}-${ii}`;
+                          return <div key={pickKey}>{renderOptionItem(it, pickKey)}</div>;
+                        }
+                        return (
+                          <div key={it.name} style={{fontSize:13}}>
+                            {it.qty>1?`${it.qty}× `:""}
+                            <strong>{it.name}</strong>
+                            {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -3785,7 +3799,7 @@ function FeaturesTab({ char, gameData }) {
           )}
           {locked   && <span style={ws.lockBadge}>Lvl {feat.level}</span>}
           {!locked && feat.level > 1 && !isSpecies && !isSubrace && <span style={{ fontSize:10, color:"var(--text-dim)" }}>Lvl {feat.level}</span>}
-          {chosen   && <span style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10, border:"1px solid var(--success)" }}>{chosen.split("—")[0].trim()}</span>}
+          {chosen   && <span style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10, border:"1px solid var(--success)" }}>{(Array.isArray(chosen) ? chosen.join(", ") : String(chosen).split("—")[0].trim())}</span>}
           <span style={{ color:"var(--text-dim)", fontSize:11 }}>{isOpen ? "▲" : "▼"}</span>
         </div>
         {isOpen && (
