@@ -11681,6 +11681,406 @@
         "Cleric"
       ],
       "ritual": false
+    },
+    {
+      "name": "Acid Splash",
+      "level": 0,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You hurl a bubble of acid. Choose one creature within range, or choose two creatures within range that are within 5 feet of each other. A target must succeed on a Dexterity saving throw or take 1d6 acid damage.",
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "1d6",
+        "damageType": "acid",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Control Flames",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "S",
+      "duration": "Instantaneous or 1 hour",
+      "description": "You choose nonmagical flame that you can see within range and that fits within a 5-foot cube. You affect it in one of several ways: instantaneously expand/extinguish it, double/halve its illumination radius, change its color, or cause it to flicker.",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Create Bonfire",
+      "level": 0,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You create a bonfire on ground that you can see within range. Any creature in the bonfire's space when you cast the spell must succeed on a Dexterity saving throw or take 1d8 fire damage. A creature that enters the bonfire for the first time on a turn or ends its turn there must also make this save.",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "1d8",
+        "damageType": "fire",
+        "cantripScale": "1d8"
+      }
+    },
+    {
+      "name": "Decompose",
+      "level": 0,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "1 minute",
+      "description": "You reach out and touch a corpse. Over the next minute, the corpse begins to rapidly decompose, sprouting fungus and moss as it breaks down into compost.",
+      "classes": [
+        "Druid"
+      ]
+    },
+    {
+      "name": "Encode Thoughts",
+      "level": 0,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "S",
+      "duration": "8 hours",
+      "description": "You pull a memory, an idea, or a message from your mind and transform it into a tangible string of glowing energy called a thought strand. You or another creature can later cast the cantrip again to decode the strand's content.",
+      "classes": [
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Frostbite",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You cause numbing frost to form on one creature that you can see within range. The target must make a Constitution saving throw. On a failed save, the target takes 1d6 cold damage, and it has disadvantage on the next weapon attack roll it makes before the end of its next turn.",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "1d6",
+        "damageType": "cold",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Green-Flame Blade",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "S, M",
+      "duration": "Instantaneous",
+      "description": "You brandish the weapon used in the spell's casting and make a melee attack with it against one creature within 5 feet. On a hit, the target suffers the weapon attack's normal effects, and green fire leaps to a different creature of your choice within 5 feet. The second creature takes fire damage equal to your spellcasting ability modifier.",
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "attack": "melee",
+        "notes": "On hit: splash fire damage to nearby creature"
+      }
+    },
+    {
+      "name": "Gust",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You seize the air and compel it to create one of the following effects: push one creature 5 feet if it fails a Strength saving throw, push an unattended object 10 feet, or create a harmless sensory effect.",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "str",
+        "notes": "Push creature or object"
+      }
+    },
+    {
+      "name": "Hand of Radiance",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You raise your hand, and burning radiance erupts from it. Each creature of your choice that you can see within 5 feet of you must succeed on a Constitution saving throw or take 1d6 radiant damage.",
+      "classes": [
+        "Cleric"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "1d6",
+        "damageType": "radiant",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Lightning Lure",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (15-ft radius)",
+      "components": "V",
+      "duration": "Instantaneous",
+      "description": "You create a lash of lightning energy that strikes at one creature of your choice that you can see within 15 feet of you. The target must succeed on a Strength saving throw or be pulled up to 10 feet in a straight line toward you and take 1d8 lightning damage if it ends within 5 feet of you.",
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "str",
+        "damage": "1d8",
+        "damageType": "lightning",
+        "cantripScale": "1d8",
+        "notes": "Also pulls target 10 ft toward you"
+      }
+    },
+    {
+      "name": "Magic Stone",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 bonus action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "1 minute",
+      "description": "You touch one to three pebbles and imbue them with magic. You or someone else can make a ranged spell attack with one of the pebbles by throwing it or hurling it with a sling. On a hit, the target takes 1d6 + your spellcasting ability modifier bludgeoning damage.",
+      "classes": [
+        "Druid",
+        "Warlock"
+      ],
+      "combat": {
+        "attack": "ranged",
+        "damage": "1d6",
+        "damageType": "bludgeoning"
+      }
+    },
+    {
+      "name": "Mending",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 minute",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. The repair leaves no trace that the object was ever damaged.",
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Message",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S, M",
+      "duration": "1 round",
+      "description": "You point your finger toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear.",
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Mind Sliver",
+      "level": 0,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V",
+      "duration": "1 round",
+      "description": "You drive a disorienting spike of psychic energy into the mind of one creature you can see within range. The target must succeed on an Intelligence saving throw or take 1d6 psychic damage and subtract 1d4 from the next saving throw it makes before the end of your next turn.",
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "int",
+        "damage": "1d6",
+        "damageType": "psychic",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Mold Earth",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "S",
+      "duration": "Instantaneous or 1 hour",
+      "description": "You choose a portion of dirt or stone that fits within a 5-foot cube within range and do one of the following: excavate it, move it, cause shapes/colors to appear in it, or cause it to turn into difficult terrain for 1 hour.",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Primal Savagery",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "S",
+      "duration": "Instantaneous",
+      "description": "You channel primal magic to cause your teeth or fingernails to sharpen, ready to deliver a corrosive attack. Make a melee spell attack against one creature within 5 feet. On a hit, the target takes 1d10 acid damage.",
+      "classes": [
+        "Druid"
+      ],
+      "combat": {
+        "attack": "melee",
+        "damage": "1d10",
+        "damageType": "acid",
+        "cantripScale": "1d10"
+      }
+    },
+    {
+      "name": "Produce Flame",
+      "level": 0,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "10 minutes",
+      "description": "A flickering flame appears in your hand. You can use your action to hurl the fire at a creature within 30 feet. Make a ranged spell attack. On a hit, the target takes 1d8 fire damage.",
+      "classes": [
+        "Druid"
+      ],
+      "combat": {
+        "attack": "ranged",
+        "damage": "1d8",
+        "damageType": "fire",
+        "cantripScale": "1d8"
+      }
+    },
+    {
+      "name": "Shape Water",
+      "level": 0,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "S",
+      "duration": "Instantaneous or 1 hour",
+      "description": "You choose an area of water that fits within a 5-foot cube within range. You manipulate it in one of the following ways: move it, change its flow, change its color/opacity, or freeze it (provided no creatures are in it).",
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Sword Burst",
+      "level": 0,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "V",
+      "duration": "Instantaneous",
+      "description": "You create a momentary circle of spectral blades that sweep around you. Each creature within range, other than you, must succeed on a Dexterity saving throw or take 1d6 force damage.",
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "1d6",
+        "damageType": "force",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Thunderclap",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "S",
+      "duration": "Instantaneous",
+      "description": "You create a burst of thunderous sound that can be heard up to 100 feet away. Each creature within 5 feet of you must make a Constitution saving throw. On a failed save, a creature takes 1d6 thunder damage.",
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "1d6",
+        "damageType": "thunder",
+        "cantripScale": "1d6"
+      }
+    },
+    {
+      "name": "Virtue",
+      "level": 0,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "1 round",
+      "description": "You touch one willing creature and imbue it with vitality. If the target has at least 1 hit point, it gains 1d4 temporary hit points, which are lost when the spell ends.",
+      "classes": [
+        "Cleric"
+      ]
+    },
+    {
+      "name": "Word of Radiance",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Self (5-ft radius)",
+      "components": "V, M",
+      "duration": "Instantaneous",
+      "description": "You utter a divine word, and burning radiance erupts from you. Each creature of your choice that you can see within 5 feet of you must succeed on a Constitution saving throw or take 1d6 radiant damage.",
+      "classes": [
+        "Cleric"
+      ],
+      "combat": {
+        "save": "con",
+        "damage": "1d6",
+        "damageType": "radiant",
+        "cantripScale": "1d6"
+      }
     }
   ],
   "themes": {
