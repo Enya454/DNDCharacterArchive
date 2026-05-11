@@ -5378,7 +5378,6 @@ function App() {
     );
     if (gameData) return <SharedCharacterView token={shareToken} gameData={gameData} />;
   }
-  const { data:gameData, error } = useGameData();
   const [session,    setSession]    = useState(undefined); // undefined = checking, null = logged out
   const [characters, setCharacters] = useState([]);
   const [view,       setView]       = useState("home");
