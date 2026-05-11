@@ -2163,7 +2163,7 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
 // SPELL CARD — shared between WizardSpellPicker and SpellsTab
 // Shows big damage/DC badges when collapsed, vertical details expanded
 // ============================================================
-function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onToggle, actionLabel }) {
+function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onToggle, actionLabel, extraSource }) {
   const [open, setOpen] = useState(false);
   const c = spell.combat || {};
 
@@ -2218,6 +2218,7 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
             <span style={lvlTag}>{spell.level===0?"Cantrip":`Level ${spell.level}`}</span>
             <span style={{ fontSize:11, color:"var(--text-dim)" }}>{spell.school}</span>
             {disabledReason && <span style={{ fontSize:11, color:"var(--danger)" }}>{disabledReason}</span>}
+            {extraSource && <span style={{ fontSize:10, color:"var(--accent2)", padding:"1px 6px", border:"1px solid var(--accent2)", borderRadius:8 }}>✦ {extraSource}</span>}
           </div>
         </div>
 
@@ -3300,7 +3301,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
   const { classes, spells:spellDb } = gameData;
   const [managing,  setManaging]  = useState(false);
   const [filter,    setFilter]    = useState("all");
-  const [casting,   setCasting]   = useState(null); // spell being cast (for upcast modal)
+  const [casting,   setCasting]   = useState(null);
   const [upcastLvl, setUpcastLvl] = useState(null);
 
   const limits    = getSpellLimits(char, classes);
@@ -3310,19 +3311,38 @@ function SpellsTab({ char, gameData, onUpdate }) {
     ? spellDb.filter(s => (s.classes||[]).includes(spellList))
     : (spellDb?.[spellList] || []);
 
+  // ── Extra spells from racial grants and class features (Pact of Tome, etc.) ──
+  const racialSpells   = char.racialSpells || [];
+  const tomeCantrips   = (char.featureChoices?.["pact_tome_cantrips"] || []);
+  const basSpells      = [
+    ...(char.featureChoices?.["bas_required"] || []),
+    ...(char.featureChoices?.["bas_extra"]    || []),
+  ];
+  // Build extra spell objects — look them up in the spell db for full data
+  const allSpellsDb = Array.isArray(spellDb) ? spellDb : [];
+  const findSpell = name => allSpellsDb.find(s => s.name === name) || { name, level:0, school:"", castingTime:"", range:"", description:"" };
+
+  const tomeSpells   = tomeCantrips.map(n => ({ ...findSpell(n), _source:"Pact of the Tome" }));
+  const bookSpells   = basSpells.map(n    => ({ ...findSpell(n), _source:"Book of Ancient Secrets", ritual:true }));
+  const heritageSpells = racialSpells.map(s => ({ ...s, _source: s.sourceFeature || "Heritage" }));
+
+  // Combined "extra" list — these don't count toward spell limits
+  const extraSpells = [...heritageSpells, ...tomeSpells, ...bookSpells];
+  // Names already covered by extra (for marking in the spell picker)
+  const extraNames  = new Set(extraSpells.map(s => s.name));
+
   const knownCantrips = known.filter(s => s.level === 0);
   const knownSpells   = known.filter(s => s.level > 0);
   const spellDC       = calcSpellDC(char, classes);
   const spellAtk      = calcSpellAtk(char, classes);
   const maxSlotLevel  = limits?.maxSlotLevel || 0;
   const canAddCantrip = !limits || knownCantrips.length < (limits.cantripsKnown || 0);
-  const canAddSpell   = !limits || knownSpells.length < (limits.spellsKnown || 0);
+  const canAddSpell   = !limits || knownSpells.length   < (limits.spellsKnown   || 0);
 
-  // Slot tracking stored on char.spellSlots: { "1": 2, "2": 1 } = slots spent per level
-  const slots       = limits?.slots || [];
-  const slotsSpent  = char.spellSlots || {};
-  const slotsLeft   = lvl => Math.max(0, (slots[lvl-1] || 0) - (slotsSpent[String(lvl)] || 0));
-  const spendSlot   = lvl => {
+  const slots      = limits?.slots || [];
+  const slotsSpent = char.spellSlots || {};
+  const slotsLeft  = lvl => Math.max(0, (slots[lvl-1] || 0) - (slotsSpent[String(lvl)] || 0));
+  const spendSlot  = lvl => {
     if (slotsLeft(lvl) <= 0) return;
     onUpdate({ ...char, spellSlots: { ...slotsSpent, [String(lvl)]: (slotsSpent[String(lvl)]||0) + 1 } });
     setCasting(null); setUpcastLvl(null);
@@ -3349,43 +3369,41 @@ function SpellsTab({ char, gameData, onUpdate }) {
   const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
     border:`1px solid ${a?"var(--accent)":"var(--border)"}`, background:a?"var(--accent)":"transparent", color:a?"var(--bg)":"var(--text-muted)" });
 
-  // ── Spell row for the known-spells table ──
-  const SpellRow = ({ spell }) => {
+  // SpellRow — one row in the known-spells table
+  const SpellRow = ({ spell, badge }) => {
     const isCantrip = spell.level === 0;
-    const canUpcast = !isCantrip && maxSlotLevel > spell.level;
-    const hasSlot   = isCantrip || slotsLeft(spell.level) > 0;
+    const isRitual  = spell.ritual || (spell.castingTime||'').includes('ritual');
+    // For extra spells, use pact slots if warlock
+    const canCast   = isCantrip || (limits.type === "pact"
+      ? (slotsSpent["pact"]||0) < (limits.pactSlots||0)
+      : slotsLeft(spell.level) > 0);
     return (
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 90px", alignItems:"center",
-        padding:"6px 10px", borderBottom:"1px solid rgba(255,255,255,0.04)",
-        background:"transparent" }}>
-        {/* Name + school */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 100px", alignItems:"center",
+        padding:"6px 10px", borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
         <div>
           <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{spell.name}</span>
-          <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:7 }}>{spell.school}</span>
+          {spell.school && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:7 }}>{spell.school}</span>}
           {spell.combat?.damage && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:7 }}>{spell.combat.damage} {spell.combat.damageType}</span>}
-          {spell.combat?.save && <span style={{ fontSize:10, color:"var(--info)", marginLeft:7 }}>Save: {ABILITY_SHORT[spell.combat.save]}</span>}
+          {isRitual && <span style={{ fontSize:9, color:"rgba(100,160,255,0.7)", marginLeft:7 }}>ritual</span>}
+          {badge && <span style={{ fontSize:9, color:"var(--accent2)", marginLeft:7, padding:"1px 5px", border:"1px solid var(--accent2)", borderRadius:4 }}>{badge}</span>}
         </div>
-        {/* Level */}
         <div style={{ fontSize:11, color:"var(--text-muted)", textAlign:"center" }}>
-          {isCantrip ? <span style={{ color:"var(--text-dim)" }}>—</span> : `Lvl ${spell.level}`}
+          {isCantrip ? <span style={{ color:"var(--text-dim)" }}>—</span> : `L${spell.level}`}
         </div>
-        {/* Casting time */}
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.castingTime}</div>
-        {/* Range */}
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.range}</div>
-        {/* Cast button */}
         <div>
-          {isCantrip ? (
-            <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>At will</span>
+          {isCantrip || isRitual ? (
+            <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>{isRitual?"Ritual":"At will"}</span>
           ) : (
             <button onClick={() => { setCasting(spell); setUpcastLvl(spell.level); }}
-              disabled={!hasSlot}
-              style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:hasSlot?"pointer":"not-allowed",
+              disabled={!canCast}
+              style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", transition:"all 0.15s",
-                border:`1px solid ${hasSlot?"var(--accent)":"var(--border)"}`,
-                background:hasSlot?"rgba(201,162,39,0.12)":"transparent",
-                color:hasSlot?"var(--accent)":"var(--text-dim)", opacity:hasSlot?1:0.5 }}>
-              {hasSlot ? "Cast ▸" : "No slot"}
+                border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
+                background:canCast?"rgba(201,162,39,0.12)":"transparent",
+                color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
+              {canCast ? "Cast ▸" : "No slot"}
             </button>
           )}
         </div>
@@ -3459,15 +3477,19 @@ function SpellsTab({ char, gameData, onUpdate }) {
             <div style={{ overflowY:"auto", flex:1 }}>
               {displayed.map(spell => {
                 const isK = known.some(s => s.name === spell.name);
+                const isExtra = extraNames.has(spell.name);
                 const isCantrip = spell.level === 0;
                 const capOk = isK || (isCantrip ? canAddCantrip : canAddSpell);
                 const slotOk = isCantrip || spell.level <= maxSlotLevel;
                 const disabled = !isK && (!slotOk || !capOk);
                 return (
                   <SpellCard key={spell.name} spell={spell} charLevel={char.level}
-                    isKnown={isK} disabled={disabled}
-                    disabledReason={!isK&&(!slotOk?"slot too high":!capOk?"limit reached":null)}
-                    onToggle={()=>toggleKnown(spell)} actionLabel={isK?"Remove":"+ Learn"}/>
+                    isKnown={isK}
+                    disabled={disabled && !isExtra}
+                    disabledReason={!isK&&!isExtra&&(!slotOk?"slot too high":!capOk?"limit reached":null)}
+                    extraSource={isExtra && !isK ? extraSpells.find(s=>s.name===spell.name)?._source : null}
+                    onToggle={()=>toggleKnown(spell)}
+                    actionLabel={isK ? "Remove" : isExtra ? "+ Also learn" : "+ Learn"}/>
                 );
               })}
             </div>
@@ -3540,25 +3562,35 @@ function SpellsTab({ char, gameData, onUpdate }) {
       </div>
 
       {/* ── Known spells table ── */}
-      {known.length === 0 ? (
+      {(known.length === 0 && extraSpells.length === 0) ? (
         <div style={{ padding:"28px", textAlign:"center", color:"var(--text-muted)", fontSize:13, fontStyle:"italic", border:"1px dashed var(--border)", borderRadius:8 }}>
           No spells selected. Click <strong style={{ color:"var(--accent)" }}>Manage Spells</strong> to add some.
         </div>
       ) : (
         <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, overflow:"hidden" }}>
           {/* Table header */}
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 90px", padding:"5px 10px",
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 100px", padding:"5px 10px",
             background:"rgba(0,0,0,0.25)", borderBottom:"1px solid var(--border)" }}>
             {["Spell","Lvl","Cast Time","Range",""].map(h=>(
               <div key={h} style={{ fontSize:9, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1 }}>{h}</div>
             ))}
           </div>
-          {/* Cantrips */}
+
+          {/* ── Extra spells (racial, tome, book) — shown first ── */}
+          {extraSpells.length > 0 && (<>
+            <div style={{ padding:"3px 10px", fontSize:10, color:"var(--accent2)", background:"rgba(0,0,0,0.2)", borderBottom:"1px solid var(--border)" }}>
+              Always Known — Heritage &amp; Class Features
+            </div>
+            {extraSpells.map(sp=><SpellRow key={`extra-${sp.name}`} spell={sp} badge={sp._source}/>)}
+          </>)}
+
+          {/* ── Chosen cantrips ── */}
           {knownCantrips.length > 0 && (<>
-            <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)" }}>Cantrips</div>
+            <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)", borderTop:extraSpells.length?"1px solid var(--border)":"none" }}>Cantrips</div>
             {knownCantrips.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
           </>)}
-          {/* Leveled spells grouped */}
+
+          {/* ── Leveled spells grouped ── */}
           {[1,2,3,4,5,6,7,8,9].map(lvl => {
             const atLvl = knownSpells.filter(s=>s.level===lvl);
             if (!atLvl.length) return null;
