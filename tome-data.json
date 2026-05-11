@@ -193,15 +193,21 @@
               "grants": [
                 {
                   "spellName": "Dancing Lights",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Faerie Fire",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Darkness",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "You know the dancing lights cantrip. At 3rd level you can cast faerie fire once, and at 5th level you can cast darkness once. Charisma is your spellcasting ability for these spells."
@@ -554,15 +560,21 @@
               "grants": [
                 {
                   "spellName": "Thaumaturgy",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Hellish Rebuke",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Darkness",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Thaumaturgy cantrip; Hellish Rebuke (2nd level) 1/long rest at 3rd; Darkness 1/long rest at 5th. CHA is your spellcasting ability."
@@ -584,15 +596,21 @@
               "grants": [
                 {
                   "spellName": "Thaumaturgy",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Hellish Rebuke",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Darkness",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Same as standard Infernal Legacy. Patron of Tieflings who trace their descent to Asmodeus."
@@ -614,15 +632,21 @@
               "grants": [
                 {
                   "spellName": "Thaumaturgy",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Searing Smite",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Branding Smite",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Thaumaturgy cantrip; Searing Smite 1/long rest at 3rd; Branding Smite 1/long rest at 5th. CHA is your spellcasting ability."
@@ -644,15 +668,21 @@
               "grants": [
                 {
                   "spellName": "Thaumaturgy",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Disguise Self",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Detect Thoughts",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Thaumaturgy cantrip; Disguise Self 1/long rest at 3rd; Detect Thoughts 1/long rest at 5th."
@@ -674,15 +704,21 @@
               "grants": [
                 {
                   "spellName": "Minor Illusion",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Disguise Self",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Invisibility",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Minor Illusion cantrip; Disguise Self 1/long rest at 3rd; Invisibility 1/long rest at 5th."
@@ -704,15 +740,21 @@
               "grants": [
                 {
                   "spellName": "Ray of Frost",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Armor of Agathys",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Darkness",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Ray of Frost cantrip; Armor of Agathys 1/long rest at 3rd; Darkness 1/long rest at 5th."
@@ -734,15 +776,21 @@
               "grants": [
                 {
                   "spellName": "Mage Hand",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Tenser's Floating Disk",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Arcane Lock",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Mage Hand cantrip; Tenser's Floating Disk 1/long rest at 3rd; Arcane Lock 1/long rest at 5th."
@@ -764,15 +812,21 @@
               "grants": [
                 {
                   "spellName": "Mage Hand",
-                  "minCharLevel": 1
+                  "minCharLevel": 1,
+                  "uses": null,
+                  "recharge": null
                 },
                 {
                   "spellName": "Burning Hands",
-                  "minCharLevel": 3
+                  "minCharLevel": 3,
+                  "uses": 1,
+                  "recharge": "long"
                 },
                 {
                   "spellName": "Flame Blade",
-                  "minCharLevel": 5
+                  "minCharLevel": 5,
+                  "uses": 1,
+                  "recharge": "long"
                 }
               ],
               "description": "Mage Hand cantrip; Burning Hands 1/long rest at 3rd; Flame Blade 1/long rest at 5th."
@@ -863,7 +917,9 @@
           "grants": [
             {
               "spellName": "Healing Hands",
-              "minCharLevel": 1
+              "minCharLevel": 1,
+              "uses": null,
+              "recharge": null
             }
           ],
           "description": "As an action, you can touch a creature and cause it to regain hit points equal to your level. Once per long rest.",
@@ -882,7 +938,9 @@
           "grants": [
             {
               "spellName": "Light",
-              "minCharLevel": 1
+              "minCharLevel": 1,
+              "uses": null,
+              "recharge": null
             }
           ],
           "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."

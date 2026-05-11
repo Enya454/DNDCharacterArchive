@@ -3326,10 +3326,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
   const bookSpells   = basSpells.map(n    => ({ ...findSpell(n), _source:"Book of Ancient Secrets", ritual:true }));
   const heritageSpells = racialSpells.map(s => ({ ...s, _source: s.sourceFeature || "Heritage" }));
 
-  // Combined "extra" list — these don't count toward spell limits
-  const extraSpells = [...heritageSpells, ...tomeSpells, ...bookSpells];
-  // Names already covered by extra (for marking in the spell picker)
-  const extraNames  = new Set(extraSpells.map(s => s.name));
+  // extraNames for marking in spell picker (built from new extraSpells below)
 
   const knownCantrips = known.filter(s => s.level === 0);
   const knownSpells   = known.filter(s => s.level > 0);
@@ -3411,7 +3408,66 @@ function SpellsTab({ char, gameData, onUpdate }) {
     );
   };
 
-  const displayed = allSpells.filter(sp => filter === "all" || sp.level === +filter);
+  // ── Filter state ──
+  const [levelFilter, setLevelFilter] = useState("all");
+
+  // ── Build usage map for heritage spells from char.actionUses ──
+  // Key: "racial_{spellName}"
+  const racialUses = char.actionUses || {};
+  const racialSpentKey  = name => `racial_${name}`;
+  const racialRemaining = (name, uses) => {
+    if (uses === null || uses === undefined) return null; // at will
+    return Math.max(0, uses - (racialUses[racialSpentKey(name)] || 0));
+  };
+  const spendRacialUse  = name => {
+    const key = racialSpentKey(name);
+    onUpdate({ ...char, actionUses: { ...racialUses, [key]: (racialUses[key] || 0) + 1 } });
+  };
+  const recoverRacialUses = (recharge) => {
+    // Clear all racial uses that match the given recharge type
+    const newUses = { ...racialUses };
+    // Build lookup of which spells have which recharge
+    extraSpells.forEach(sp => {
+      const grant = sp._grant;
+      if (grant && grant.recharge === recharge) {
+        delete newUses[racialSpentKey(sp.name)];
+      }
+    });
+    onUpdate({ ...char, actionUses: newUses });
+  };
+
+  // Rebuild extraSpells with grant info attached
+  const allGrantsByName = {};
+  (char.racialSpells || []).forEach(sp => {
+    // Find the grant that produced this spell by looking through species/subrace data
+    allGrantsByName[sp.name] = sp._grant || null;
+  });
+
+  const heritageSpellsWithGrants = racialSpells.map(s => {
+    // Try to find grant info from the species data
+    const speciesD = gameData?.species?.[char.species];
+    const subraceD = char.subrace ? speciesD?.subraces?.[char.subrace] : null;
+    let grant = null;
+    for (const src of [speciesD, subraceD]) {
+      if (!src) continue;
+      for (const feat of (src.features || [])) {
+        if (feat.type === 'spell_grant') {
+          const g = (feat.grants || []).find(g => g.spellName === s.name);
+          if (g) { grant = g; break; }
+        }
+      }
+      if (grant) break;
+    }
+    return { ...s, _source: s.sourceFeature || "Heritage", _grant: grant };
+  });
+
+  const extraSpells = [
+    ...heritageSpellsWithGrants,
+    ...tomeSpells,
+    ...bookSpells,
+  ];
+  const extraNames  = new Set(extraSpells.map(s => s.name));
+  const displayed   = allSpells.filter(sp => filter === "all" || sp.level === +filter);
 
   return (
     <div>
@@ -3498,7 +3554,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
       )}
 
       {/* ── Header stats row ── */}
-      <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:14, alignItems:"center" }}>
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:10, alignItems:"center" }}>
         {[
           ["Spell DC",  spellDC ?? "—"],
           ["Spell Atk", modStr(spellAtk ?? 0)],
@@ -3512,6 +3568,17 @@ function SpellsTab({ char, gameData, onUpdate }) {
         <button onClick={()=>setManaging(true)} style={{ marginLeft:"auto", padding:"7px 16px", borderRadius:8, cursor:"pointer", fontSize:13, fontFamily:"var(--font-display)", border:"1px solid var(--accent)", background:"rgba(201,162,39,0.1)", color:"var(--accent)" }}>
           ✦ Manage Spells
         </button>
+      </div>
+
+      {/* ── Level filter ── */}
+      <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:12 }}>
+        {[["all","All"],["0","Cantrips"],...[1,2,3,4,5,6,7,8,9].filter(l=>l<=maxSlotLevel).map(l=>[String(l),`Level ${l}`])].map(([val,lbl])=>(
+          <button key={val} style={{ padding:"4px 11px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+            border:`1px solid ${levelFilter===val?"var(--accent)":"var(--border)"}`,
+            background:levelFilter===val?"rgba(201,162,39,0.1)":"var(--surface)",
+            color:levelFilter===val?"var(--accent)":"var(--text-muted)" }}
+            onClick={()=>setLevelFilter(val)}>{lbl}</button>
+        ))}
       </div>
 
       {/* ── Spell slots ── */}
@@ -3577,26 +3644,28 @@ function SpellsTab({ char, gameData, onUpdate }) {
           </div>
 
           {/* ── Extra spells (racial, tome, book) — shown first ── */}
-          {extraSpells.length > 0 && (<>
+          {extraDisplayed.length > 0 && (<>
             <div style={{ padding:"3px 10px", fontSize:10, color:"var(--accent2)", background:"rgba(0,0,0,0.2)", borderBottom:"1px solid var(--border)" }}>
               Always Known — Heritage &amp; Class Features
             </div>
-            {extraSpells.map(sp=><SpellRow key={`extra-${sp.name}`} spell={sp} badge={sp._source}/>)}
+            {extraDisplayed.map(sp=><SpellRow key={`extra-${sp.name}`} spell={sp} badge={sp._source} grant={sp._grant||null}/>)}
           </>)}
 
           {/* ── Chosen cantrips ── */}
-          {knownCantrips.length > 0 && (<>
-            <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)", borderTop:extraSpells.length?"1px solid var(--border)":"none" }}>Cantrips</div>
-            {knownCantrips.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
+          {knownCantripsD.length > 0 && (<>
+            <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)", borderTop:extraDisplayed.length?"1px solid var(--border)":"none" }}>Cantrips</div>
+            {knownCantripsD.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
           </>)}
 
           {/* ── Leveled spells grouped ── */}
           {[1,2,3,4,5,6,7,8,9].map(lvl => {
-            const atLvl = knownSpells.filter(s=>s.level===lvl);
+            if (levelFilter !== "all" && levelFilter !== String(lvl)) return null;
+            const atLvl = knownSpellsD.filter(s=>s.level===lvl);
             if (!atLvl.length) return null;
             return (<React.Fragment key={lvl}>
               <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)", borderTop:"1px solid var(--border)" }}>
                 Level {lvl} — {slotsLeft(lvl)}/{slots[lvl-1]||0} slots
+                {maxSlotLevel > lvl && <span style={{ fontSize:9, color:"var(--text-dim)", marginLeft:8 }}>(can upcast to L{maxSlotLevel})</span>}
               </div>
               {atLvl.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
             </React.Fragment>);
