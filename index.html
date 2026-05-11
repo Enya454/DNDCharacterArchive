@@ -3367,15 +3367,21 @@ function SpellsTab({ char, gameData, onUpdate }) {
     border:`1px solid ${a?"var(--accent)":"var(--border)"}`, background:a?"var(--accent)":"transparent", color:a?"var(--bg)":"var(--text-muted)" });
 
   // SpellRow — one row in the known-spells table
-  const SpellRow = ({ spell, badge }) => {
+  const SpellRow = ({ spell, badge, grant }) => {
     const isCantrip = spell.level === 0;
     const isRitual  = spell.ritual || (spell.castingTime||'').includes('ritual');
-    // For extra spells, use pact slots if warlock
-    const canCast   = isCantrip || (limits.type === "pact"
-      ? (slotsSpent["pact"]||0) < (limits.pactSlots||0)
-      : slotsLeft(spell.level) > 0);
+    const isHeritage = !!grant;
+    const maxUses  = grant ? grant.uses : null;
+    const remUses  = grant ? racialRemaining(spell.name, maxUses) : null;
+    const recharge = grant?.recharge || null;
+    const rechargeLabel = recharge === 'short' ? 'Short Rest' : recharge === 'long' ? 'Long Rest' : null;
+    const hasSlot = isCantrip || isRitual ? true
+      : limits.type === "pact"
+        ? (slotsSpent["pact"]||0) < (limits.pactSlots||0)
+        : slotsLeft(Math.min(spell.level, maxSlotLevel)) > 0;
+    const canCast = isHeritage ? (maxUses === null || remUses > 0) : hasSlot;
     return (
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 100px", alignItems:"center",
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 50px 72px 80px 140px", alignItems:"center",
         padding:"6px 10px", borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
         <div>
           <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{spell.name}</span>
@@ -3389,12 +3395,29 @@ function SpellsTab({ char, gameData, onUpdate }) {
         </div>
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.castingTime}</div>
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.range}</div>
-        <div>
-          {isCantrip || isRitual ? (
+        <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+          {isHeritage && maxUses !== null ? (<>
+            <div style={{ display:"flex", gap:3 }}>
+              {Array.from({length: maxUses}).map((_,i) => {
+                const spent = i >= remUses;
+                return <div key={i} onClick={()=>{
+                  if (!spent) spendRacialUse(spell.name);
+                  else { const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:Math.max(0,(racialUses[k]||0)-1)}}); }
+                }} style={{ width:10,height:10,borderRadius:"50%",cursor:"pointer",transition:"all 0.15s",
+                  border:`1.5px solid ${spent?"var(--border)":"var(--accent)"}`,background:spent?"transparent":"var(--accent)" }}/>;
+              })}
+            </div>
+            {remUses < maxUses && rechargeLabel && (
+              <button onClick={()=>{ const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:0}}); }}
+                style={{ padding:"2px 7px", borderRadius:5, fontSize:10, cursor:"pointer",
+                  border:"1px solid var(--success)", background:"rgba(39,174,96,0.1)", color:"var(--success)" }}>
+                ↺ {rechargeLabel}
+              </button>
+            )}
+          </>) : isCantrip || isRitual ? (
             <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>{isRitual?"Ritual":"At will"}</span>
           ) : (
-            <button onClick={() => { setCasting(spell); setUpcastLvl(spell.level); }}
-              disabled={!canCast}
+            <button onClick={()=>{ setCasting(spell); setUpcastLvl(spell.level); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", transition:"all 0.15s",
                 border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
@@ -3468,6 +3491,10 @@ function SpellsTab({ char, gameData, onUpdate }) {
   ];
   const extraNames  = new Set(extraSpells.map(s => s.name));
   const displayed   = allSpells.filter(sp => filter === "all" || sp.level === +filter);
+  const extraDisplayed  = levelFilter === "all" ? extraSpells : extraSpells.filter(sp => sp.level === +levelFilter);
+  const knownDisplayed  = levelFilter === "all" ? known : known.filter(sp => sp.level === +levelFilter);
+  const knownCantripsD  = knownDisplayed.filter(s => s.level === 0);
+  const knownSpellsD    = knownDisplayed.filter(s => s.level > 0);
 
   return (
     <div>
