@@ -5006,6 +5006,7 @@ function App() {
   const [selId,      setSelId]      = useState(null);
   const [charLoading,setCharLoading]= useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const selChar = characters.find(c => c.id === selId);
 
   // ── Auth state listener ──
   useEffect(() => {
