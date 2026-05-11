@@ -439,7 +439,31 @@ const dbDeleteChar = async id => {
   if (error) console.error("Delete error:", error);
 };
 
-// Keep localStorage as offline fallback
+// Share helpers
+const createShareToken = async (charId, userId) => {
+  const { data, error } = await sb.from("shared_characters")
+    .insert({ character_id: charId, user_id: userId })
+    .select("token")
+    .single();
+  if (error) { console.error("Share error:", error); return null; }
+  return data.token;
+};
+const deleteShareToken = async (token) => {
+  await sb.from("shared_characters").delete().eq("token", token);
+};
+const fetchSharedChar = async (token) => {
+  const { data, error } = await sb.from("shared_characters")
+    .select("character_id")
+    .eq("token", token)
+    .single();
+  if (error || !data) return null;
+  const { data: charRow, error: charErr } = await sb.from("characters")
+    .select("data")
+    .eq("id", data.character_id)
+    .single();
+  if (charErr || !charRow) return null;
+  return charRow.data;
+};
 const SK = "tome_of_heroes_v1";
 const loadChars  = () => { try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : []; } catch { return []; } };
 const saveChars  = chars => { try { localStorage.setItem(SK, JSON.stringify(chars)); } catch {} };
@@ -4602,12 +4626,15 @@ function ActionsTab({ char, gameData, onUpdate }) {
   );
 }
 
-function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, cloudSync }) {
+function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, cloudSync, readOnly }) {
   const [char, setChar]   = useState(initial);
   const [tab,  setTab]    = useState("actions");
   const [saved, setSaved] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const saveTimer = useRef(null);
+  const [shareModal, setShareModal] = useState(false);
+  const [shareToken, setShareToken] = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const fileRef   = useRef(null);
 
   const { classes, species:speciesDb, themes, music } = gameData;
@@ -4713,6 +4740,57 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
     <TW themeKey={char.theme} themes={themes} charCustom={char.custom || {}}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
+      {/* ── Share Modal ── */}
+      {shareModal && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center" }}
+          onClick={e=>e.target===e.currentTarget&&setShareModal(false)}>
+          <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:460, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
+            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, marginBottom:8 }}>Share Character</div>
+            <div style={{ fontSize:13, color:"#8a8070", marginBottom:20, lineHeight:1.7 }}>
+              Generate a read-only link for your DM or party members. They can view the character sheet but cannot make any changes.
+            </div>
+            {!shareToken ? (
+              <button onClick={async ()=>{
+                setShareLoading(true);
+                const { data:{ session } } = await sb.auth.getSession();
+                if (!session) return;
+                const token = await createShareToken(char.id, session.user.id);
+                if (token) setShareToken(token);
+                setShareLoading(false);
+              }} disabled={shareLoading}
+                style={{ width:"100%", padding:"11px", borderRadius:8, cursor:shareLoading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", border:"1px solid #c9a227", background:"rgba(201,162,39,0.1)", color:"#c9a227", opacity:shareLoading?0.6:1 }}>
+                {shareLoading ? "Generating…" : "🔗 Generate Share Link"}
+              </button>
+            ) : (
+              <div>
+                <div style={{ fontSize:11, color:"#8a8070", marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Share Link</div>
+                <div style={{ display:"flex", gap:8, marginBottom:14 }}>
+                  <input readOnly value={`${window.location.origin}${window.location.pathname}?share=${shareToken}`}
+                    style={{ flex:1, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"9px 12px", borderRadius:7, fontSize:12, fontFamily:"monospace" }}
+                    onClick={e=>e.target.select()}/>
+                  <button onClick={()=>{
+                    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${shareToken}`);
+                    setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
+                  }} style={{ padding:"9px 16px", borderRadius:7, border:"1px solid #c9a227", background:shareCopied?"#c9a227":"rgba(201,162,39,0.1)", color:shareCopied?"#0d0d0f":"#c9a227", cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", flexShrink:0, transition:"all 0.2s" }}>
+                    {shareCopied ? "✓ Copied!" : "Copy"}
+                  </button>
+                </div>
+                <div style={{ fontSize:12, color:"#554f45", marginBottom:16, lineHeight:1.6 }}>
+                  Anyone with this link can view {char.name}'s sheet. You can revoke access at any time.
+                </div>
+                <button onClick={async ()=>{
+                  await deleteShareToken(shareToken);
+                  setShareToken(null);
+                }} style={{ width:"100%", padding:"8px", borderRadius:7, border:"1px solid rgba(192,57,43,0.4)", background:"transparent", color:"#e74c3c", cursor:"pointer", fontSize:13 }}>
+                  🗑 Revoke Link
+                </button>
+              </div>
+            )}
+            <button onClick={()=>setShareModal(false)} style={{ width:"100%", marginTop:12, padding:"8px", borderRadius:7, border:"1px solid rgba(255,255,255,0.1)", background:"transparent", color:"#554f45", cursor:"pointer", fontSize:13 }}>Close</button>
+          </div>
+        </div>
+      )}
+
       {/* ── Sticky top bar ── */}
       <div style={{ background:theme.card, borderBottom:`2px solid ${theme.accent}`, padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -4750,8 +4828,11 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {/* Controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
-            <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
-            <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
+            {!readOnly && <>
+              <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
+              <button onClick={()=>setShareModal(true)} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>🔗 Share</button>
+              <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
+            </>}
           </div>
         </div>
       </div>
@@ -5225,7 +5306,78 @@ function LoginScreen({ onLogin }) {
   );
 }
 
+// ============================================================
+// SHARED CHARACTER VIEW — read-only, no auth required
+// ============================================================
+function SharedCharacterView({ token, gameData }) {
+  const [char,    setChar]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(null);
+
+  useEffect(() => {
+    fetchSharedChar(token).then(c => {
+      if (c) setChar(c);
+      else setError("Character not found. The share link may have expired or been removed.");
+      setLoading(false);
+    });
+  }, [token]);
+
+  if (loading) return (
+    <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
+      <div style={{ textAlign:"center" }}>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ color:"#8a8070" }}>Loading character…</div>
+      </div>
+    </div>
+  );
+
+  if (error || !char) return (
+    <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
+      <div style={{ textAlign:"center", maxWidth:440, padding:32 }}>
+        <div style={{ fontSize:48, marginBottom:16 }}>🔗</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
+        <div style={{ color:"#8a8070", fontSize:14 }}>{error || "This share link is invalid or has been removed."}</div>
+        <button onClick={()=>window.location.href=window.location.pathname} style={{ marginTop:20, padding:"8px 20px", borderRadius:8, border:"1px solid #c9a227", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:14 }}>Go to Tome of Heroes</button>
+      </div>
+    </div>
+  );
+
+  // Render CharacterSheet in read-only mode (no edit callbacks)
+  return (
+    <div style={{ position:"relative" }}>
+      {/* Read-only banner */}
+      <div style={{ position:"fixed", bottom:16, right:16, zIndex:999, padding:"8px 16px", background:"rgba(26,26,31,0.95)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:12, color:"#8a8070", backdropFilter:"blur(8px)" }}>
+        👁 Viewing shared character — read only
+      </div>
+      <CharacterSheet
+        char={char}
+        gameData={gameData}
+        onBack={()=>window.location.href=window.location.pathname}
+        onDelete={()=>{}}
+        onEdit={null}
+        cloudSync={null}
+        readOnly={true}
+      />
+    </div>
+  );
+}
+
 function App() {
+  const { data:gameData, error } = useGameData();
+
+  // Check for share token in URL — if present, show read-only view without auth
+  const shareToken = new URLSearchParams(window.location.search).get("share");
+  if (shareToken) {
+    if (!gameData && !error) return (
+      <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+          <div style={{ color:"#8a8070" }}>Loading…</div>
+        </div>
+      </div>
+    );
+    if (gameData) return <SharedCharacterView token={shareToken} gameData={gameData} />;
+  }
   const { data:gameData, error } = useGameData();
   const [session,    setSession]    = useState(undefined); // undefined = checking, null = logged out
   const [characters, setCharacters] = useState([]);
