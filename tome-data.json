@@ -1138,7 +1138,7 @@
           "options": [
             [
               {
-                "name": "Two handaxes",
+                "name": "Handaxe",
                 "qty": 2,
                 "type": "weapon",
                 "weight": 2,
@@ -1167,7 +1167,7 @@
               "description": "Backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50ft hempen rope"
             },
             {
-              "name": "4 Javelins",
+              "name": "Javelin",
               "qty": 4,
               "type": "weapon",
               "weight": 2,
@@ -1806,7 +1806,7 @@
               "description": "AC 11 + Dex modifier"
             },
             {
-              "name": "Two Daggers",
+              "name": "Dagger",
               "qty": 2,
               "type": "weapon",
               "weight": 1,
@@ -2380,7 +2380,7 @@
                 "description": "1d8 piercing, ammunition, heavy, two-handed, range 150/600"
               },
               {
-                "name": "20 Arrows",
+                "name": "Arrow",
                 "qty": 20,
                 "type": "misc",
                 "weight": 1,
@@ -2433,7 +2433,7 @@
                 "description": "1d8 piercing, loading, range 80/320"
               },
               {
-                "name": "20 Crossbow bolts",
+                "name": "Crossbow Bolt",
                 "qty": 20,
                 "type": "misc",
                 "weight": 1,
@@ -2442,7 +2442,7 @@
             ],
             [
               {
-                "name": "Two Handaxes",
+                "name": "Handaxe",
                 "qty": 2,
                 "type": "weapon",
                 "weight": 2,
@@ -3473,7 +3473,7 @@
                 "description": "1d8 piercing, ammunition, loading, two-handed"
               },
               {
-                "name": "20 Crossbow bolts",
+                "name": "Crossbow Bolt",
                 "qty": 20,
                 "type": "misc",
                 "weight": 1,
@@ -4587,7 +4587,7 @@
           "options": [
             [
               {
-                "name": "5 Javelins",
+                "name": "Javelin",
                 "qty": 5,
                 "type": "weapon",
                 "weight": 2,
@@ -5146,7 +5146,7 @@
           "options": [
             [
               {
-                "name": "Two Shortswords",
+                "name": "Shortsword",
                 "qty": 2,
                 "type": "weapon",
                 "weight": 2,
@@ -5155,7 +5155,7 @@
             ],
             [
               {
-                "name": "Two simple melee weapons",
+                "name": "Simple melee weapon",
                 "qty": 2,
                 "type": "weapon",
                 "weight": 0,
@@ -5892,7 +5892,7 @@
         {
           "fixed": [
             {
-              "name": "10 Darts",
+              "name": "Dart",
               "qty": 10,
               "type": "weapon",
               "weight": 0.25,
@@ -6369,7 +6369,7 @@
                 "description": "1d8 piercing, loading, range 80/320"
               },
               {
-                "name": "20 Crossbow bolts",
+                "name": "Crossbow Bolt",
                 "qty": 20,
                 "type": "misc",
                 "weight": 1,
@@ -6438,7 +6438,7 @@
         {
           "fixed": [
             {
-              "name": "Two Daggers",
+              "name": "Dagger",
               "qty": 2,
               "type": "weapon",
               "weight": 1,
@@ -7422,7 +7422,7 @@
                 "description": "1d8 piercing, loading, range 80/320"
               },
               {
-                "name": "20 Crossbow bolts",
+                "name": "Crossbow Bolt",
                 "qty": 20,
                 "type": "misc",
                 "weight": 1,
@@ -7505,7 +7505,7 @@
               "description": "Choose at DM discretion"
             },
             {
-              "name": "Two Daggers",
+              "name": "Dagger",
               "qty": 2,
               "type": "weapon",
               "weight": 1,
@@ -7562,7 +7562,7 @@
           "description": "Religious text"
         },
         {
-          "name": "5 sticks of incense",
+          "name": "Stick of Incense",
           "qty": 5,
           "type": "misc",
           "weight": 0,
