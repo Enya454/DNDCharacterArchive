@@ -3395,34 +3395,35 @@ function SpellsTab({ char, gameData, onUpdate }) {
         </div>
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.castingTime}</div>
         <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.range}</div>
-        <div style={{ display:"flex", alignItems:"center", gap:5, flexWrap:"wrap" }}>
-          {/* Usage pips + recover — shown for heritage spells with limited uses */}
-          {isHeritage && maxUses !== null && (<>
-            <div style={{ display:"flex", gap:3 }}>
-              {Array.from({length: maxUses}).map((_,i) => {
-                const spent = i >= remUses;
-                return <div key={i} onClick={()=>{
-                  if (!spent) spendRacialUse(spell.name);
-                  else { const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:Math.max(0,(racialUses[k]||0)-1)}}); }
-                }} style={{ width:10,height:10,borderRadius:"50%",cursor:"pointer",transition:"all 0.15s",
-                  border:`1.5px solid ${spent?"var(--border)":"var(--accent)"}`,background:spent?"transparent":"var(--accent)" }}/>;
-              })}
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          {/* Usage pips + recover stacked vertically — only for heritage limited-use spells */}
+          {isHeritage && maxUses !== null && (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
+              <div style={{ display:"flex", gap:3 }}>
+                {Array.from({length: maxUses}).map((_,i) => {
+                  const spent = i >= remUses;
+                  return <div key={i} onClick={()=>{
+                    if (!spent) spendRacialUse(spell.name);
+                    else { const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:Math.max(0,(racialUses[k]||0)-1)}}); }
+                  }} style={{ width:9,height:9,borderRadius:"50%",cursor:"pointer",transition:"all 0.15s",
+                    border:`1.5px solid ${spent?"var(--border)":"var(--accent)"}`,background:spent?"transparent":"var(--accent)" }}/>;
+                })}
+              </div>
+              {remUses < maxUses && rechargeLabel && (
+                <button onClick={()=>{ const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:0}}); }}
+                  style={{ padding:"1px 5px", borderRadius:4, fontSize:9, cursor:"pointer", whiteSpace:"nowrap",
+                    border:"1px solid var(--success)", background:"rgba(39,174,96,0.1)", color:"var(--success)" }}>
+                  ↺ {rechargeLabel}
+                </button>
+              )}
             </div>
-            {remUses < maxUses && rechargeLabel && (
-              <button onClick={()=>{ const k=racialSpentKey(spell.name); onUpdate({...char,actionUses:{...racialUses,[k]:0}}); }}
-                style={{ padding:"2px 7px", borderRadius:5, fontSize:10, cursor:"pointer",
-                  border:"1px solid var(--success)", background:"rgba(39,174,96,0.1)", color:"var(--success)" }}>
-                ↺ {rechargeLabel}
-              </button>
-            )}
-          </>)}
-          {/* Cast button — shown for all non-cantrip, non-ritual spells */}
+          )}
+          {/* Cast button */}
           {isCantrip ? (
             <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>At will</span>
           ) : isRitual ? (
             <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>Ritual</span>
           ) : isHeritage ? (
-            // Heritage spell — Cast spends a racial use, no slot modal
             <button onClick={()=>{ if (canCast) spendRacialUse(spell.name); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", transition:"all 0.15s",
@@ -3432,7 +3433,6 @@ function SpellsTab({ char, gameData, onUpdate }) {
               {canCast ? "Cast ▸" : "No uses"}
             </button>
           ) : limits.type === "pact" ? (
-            // Warlock pact magic — always casts at pact slot level, no upcast modal
             <button onClick={()=>{ if (canCast) onUpdate({...char,spellSlots:{...slotsSpent,pact:(slotsSpent["pact"]||0)+1}}); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", transition:"all 0.15s",
@@ -3442,7 +3442,6 @@ function SpellsTab({ char, gameData, onUpdate }) {
               {canCast ? `Cast L${limits.pactSlotLevel} ▸` : "No slots"}
             </button>
           ) : (
-            // Normal spellcaster — open upcast modal
             <button onClick={()=>{ setCasting(spell); setUpcastLvl(spell.level); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", transition:"all 0.15s",
@@ -3452,6 +3451,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
               {canCast ? "Cast ▸" : "No slot"}
             </button>
           )}
+        </div>
         </div>
       </div>
     );
@@ -3689,9 +3689,9 @@ function SpellsTab({ char, gameData, onUpdate }) {
       ) : (
         <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, overflow:"hidden" }}>
           {/* Table header */}
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 44px 70px 80px 100px", padding:"5px 10px",
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 50px 72px 80px 140px", padding:"5px 10px",
             background:"rgba(0,0,0,0.25)", borderBottom:"1px solid var(--border)" }}>
-            {["Spell","Lvl","Cast Time","Range",""].map(h=>(
+            {["Spell","Lvl","Cast Time","Range","Uses / Cast"].map(h=>(
               <div key={h} style={{ fontSize:9, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1 }}>{h}</div>
             ))}
           </div>
