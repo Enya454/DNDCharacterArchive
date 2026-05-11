@@ -598,6 +598,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         return picked >= maxCount;
       }
       case "proficiency_choice": {
+        const owned = skillSources && thisSource
           ? Object.entries(skillSources).filter(([,s]) => s === thisSource).map(([sk]) => sk)
           : (skillProfs || []);
         return owned.length >= (feature.count || 0);
