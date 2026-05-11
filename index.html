@@ -658,17 +658,67 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* Simple choice */}
           {!locked && feature.type === "choice" && feature.options && (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
-              {feature.options.map(opt => (
-                <div key={opt} onClick={() => onChoice(feature.name, opt)} style={{
-                  padding:"8px 12px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
-                  border:`1px solid ${chosen === opt ? "var(--accent)" : "var(--border)"}`,
-                  background: chosen === opt ? "rgba(201,162,39,0.1)" : "var(--surface)",
-                  color: chosen === opt ? "var(--accent)" : "var(--text)"
-                }}>
-                  {chosen === opt && "✓ "}{opt}
-                </div>
-              ))}
+            <div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
+                {feature.options.map(opt => (
+                  <div key={opt} onClick={() => onChoice(feature.name, opt)} style={{
+                    padding:"8px 12px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                    border:`1px solid ${chosen === opt ? "var(--accent)" : "var(--border)"}`,
+                    background: chosen === opt ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                    color: chosen === opt ? "var(--accent)" : "var(--text)"
+                  }}>
+                    {chosen === opt && "✓ "}{opt}
+                  </div>
+                ))}
+              </div>
+
+              {/* Pact of the Tome — choose 3 cantrips from any class */}
+              {feature.name === "Pact Boon" && chosen?.includes("Tome") && (() => {
+                const allCantrips = (gameData?.spells || []).filter(s => s.level === 0);
+                const tomeKey = "pact_tome_cantrips";
+                const tomeCantrips = (choices?.[tomeKey] || []);
+                const maxTome = 3;
+                const toggleTome = spell => {
+                  const isIn = tomeCantrips.includes(spell.name);
+                  const next = isIn
+                    ? tomeCantrips.filter(n => n !== spell.name)
+                    : tomeCantrips.length < maxTome ? [...tomeCantrips, spell.name] : tomeCantrips;
+                  onChoice && onChoice(tomeKey, next);
+                };
+                return (
+                  <div style={{ marginTop:14, padding:"12px 14px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--accent2)", borderRadius:8 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:8 }}>
+                      Pact of the Tome — Choose 3 Cantrips ({tomeCantrips.length}/{maxTome})
+                    </div>
+                    <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>
+                      Your Book of Shadows contains 3 cantrips from any class's spell list. They count as Warlock cantrips for you.
+                    </div>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:6, maxHeight:200, overflowY:"auto" }}>
+                      {allCantrips.map(spell => {
+                        const isPicked = tomeCantrips.includes(spell.name);
+                        const canPick = isPicked || tomeCantrips.length < maxTome;
+                        return (
+                          <div key={spell.name} onClick={() => canPick && toggleTome(spell)}
+                            style={{ padding:"4px 10px", borderRadius:16, cursor:canPick?"pointer":"not-allowed",
+                              fontSize:12, transition:"all 0.15s",
+                              border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
+                              background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                              color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                              opacity:!canPick&&!isPicked?0.5:1 }}>
+                            {isPicked?"✓ ":""}{spell.name}
+                            <span style={{fontSize:10,color:"var(--text-dim)",marginLeft:5}}>{spell.school}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {tomeCantrips.length > 0 && (
+                      <div style={{ marginTop:8, fontSize:12, color:"var(--accent)" }}>
+                        Selected: {tomeCantrips.join(", ")}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -916,6 +966,96 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     })}
                   </div>
                 )}
+                {/* Book of Ancient Secrets — ritual spell picker */}
+                {pickedNames.includes("Book of Ancient Secrets") && (() => {
+                  const allRituals = (gameData?.spells || []).filter(s =>
+                    s.ritual || (s.castingTime||'').includes('ritual')
+                  );
+                  const basKey  = "bas_required";   // first 2 level-1 rituals
+                  const basExtra = "bas_extra";      // unlimited additional rituals
+                  const required = (choices?.[basKey]  || []);
+                  const extra    = (choices?.[basExtra] || []);
+                  const allChosen = [...required, ...extra];
+
+                  const toggleRequired = spell => {
+                    const isIn = required.includes(spell.name);
+                    const next = isIn
+                      ? required.filter(n => n !== spell.name)
+                      : required.length < 2 ? [...required, spell.name] : required;
+                    onChoice && onChoice(basKey, next);
+                  };
+                  const toggleExtra = spell => {
+                    const isIn = extra.includes(spell.name);
+                    onChoice && onChoice(basExtra,
+                      isIn ? extra.filter(n => n !== spell.name) : [...extra, spell.name]
+                    );
+                  };
+                  const level1Rituals = allRituals.filter(s => s.level === 1);
+                  const higherRituals = allRituals.filter(s => s.level > 1);
+                  return (
+                    <div style={{ marginTop:14, padding:"12px 14px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--accent2)", borderRadius:8 }}>
+                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:4 }}>
+                        Book of Ancient Secrets — Ritual Spells
+                      </div>
+                      <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:12, lineHeight:1.6 }}>
+                        Choose 2 first-level ritual spells to inscribe at no cost. You can add more ritual spells of any level (up to half your Warlock level, rounded up) by spending 2 hours and 50gp per spell level when you find them.
+                      </div>
+
+                      {/* Required — 2 level 1 rituals */}
+                      <div style={{ fontSize:11, color:"var(--accent)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>
+                        Starting Rituals ({required.length}/2 chosen)
+                      </div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:14 }}>
+                        {level1Rituals.map(spell => {
+                          const isPicked = required.includes(spell.name);
+                          const inExtra  = extra.includes(spell.name);
+                          const canPick  = isPicked || (required.length < 2 && !inExtra);
+                          return (
+                            <div key={spell.name} onClick={() => !inExtra && canPick && toggleRequired(spell)}
+                              style={{ padding:"4px 10px", borderRadius:16, cursor:(canPick&&!inExtra)?"pointer":"not-allowed",
+                                fontSize:12, transition:"all 0.15s",
+                                border:`1px solid ${isPicked?"var(--accent)":inExtra?"var(--border)":"var(--border)"}`,
+                                background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                                color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                                opacity:(!canPick&&!isPicked)||inExtra?0.4:1 }}>
+                              {isPicked?"✓ ":""}{spell.name}
+                              <span style={{fontSize:9,color:"var(--text-dim)",marginLeft:4}}>{spell.school}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Additional — unlimited, any level ritual */}
+                      <div style={{ fontSize:11, color:"var(--accent)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>
+                        Additional Rituals ({extra.length} added — costs gp &amp; time in-game)
+                      </div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                        {[...level1Rituals, ...higherRituals].map(spell => {
+                          const inReq   = required.includes(spell.name);
+                          const isPicked = extra.includes(spell.name);
+                          return (
+                            <div key={spell.name} onClick={() => !inReq && toggleExtra(spell)}
+                              style={{ padding:"4px 10px", borderRadius:16, cursor:inReq?"not-allowed":"pointer",
+                                fontSize:12, transition:"all 0.15s",
+                                border:`1px solid ${isPicked?"var(--success)":inReq?"var(--border)":"var(--border)"}`,
+                                background:isPicked?"rgba(39,174,96,0.12)":"var(--surface)",
+                                color:isPicked?"var(--success)":inReq?"var(--text-dim)":"var(--text-muted)",
+                                opacity:inReq?0.4:1 }}>
+                              {isPicked?"✓ ":""}{spell.name}
+                              <span style={{fontSize:9,color:"var(--text-dim)",marginLeft:4}}>Lvl {spell.level}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {allChosen.length > 0 && (
+                        <div style={{ marginTop:10, fontSize:12, color:"var(--text-muted)", lineHeight:1.6 }}>
+                          <span style={{color:"var(--accent)"}}>In your Book:</span> {allChosen.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Legend for prereq */}
                 {(feature.invocations||[]).some(i=>i.prereq) && (
                   <div style={{fontSize:10,color:"var(--text-dim)",marginTop:6}}>* = has a prerequisite (hover/select to see). Pact Boon prereqs become available after choosing your Pact Boon.</div>

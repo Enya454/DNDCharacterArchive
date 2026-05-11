@@ -11331,6 +11331,356 @@
         "damageType": "bludgeoning",
         "notes": "Restrained on failed save; ongoing 3d6 each turn"
       }
+    },
+    {
+      "name": "Alarm",
+      "level": 1,
+      "school": "Abjuration",
+      "castingTime": "1 minute (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "You set an alarm against unwanted intrusion. Choose a door, window, or an area within range no larger than a 20-foot cube. Until the spell ends, an alarm alerts you whenever a Tiny or larger creature touches or enters the warded area.",
+      "classes": [
+        "Wizard",
+        "Ranger"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Detect Poison and Disease",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "For the duration, you can sense the presence and location of poisons, poisonous creatures, and diseases within 30 feet.",
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Find Familiar",
+      "level": 1,
+      "school": "Conjuration",
+      "castingTime": "1 hour (ritual)",
+      "range": "10 ft",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You gain the service of a familiar, a spirit that takes an animal form you choose: bat, cat, crab, frog, hawk, lizard, octopus, owl, poisonous snake, fish, rat, raven, sea horse, spider, or weasel.",
+      "classes": [
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Identify",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "1 minute (ritual)",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You choose one object that you must touch throughout the casting. If it is a magic item or some other magic-imbued object, you learn its properties and how to use them.",
+      "classes": [
+        "Bard",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Tenser's Floating Disk",
+      "level": 1,
+      "school": "Conjuration",
+      "castingTime": "1 action (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "This spell creates a circular, horizontal plane of force, 3 feet in diameter and 1 inch thick, that floats 3 feet above the ground in an unoccupied space within range. The disk can hold up to 500 pounds.",
+      "classes": [
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Animal Messenger",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "1 action (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "By means of this spell, you use an animal to deliver a message. Choose a Tiny beast in range and speak a message of up to 25 words. The beast will travel to a target destination you designate.",
+      "classes": [
+        "Bard",
+        "Druid",
+        "Ranger"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Augury",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 minute (ritual)",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "By casting gem-inlaid sticks, rolling dragon bones, laying out ornate cards, or employing some other divining tool, you receive an omen from an otherworldly entity about the results of a specific course of action within the next 30 minutes.",
+      "classes": [
+        "Cleric"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Beast Sense",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "Touch",
+      "components": "S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You touch a willing beast. For the duration, you can use your action to see through the beast's eyes and hear what it hears, and continue to do so until you use your action to return to your normal senses.",
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Gentle Repose",
+      "level": 2,
+      "school": "Necromancy",
+      "castingTime": "1 action (ritual)",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "10 days",
+      "description": "You touch a corpse or other remains. For the duration, the target is protected from decay and can't become undead. The spell also effectively extends the time limit on raising the target from the dead.",
+      "classes": [
+        "Cleric",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Magic Mouth",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "1 minute (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Until dispelled",
+      "description": "You implant a message within an object in range, a message that is uttered when a trigger condition is met. The message is spoken in your voice and is no louder than a normal conversation.",
+      "classes": [
+        "Bard",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Skywrite",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "1 action (ritual)",
+      "range": "Unlimited",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You cause up to ten words to form in a part of the sky you can see. The words appear to be made of cloud and remain in place for the spell's duration.",
+      "classes": [
+        "Bard",
+        "Druid",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Feign Death",
+      "level": 3,
+      "school": "Necromancy",
+      "castingTime": "1 action (ritual)",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "You touch a willing creature and put it into a cataleptic state that is indistinguishable from death. For the duration, the target appears dead and is blinded and incapacitated, has resistance to all damage except psychic, and is immune to poison.",
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Meld into Stone",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action (ritual)",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "8 hours",
+      "description": "You step into a stone object or surface large enough to fully contain your body, melding yourself and all the equipment you carry with the stone for the duration. Nothing of your presence remains visible to inspection.",
+      "classes": [
+        "Cleric",
+        "Druid"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Nondetection",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "For the duration, you hide a target from divination magic. The target can't be targeted by any divination magic or perceived through magical scrying sensors.",
+      "classes": [
+        "Bard",
+        "Ranger",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Speak with Dead",
+      "level": 3,
+      "school": "Necromancy",
+      "castingTime": "1 action",
+      "range": "10 ft",
+      "components": "V, S, M",
+      "duration": "10 minutes",
+      "description": "You grant the semblance of life and intelligence to a corpse, allowing it to answer the questions you pose. The corpse can answer up to five questions. It knows only what it knew in life.",
+      "classes": [
+        "Bard",
+        "Cleric"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Speak with Plants",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Self (30-ft radius)",
+      "components": "V, S",
+      "duration": "10 minutes",
+      "description": "You imbue plants within 30 feet with limited sentience and animation, giving them the ability to communicate with you and follow your simple commands.",
+      "classes": [
+        "Bard",
+        "Druid",
+        "Ranger"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Water Breathing",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "This spell grants up to ten willing creatures of your choice the ability to breathe underwater until the spell ends.",
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Water Walk",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "This spell grants the ability to move across any liquid surface as if it were harmless solid ground. Up to ten willing creatures can benefit.",
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Ranger",
+        "Sorcerer"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Divination",
+      "level": 4,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "Your magic and an offering put you in contact with a god or a god's servants. You ask a single question about a specific goal, event, or activity within 7 days. The DM offers a truthful reply.",
+      "classes": [
+        "Cleric"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Leomund's Tiny Hut",
+      "level": 3,
+      "school": "Evocation",
+      "castingTime": "1 minute (ritual)",
+      "range": "Self (10-ft radius hemisphere)",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "A 10-foot-radius immobile dome of force springs into existence around and above you. Nine creatures of Medium size or smaller can fit inside. The atmosphere inside the dome is comfortable regardless of the weather outside.",
+      "classes": [
+        "Bard",
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Rary's Telepathic Bond",
+      "level": 5,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "You forge a telepathic link among up to eight willing creatures within range. Psychic messages can be transmitted among the bonded creatures at will.",
+      "classes": [
+        "Wizard"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Forbiddance",
+      "level": 6,
+      "school": "Abjuration",
+      "castingTime": "10 minutes (ritual)",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "You create a ward against magical travel that protects up to 40,000 square feet of floor space within range. Creatures can't teleport into the area or use portals within the area. You can designate damage types.",
+      "classes": [
+        "Cleric"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Word of Recall",
+      "level": 6,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "5 ft",
+      "components": "V",
+      "duration": "Instantaneous",
+      "description": "You and up to five willing creatures within 5 feet of you instantly teleport to a previously designated sanctuary. You must designate such a place by casting this spell there.",
+      "classes": [
+        "Cleric"
+      ],
+      "ritual": false
     }
   ],
   "themes": {
