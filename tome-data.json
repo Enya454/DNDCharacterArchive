@@ -6711,9 +6711,14 @@
             },
             {
               "name": "Book of Ancient Secrets",
-              "description": "You can now inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list. The spells appear in the book and don't count against the number of spells you know. With your Book of Shadows in hand, you can cast the chosen spells as rituals.",
+              "description": "You can inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list (e.g. Alarm, Detect Magic, Find Familiar, Identify, Illusory Script, Tenser's Floating Disk, Unseen Servant). The spells appear in the book and don't count against your spells known. With your Book of Shadows in hand, you can cast them as rituals. If you encounter a spell in written form, you can add it to your Book of Shadows if it is on any class's spell list, the spell's level is no higher than half your Warlock level (rounded up), and you spend 2 hours and 50 gp per spell level. Ritual spells: Alarm, Ceremony, Comprehend Languages, Detect Magic, Detect Poison and Disease, Find Familiar, Identify, Illusory Script, Speak with Animals, Tenser's Floating Disk, Unseen Servant, Animal Messenger, Beast Sense, Gentle Repose, Magic Mouth, Silence, Skywrite, Augury, Clairvoyance, Meld into Stone, Nondetection, Speak with Dead, Speak with Plants, Water Breathing, Water Walk, Divination, Leomund's Tiny Hut, Drawmij's Instant Summons, Planar Binding, Rary's Telepathic Bond, Forbiddance, Word of Recall.",
               "levelReq": 1,
-              "prereq": "Pact of the Tome"
+              "prereq": "Pact of the Tome",
+              "subChoice": {
+                "type": "text",
+                "prompt": "Note your chosen ritual spells in your character notes",
+                "note": "Choose 2 ritual spells from any class list to inscribe in your Book of Shadows."
+              }
             },
             {
               "name": "Lifedrinker",
@@ -6908,7 +6913,8 @@
               "name": "Beguiling Defenses",
               "level": 10,
               "type": "passive",
-              "description": "Beginning at 10th level, your patron teaches you how to turn the mind-affecting magic of your enemies against them. You are immune to being charmed, and when another creature attempts to charm you, you can use your reaction to attempt to turn the charm back on that creature."
+              "description": "Beginning at 10th level, your patron teaches you how to turn the mind-affecting magic of your enemies against them. You are immune to being charmed, and when another creature attempts to charm you, you can use your reaction to attempt to turn the charm back on that creature. The creature must succeed on a Wisdom saving throw against your warlock spell save DC or be charmed by you for 1 minute or until the creature takes any damage.",
+              "actionType": "reaction"
             },
             {
               "name": "Dark Delirium",
@@ -6931,7 +6937,7 @@
               "name": "Expanded Spell List (Great Old One)",
               "level": 1,
               "type": "passive",
-              "description": "Great Old One Expanded Spells: 1st: Dissonant Whispers, Tasha's Hideous Laughter; 2nd: Detect Thoughts, Phantasmal Force; 3rd: Clairvoyance, Sending; 4th: Dominate Beast, Evard's Black Tentacles; 5th: Dominate Person, Telekinesis."
+              "description": "The Great Old One lets you choose from an expanded list of spells when you learn a Warlock spell. These spells count as Warlock spells for you and are added to your available spell list. 1st level: Dissonant Whispers, Tasha's Hideous Laughter; 2nd level: Detect Thoughts, Phantasmal Force; 3rd level: Clairvoyance, Sending; 4th level: Dominate Beast, Evard's Black Tentacles; 5th level: Dominate Person, Telekinesis."
             },
             {
               "name": "Awakened Mind",
@@ -8097,7 +8103,8 @@
           "type": "proficiency_choice",
           "count": 2,
           "from": "all",
-          "description": "Choose any 2 skills to be proficient in."
+          "description": "Choose any 2 skills to be proficient in.",
+          "displayText": "Any 2 skills"
         },
         {
           "name": "Languages",
@@ -8888,7 +8895,8 @@
       },
       "classes": [
         "Wizard",
-        "Sorcerer"
+        "Sorcerer",
+        "Warlock"
       ]
     },
     {
@@ -9532,7 +9540,8 @@
         "notes": "target must move away on fail"
       },
       "classes": [
-        "Bard"
+        "Bard",
+        "Warlock"
       ]
     },
     {
@@ -9640,7 +9649,8 @@
         "notes": "Charmed humanoid obeys telepathic commands"
       },
       "classes": [
-        "Bard"
+        "Bard",
+        "Warlock"
       ]
     },
     {
@@ -11197,6 +11207,129 @@
         "damage": "4d10",
         "damageType": "psychic",
         "notes": "Frightened; repeated saves each turn"
+      }
+    },
+    {
+      "name": "Tasha's Hideous Laughter",
+      "level": 1,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "A creature of your choice sees everything as hilariously funny and falls into fits of laughter. The target must succeed on a Wisdom saving throw or fall prone, becoming incapacitated and unable to stand up for the duration. A creature with an Intelligence score of 4 or less isn't affected.",
+      "classes": [
+        "Warlock"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Incapacitated and prone"
+      }
+    },
+    {
+      "name": "Detect Thoughts",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "For the duration, you can read the thoughts of certain creatures. When you cast the spell and as your action on each turn, you can focus your mind on any creature within 30 feet. If the creature has an Intelligence of 3 or lower or doesn't speak a language, it is unaffected. You learn the surface thoughts of that creature.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Phantasmal Force",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You craft an illusion that takes root in the mind of a creature. The target must make an Intelligence saving throw. On failure, you create a phantasmal object, creature, or phenomenon no larger than a 10-foot cube that only the target can perceive. Each round the target takes 1d6 psychic damage.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "int",
+        "damage": "1d6",
+        "damageType": "psychic",
+        "notes": "Illusory object perceived only by target"
+      }
+    },
+    {
+      "name": "Clairvoyance",
+      "level": 3,
+      "school": "Divination",
+      "castingTime": "10 minutes",
+      "range": "1 mile",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "You create an invisible sensor within range in a location familiar to you or in an obvious location. The sensor remains for the duration. You can use your action to switch between seeing or hearing through the sensor.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Sorcerer",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Sending",
+      "level": 3,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Unlimited",
+      "components": "V, S, M",
+      "duration": "1 round",
+      "description": "You send a short message of 25 words or fewer to a creature with which you are familiar. The creature hears the message in its mind and can reply in a message of 25 words or fewer.",
+      "classes": [
+        "Warlock",
+        "Bard",
+        "Cleric",
+        "Wizard"
+      ]
+    },
+    {
+      "name": "Dominate Beast",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You attempt to beguile a beast. The target must succeed on a Wisdom saving throw or be charmed by you for the duration. While charmed, you have a telepathic link with it as long as you are on the same plane.",
+      "classes": [
+        "Warlock",
+        "Druid",
+        "Sorcerer"
+      ],
+      "combat": {
+        "save": "wis",
+        "notes": "Charmed beast obeys telepathic commands"
+      }
+    },
+    {
+      "name": "Evard's Black Tentacles",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "90 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "Squirming, ebony tentacles fill a 20-foot square. Each creature in the area must succeed on a Dexterity saving throw or take 3d6 bludgeoning damage and be restrained. A restrained creature takes 3d6 bludgeoning damage at the start of each of its turns.",
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "3d6",
+        "damageType": "bludgeoning",
+        "notes": "Restrained on failed save; ongoing 3d6 each turn"
       }
     }
   ],

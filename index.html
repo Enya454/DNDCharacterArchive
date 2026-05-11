@@ -2586,7 +2586,10 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                 })}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
-                    {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>(f.fixed||f.from||[]).slice(0,2).join(", ")).join(" • ")}
+                    {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>{
+                      const src = f.displayText || (Array.isArray(f.fixed) ? f.fixed : Array.isArray(f.from) ? f.from : f.from === "all" ? ["Any 2 skills"] : []);
+                      return src.slice(0,2).join(", ");
+                    }).join(" • ")}
                   </div>
                 </div>
               ))}
