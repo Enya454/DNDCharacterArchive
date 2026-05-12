@@ -5561,28 +5561,17 @@ function SharedCharacterView({ token, gameData }) {
 }
 
 function App() {
-  const { data:gameData, error } = useGameData();
-
-  // Check for share token in URL — if present, show read-only view without auth
-  const shareToken = new URLSearchParams(window.location.search).get("share");
-  if (shareToken) {
-    if (!gameData && !error) return (
-      <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
-        <div style={{ textAlign:"center" }}>
-          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
-          <div style={{ color:"#8a8070" }}>Loading…</div>
-        </div>
-      </div>
-    );
-    if (gameData) return <SharedCharacterView token={shareToken} gameData={gameData} />;
-  }
-  const [session,    setSession]    = useState(undefined); // undefined = checking, null = logged out
+  const { data:gameData, error:gameError } = useGameData();
+  const [session,    setSession]    = useState(undefined);
   const [characters, setCharacters] = useState([]);
   const [view,       setView]       = useState("home");
   const [selId,      setSelId]      = useState(null);
   const [charLoading,setCharLoading]= useState(false);
   const [showAccount, setShowAccount] = useState(false);
   const selChar = characters.find(c => c.id === selId);
+
+  // Check for share token — AFTER all hooks
+  const shareToken = new URLSearchParams(window.location.search).get("share");
 
   // ── Auth state listener ──
   useEffect(() => {
@@ -5612,7 +5601,19 @@ function App() {
   }, [session?.user?.id]);
 
   // ── Loading states ──
-  if (session === undefined || (!gameData && !error)) return (
+  if (shareToken) {
+    if (!gameData && !gameError) return (
+      <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+          <div style={{ color:"#8a8070" }}>Loading…</div>
+        </div>
+      </div>
+    );
+    if (gameData) return <SharedCharacterView token={shareToken} gameData={gameData} />;
+  }
+
+  if (session === undefined || (!gameData && !gameError)) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
         <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
