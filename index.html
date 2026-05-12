@@ -4124,14 +4124,13 @@ function FeaturesTab({ char, gameData }) {
   const classFeatures = [
     ...(classData?.features || [])
       .filter(f => char.level >= (f.level || 1))
-      .map(f => ({ ...f, _group:"class", _label: char.class, _sublabel: char.class })),
+      .map(f => ({ ...f, _group:"class", _label: char.class, _sublabel: char.class }))
+      .sort((a, b) => (a.level||0) - (b.level||0)),
     ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
       .filter(f => char.level >= (f.level || 1))
-      .map(f => ({ ...f, _group:"class", _label: char.class, _sublabel: char.subclass })),
-  ].sort((a, b) => (a.level||0) !== (b.level||0)
-    ? (a.level||0) - (b.level||0)
-    : (a._sublabel === char.class ? -1 : 1) // class features before subclass at same level
-  );
+      .map(f => ({ ...f, _group:"class", _label: char.subclass, _sublabel: char.subclass }))
+      .sort((a, b) => (a.level||0) - (b.level||0)),
+  ];
 
   const racialSpellGrants = [
     ...(speciesData?.features || []).filter(f => f.type === "spell_grant"),
