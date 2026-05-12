@@ -4859,10 +4859,12 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
   const upd = useCallback(u => {
     const s = { ...u, updatedAt: new Date().toISOString() };
+    console.log("[upd] saving char:", s.name, "inv:", (s.inventory||[]).length, "items", s.id);
     setChar(s);
     // Save to localStorage immediately (no debounce) so refreshing always works
     const all = loadChars();
     const idx = all.findIndex(c => c.id === s.id);
+    console.log("[upd] localStorage chars:", all.length, "found at idx:", idx);
     if (idx >= 0) all[idx] = s; else all.push(s);
     saveChars(all);
     // Cloud sync debounced to avoid hammering Supabase on every keystroke
