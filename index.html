@@ -8,12 +8,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; }
+    body { margin: 0; font-size: 15px; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0d0d0f; }
     ::-webkit-scrollbar-thumb { background: #3a3a45; border-radius: 3px; }
     input, textarea, select { outline: none; }
     input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+    /* ── Character sheet readability boosts ── */
+    /* Bump ALL small text in the sheet up a notch */
+    [data-sheet] { font-size: 14px; }
+    [data-sheet] .text-sm  { font-size: 13px; }
+    [data-sheet] .text-xs  { font-size: 12px; }
+
+    /* Tab labels */
+    .sheet-tab-label { font-size: 13px !important; }
+
+    /* Left column labels readable */
+    .sheet-section-label { font-size: 11px !important; letter-spacing: 1.5px; }
 
     /* ── Floating symbol animations ── */
     @keyframes floatUp {
@@ -4045,7 +4057,7 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
       </div>
       {isOpen && (
         <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
-          <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:0 }}>{feat.description}</p>
+          <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{feat.description}</p>
           {chosen && (
             <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(201,162,39,0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>✓ Chosen: {chosen}</div>
           )}
@@ -4707,12 +4719,13 @@ function RestModal({ type, char, classData, onConfirm, onCancel }) {
   });
 
   const longRecoveries = [
-    "All HP restored",
-    "Temp HP cleared",
+    "All HP restored to maximum",
+    "Temporary HP cleared",
     "All spell slots restored",
-    "All hit dice restored (up to half max)",
+    "Hit dice restored (up to half your maximum)",
     "All long rest abilities restored",
-    "All short rest abilities restored",
+    "All short rest abilities restored (Warlock pact slots, Action Surge, etc.)",
+    "All racial/heritage spell uses restored",
   ];
 
   const [rolled, setRolled] = useState(false);
@@ -4745,10 +4758,10 @@ function RestModal({ type, char, classData, onConfirm, onCancel }) {
       // Long rest: restore everything
       const restoredDice = Math.min(maxDice, curDice + Math.max(1, Math.floor(maxDice / 2)));
       onConfirm({
-        hp: { ...char.hp, current: char.hp.max, temp: 0 },
-        hitDice: { ...char.hitDice, current: restoredDice },
+        hp:         { ...char.hp, current: char.hp.max, temp: 0 },
+        hitDice:    { ...char.hitDice, current: restoredDice },
         spellSlots: {},
-        actionUses: {},
+        actionUses: {}, // clears ALL uses — short and long rest abilities
       });
     }
   };
@@ -4840,6 +4853,9 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const skills      = getSkillBonuses(char);
   const isSpellcaster = !!getSpellcastingInfo(char, classes);
 
+  const cloudSyncRef = useRef(cloudSync);
+  useEffect(() => { cloudSyncRef.current = cloudSync; }, [cloudSync]);
+
   const upd = useCallback(u => {
     const s = { ...u, updatedAt: new Date().toISOString() };
     setChar(s);
@@ -4849,10 +4865,10 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
       const idx = all.findIndex(c => c.id === s.id);
       if (idx >= 0) all[idx] = s; else all.push(s);
       saveChars(all);
-      if (cloudSync) cloudSync(s);
+      if (cloudSyncRef.current) cloudSyncRef.current(s);
       setSaved(true); setTimeout(() => setSaved(false), 2000);
     }, 800);
-  }, [cloudSync]);
+  }, []);
 
 
 
@@ -4891,7 +4907,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const ts = active => ({
-    padding:"7px 12px", cursor:"pointer", fontSize:12, whiteSpace:"nowrap",
+    padding:"7px 14px", cursor:"pointer", fontSize:13, whiteSpace:"nowrap",
     transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
     background: active ? theme.card : "transparent",
     color:      active ? theme.accent : theme.textMuted,
@@ -5098,7 +5114,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {/* Proficiencies */}
           {classData && (<>
             {sectionLabel("Proficiencies")}
-            <div style={{ fontSize:11, lineHeight:1.85, marginBottom:4 }}>
+            <div style={{ fontSize:13, lineHeight:2, marginBottom:4 }}>
               <div><span style={{ color:theme.textMuted }}>Armor: </span><span style={{ color:theme.text }}>{(classData.armorProficiencies||[]).join(", ")||"None"}</span></div>
               <div><span style={{ color:theme.textMuted }}>Weapons: </span><span style={{ color:theme.text }}>{(classData.weaponProficiencies||[]).join(", ")||"None"}</span></div>
               <div><span style={{ color:theme.textMuted }}>Saves: </span><span style={{ color:theme.text }}>{(classData.savingThrows||[]).map(ab=>ABILITY_SHORT[ab]).join(", ")}</span></div>
@@ -5120,7 +5136,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:22, lineHeight:1 }}>{s.v}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>

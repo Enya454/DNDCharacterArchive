@@ -8715,7 +8715,8 @@
       "duration": "1 minute",
       "description": "This spell sends creatures into a magical slumber. Roll 5d8; the total is how many hit points of creatures this spell can affect, starting with the creature with the lowest current HP. Unconscious creatures are prioritised. Each sleeping creature is unconscious until the spell ends, the sleeper takes damage, or someone uses an action to shake or slap the sleeper awake. +2d8 per slot above 1st.",
       "combat": {
-        "notes": "Affects 5d8 HP of creatures; +2d8 per slot above 1st"
+        "notes": "Affects 5d8 HP of creatures; +2d8 per slot above 1st",
+        "slotScale": "+2d8 HP of creatures affected per slot level above 1st"
       },
       "classes": [
         "Wizard"
@@ -8808,7 +8809,8 @@
       "description": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target. When using a slot of 3rd or higher, you can target one additional humanoid for each slot level above 2nd.",
       "combat": {
         "save": "wis",
-        "notes": "Paralyzed; +1 target per slot above 2nd"
+        "notes": "Paralyzed; +1 target per slot above 2nd",
+        "slotScale": "+1 additional target per slot level above 2nd"
       },
       "classes": [
         "Wizard",
@@ -9071,7 +9073,8 @@
       "combat": {
         "healing": "1d8",
         "healSlotScale": "+1d8",
-        "notes": "+ spellcasting modifier"
+        "notes": "+ spellcasting modifier",
+        "slotScale": "+1d8 per slot level above 1st"
       },
       "classes": [
         "Cleric",
@@ -9088,7 +9091,8 @@
       "duration": "Concentration, up to 1 minute",
       "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw. When you cast this spell using a slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.",
       "combat": {
-        "notes": "+1d4 to attack rolls and saves for up to 3 creatures; +1 target per slot"
+        "notes": "+1d4 to attack rolls and saves for up to 3 creatures; +1 target per slot",
+        "slotScale": "+1 target per slot level above 1st"
       },
       "classes": [
         "Cleric",
@@ -9146,7 +9150,8 @@
       "combat": {
         "healing": "1d4",
         "healSlotScale": "+1d4",
-        "notes": "bonus action; + spellcasting modifier"
+        "notes": "bonus action; + spellcasting modifier",
+        "slotScale": "+1d4 per slot level above 1st"
       },
       "classes": [
         "Cleric",
@@ -9184,7 +9189,8 @@
         "attack": "melee",
         "damage": "1d8",
         "damageType": "force",
-        "notes": "bonus action weapon; move + attack each turn; + spellcasting modifier"
+        "notes": "bonus action weapon; move + attack each turn; + spellcasting modifier",
+        "slotScale": "+1d8 per 2 slot levels above 2nd"
       },
       "classes": [
         "Cleric"
@@ -9236,7 +9242,8 @@
         "save": "wis",
         "damage": "3d8",
         "damageType": "radiant/necrotic",
-        "notes": "15-ft aura; half speed; +1d8 per slot above 3rd"
+        "notes": "15-ft aura; half speed; +1d8 per slot above 3rd",
+        "slotScale": "+1d8 per slot level above 3rd"
       },
       "classes": [
         "Cleric"
@@ -9271,7 +9278,8 @@
       "description": "You attempt to send one creature that you can see within range to another place of existence. The target must succeed on a Charisma saving throw or be banished. If the target is native to the plane of existence you're on, you banish the target to a harmless demiplane. While there, the target is incapacitated. The target remains there until the spell ends, at which point the target reappears in the space it left or in the nearest unoccupied space if that space is occupied.",
       "combat": {
         "save": "cha",
-        "notes": "Target banished on fail; permanent if on different native plane"
+        "notes": "Target banished on fail; permanent if on different native plane",
+        "slotScale": "+1 additional target per slot level above 4th"
       },
       "classes": [
         "Cleric",
@@ -9576,7 +9584,8 @@
       "description": "You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and does so with advantage if you or your companions are fighting it. If it fails the saving throw, it is charmed by you until the spell ends or until you or your companions do anything harmful to it. +1 target per slot above 1st.",
       "combat": {
         "save": "wis",
-        "notes": "Charmed as friendly; +1 target per slot above 1st"
+        "notes": "Charmed as friendly; +1 target per slot above 1st",
+        "slotScale": "+1 additional target per slot level above 1st"
       },
       "classes": [
         "Bard",
@@ -9763,7 +9772,8 @@
       "duration": "Concentration, up to 1 hour",
       "description": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack. Also, choose one ability when you cast the spell. The target has disadvantage on ability checks made with the chosen ability. Duration increases at higher slots.",
       "combat": {
-        "notes": "+1d6 necrotic per hit; disadvantage on chosen ability checks"
+        "notes": "+1d6 necrotic per hit; disadvantage on chosen ability checks",
+        "slotScale": "Can target a new creature when current target drops to 0 HP without using a new spell slot"
       },
       "classes": [
         "Warlock"
@@ -10295,7 +10305,8 @@
       ],
       "combat": {
         "save": "wis",
-        "notes": "Frightened condition"
+        "notes": "Frightened condition",
+        "slotScale": "+1 additional target per slot level above 1st"
       }
     },
     {
@@ -10757,7 +10768,8 @@
       ],
       "combat": {
         "save": "wis",
-        "notes": "Paralyzed \u2014 auto-crit on melee attack"
+        "notes": "Paralyzed \u2014 auto-crit on melee attack",
+        "slotScale": "+1 additional target per slot level above 5th"
       }
     },
     {
