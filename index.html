@@ -3372,8 +3372,6 @@ function HPTracker({ hp, onUpdate }) {
 function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slotsLeft, maxSlotLevel, racialUses, racialSpentKey, racialRemaining, spendRacialUse, setCasting, setUpcastLvl }) {
     const [open, setOpen] = useState(false);
     const isCantrip = spell.level === 0;
-    const [open, setOpen] = useState(false);
-    const isCantrip = spell.level === 0;
     const isRitual  = spell.ritual || (spell.castingTime||'').includes('ritual');
     const isHeritage = !!grant;
     const maxUses  = grant ? grant.uses : null;
