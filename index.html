@@ -4119,30 +4119,32 @@ function FeaturesTab({ char, gameData }) {
   const classData   = classes?.[char.class];
   const speciesData = speciesDb?.[char.species];
   const subraceData = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
-  const [open, setOpen]     = useState({});
-  const [filter, setFilter] = useState("all"); // "all" | "class" | "special"
-  const toggle = key => setOpen(o => ({ ...o, [key]: !o[key] }));
+  const [filter, setFilter] = useState("all");
 
-  // ── Build feature groups ──────────────────────────────────
-  // CLASS features (class + subclass, sorted by level)
   const classFeatures = [
-    ...(classData?.features || []).map(f => ({ ...f, _group:"class", _label: char.class })),
+    ...(classData?.features || [])
+      .filter(f => char.level >= (f.level || 1))
+      .map(f => ({ ...f, _group:"class", _label: char.class })),
     ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
+      .filter(f => char.level >= (f.level || 1))
       .map(f => ({ ...f, _group:"class", _label: char.subclass })),
   ].sort((a, b) => (a.level||0) - (b.level||0));
 
-  // SPECIAL features: species traits + subrace traits + feats
-  // Exclude spell_grant features (those show in Spells tab)
+  const racialSpellGrants = [
+    ...(speciesData?.features || []).filter(f => f.type === "spell_grant"),
+    ...(subraceData?.features || []).filter(f => f.type === "spell_grant"),
+  ];
+
   const specialFeatures = [
     ...(speciesData?.features || [])
       .filter(f => f.type !== "spell_grant")
-      .map(f => ({ ...f, _group:"special", _label: char.species, _isSpecies:true })),
+      .map(f => ({ ...f, _group:"special", _label: char.species })),
     ...(subraceData?.features || [])
       .filter(f => f.type !== "spell_grant")
-      .map(f => ({ ...f, _group:"special", _label: char.subrace, _isSubrace:true })),
+      .map(f => ({ ...f, _group:"special", _label: char.subrace })),
     ...Object.entries(char.featChoices || {})
       .filter(([, v]) => v && v !== "__pending__")
-      .map(([asiFeature, featName]) => {
+      .map(([, featName]) => {
         const feat = featList.find(f => f.name === featName);
         return feat ? { ...feat, _group:"special", _label:"Feat", _isFeat:true } : null;
       })
@@ -4153,7 +4155,6 @@ function FeaturesTab({ char, gameData }) {
     : filter === "special" ? specialFeatures
     : [...classFeatures, ...specialFeatures];
 
-  // Group shown features by their _label for section headers
   const grouped = [];
   let lastLabel = null;
   for (const feat of shown) {
@@ -4163,172 +4164,127 @@ function FeaturesTab({ char, gameData }) {
     }
     grouped.push({ type:"feature", feat });
   }
+  if (filter !== "class" && racialSpellGrants.length > 0) {
+    grouped.push({ type:"spellgrants", grants: racialSpellGrants });
+  }
 
-  // ── Render one feature row ────────────────────────────────
   const renderFeature = (feat, idx) => {
     const key = feat.name + (feat._label||"") + idx;
-    const isOpen = open[key];
-    const locked = feat._group === "class" && !feat._isSpecies && !feat._isSubrace
-      && char.level < (feat.level || 1);
     const chosen     = char.featureChoices?.[feat.name];
     const chosenFeat = char.featChoices?.[feat.name];
     const asiChoices = char.asiChoices?.[feat.name];
-    const invList    = feat.invocations ? (char.featureChoices?.[feat.name] || []) : null;
-
-    // Badge for level, type hints
-    const badges = [];
-    if (feat.level > 1 && feat._group === "class") badges.push(`Lvl ${feat.level}`);
-    if (locked) badges.push("🔒 Locked");
-    if (feat._isFeat) badges.push("Feat");
-
+    const invList    = feat.type === "eldritch_invocations"
+      ? (char.featureChoices?.[feat.name] || []) : null;
     return (
-      <div key={key} style={{ marginBottom: isOpen ? 4 : 2 }}>
-        {/* ── Feature header row ── */}
-        <div onClick={() => !locked && toggle(key)}
-          style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"10px 14px",
-            borderRadius: isOpen ? "8px 8px 0 0" : 8,
-            background: locked ? "rgba(255,255,255,0.02)" : isOpen ? "rgba(201,162,39,0.06)" : "var(--surface)",
-            border:`1px solid ${locked?"var(--border)":isOpen?"var(--accent)":"var(--border)"}`,
-            cursor: locked ? "default" : "pointer", transition:"all 0.15s" }}>
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:14,
-                color: locked ? "var(--text-dim)" : isOpen ? "var(--accent)" : "var(--text)" }}>
-                {feat.name}
-              </span>
-              {badges.map(b => (
-                <span key={b} style={{ fontSize:10, padding:"1px 6px", borderRadius:4,
-                  background:"rgba(255,255,255,0.06)", border:"1px solid var(--border)",
-                  color:"var(--text-dim)" }}>{b}</span>
-              ))}
-              {/* Show chosen value inline when collapsed */}
-              {!isOpen && chosen && !Array.isArray(chosen) && (
-                <span style={{ fontSize:11, color:"var(--accent)", padding:"1px 7px",
-                  borderRadius:10, border:"1px solid var(--accent)", background:"rgba(201,162,39,0.08)" }}>
-                  {String(chosen).split("—")[0].trim()}
-                </span>
-              )}
-              {!isOpen && chosenFeat && chosenFeat !== "__pending__" && (
-                <span style={{ fontSize:11, color:"var(--accent)", padding:"1px 7px",
-                  borderRadius:10, border:"1px solid var(--accent)", background:"rgba(201,162,39,0.08)" }}>
-                  🏆 {chosenFeat}
-                </span>
-              )}
-              {!isOpen && invList?.length > 0 && (
-                <span style={{ fontSize:11, color:"var(--text-muted)" }}>{invList.length} invocation{invList.length!==1?"s":""}</span>
-              )}
-            </div>
-            {/* One-liner description preview when collapsed */}
-            {!isOpen && feat.description && (
-              <div style={{ fontSize:12, color:"var(--text-dim)", marginTop:3,
-                overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:"90%" }}>
-                {feat.description.slice(0, 120)}{feat.description.length > 120 ? "…" : ""}
-              </div>
-            )}
-          </div>
-          {!locked && <span style={{ fontSize:11, color:"var(--text-muted)", flexShrink:0 }}>{isOpen?"▲":"▼"}</span>}
+      <div key={key} style={{ marginBottom:14, padding:"14px 16px",
+        background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:8 }}>
+          <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--accent)" }}>{feat.name}</span>
+          {feat.level > 1 && feat._group === "class" && (
+            <span style={{ fontSize:10, padding:"1px 6px", borderRadius:4,
+              background:"rgba(255,255,255,0.05)", border:"1px solid var(--border)", color:"var(--text-dim)" }}>
+              Lvl {feat.level}
+            </span>
+          )}
+          {feat._isFeat && (
+            <span style={{ fontSize:10, padding:"1px 6px", borderRadius:4,
+              background:"rgba(201,162,39,0.08)", border:"1px solid rgba(201,162,39,0.3)", color:"var(--accent)" }}>
+              🏆 Feat
+            </span>
+          )}
         </div>
-
-        {/* ── Expanded content ── */}
-        {isOpen && (
-          <div style={{ padding:"12px 16px 14px", border:"1px solid var(--accent)",
-            borderTop:"none", borderRadius:"0 0 8px 8px",
-            background:"rgba(0,0,0,0.2)", marginBottom:2 }}>
-
-            {/* Full description */}
-            <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 10px 0" }}>
-              {feat.description}
-            </p>
-
-            {/* Chosen option */}
-            {chosen && !Array.isArray(chosen) && feat.type === "choice" && (
-              <div style={{ padding:"8px 12px", background:"rgba(201,162,39,0.06)",
-                border:"1px solid var(--accent)", borderRadius:8, marginBottom:8 }}>
-                <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Chosen</div>
-                <div style={{ fontSize:13, color:"var(--accent)", lineHeight:1.6 }}>{chosen}</div>
-              </div>
-            )}
-
-            {/* Eldritch Invocations — list with descriptions */}
-            {feat.type === "eldritch_invocations" && invList?.length > 0 && (
-              <div style={{ marginBottom:8 }}>
-                <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>
-                  Active Invocations ({invList.length})
-                </div>
-                {invList.map(name => {
-                  const inv = (feat.invocations||[]).find(i=>i.name===name);
-                  return (
-                    <div key={name} style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)",
-                      border:"1px solid rgba(201,162,39,0.2)", borderRadius:7, marginBottom:6 }}>
-                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:3 }}>
-                        {name}
-                        {inv?.prereq && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>{inv.prereq}</span>}
-                      </div>
-                      {inv?.description && <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.6 }}>{inv.description}</div>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Feat chosen at ASI */}
-            {chosenFeat && chosenFeat !== "__pending__" && (() => {
-              const fd = featList.find(f=>f.name===chosenFeat);
+        <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 0 0" }}>{feat.description}</p>
+        {chosen && !Array.isArray(chosen) && feat.type === "choice" && (
+          <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:8 }}>
+            <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Your Choice</div>
+            <div style={{ fontSize:13, color:"var(--accent)", lineHeight:1.6 }}>{chosen}</div>
+          </div>
+        )}
+        {feat.type === "eldritch_invocations" && invList?.length > 0 && (
+          <div style={{ marginTop:10 }}>
+            <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Active Invocations ({invList.length})</div>
+            {invList.map(name => {
+              const inv = (feat.invocations||[]).find(i=>i.name===name);
               return (
-                <div style={{ padding:"10px 14px", background:"rgba(201,162,39,0.06)",
-                  border:"1px solid var(--accent)", borderRadius:8, marginBottom:8 }}>
-                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:5 }}>🏆 {chosenFeat}</div>
-                  {fd?.description && <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7 }}>{fd.description}</div>}
+                <div key={name} style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(201,162,39,0.18)", borderRadius:7, marginBottom:6 }}>
+                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:4 }}>
+                    {name}{inv?.prereq && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>Requires: {inv.prereq}</span>}
+                  </div>
+                  {inv?.description && <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.65 }}>{inv.description}</div>}
                 </div>
               );
-            })()}
-
-            {/* ASI bonuses */}
-            {feat.type === "asi" && !chosenFeat && (() => {
-              const bonuses = Object.entries(asiChoices||{}).filter(([,v])=>v>0);
-              return bonuses.length > 0 ? (
-                <div style={{ padding:"7px 12px", background:"rgba(39,174,96,0.08)",
-                  border:"1px solid var(--success)", borderRadius:7, marginBottom:8 }}>
-                  <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:3 }}>Ability Score Increases</div>
-                  <div style={{ fontSize:13, color:"var(--success)" }}>
-                    {bonuses.map(([ab,v])=>`+${v} ${ABILITY_SHORT[ab]}`).join(", ")}
-                  </div>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Pact of the Tome cantrips */}
-            {feat.name === "Pact Boon" && chosen?.includes("Tome") && (() => {
-              const tomeCantrips = char.featureChoices?.["pact_tome_cantrips"] || [];
-              return tomeCantrips.length > 0 ? (
-                <div style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)",
-                  border:"1px solid rgba(201,162,39,0.2)", borderRadius:7, marginBottom:8 }}>
-                  <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Book of Shadows Cantrips</div>
-                  <div style={{ fontSize:13, color:"var(--accent)" }}>{tomeCantrips.join(", ")}</div>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Book of Ancient Secrets rituals */}
-            {feat.type === "eldritch_invocations" && invList?.includes("Book of Ancient Secrets") && (() => {
-              const req   = char.featureChoices?.["bas_required"] || [];
-              const extra = char.featureChoices?.["bas_extra"]    || [];
-              const all   = [...req, ...extra];
+            })}
+            {invList.includes("Book of Ancient Secrets") && (() => {
+              const all = [...(char.featureChoices?.["bas_required"]||[]), ...(char.featureChoices?.["bas_extra"]||[])];
               return all.length > 0 ? (
-                <div style={{ padding:"8px 12px", background:"rgba(41,128,185,0.06)",
-                  border:"1px solid rgba(41,128,185,0.3)", borderRadius:7 }}>
-                  <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Ritual Spells in Book</div>
+                <div style={{ padding:"8px 12px", background:"rgba(41,128,185,0.06)", border:"1px solid rgba(41,128,185,0.3)", borderRadius:7 }}>
+                  <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Ritual Spells in Book of Shadows</div>
                   <div style={{ fontSize:13, color:"var(--info)" }}>{all.join(", ")}</div>
                 </div>
               ) : null;
             })()}
           </div>
         )}
+        {feat.name === "Pact Boon" && chosen?.includes("Tome") && (() => {
+          const tc = char.featureChoices?.["pact_tome_cantrips"] || [];
+          return tc.length > 0 ? (
+            <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(201,162,39,0.18)", borderRadius:7 }}>
+              <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Book of Shadows Cantrips</div>
+              <div style={{ fontSize:13, color:"var(--accent)" }}>{tc.join(", ")}</div>
+            </div>
+          ) : null;
+        })()}
+        {chosenFeat && chosenFeat !== "__pending__" && (() => {
+          const fd = featList.find(f=>f.name===chosenFeat);
+          return (
+            <div style={{ marginTop:10, padding:"10px 14px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:8 }}>
+              <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:6 }}>🏆 {chosenFeat}</div>
+              {fd?.description && <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7 }}>{fd.description}</div>}
+            </div>
+          );
+        })()}
+        {feat.type === "asi" && !chosenFeat && (() => {
+          const bonuses = Object.entries(asiChoices||{}).filter(([,v])=>v>0);
+          return bonuses.length > 0 ? (
+            <div style={{ marginTop:10, padding:"7px 12px", background:"rgba(39,174,96,0.08)", border:"1px solid var(--success)", borderRadius:7 }}>
+              <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:3 }}>Ability Score Increases</div>
+              <div style={{ fontSize:13, color:"var(--success)" }}>{bonuses.map(([ab,v])=>`+${v} ${ABILITY_SHORT[ab]}`).join(", ")}</div>
+            </div>
+          ) : null;
+        })()}
       </div>
     );
   };
 
-  // ── Filter pills ──────────────────────────────────────────
+  const renderSpellGrants = (grants) => {
+    const level = char.level || 1;
+    const allGranted = grants.flatMap(g => (g.grants||[]).map(gr => ({ ...gr, source: g.name })));
+    const available = allGranted.filter(g => level >= (g.minCharLevel || 1));
+    const upcoming  = allGranted.filter(g => level <  (g.minCharLevel || 1));
+    if (available.length === 0 && upcoming.length === 0) return null;
+    return (
+      <div key="spell-grants" style={{ marginBottom:14, padding:"14px 16px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10 }}>
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>Heritage Spells</div>
+        <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 10px 0" }}>
+          Your ancestry grants you the following spells. These are always available and do not count against your spell limit.
+        </p>
+        {available.map(g => (
+          <div key={g.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 10px", background:"rgba(201,162,39,0.04)", borderRadius:6, border:"1px solid rgba(201,162,39,0.15)", marginBottom:5 }}>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, flex:1 }}>{g.spellName}</span>
+            <span style={{ fontSize:11, color:"var(--text-dim)" }}>{g.uses === null || g.uses === undefined ? "At will" : `${g.uses}× / ${g.recharge === "long" ? "Long Rest" : "Short Rest"}`}</span>
+            <span style={{ fontSize:10, color:"var(--accent2)", padding:"1px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>✓ Unlocked</span>
+          </div>
+        ))}
+        {upcoming.map(g => (
+          <div key={g.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 10px", background:"rgba(255,255,255,0.02)", borderRadius:6, border:"1px solid var(--border)", marginBottom:5, opacity:0.5 }}>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--text-dim)", fontSize:13, flex:1 }}>{g.spellName}</span>
+            <span style={{ fontSize:11, color:"var(--text-dim)" }}>Unlocks at level {g.minCharLevel}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const pill = active => ({
     padding:"5px 16px", borderRadius:20, cursor:"pointer", fontSize:12,
     fontFamily:"var(--font-display)", letterSpacing:0.5, transition:"all 0.15s",
@@ -4339,49 +4295,30 @@ function FeaturesTab({ char, gameData }) {
 
   return (
     <div>
-      {/* ── Filter bar ── */}
       <div style={{ display:"flex", gap:8, marginBottom:20 }}>
         <button style={pill(filter==="all")}     onClick={()=>setFilter("all")}>All</button>
         <button style={pill(filter==="class")}   onClick={()=>setFilter("class")}>⚔️ Class Features</button>
         <button style={pill(filter==="special")} onClick={()=>setFilter("special")}>✦ Special Features</button>
-        <span style={{ marginLeft:"auto", fontSize:12, color:"var(--text-dim)", alignSelf:"center" }}>
-          {shown.length} feature{shown.length!==1?"s":""}
-        </span>
+        <span style={{ marginLeft:"auto", fontSize:12, color:"var(--text-dim)", alignSelf:"center" }}>{shown.length} feature{shown.length!==1?"s":""}</span>
       </div>
-
-      {/* ── Feature groups ── */}
       {grouped.map((item, i) => {
-        if (item.type === "header") {
-          return (
-            <div key={`h-${item.label}-${i}`} style={{
-              display:"flex", alignItems:"center", gap:10,
-              marginBottom:10, marginTop: i > 0 ? 20 : 0 }}>
-              <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)",
-                fontSize:11, textTransform:"uppercase", letterSpacing:2, flexShrink:0 }}>
-                {item.label}
-              </div>
-              <div style={{ flex:1, height:1, background:"rgba(201,162,39,0.2)" }}/>
-              <div style={{ fontSize:10, color:"var(--text-dim)", flexShrink:0 }}>
-                {item.group === "class" ? "⚔️ Class" : "✦ Special"}
-              </div>
-            </div>
-          );
-        }
+        if (item.type === "header") return (
+          <div key={`h-${item.label}-${i}`} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10, marginTop: i > 0 ? 20 : 0 }}>
+            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, flexShrink:0 }}>{item.label}</div>
+            <div style={{ flex:1, height:1, background:"rgba(201,162,39,0.2)" }}/>
+            <div style={{ fontSize:10, color:"var(--text-dim)", flexShrink:0 }}>{item.group === "class" ? "⚔️ Class" : "✦ Special"}</div>
+          </div>
+        );
+        if (item.type === "spellgrants") return renderSpellGrants(item.grants);
         return renderFeature(item.feat, i);
       })}
-
       {shown.length === 0 && (
-        <div style={{ textAlign:"center", padding:40, color:"var(--text-muted)", fontSize:13, fontStyle:"italic" }}>
-          No features to display.
-        </div>
+        <div style={{ textAlign:"center", padding:40, color:"var(--text-muted)", fontSize:13, fontStyle:"italic" }}>No features to display.</div>
       )}
     </div>
   );
 }
 
-// ============================================================
-// NOTES TAB
-// ============================================================
 function NotesTab({ char, onUpdate }) {
   return (
     <div>
