@@ -441,10 +441,11 @@ const dbLoadChars = async () => {
 };
 const dbSaveChar = async char => {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) return;
+  if (!session) { console.warn("dbSaveChar: no session, saving locally only"); return; }
   const row = { id: char.id, user_id: session.user.id, data: char, updated_at: new Date().toISOString() };
   const { error } = await sb.from("characters").upsert(row, { onConflict: "id" });
-  if (error) console.error("Save error:", error);
+  if (error) console.error("dbSaveChar error:", error);
+  else console.log("dbSaveChar OK:", char.name, "inv:", (char.inventory||[]).length, "items");
 };
 const dbDeleteChar = async id => {
   const { error } = await sb.from("characters").delete().eq("id", id);
@@ -4859,12 +4860,14 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const upd = useCallback(u => {
     const s = { ...u, updatedAt: new Date().toISOString() };
     setChar(s);
+    // Save to localStorage immediately (no debounce) so refreshing always works
+    const all = loadChars();
+    const idx = all.findIndex(c => c.id === s.id);
+    if (idx >= 0) all[idx] = s; else all.push(s);
+    saveChars(all);
+    // Cloud sync debounced to avoid hammering Supabase on every keystroke
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      const all = loadChars();
-      const idx = all.findIndex(c => c.id === s.id);
-      if (idx >= 0) all[idx] = s; else all.push(s);
-      saveChars(all);
       if (cloudSyncRef.current) cloudSyncRef.current(s);
       setSaved(true); setTimeout(() => setSaved(false), 2000);
     }, 800);
@@ -5609,18 +5612,24 @@ function App() {
   // ── Load characters when session appears ──
   useEffect(() => {
     if (!session) return;
+    // Show localStorage chars immediately so UI isn't blank while Supabase loads
+    const local = loadChars();
+    if (local.length > 0) setCharacters(local);
     setCharLoading(true);
     dbLoadChars().then(chars => {
-      setCharacters(chars);
-      // Migrate any local chars on first login (offer once)
-      const local = loadChars();
-      if (local.length > 0 && chars.length === 0) {
+      if (chars.length > 0) {
+        // Supabase is authoritative — merge: Supabase wins for chars that exist there
+        setCharacters(chars);
+        saveChars(chars); // keep localStorage in sync
+      } else if (local.length > 0) {
+        // First login migration: push local chars to Supabase
         Promise.all(local.map(c => dbSaveChar(c))).then(() => {
           saveChars([]); // clear local after migration
         });
         setCharacters(local);
       }
-    }).finally(() => setCharLoading(false));
+    }).catch(e => console.error("dbLoadChars error:", e))
+      .finally(() => setCharLoading(false));
   }, [session?.user?.id]);
 
   // ── Loading states ──
