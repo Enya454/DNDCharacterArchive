@@ -5573,6 +5573,13 @@ function App() {
   // Check for share token — AFTER all hooks
   const shareToken = new URLSearchParams(window.location.search).get("share");
 
+  // ── cloudSyncChar — must be defined before any early returns (hook rule) ──
+  const cloudSyncChar = useCallback(async char => {
+    setCharacters(prev => prev.map(c => c.id === char.id ? char : c));
+    saveChars(loadChars().map(c => c.id === char.id ? char : c));
+    await dbSaveChar(char);
+  }, []);
+
   // ── Auth state listener ──
   useEffect(() => {
     sb.auth.getSession().then(({ data }) => setSession(data.session ?? null));
@@ -5659,13 +5666,7 @@ function App() {
     setView("home");
   };
 
-  // Also wire upd in CharacterSheet to cloud-save — handled via saveChar above for full saves.
-  // For live edits (HP, spells etc) we piggyback on the debounced local save + push to cloud.
-  const cloudSyncChar = useCallback(async char => {
-    setCharacters(prev => prev.map(c => c.id === char.id ? char : c));
-    saveChars(loadChars().map(c => c.id === char.id ? char : c));
-    await dbSaveChar(char);
-  }, []);
+  // ── Routing ──
 
   if (view === "create") return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("home")} />;
   if (view === "edit" && selChar) return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("sheet")} editChar={selChar} />;
