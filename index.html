@@ -2371,6 +2371,39 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
 // Steps: Identity → Class → Species → Background → Abilities
 //        → Equipment & Spells → Finalise
 // ============================================================
+function StepBar({ STEPS, step, setStep, stepComplete }) {
+  return (
+    <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
+      {STEPS.map((name, i) => {
+        const isCurrent = i === step;
+        const incomplete = !stepComplete[i] && i <= step;
+        return (
+          <div key={i} onClick={() => setStep(i)} style={{
+            position:"relative",
+            padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
+            letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s", cursor:"pointer",
+            border: isCurrent ? "1px solid var(--accent)" : "1px solid var(--border)",
+            background: isCurrent ? "var(--accent)" : i < step ? "var(--accent2)" : "var(--surface)",
+            color: isCurrent ? "var(--bg)" : i < step ? "var(--bg)" : "var(--text-muted)"
+          }}>
+            {i+1}. {name}
+            {incomplete && (
+              <span style={{
+                position:"absolute", top:-5, right:-5,
+                width:14, height:14, borderRadius:"50%",
+                background:"#e74c3c", border:"2px solid var(--bg)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:9, color:"#fff", fontWeight:"bold", lineHeight:1,
+                pointerEvents:"none"
+              }}>!</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
   const [step, setStep] = useState(0);
   const [char, setChar] = useState(editChar ? { ...editChar } : { ...DEFAULT_CHAR });
@@ -2638,43 +2671,13 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
   });
 
 
-  // Show red dot on steps that are incomplete AND at or before the current step
-  const StepBar = () => (
-    <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
-      {STEPS.map((name, i) => {
-        const isCurrent = i === step;
-        const incomplete = !stepComplete[i] && i <= step;
-        return (
-          <div key={i} onClick={() => setStep(i)} style={{
-            position:"relative",
-            padding:"5px 12px", borderRadius:20, fontSize:11, fontWeight:"bold",
-            letterSpacing:0.5, whiteSpace:"nowrap", transition:"all 0.2s", cursor:"pointer",
-            border: isCurrent ? "1px solid var(--accent)" : "1px solid var(--border)",
-            background: isCurrent ? "var(--accent)" : i < step ? "var(--accent2)" : "var(--surface)",
-            color: isCurrent ? "var(--bg)" : i < step ? "var(--bg)" : "var(--text-muted)"
-          }}>
-            {i+1}. {name}
-            {incomplete && (
-              <span style={{
-                position:"absolute", top:-5, right:-5,
-                width:14, height:14, borderRadius:"50%",
-                background:"#e74c3c", border:"2px solid var(--bg)",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:9, color:"#fff", fontWeight:"bold", lineHeight:1,
-                pointerEvents:"none"
-              }}>!</span>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+  // StepBar rendered as top-level component
 
   return (
     <TW themeKey={char.theme} themes={themes}>
       <div style={ws.page}>
         <div style={ws.title}>⚔️ Create Your Character</div>
-        <StepBar />
+        <StepBar STEPS={STEPS} step={step} setStep={setStep} stepComplete={stepComplete} />
 
         {/* ── STEP 0: Identity ── */}
         {step === 0 && (
@@ -4019,6 +4022,8 @@ function InventoryTab({ char, gameData, onUpdate }) {
 // ============================================================
 // FEATURES TAB (character sheet view)
 // ============================================================
+const FeatureRow = ({ feat, isSpecies, isSubrace }
+
 function FeaturesTab({ char, gameData }) {
   const { classes, species:speciesDb, feats:featList=[] } = gameData;
   const classData   = classes?.[char.class];
@@ -4032,7 +4037,7 @@ function FeaturesTab({ char, gameData }) {
     ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || [])
   ].sort((a, b) => a.level - b.level);
 
-  const FeatureRow = ({ feat, isSpecies, isSubrace }) => {
+  const FeatureRow_ = (props) => <FeatureRow_ {...props} char={char} open={open} toggle={toggle} featList={featList} ws={ws}/>;) => {
     const locked  = !isSpecies && !isSubrace && char.level < feat.level;
     const chosen  = char.featureChoices?.[feat.name];
     const chosenFeat = char.featChoices?.[feat.name];
@@ -4129,7 +4134,7 @@ function FeaturesTab({ char, gameData }) {
           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
             {char.species} Species Traits
           </div>
-          {(speciesData.features || []).map(feat => <FeatureRow key={feat.name} feat={feat} isSpecies={true} />)}
+          {(speciesData.features || []).map(feat => <FeatureRow_ key={feat.name} feat={feat} isSpecies={true} />)}
         </div>
       )}
 
@@ -4139,7 +4144,7 @@ function FeaturesTab({ char, gameData }) {
           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
             {char.subrace} Traits
           </div>
-          {subraceData.features.map(feat => <FeatureRow key={feat.name} feat={feat} isSubrace={true} />)}
+          {subraceData.features.map(feat => <FeatureRow_ key={feat.name} feat={feat} isSubrace={true} />)}
         </div>
       )}
 
@@ -4148,7 +4153,7 @@ function FeaturesTab({ char, gameData }) {
           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:12 }}>
             {char.class}{char.subclass ? ` — ${char.subclass}` : ""} Features
           </div>
-          {allFeatures.map((feat, i) => <FeatureRow key={`${feat.name}-${i}`} feat={feat} isSpecies={false} />)}
+          {allFeatures.map((feat, i) => <FeatureRow_ key={`${feat.name}-${i}`} feat={feat} isSpecies={false} />)}
         </div>
       )}
     </div>
