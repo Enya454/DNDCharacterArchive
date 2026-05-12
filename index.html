@@ -4842,7 +4842,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const [shareCopied, setShareCopied] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
   const [restModal, setRestModal] = useState(null); // null | "short" | "long"
-  const fileRef   = useRef(null);
+  const fileRef    = useRef(null);
+  const saveTimer  = useRef(null);
 
   const { classes, species:speciesDb, themes, music } = gameData;
   const theme       = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
