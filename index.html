@@ -5286,6 +5286,18 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {/* Warnings */}
           {stealthDisadv && <div style={{ marginTop:8, padding:"4px 8px", background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", borderRadius:5, fontSize:10, color:"#e67e22" }}>⚠ Stealth disadvantage</div>}
           {strWarnings.map(msg=><div key={msg} style={{ marginTop:4, padding:"4px 8px", background:"rgba(192,57,43,0.12)", border:`1px solid ${theme.danger}`, borderRadius:5, fontSize:10, color:theme.danger }}>⚠ {msg}</div>)}
+
+          {/* Languages */}
+          {(char.languages||[]).length > 0 && (<>
+            {sectionLabel("Languages")}
+            <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:4 }}>
+              {[...(char.languages||[])].sort().map(lang => (
+                <span key={lang} style={{ padding:"2px 8px", background:"rgba(80,120,200,0.08)", border:"1px solid rgba(80,120,200,0.25)", borderRadius:12, fontSize:11, color:theme.textMuted }}>
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </>)}
         </div>
 
         {/* ══ RIGHT SIDE: combat stats grid + tab panel ══ */}
@@ -5317,27 +5329,126 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               {tab==="features"  && <FeaturesTab   char={char} gameData={gameData}/>}
               {tab==="background"&& (
                 <div>
-                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:16, marginBottom:14 }}>{char.background}</div>
-                  {gameData.backgrounds?.[char.background]?.description
-                    ? <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, marginBottom:16 }}>{gameData.backgrounds[char.background].description}</p>
-                    : <p style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic" }}>No background description available.</p>}
-                  {gameData.backgrounds?.[char.background]?.features?.length > 0 && (<>
-                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, marginBottom:10 }}>Background Features</div>
-                    {gameData.backgrounds[char.background].features.map(f=>(
-                      <div key={f.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 14px", marginBottom:8 }}>
-                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:4 }}>{f.name}</div>
-                        <div style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
+                  {(() => {
+                    const bg = gameData.backgrounds?.[char.background];
+                    if (!bg) return <p style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic" }}>No background data available.</p>;
+
+                    const features     = bg.features || [];
+                    // The special feature: the unique passive that defines the background
+                    const specialFeat  = features.find(f => f.type === "passive" && !f.name.toLowerCase().includes("tool") && !f.name.toLowerCase().includes("proficien"));
+                    // Skill proficiencies
+                    const skillFeat    = features.find(f => f.type === "proficiency_choice");
+                    // Language features
+                    const langFeats    = features.filter(f => f.type === "language_choice");
+                    // Other features (tool proficiencies, choices, etc.)
+                    const otherFeats   = features.filter(f =>
+                      f !== specialFeat && f !== skillFeat && !langFeats.includes(f)
+                    );
+
+                    // What skills did the character actually choose for this background?
+                    const bgSkillSource = char.background;
+                    const chosenSkills  = Object.entries(char.skillProfSources || {})
+                      .filter(([, src]) => src === bgSkillSource)
+                      .map(([sk]) => sk);
+                    // Fallback: if fixed (not "all"), show those
+                    const fixedSkills = Array.isArray(skillFeat?.fixed) ? skillFeat.fixed
+                      : Array.isArray(skillFeat?.from) ? skillFeat.from : null;
+
+                    const displaySkills = chosenSkills.length > 0 ? chosenSkills : fixedSkills;
+
+                    const divider = (txt) => (
+                      <div style={{ display:"flex", alignItems:"center", gap:10, margin:"20px 0 12px" }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, flexShrink:0 }}>{txt}</div>
+                        <div style={{ flex:1, height:1, background:"rgba(201,162,39,0.2)" }}/>
                       </div>
-                    ))}
-                  </>)}
-                  {char.personalItems?.length > 0 && (<>
-                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, margin:"16px 0 10px" }}>Personal Effects & Mementos</div>
-                    <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-                      {char.personalItems.map(p=>(
-                        <span key={p.id} style={{ padding:"4px 10px", background:"rgba(100,100,200,0.08)", border:"1px solid rgba(100,100,200,0.3)", borderRadius:8, fontSize:13, color:"var(--text)" }}>{p.name}</span>
-                      ))}
-                    </div>
-                  </>)}
+                    );
+
+                    return (<>
+                      {/* ── Background name & description ── */}
+                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, marginBottom: bg.description ? 10 : 16 }}>{char.background}</div>
+                      {bg.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, marginBottom:16 }}>{bg.description}</p>}
+
+                      {/* ── Special feature — pinned at top ── */}
+                      {specialFeat && (<>
+                        {divider("Background Feature")}
+                        <div style={{ background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:10, padding:"14px 16px", marginBottom:4 }}>
+                          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>{specialFeat.name}</div>
+                          <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:0 }}>{specialFeat.description}</p>
+                        </div>
+                      </>)}
+
+                      {/* ── Skill proficiencies ── */}
+                      {skillFeat && (<>
+                        {divider("Skill Proficiencies")}
+                        <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 16px" }}>
+                          {displaySkills && displaySkills.length > 0 ? (
+                            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+                              {displaySkills.map(sk => (
+                                <span key={sk} style={{ padding:"4px 12px", background:"rgba(201,162,39,0.08)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:13, color:"var(--accent)", fontFamily:"var(--font-display)" }}>
+                                  {sk}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p style={{ fontSize:13, color:"var(--text-muted)", margin:0, fontStyle:"italic" }}>
+                              {skillFeat.from === "all" ? "Any 2 skills of your choice" : skillFeat.description}
+                            </p>
+                          )}
+                        </div>
+                      </>)}
+
+                      {/* ── Languages ── */}
+                      {langFeats.length > 0 && (<>
+                        {divider("Languages")}
+                        <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 16px" }}>
+                          {(() => {
+                            const bgLangSrc = char.background + "_lang";
+                            const bgLangs = (char.languages || []).filter(l =>
+                              (char.languageSources||{})[l] === char.background ||
+                              (char.languageSources||{})[l] === bgLangSrc
+                            );
+                            const autoLangs = bg.autoLanguages || [];
+                            const allLangs = [...new Set([...autoLangs, ...bgLangs])];
+                            return allLangs.length > 0 ? (
+                              <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+                                {allLangs.map(l => (
+                                  <span key={l} style={{ padding:"4px 12px", background:"rgba(80,120,200,0.08)", border:"1px solid rgba(80,120,200,0.3)", borderRadius:20, fontSize:13, color:"var(--info)" }}>{l}</span>
+                                ))}
+                              </div>
+                            ) : (
+                              <p style={{ fontSize:13, color:"var(--text-muted)", margin:0 }}>{langFeats[0]?.description}</p>
+                            );
+                          })()}
+                        </div>
+                      </>)}
+
+                      {/* ── Other features (tool proficiencies, etc.) ── */}
+                      {otherFeats.length > 0 && (<>
+                        {divider("Additional Proficiencies & Traits")}
+                        {otherFeats.map(f => (
+                          <div key={f.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 16px", marginBottom:8 }}>
+                            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:6 }}>{f.name}</div>
+                            <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{f.description}</p>
+                            {f.type === "choice" && char.featureChoices?.[f.name] && (
+                              <div style={{ marginTop:8, padding:"5px 10px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:6, fontSize:13, color:"var(--accent)" }}>
+                                Chosen: {char.featureChoices[f.name]}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </>)}
+
+                      {/* ── Personal effects ── */}
+                      {char.personalItems?.length > 0 && (<>
+                        {divider("Personal Effects & Mementos")}
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                          {char.personalItems.map(p=>(
+                            <span key={p.id} style={{ padding:"4px 10px", background:"rgba(100,100,200,0.08)", border:"1px solid rgba(100,100,200,0.3)", borderRadius:8, fontSize:13, color:"var(--text)" }}>{p.name}</span>
+                          ))}
+                        </div>
+                      </>)}
+                    </>);
+                  })()}
                 </div>
               )}
               {tab==="notes"     && <NotesTab       char={char} onUpdate={upd}/>}
