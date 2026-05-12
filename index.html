@@ -502,25 +502,43 @@ const DEFAULT_CHAR = {
 // ── Theme wrapper ──
 const TW = ({ themeKey, themes, children, charCustom }) => {
   const t = themes?.[themeKey] || themes?.[Object.keys(themes || {})[0]] || {};
-  // charCustom overrides individual tokens if set
   const cc = charCustom || {};
-  const bg  = cc.bgColor  || t.bg      || "#0d0d0f";
-  const g1  = cc.bgG1    || "rgba(60,20,100,0.22)";
-  const g2  = cc.bgG2    || "rgba(80,40,10,0.18)";
-  const accent = cc.accentColor|| t.accent  || "#c9a227";
-  const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel Decorative',serif";
-  const fontB  = cc.fontBody   || t.fontBody    || "serif";
+  const bg     = cc.bgColor     || t.bg       || "#0d0d0f";
+  const g1     = cc.bgG1        || "rgba(60,20,100,0.22)";
+  const g2     = cc.bgG2        || "rgba(80,40,10,0.18)";
+  const accent = cc.accentColor || t.accent   || "#c9a227";
+  const fontD  = cc.fontDisplay || t.fontDisplay || "'Cinzel Decorative',serif";
+  const fontB  = cc.fontBody    || t.fontBody    || "serif";
+  const fontScale  = cc.fontScale  || 1;
+  const cardOpacity = cc.cardOpacity !== undefined ? cc.cardOpacity : 1;
+  const borderStyle = cc.borderStyle || "rounded"; // rounded | sharp | pill
+
+  // Compute card background with opacity
+  const cardBg = t.card || "rgba(22,22,28,0.97)";
+
+  // CSS custom props for border radius
+  const bRadius = borderStyle === "sharp" ? "0px" : borderStyle === "pill" ? "20px" : "10px";
+
+  const bgStyle = cc.bgImage
+    ? { backgroundImage:`url(${cc.bgImage})`, backgroundSize:"cover", backgroundPosition:"center", backgroundAttachment:"fixed" }
+    : { background:`radial-gradient(ellipse at 15% 0%, ${g1} 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, ${g2} 0%, transparent 50%), ${bg}` };
+
   return (
     <div style={{
-      "--bg":bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
+      "--bg":bg,"--surface":t.surface,"--card":cardBg,"--border":t.border,
       "--accent":accent,"--accent2":t.accentSecondary,"--text":t.text,
       "--text-muted":t.textMuted,"--text-dim":t.textDim,
       "--danger":t.danger,"--success":t.success,"--info":t.info,
       "--font-display":fontD,"--font-body":fontB,"--gradient-hero":t.gradientHero,
-      background:`radial-gradient(ellipse at 15% 0%, ${g1} 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, ${g2} 0%, transparent 50%), ${bg}`,
+      "--font-scale":fontScale,"--border-radius":bRadius,
+      "--card-opacity":cardOpacity,
+      ...bgStyle,
       color:t.text||"#e8e0d0",
-      minHeight:"100vh", fontFamily:fontB, position:"relative", overflow:"hidden"
+      minHeight:"100vh", fontFamily:fontB, position:"relative", overflow:"hidden",
+      fontSize: `${fontScale * 14}px`,
     }}>
+      {/* Tint overlay when using a background image */}
+      {cc.bgImage && <div style={{ position:"fixed", inset:0, background:`rgba(0,0,0,${cc.bgTint ?? 0.55})`, zIndex:0, pointerEvents:"none" }}/>}
       <MysticBackground density={cc.symbolDensity || "subtle"}
         symbolSet={cc.symbolSet?.length > 0 ? cc.symbolSet : null}
         symbolOpacity={cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1}/>
@@ -2853,7 +2871,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     languageSources: keptLangSources,
                   };
                 })}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>{
                       if (f.displayText) return f.displayText;
@@ -2931,7 +2949,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       featureChoices: newChoices,
                     };
                   })}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {[
                       ...Object.entries(d.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`),
@@ -2976,7 +2994,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                               );
                               return { ...c, subrace: srName, featureChoices: newChoices, skillProfSources: newSources, skillProficiencies: newProfs };
                             })}>
-                            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{srName}</div>
+                            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{srName}</div>
                             <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:3 }}>
                               {Object.entries(srData.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`).join(", ") || "No bonus"}
                             </div>
@@ -3136,7 +3154,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       };
                     });
                   }}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.spellcaster ? "✨ Spellcaster" : "⚔️ Martial"}</div>
                   {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
@@ -3435,7 +3453,7 @@ function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slo
         padding:"6px 10px", borderBottom: open ? "none" : "1px solid rgba(255,255,255,0.04)",
         cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
         <div>
-          <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{spell.name}</span>
+          <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15 }}>{spell.name}</span>
           <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:5 }}>{open?"▲":"▼"}</span>
           {spell.school && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:7 }}>{spell.school}</span>}
           {spell.combat?.damage && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:7 }}>{spell.combat.damage} {spell.combat.damageType}</span>}
@@ -4324,40 +4342,85 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
       {/* ── Appearance ── */}
       {sectionHead("Appearance")}
 
-      {/* Background preset */}
+      {/* Background — gradient presets OR custom image */}
       <div style={{ marginBottom:16 }}>
         <label style={label}>Background Style</label>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
-          {[
-            { id:"dungeon",  name:"Dungeon Stone",  bg:"#0d0d0f", g1:"rgba(60,20,100,0.22)",  g2:"rgba(80,40,10,0.18)" },
-            { id:"abyss",    name:"Void Abyss",     bg:"#050508", g1:"rgba(20,0,80,0.35)",    g2:"rgba(0,20,60,0.25)"  },
-            { id:"crimson",  name:"Crimson Court",  bg:"#0e0608", g1:"rgba(120,10,30,0.28)",  g2:"rgba(60,0,10,0.2)"   },
-            { id:"forest",   name:"Druid Grove",    bg:"#050d07", g1:"rgba(10,60,20,0.30)",   g2:"rgba(30,80,10,0.18)" },
-            { id:"ocean",    name:"Abyssal Sea",    bg:"#030810", g1:"rgba(0,40,120,0.30)",   g2:"rgba(10,20,80,0.22)" },
-            { id:"desert",   name:"Desert Tomb",    bg:"#0e0c05", g1:"rgba(120,80,10,0.28)",  g2:"rgba(80,40,5,0.20)"  },
-            { id:"frost",    name:"Frost Cave",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)"},
-            { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)"  },
-            { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)" },
-          ].map(p => {
-            const cur = cc.bgPreset || "dungeon";
-            const active = cur === p.id;
-            return (
-              <div key={p.id} onClick={()=>updCustom({ bgPreset:p.id, bgColor:p.bg, bgG1:p.g1, bgG2:p.g2 })}
-                style={{ padding:"10px 8px", borderRadius:8, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
-                  border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
-                  background:`radial-gradient(ellipse at 20% 10%, ${p.g1} 0%, transparent 60%), ${p.bg}` }}>
-                <div style={{ fontSize:12, color: active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
-              </div>
-            );
-          })}
+        {/* Mode toggle */}
+        <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+          {[["gradient","🎨 Gradient"],["image","🖼 Custom Image"]].map(([m,l])=>(
+            <button key={m} onClick={()=>updCustom({bgMode:m, bgImage: m==="gradient" ? undefined : cc.bgImage})}
+              style={{ padding:"5px 14px", borderRadius:20, cursor:"pointer", fontSize:12,
+                border:`1px solid ${(cc.bgMode||"gradient")===m?"var(--accent)":"var(--border)"}`,
+                background:(cc.bgMode||"gradient")===m?"rgba(201,162,39,0.1)":"transparent",
+                color:(cc.bgMode||"gradient")===m?"var(--accent)":"var(--text-muted)" }}>{l}</button>
+          ))}
         </div>
+
+        {(cc.bgMode || "gradient") === "gradient" ? (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+            {[
+              { id:"dungeon",  name:"Dungeon Stone",  bg:"#0d0d0f", g1:"rgba(60,20,100,0.22)",  g2:"rgba(80,40,10,0.18)" },
+              { id:"abyss",    name:"Void Abyss",     bg:"#050508", g1:"rgba(20,0,80,0.35)",    g2:"rgba(0,20,60,0.25)"  },
+              { id:"crimson",  name:"Crimson Court",  bg:"#0e0608", g1:"rgba(120,10,30,0.28)",  g2:"rgba(60,0,10,0.2)"   },
+              { id:"forest",   name:"Druid Grove",    bg:"#050d07", g1:"rgba(10,60,20,0.30)",   g2:"rgba(30,80,10,0.18)" },
+              { id:"ocean",    name:"Abyssal Sea",    bg:"#030810", g1:"rgba(0,40,120,0.30)",   g2:"rgba(10,20,80,0.22)" },
+              { id:"desert",   name:"Desert Tomb",    bg:"#0e0c05", g1:"rgba(120,80,10,0.28)",  g2:"rgba(80,40,5,0.20)"  },
+              { id:"frost",    name:"Frost Cave",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)"},
+              { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)"  },
+              { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)" },
+            ].map(p => {
+              const cur = cc.bgPreset || "dungeon";
+              const active = cur === p.id;
+              return (
+                <div key={p.id} onClick={()=>updCustom({ bgPreset:p.id, bgColor:p.bg, bgG1:p.g1, bgG2:p.g2 })}
+                  style={{ padding:"10px 8px", borderRadius:8, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
+                    border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                    background:`radial-gradient(ellipse at 20% 10%, ${p.g1} 0%, transparent 60%), ${p.bg}` }}>
+                  <div style={{ fontSize:12, color:active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div>
+            <div style={{ marginBottom:8, fontSize:12, color:"var(--text-muted)" }}>
+              Upload a custom background image (art, maps, textures — anything goes).
+            </div>
+            {cc.bgImage ? (
+              <div style={{ position:"relative", borderRadius:8, overflow:"hidden", marginBottom:8, height:120, border:"1px solid var(--border)" }}>
+                <img src={cc.bgImage} alt="bg" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+                <button onClick={()=>updCustom({bgImage:undefined})}
+                  style={{ position:"absolute", top:6, right:6, padding:"3px 8px", borderRadius:5, border:"1px solid var(--danger)", background:"rgba(0,0,0,0.7)", color:"var(--danger)", cursor:"pointer", fontSize:11 }}>Remove</button>
+              </div>
+            ) : (
+              <div onClick={()=>document.getElementById("bg-img-upload").click()}
+                style={{ height:80, border:"2px dashed var(--border)", borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"var(--text-muted)", fontSize:13, marginBottom:8 }}>
+                🖼 Click to upload background image
+              </div>
+            )}
+            <input id="bg-img-upload" type="file" accept="image/*" style={{ display:"none" }}
+              onChange={e=>{
+                const file = e.target.files?.[0]; if (!file) return;
+                const r = new FileReader();
+                r.onload = ev => updCustom({bgImage:ev.target.result});
+                r.readAsDataURL(file);
+              }}/>
+            {/* Tint overlay slider */}
+            <div style={{ marginTop:8 }}>
+              <label style={{...label, marginBottom:4}}>Darkness overlay: {Math.round((cc.bgTint ?? 0.55)*100)}%</label>
+              <input type="range" min={0} max={90} value={Math.round((cc.bgTint ?? 0.55)*100)}
+                onChange={e=>updCustom({bgTint:+e.target.value/100})}
+                style={{ width:"100%", accentColor:"var(--accent)" }}/>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Accent colour */}
       <div style={{ marginBottom:14 }}>
         <label style={label}>Accent Colour</label>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          {["#c9a227","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
+          {["#c9a227","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4","#e07ab4","#ffffff"].map(col=>(
             <div key={col} onClick={()=>updCustom({accentColor:col})}
               style={{ width:28, height:28, borderRadius:"50%", background:col, cursor:"pointer", flexShrink:0,
                 border:`3px solid ${(cc.accentColor||"#c9a227")===col?"white":"transparent"}`,
@@ -4394,6 +4457,31 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         </div>
       </div>
 
+      {/* Font scale */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Font Scale: {Math.round((cc.fontScale||1)*100)}%</label>
+        <input type="range" min={80} max={130} value={Math.round((cc.fontScale||1)*100)}
+          onChange={e=>updCustom({fontScale:+e.target.value/100})}
+          style={{ width:"100%", accentColor:"var(--accent)" }}/>
+        <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:"var(--text-dim)", marginTop:2 }}>
+          <span>80% (compact)</span><span>100% (default)</span><span>130% (large)</span>
+        </div>
+      </div>
+
+      {/* Border style */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Card Border Style</label>
+        <div style={{ display:"flex", gap:8 }}>
+          {[["rounded","⬜ Rounded"],["sharp","▪ Sharp"],["pill","⬭ Pill"]].map(([v,l])=>(
+            <button key={v} onClick={()=>updCustom({borderStyle:v})}
+              style={{ flex:1, padding:"6px", borderRadius:v==="sharp"?0:v==="pill"?20:6, cursor:"pointer", fontSize:12,
+                border:`1px solid ${(cc.borderStyle||"rounded")===v?"var(--accent)":"var(--border)"}`,
+                background:(cc.borderStyle||"rounded")===v?"rgba(201,162,39,0.1)":"transparent",
+                color:(cc.borderStyle||"rounded")===v?"var(--accent)":"var(--text-muted)" }}>{l}</button>
+          ))}
+        </div>
+      </div>
+
       {/* Floating symbols */}
       <div style={{ marginBottom:14 }}>
         <label style={label}>Floating Symbol Style</label>
@@ -4427,6 +4515,41 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
             {Math.round((cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1) * 100)}%
           </span>
         </div>
+      </div>
+
+      {/* ── Full-body character portrait ── */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Full-Body Portrait Sidebar</label>
+        <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
+          Upload a full-body character illustration. It appears as a tall panel to the left of your character sheet.
+        </div>
+        {cc.fullBodyImage ? (
+          <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+            <div style={{ width:80, height:160, borderRadius:8, overflow:"hidden", border:"1px solid var(--border)", flexShrink:0 }}>
+              <img src={cc.fullBodyImage} alt="full body preview" style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}/>
+            </div>
+            <div>
+              <div style={{ fontSize:12, color:"var(--success)", marginBottom:8 }}>✓ Full-body image set</div>
+              <button onClick={()=>document.getElementById("fullbody-upload").click()}
+                style={{ display:"block", marginBottom:6, padding:"5px 12px", borderRadius:6, border:"1px solid var(--accent)", background:"rgba(201,162,39,0.1)", color:"var(--accent)", cursor:"pointer", fontSize:12 }}>Change Image</button>
+              <button onClick={()=>updCustom({fullBodyImage:undefined})}
+                style={{ display:"block", padding:"5px 12px", borderRadius:6, border:"1px solid var(--danger)", background:"transparent", color:"var(--danger)", cursor:"pointer", fontSize:12 }}>Remove</button>
+            </div>
+          </div>
+        ) : (
+          <div onClick={()=>document.getElementById("fullbody-upload").click()}
+            style={{ height:100, border:"2px dashed var(--border)", borderRadius:8, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", cursor:"pointer", gap:6 }}>
+            <span style={{ fontSize:28 }}>🧙</span>
+            <span style={{ fontSize:12, color:"var(--text-muted)" }}>Click to upload full-body portrait</span>
+          </div>
+        )}
+        <input id="fullbody-upload" type="file" accept="image/*" style={{ display:"none" }}
+          onChange={e=>{
+            const file = e.target.files?.[0]; if (!file) return;
+            const r = new FileReader();
+            r.onload = ev => updCustom({fullBodyImage:ev.target.result});
+            r.readAsDataURL(file);
+          }}/>
       </div>
 
       {/* Reset all */}
@@ -5092,8 +5215,24 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
       </div>
 
       {/* ── Two-column body ── */}
-      <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
+      <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1400, margin:"0 auto", width:"100%" }}>
+        {/* Outer flex: optional fullbody sidebar | main two-col */}
+        <div style={{ display:"flex", height:"100%", gap:10, overflow:"hidden" }}>
+
+        {/* ── Full-body portrait sidebar ── */}
+        {char.custom?.fullBodyImage && (
+          <div style={{ width:180, flexShrink:0, borderRadius:12, overflow:"hidden", border:`1px solid ${theme.border}`, position:"relative", background:theme.surface }}>
+            <img src={char.custom.fullBodyImage} alt="full body"
+              style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}
+              onError={e=>e.target.style.display="none"}/>
+            <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"8px", background:"linear-gradient(transparent,rgba(0,0,0,0.7))", fontSize:11, color:"rgba(255,255,255,0.7)", textAlign:"center", fontFamily:theme.fontDisplay }}>
+              {char.name}
+            </div>
+          </div>
+        )}
+
+        {/* ── Main two-column grid ── */}
+        <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", flex:1, gap:10, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
         <div style={{ borderRadius:12, border:`1px solid ${theme.border}`, background:theme.card, overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
@@ -5224,7 +5363,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             </div>
           </div>
         </div>
-        </div>{/* end grid */}
+        </div>{/* end main two-col grid */}
+        </div>{/* end outer flex (sidebar + grid) */}
       </div>{/* end padding wrapper */}
     </TW>
   );
