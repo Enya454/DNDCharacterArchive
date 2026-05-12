@@ -440,9 +440,9 @@ const dbDeleteChar = async id => {
 };
 
 // Share helpers
-const createShareToken = async (charId, userId) => {
+const createShareToken = async (charId, userId, charData) => {
   const { data, error } = await sb.from("shared_characters")
-    .insert({ character_id: charId, user_id: userId })
+    .insert({ character_id: charId, user_id: userId, character_data: charData })
     .select("token")
     .single();
   if (error) { console.error("Share error:", error); return null; }
@@ -452,17 +452,13 @@ const deleteShareToken = async (token) => {
   await sb.from("shared_characters").delete().eq("token", token);
 };
 const fetchSharedChar = async (token) => {
+  // character_data is stored directly in the share row — no auth needed
   const { data, error } = await sb.from("shared_characters")
-    .select("character_id")
+    .select("character_data")
     .eq("token", token)
     .single();
   if (error || !data) return null;
-  const { data: charRow, error: charErr } = await sb.from("characters")
-    .select("data")
-    .eq("id", data.character_id)
-    .single();
-  if (charErr || !charRow) return null;
-  return charRow.data;
+  return data.character_data;
 };
 const SK = "tome_of_heroes_v1";
 const loadChars  = () => { try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : []; } catch { return []; } };
@@ -1732,6 +1728,7 @@ function LibraryItemAdder({ gameData, onAdd }) {
 function WizardSpellPicker({ char, setChar, gameData }) {
   const { classes } = gameData;
   const [spellFilter, setSpellFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const limits = getSpellLimits(char, classes);
   if (!limits) return <p style={{color:"var(--text-muted)",fontSize:13}}>This class doesn't use spells.</p>;
   const spellList = limits.spellList || char.class;
@@ -1754,7 +1751,9 @@ function WizardSpellPicker({ char, setChar, gameData }) {
     if (spell.level > limits.maxSlotLevel) return;
     setChar(c => ({...c, spells: [...known, {...spell, prepared:false}]}));
   };
-  const displayed = allClassSpells.filter(sp => spellFilter === "all" || sp.level === +spellFilter);
+  const displayed = allClassSpells
+    .filter(sp => (spellFilter === "all" || sp.level === +spellFilter) && (!search || sp.name.toLowerCase().includes(search.toLowerCase())))
+    .sort((a, b) => a.level !== b.level ? a.level - b.level : a.name.localeCompare(b.name));
   return (
     <div>
       <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginBottom:12,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:8}}>
@@ -1764,14 +1763,21 @@ function WizardSpellPicker({ char, setChar, gameData }) {
         <strong style={{color:"var(--accent)"}}>{knownSpells.length}/{limits.spellsKnown ?? "∞"}</strong>
         <span style={{fontSize:11,color:"var(--text-dim)",marginLeft:8}}>Max slot level: {limits.maxSlotLevel}</span>
       </div>
+      <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
+        <input value={search} onChange={e=>{setSearch(e.target.value);setSpellFilter("all");}}
+          placeholder="Search spells…"
+          style={{flex:1,background:"var(--surface)",border:"1px solid var(--border)",color:"var(--text)",padding:"6px 12px",borderRadius:8,fontSize:13,fontFamily:"var(--font-body)"}}/>
+        {search && <button onClick={()=>setSearch("")} style={{background:"transparent",border:"none",color:"var(--text-muted)",cursor:"pointer",fontSize:16,padding:"0 4px"}}>×</button>}
+      </div>
       <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:10}}>
-        <button style={fBtn(spellFilter==="all")} onClick={()=>setSpellFilter("all")}>All</button>
-        {limits.cantripsKnown > 0 && <button style={fBtn(spellFilter==="0")} onClick={()=>setSpellFilter("0")}>Cantrips</button>}
+        <button style={fBtn(spellFilter==="all"&&!search)} onClick={()=>{setSpellFilter("all");setSearch("");}}>All</button>
+        {limits.cantripsKnown > 0 && <button style={fBtn(spellFilter==="0")} onClick={()=>{setSpellFilter("0");setSearch("");}}>Cantrips</button>}
         {[1,2,3,4,5].filter(l=>l<=limits.maxSlotLevel).map(l=>(
-          <button key={l} style={fBtn(spellFilter===String(l))} onClick={()=>setSpellFilter(String(l))}>Lvl {l}</button>
+          <button key={l} style={fBtn(spellFilter===String(l)&&!search)} onClick={()=>{setSpellFilter(String(l));setSearch("");}}>Lvl {l}</button>
         ))}
       </div>
       <div style={{maxHeight:420,overflowY:"auto"}}>
+        {displayed.length === 0 && <div style={{fontSize:13,color:"var(--text-dim)",fontStyle:"italic",padding:"16px 0",textAlign:"center"}}>No spells match "{search}"</div>}
         {displayed.map(spell => {
           const isK = known.some(s => s.name === spell.name);
           const isCantrip = spell.level === 0;
@@ -2348,6 +2354,11 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
           </div>
           {c.notes && (
             <div style={{ fontSize:13, color:"var(--accent)", fontStyle:"italic", marginBottom:8 }}>{c.notes}</div>
+          )}
+          {c.slotScale && (
+            <div style={{ fontSize:13, color:"var(--info)", marginBottom:8, padding:"6px 10px", background:"rgba(41,128,185,0.1)", border:"1px solid rgba(41,128,185,0.3)", borderRadius:6 }}>
+              ⬆ Upcasting: {c.slotScale}
+            </div>
           )}
           <p style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, margin:0 }}>{spell.description}</p>
         </div>
@@ -3362,6 +3373,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
   const { classes, spells:spellDb } = gameData;
   const [managing,  setManaging]  = useState(false);
   const [filter,    setFilter]    = useState("all");
+  const [search,    setSearch]    = useState("");
   const [casting,   setCasting]   = useState(null);
   const [upcastLvl, setUpcastLvl] = useState(null);
 
@@ -3429,6 +3441,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
 
   // SpellRow — one row in the known-spells table
   const SpellRow = ({ spell, badge, grant }) => {
+    const [open, setOpen] = useState(false);
     const isCantrip = spell.level === 0;
     const isRitual  = spell.ritual || (spell.castingTime||'').includes('ritual');
     const isHeritage = !!grant;
@@ -3442,22 +3455,24 @@ function SpellsTab({ char, gameData, onUpdate }) {
         : slotsLeft(Math.min(spell.level, maxSlotLevel)) > 0;
     const canCast = isHeritage ? (maxUses === null || remUses > 0) : hasSlot;
     return (
+      <div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 50px 72px 80px 140px", alignItems:"center",
-        padding:"6px 10px", borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
+        padding:"6px 10px", borderBottom: open ? "none" : "1px solid rgba(255,255,255,0.04)",
+        cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
         <div>
           <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{spell.name}</span>
+          <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:5 }}>{open?"▲":"▼"}</span>
           {spell.school && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:7 }}>{spell.school}</span>}
           {spell.combat?.damage && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:7 }}>{spell.combat.damage} {spell.combat.damageType}</span>}
           {isRitual && <span style={{ fontSize:9, color:"rgba(100,160,255,0.7)", marginLeft:7 }}>ritual</span>}
           {badge && <span style={{ fontSize:9, color:"var(--accent2)", marginLeft:7, padding:"1px 5px", border:"1px solid var(--accent2)", borderRadius:4 }}>{badge}</span>}
         </div>
-        <div style={{ fontSize:11, color:"var(--text-muted)", textAlign:"center" }}>
+        <div style={{ fontSize:11, color:"var(--text-muted)", textAlign:"center" }} onClick={e=>e.stopPropagation()}>
           {isCantrip ? <span style={{ color:"var(--text-dim)" }}>—</span> : `L${spell.level}`}
         </div>
-        <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.castingTime}</div>
-        <div style={{ fontSize:10, color:"var(--text-muted)" }}>{spell.range}</div>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          {/* Usage pips + recover stacked vertically — only for heritage limited-use spells */}
+        <div style={{ fontSize:10, color:"var(--text-muted)" }} onClick={e=>e.stopPropagation()}>{spell.castingTime}</div>
+        <div style={{ fontSize:10, color:"var(--text-muted)" }} onClick={e=>e.stopPropagation()}>{spell.range}</div>
+        <div onClick={e=>e.stopPropagation()}>
           {isHeritage && maxUses !== null && (
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
               <div style={{ display:"flex", gap:3 }}>
@@ -3479,7 +3494,6 @@ function SpellsTab({ char, gameData, onUpdate }) {
               )}
             </div>
           )}
-          {/* Cast button */}
           {isCantrip ? (
             <span style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>At will</span>
           ) : isRitual ? (
@@ -3487,8 +3501,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
           ) : isHeritage ? (
             <button onClick={()=>{ if (canCast) spendRacialUse(spell.name); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
-                fontFamily:"var(--font-display)", transition:"all 0.15s",
-                border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
+                fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
                 background:canCast?"rgba(201,162,39,0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? "Cast ▸" : "No uses"}
@@ -3496,8 +3509,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
           ) : limits.type === "pact" ? (
             <button onClick={()=>{ if (canCast) onUpdate({...char,spellSlots:{...slotsSpent,pact:(slotsSpent["pact"]||0)+1}}); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
-                fontFamily:"var(--font-display)", transition:"all 0.15s",
-                border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
+                fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
                 background:canCast?"rgba(201,162,39,0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? `Cast L${limits.pactSlotLevel} ▸` : "No slots"}
@@ -3505,14 +3517,33 @@ function SpellsTab({ char, gameData, onUpdate }) {
           ) : (
             <button onClick={()=>{ setCasting(spell); setUpcastLvl(spell.level); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
-                fontFamily:"var(--font-display)", transition:"all 0.15s",
-                border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
+                fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
                 background:canCast?"rgba(201,162,39,0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? "Cast ▸" : "No slot"}
             </button>
           )}
         </div>
+      </div>
+      {/* Expanded description */}
+      {open && (
+        <div style={{ padding:"10px 14px 12px", borderBottom:"1px solid rgba(255,255,255,0.04)", background:"rgba(0,0,0,0.15)" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 20px", marginBottom:8 }}>
+            {[["Casting Time",spell.castingTime],["Range",spell.range],["Components",spell.components],["Duration",spell.duration]]
+              .filter(([,v])=>v).map(([l,v])=>(
+              <div key={l}><span style={{fontSize:10,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>{l}: </span>
+              <span style={{fontSize:12,color:"var(--text)"}}>{v}</span></div>
+            ))}
+          </div>
+          {spell.combat?.slotScale && (
+            <div style={{fontSize:12,color:"var(--info)",marginBottom:6,padding:"4px 8px",background:"rgba(41,128,185,0.1)",border:"1px solid rgba(41,128,185,0.3)",borderRadius:5}}>
+              ⬆ Upcasting: {spell.combat.slotScale}
+            </div>
+          )}
+          {spell.combat?.notes && <div style={{fontSize:12,color:"var(--accent)",fontStyle:"italic",marginBottom:6}}>{spell.combat.notes}</div>}
+          <p style={{fontSize:13,color:"var(--text-muted)",lineHeight:1.7,margin:0}}>{spell.description}</p>
+        </div>
+      )}
       </div>
     );
   };
@@ -3576,7 +3607,9 @@ function SpellsTab({ char, gameData, onUpdate }) {
     ...bookSpells,
   ];
   const extraNames  = new Set(extraSpells.map(s => s.name));
-  const displayed   = allSpells.filter(sp => filter === "all" || sp.level === +filter);
+  const displayed   = allSpells
+    .filter(sp => (filter === "all" || sp.level === +filter) && (!search || sp.name.toLowerCase().includes(search.toLowerCase())))
+    .sort((a,b) => a.level !== b.level ? a.level - b.level : a.name.localeCompare(b.name));
   const extraDisplayed  = levelFilter === "all" ? extraSpells : extraSpells.filter(sp => sp.level === +levelFilter);
   const knownDisplayed  = levelFilter === "all" ? known : known.filter(sp => sp.level === +levelFilter);
   const knownCantripsD  = knownDisplayed.filter(s => s.level === 0);
@@ -4626,6 +4659,156 @@ function ActionsTab({ char, gameData, onUpdate }) {
   );
 }
 
+// ============================================================
+// REST MODAL
+// ============================================================
+function RestModal({ type, char, classData, onConfirm, onCancel }) {
+  const isShort = type === "short";
+  const hitDie  = classData?.hitDie || 8;
+  const maxDice = char.hitDice?.max || char.level || 1;
+  const curDice = char.hitDice?.current ?? maxDice;
+  const conMod  = calcMod(char.abilities?.con || 10);
+
+  const [diceToSpend, setDiceToSpend] = useState(0);
+
+  const hpGain = (() => {
+    if (!isShort || diceToSpend === 0) return 0;
+    // Each die rolls average = (hitDie/2 + 0.5), we'll show expected; actual uses avg
+    let total = 0;
+    for (let i = 0; i < diceToSpend; i++) {
+      total += Math.floor(Math.random() * hitDie) + 1 + conMod;
+    }
+    return Math.max(0, total);
+  })();
+
+  // What gets recovered
+  const shortRecoveries = [
+    "Action Surge (Fighter)",
+    "Second Wind (Fighter)",
+    "Bardic Inspiration (if Font of Inspiration)",
+    "Ki points (Monk)",
+    "Pact Magic slots (Warlock)",
+    "Dark One's Luck (Fiend Warlock)",
+  ].filter(r => {
+    if (r.includes("Fighter") && char.class !== "Fighter") return false;
+    if (r.includes("Monk") && char.class !== "Monk") return false;
+    if (r.includes("Bard") && char.class !== "Bard") return false;
+    if (r.includes("Warlock") && char.class !== "Warlock") return false;
+    return true;
+  });
+
+  const longRecoveries = [
+    "All HP restored",
+    "Temp HP cleared",
+    "All spell slots restored",
+    "All hit dice restored (up to half max)",
+    "All long rest abilities restored",
+    "All short rest abilities restored",
+  ];
+
+  const [rolled, setRolled] = useState(false);
+  const [rolledHp, setRolledHp] = useState(0);
+
+  const rollDice = () => {
+    let total = 0;
+    for (let i = 0; i < diceToSpend; i++) {
+      total += Math.floor(Math.random() * hitDie) + 1 + conMod;
+    }
+    setRolledHp(Math.max(0, total));
+    setRolled(true);
+  };
+
+  const confirm = () => {
+    if (isShort) {
+      const newHp = Math.min(char.hp.max, char.hp.current + (rolled ? rolledHp : 0));
+      const newDice = Math.max(0, curDice - diceToSpend);
+      onConfirm({
+        hp: { ...char.hp, current: newHp },
+        hitDice: { ...char.hitDice, current: newDice },
+        // Clear short-rest action uses
+        actionUses: Object.fromEntries(
+          Object.entries(char.actionUses || {}).filter(([k]) => !k.startsWith("spent_") || true)
+          // We clear uses tagged "short" — stored feature data has .uses.per
+        ),
+        spellSlots: char.class === "Warlock" ? {} : char.spellSlots,
+      });
+    } else {
+      // Long rest: restore everything
+      const restoredDice = Math.min(maxDice, curDice + Math.max(1, Math.floor(maxDice / 2)));
+      onConfirm({
+        hp: { ...char.hp, current: char.hp.max, temp: 0 },
+        hitDice: { ...char.hitDice, current: restoredDice },
+        spellSlots: {},
+        actionUses: {},
+      });
+    }
+  };
+
+  const s = { padding:"10px 14px", borderRadius:8, background:"rgba(0,0,0,0.2)", border:"1px solid var(--border)", marginBottom:10, fontSize:13, color:"var(--text-muted)", lineHeight:1.7 };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center" }}
+      onClick={e=>e.target===e.currentTarget&&onCancel()}>
+      <div style={{ background:"var(--card)", border:`1px solid ${isShort?"var(--border)":"var(--accent)"}`, borderRadius:14, padding:28, maxWidth:460, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
+        <div style={{ fontFamily:"var(--font-display)", color: isShort?"var(--text)":"var(--accent)", fontSize:18, marginBottom:6 }}>
+          {isShort ? "⏳ Short Rest" : "🌙 Long Rest"}
+        </div>
+        <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:16 }}>
+          {isShort ? "Take a short rest (~1 hour). Spend hit dice to recover HP." : "Take a long rest (~8 hours). Restore HP, spell slots, and abilities."}
+        </div>
+
+        {isShort ? (<>
+          <div style={s}>
+            <div style={{ marginBottom:8, color:"var(--text)", fontFamily:"var(--font-display)", fontSize:14 }}>
+              Hit Dice: {curDice}/{maxDice} (d{hitDie}) remaining
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <span style={{ color:"var(--text-muted)", fontSize:13 }}>Dice to spend:</span>
+              <button onClick={()=>setDiceToSpend(d=>Math.max(0,d-1))} style={{ width:28,height:28,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:16 }}>−</button>
+              <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:20, minWidth:24, textAlign:"center" }}>{diceToSpend}</span>
+              <button onClick={()=>setDiceToSpend(d=>Math.min(curDice,d+1))} style={{ width:28,height:28,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:16 }}>+</button>
+              {diceToSpend > 0 && !rolled && (
+                <button onClick={rollDice} style={{ padding:"5px 14px",borderRadius:7,border:"1px solid var(--accent)",background:"rgba(201,162,39,0.1)",color:"var(--accent)",cursor:"pointer",fontSize:13,fontFamily:"var(--font-display)" }}>Roll</button>
+              )}
+              {rolled && <span style={{ color:"var(--success)", fontFamily:"var(--font-display)", fontSize:16 }}>+{rolledHp} HP</span>}
+            </div>
+            {diceToSpend > 0 && <div style={{ marginTop:6, fontSize:12, color:"var(--text-dim)" }}>
+              Rolling {diceToSpend}d{hitDie} + {conMod >= 0 ? `+${conMod*diceToSpend}` : `${conMod*diceToSpend}`} CON ({conMod} per die)
+            </div>}
+          </div>
+          {shortRecoveries.length > 0 && (
+            <div style={s}>
+              <div style={{ color:"var(--text)", marginBottom:4, fontFamily:"var(--font-display)", fontSize:13 }}>Also recovered:</div>
+              {shortRecoveries.map(r=><div key={r} style={{ fontSize:12 }}>✓ {r}</div>)}
+            </div>
+          )}
+        </>) : (
+          <div style={s}>
+            <div style={{ color:"var(--text)", marginBottom:6, fontFamily:"var(--font-display)", fontSize:13 }}>On long rest you recover:</div>
+            {longRecoveries.map(r=><div key={r} style={{ fontSize:12, marginBottom:2 }}>✓ {r}</div>)}
+            <div style={{ marginTop:8, fontSize:12, color:"var(--accent)" }}>
+              Hit dice restored: {Math.min(maxDice, curDice + Math.max(1, Math.floor(maxDice/2)))} / {maxDice}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display:"flex", gap:10, marginTop:16 }}>
+          <button onClick={onCancel} style={{ flex:1, padding:"10px", borderRadius:8, border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)", cursor:"pointer", fontSize:13 }}>Cancel</button>
+          <button onClick={confirm}
+            disabled={isShort && diceToSpend > 0 && !rolled}
+            style={{ flex:2, padding:"10px", borderRadius:8, border:`1px solid ${isShort?"var(--border)":"var(--accent)"}`,
+              background:isShort?"var(--surface)":"var(--accent)",
+              color:isShort?"var(--text)":"var(--bg)",
+              cursor:(isShort&&diceToSpend>0&&!rolled)?"not-allowed":"pointer", fontSize:13,
+              fontFamily:"var(--font-display)", opacity:(isShort&&diceToSpend>0&&!rolled)?0.5:1 }}>
+            {isShort ? (diceToSpend > 0 && !rolled ? "Roll dice first" : "Take Short Rest") : "Take Long Rest"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, cloudSync, readOnly }) {
   const [char, setChar]   = useState(initial);
   const [tab,  setTab]    = useState("actions");
@@ -4635,6 +4818,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const [shareToken, setShareToken] = useState(null);
   const [shareCopied, setShareCopied] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
+  const [restModal, setRestModal] = useState(null); // null | "short" | "long"
   const fileRef   = useRef(null);
 
   const { classes, species:speciesDb, themes, music } = gameData;
@@ -4667,22 +4851,20 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const handleImageUpload = e => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Reset input so the same file can be re-selected if needed
     e.target.value = "";
     const reader = new FileReader();
     reader.onload = ev => {
       const img = ev.target.result;
-      // Update display state directly
-      setChar(c => ({ ...c, profileImage: img, updatedAt: new Date().toISOString() }));
+      const updated = { ...char, profileImage: img, updatedAt: new Date().toISOString() };
+      setChar(updated);
       setImgError(false);
-      // Save to localStorage immediately (outside the state updater — keeps it pure)
+      // Save locally
       const all = loadChars();
-      const cur = all.find(x => x.id === initial.id);
-      if (cur) {
-        cur.profileImage = img;
-        cur.updatedAt = new Date().toISOString();
-        saveChars(all);
-      }
+      const idx = all.findIndex(x => x.id === initial.id);
+      if (idx >= 0) all[idx] = updated; else all.push(updated);
+      saveChars(all);
+      // Save to cloud
+      if (cloudSync) cloudSync(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     };
@@ -4696,7 +4878,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
     { id:"features",   l:"⭐ Features"   },
     { id:"background", l:"📜 Background" },
     { id:"notes",      l:"✏️ Notes"      },
-    { id:"settings",   l:"⚙️ Settings"  },
+    ...(!readOnly ? [{ id:"settings", l:"⚙️ Settings" }] : []),
   ];
 
   const ts = active => ({
@@ -4740,7 +4922,14 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
     <TW themeKey={char.theme} themes={themes} charCustom={char.custom || {}}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
-      {/* ── Share Modal ── */}
+      {/* ── Rest Modal ── */}
+      {restModal && <RestModal
+        type={restModal}
+        char={char}
+        classData={classData}
+        onConfirm={(updates) => { upd({...char, ...updates}); setRestModal(null); }}
+        onCancel={() => setRestModal(null)}
+      />}
       {shareModal && (
         <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center" }}
           onClick={e=>e.target===e.currentTarget&&setShareModal(false)}>
@@ -4754,7 +4943,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                 setShareLoading(true);
                 const { data:{ session } } = await sb.auth.getSession();
                 if (!session) return;
-                const token = await createShareToken(char.id, session.user.id);
+                const token = await createShareToken(char.id, session.user.id, char);
                 if (token) setShareToken(token);
                 setShareLoading(false);
               }} disabled={shareLoading}
@@ -4822,8 +5011,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               }}/>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
-            <button onClick={()=>upd({...char,hp:{...char.hp,current:char.hp.max}})} style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.border}`, color:theme.textMuted, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short</button>
-            <button onClick={()=>upd({...char,hp:{...char.hp,current:char.hp.max,temp:0}})} style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.accent}`, color:theme.accent, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long</button>
+            <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.border}`, color:theme.textMuted, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
+            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.accent}`, color:theme.accent, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
           </div>
           {/* Controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
@@ -4864,9 +5053,9 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               const score = char.abilities[ab];
               return (
                 <div key={ab} style={{ textAlign:"center", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:7, padding:"5px 2px" }}>
-                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                  <div style={{ fontSize:18, fontFamily:theme.fontDisplay, color:theme.accent, lineHeight:1.2 }}>{score}</div>
-                  <div style={{ fontSize:11, color:theme.text }}>{modStr(calcMod(score))}</div>
+                  <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:theme.accent, lineHeight:1.2 }}>{score}</div>
+                  <div style={{ fontSize:13, color:theme.text }}>{modStr(calcMod(score))}</div>
                 </div>
               );
             })}
@@ -4878,8 +5067,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             {Object.entries(saves).map(([ab, sv]) => (
               <div key={ab} style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 6px", borderRadius:4 }}>
                 <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0, background:sv.proficient?theme.accent:"transparent", border:`2px solid ${sv.proficient?theme.accent:theme.border}` }}/>
-                <span style={{ flex:1, fontSize:11, color:sv.proficient?theme.text:theme.textMuted }}>{ABILITY_NAMES[ab]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:12 }}>{modStr(sv.value)}</span>
+                <span style={{ flex:1, fontSize:12, color:sv.proficient?theme.text:theme.textMuted }}>{ABILITY_NAMES[ab]}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:13 }}>{modStr(sv.value)}</span>
               </div>
             ))}
           </div>
@@ -4890,9 +5079,9 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             {Object.entries(skills).map(([sk, d]) => (
               <div key={sk} style={{ display:"flex", alignItems:"center", gap:5, padding:"2px 4px", borderRadius:3, background:d.expertise?"rgba(201,162,39,0.05)":d.proficient?"rgba(201,162,39,0.02)":"transparent" }}>
                 <span style={{ width:7, height:7, flexShrink:0, display:"inline-block", borderRadius:d.expertise?0:"50%", transform:d.expertise?"rotate(45deg)":"none", background:d.proficient||d.expertise?theme.accent:"transparent", border:`2px solid ${d.proficient||d.expertise?theme.accent:theme.border}` }}/>
-                <span style={{ flex:1, fontSize:11, color:d.proficient?theme.text:theme.textMuted, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
-                <span style={{ fontSize:9, color:theme.textDim, marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:12, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
+                <span style={{ flex:1, fontSize:12, color:d.proficient?theme.text:theme.textMuted, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
+                <span style={{ fontSize:10, color:theme.textDim, marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
               </div>
             ))}
           </div>
@@ -5462,12 +5651,11 @@ function App() {
 
   // Also wire upd in CharacterSheet to cloud-save — handled via saveChar above for full saves.
   // For live edits (HP, spells etc) we piggyback on the debounced local save + push to cloud.
-  const cloudSyncChar = async char => {
-    const list = characters.map(c => c.id === char.id ? char : c);
-    setCharacters(list);
-    saveChars(list);
+  const cloudSyncChar = useCallback(async char => {
+    setCharacters(prev => prev.map(c => c.id === char.id ? char : c));
+    saveChars(loadChars().map(c => c.id === char.id ? char : c));
     await dbSaveChar(char);
-  };
+  }, []);
 
   if (view === "create") return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("home")} />;
   if (view === "edit" && selChar) return <CharacterCreationWizard gameData={gameData} onSave={saveChar} onCancel={() => setView("sheet")} editChar={selChar} />;
