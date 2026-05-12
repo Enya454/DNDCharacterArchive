@@ -3369,78 +3369,9 @@ function HPTracker({ hp, onUpdate }) {
 // ============================================================
 // SPELLS TAB
 // ============================================================
-function SpellsTab({ char, gameData, onUpdate }) {
-  const { classes, spells:spellDb } = gameData;
-  const [managing,  setManaging]  = useState(false);
-  const [filter,    setFilter]    = useState("all");
-  const [search,    setSearch]    = useState("");
-  const [casting,   setCasting]   = useState(null);
-  const [upcastLvl, setUpcastLvl] = useState(null);
-
-  const limits    = getSpellLimits(char, classes);
-  const spellList = limits?.spellList || char.class;
-  const known     = char.spells || [];
-  const allSpells = Array.isArray(spellDb)
-    ? spellDb.filter(s => (s.classes||[]).includes(spellList))
-    : (spellDb?.[spellList] || []);
-
-  // ── Extra spells from racial grants and class features (Pact of Tome, etc.) ──
-  const racialSpells   = char.racialSpells || [];
-  const tomeCantrips   = (char.featureChoices?.["pact_tome_cantrips"] || []);
-  const basSpells      = [
-    ...(char.featureChoices?.["bas_required"] || []),
-    ...(char.featureChoices?.["bas_extra"]    || []),
-  ];
-  // Build extra spell objects — look them up in the spell db for full data
-  const allSpellsDb = Array.isArray(spellDb) ? spellDb : [];
-  const findSpell = name => allSpellsDb.find(s => s.name === name) || { name, level:0, school:"", castingTime:"", range:"", description:"" };
-
-  const tomeSpells   = tomeCantrips.map(n => ({ ...findSpell(n), _source:"Pact of the Tome" }));
-  const bookSpells   = basSpells.map(n    => ({ ...findSpell(n), _source:"Book of Ancient Secrets", ritual:true }));
-  const heritageSpells = racialSpells.map(s => ({ ...s, _source: s.sourceFeature || "Heritage" }));
-
-  // extraNames for marking in spell picker (built from new extraSpells below)
-
-  const knownCantrips = known.filter(s => s.level === 0);
-  const knownSpells   = known.filter(s => s.level > 0);
-  const spellDC       = calcSpellDC(char, classes);
-  const spellAtk      = calcSpellAtk(char, classes);
-  const maxSlotLevel  = limits?.maxSlotLevel || 0;
-  const canAddCantrip = !limits || knownCantrips.length < (limits.cantripsKnown || 0);
-  const canAddSpell   = !limits || knownSpells.length   < (limits.spellsKnown   || 0);
-
-  const slots      = limits?.slots || [];
-  const slotsSpent = char.spellSlots || {};
-  const slotsLeft  = lvl => Math.max(0, (slots[lvl-1] || 0) - (slotsSpent[String(lvl)] || 0));
-  const spendSlot  = lvl => {
-    if (slotsLeft(lvl) <= 0) return;
-    onUpdate({ ...char, spellSlots: { ...slotsSpent, [String(lvl)]: (slotsSpent[String(lvl)]||0) + 1 } });
-    setCasting(null); setUpcastLvl(null);
-  };
-  const recoverSlots = () => onUpdate({ ...char, spellSlots: {} });
-
-  const toggleKnown = spell => {
-    const isK = known.some(s => s.name === spell.name);
-    if (isK) { onUpdate({ ...char, spells: known.filter(s => s.name !== spell.name) }); return; }
-    if (spell.level === 0 && !canAddCantrip) return;
-    if (spell.level > 0 && !canAddSpell) return;
-    if (spell.level > maxSlotLevel) return;
-    onUpdate({ ...char, spells: [...known, { ...spell, prepared:false }] });
-  };
-
-  if (!limits) return (
-    <div style={{ textAlign:"center", padding:50, color:"var(--text-muted)" }}>
-      <div style={{ fontSize:48, marginBottom:14 }}>⚔️</div>
-      <div style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:18 }}>Non-Spellcaster</div>
-      <div style={{ marginTop:6 }}>{char.class || "This class"} doesn't use spells.</div>
-    </div>
-  );
-
-  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
-    border:`1px solid ${a?"var(--accent)":"var(--border)"}`, background:a?"var(--accent)":"transparent", color:a?"var(--bg)":"var(--text-muted)" });
-
-  // SpellRow — one row in the known-spells table
-  const SpellRow = ({ spell, badge, grant }) => {
+function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slotsLeft, maxSlotLevel, racialUses, racialSpentKey, racialRemaining, spendRacialUse, setCasting, setUpcastLvl }) {
+    const [open, setOpen] = useState(false);
+    const isCantrip = spell.level === 0;
     const [open, setOpen] = useState(false);
     const isCantrip = spell.level === 0;
     const isRitual  = spell.ritual || (spell.castingTime||'').includes('ritual');
@@ -3546,7 +3477,82 @@ function SpellsTab({ char, gameData, onUpdate }) {
       )}
       </div>
     );
+  }
+
+function SpellsTab({ char, gameData, onUpdate }) {
+  const { classes, spells:spellDb } = gameData;
+  const [managing,  setManaging]  = useState(false);
+  const [filter,    setFilter]    = useState("all");
+  const [search,    setSearch]    = useState("");
+  const [casting,   setCasting]   = useState(null);
+  const [upcastLvl, setUpcastLvl] = useState(null);
+
+  const limits    = getSpellLimits(char, classes);
+  const spellList = limits?.spellList || char.class;
+  const known     = char.spells || [];
+  const allSpells = Array.isArray(spellDb)
+    ? spellDb.filter(s => (s.classes||[]).includes(spellList))
+    : (spellDb?.[spellList] || []);
+
+  // ── Extra spells from racial grants and class features (Pact of Tome, etc.) ──
+  const racialSpells   = char.racialSpells || [];
+  const tomeCantrips   = (char.featureChoices?.["pact_tome_cantrips"] || []);
+  const basSpells      = [
+    ...(char.featureChoices?.["bas_required"] || []),
+    ...(char.featureChoices?.["bas_extra"]    || []),
+  ];
+  // Build extra spell objects — look them up in the spell db for full data
+  const allSpellsDb = Array.isArray(spellDb) ? spellDb : [];
+  const findSpell = name => allSpellsDb.find(s => s.name === name) || { name, level:0, school:"", castingTime:"", range:"", description:"" };
+
+  const tomeSpells   = tomeCantrips.map(n => ({ ...findSpell(n), _source:"Pact of the Tome" }));
+  const bookSpells   = basSpells.map(n    => ({ ...findSpell(n), _source:"Book of Ancient Secrets", ritual:true }));
+  const heritageSpells = racialSpells.map(s => ({ ...s, _source: s.sourceFeature || "Heritage" }));
+
+  // extraNames for marking in spell picker (built from new extraSpells below)
+
+  const knownCantrips = known.filter(s => s.level === 0);
+  const knownSpells   = known.filter(s => s.level > 0);
+  const spellDC       = calcSpellDC(char, classes);
+  const spellAtk      = calcSpellAtk(char, classes);
+  const maxSlotLevel  = limits?.maxSlotLevel || 0;
+  const canAddCantrip = !limits || knownCantrips.length < (limits.cantripsKnown || 0);
+  const canAddSpell   = !limits || knownSpells.length   < (limits.spellsKnown   || 0);
+
+  const slots      = limits?.slots || [];
+  const slotsSpent = char.spellSlots || {};
+  const slotsLeft  = lvl => Math.max(0, (slots[lvl-1] || 0) - (slotsSpent[String(lvl)] || 0));
+  const spendSlot  = lvl => {
+    if (slotsLeft(lvl) <= 0) return;
+    onUpdate({ ...char, spellSlots: { ...slotsSpent, [String(lvl)]: (slotsSpent[String(lvl)]||0) + 1 } });
+    setCasting(null); setUpcastLvl(null);
   };
+  const recoverSlots = () => onUpdate({ ...char, spellSlots: {} });
+
+  const toggleKnown = spell => {
+    const isK = known.some(s => s.name === spell.name);
+    if (isK) { onUpdate({ ...char, spells: known.filter(s => s.name !== spell.name) }); return; }
+    if (spell.level === 0 && !canAddCantrip) return;
+    if (spell.level > 0 && !canAddSpell) return;
+    if (spell.level > maxSlotLevel) return;
+    onUpdate({ ...char, spells: [...known, { ...spell, prepared:false }] });
+  };
+
+  if (!limits) return (
+    <div style={{ textAlign:"center", padding:50, color:"var(--text-muted)" }}>
+      <div style={{ fontSize:48, marginBottom:14 }}>⚔️</div>
+      <div style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:18 }}>Non-Spellcaster</div>
+      <div style={{ marginTop:6 }}>{char.class || "This class"} doesn't use spells.</div>
+    </div>
+  );
+
+  const fBtn = a => ({ padding:"4px 10px", borderRadius:20, cursor:"pointer", fontSize:12, transition:"all 0.15s",
+    border:`1px solid ${a?"var(--accent)":"var(--border)"}`, background:a?"var(--accent)":"transparent", color:a?"var(--bg)":"var(--text-muted)" });
+
+  // SpellRow — one row in the known-spells table
+  const SpellRow_ = (props) => <SpellRow {...props} char={char} onUpdate={onUpdate} limits={limits} slotsSpent={slotsSpent} slotsLeft={slotsLeft} maxSlotLevel={maxSlotLevel} racialUses={racialUses} racialSpentKey={racialSpentKey} racialRemaining={racialRemaining} spendRacialUse={spendRacialUse} setCasting={setCasting} setUpcastLvl={setUpcastLvl}/>;
+
+  // ── Filter state ──
 
   // ── Filter state ──
   const [levelFilter, setLevelFilter] = useState("all");
@@ -3794,13 +3800,13 @@ function SpellsTab({ char, gameData, onUpdate }) {
             <div style={{ padding:"3px 10px", fontSize:10, color:"var(--accent2)", background:"rgba(0,0,0,0.2)", borderBottom:"1px solid var(--border)" }}>
               Always Known — Heritage &amp; Class Features
             </div>
-            {extraDisplayed.map(sp=><SpellRow key={`extra-${sp.name}`} spell={sp} badge={sp._source} grant={sp._grant||null}/>)}
+            {extraDisplayed.map(sp=><SpellRow_ key={`extra-${sp.name}`} spell={sp} badge={sp._source} grant={sp._grant||null}/>)}
           </>)}
 
           {/* ── Chosen cantrips ── */}
           {knownCantripsD.length > 0 && (<>
             <div style={{ padding:"3px 10px", fontSize:10, color:"var(--text-muted)", background:"rgba(0,0,0,0.15)", borderBottom:"1px solid var(--border)", borderTop:extraDisplayed.length?"1px solid var(--border)":"none" }}>Cantrips</div>
-            {knownCantripsD.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
+            {knownCantripsD.map(sp=><SpellRow_ key={sp.name} spell={sp}/>)}
           </>)}
 
           {/* ── Leveled spells grouped ── */}
@@ -3813,7 +3819,7 @@ function SpellsTab({ char, gameData, onUpdate }) {
                 Level {lvl} — {slotsLeft(lvl)}/{slots[lvl-1]||0} slots
                 {maxSlotLevel > lvl && <span style={{ fontSize:9, color:"var(--text-dim)", marginLeft:8 }}>(can upcast to L{maxSlotLevel})</span>}
               </div>
-              {atLvl.map(sp=><SpellRow key={sp.name} spell={sp}/>)}
+              {atLvl.map(sp=><SpellRow_ key={sp.name} spell={sp}/>)}
             </React.Fragment>);
           })}
         </div>
