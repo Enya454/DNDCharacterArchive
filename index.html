@@ -768,6 +768,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 }}>
                   {subclass === sc && "✓ "}{sc}
                   {scData?.features?.[0] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>}
+                  {scData?.source && <div style={{ marginTop:5 }}><SourceBadge source={scData.source}/></div>}
                 </div>
               ))}
             </div>
@@ -2385,6 +2386,30 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
 // Steps: Identity → Class → Species → Background → Abilities
 //        → Equipment & Spells → Finalise
 // ============================================================
+// ── Source badge — shown on class/subclass/species/background cards ──
+function SourceBadge({ source }) {
+  if (!source) return null;
+  const colours = {
+    PHB:  { bg:"rgba(139,0,0,0.15)",   border:"rgba(139,0,0,0.5)",   text:"#e07070" },
+    XGtE: { bg:"rgba(0,80,139,0.15)",  border:"rgba(0,80,139,0.5)",  text:"#70aaee" },
+    TCoE: { bg:"rgba(80,0,139,0.15)",  border:"rgba(80,0,139,0.5)",  text:"#cc88ee" },
+    MotM: { bg:"rgba(0,100,80,0.15)",  border:"rgba(0,100,80,0.5)",  text:"#55ccaa" },
+    SCAG: { bg:"rgba(100,80,0,0.15)",  border:"rgba(100,80,0,0.5)",  text:"#ccaa55" },
+    MToF: { bg:"rgba(60,0,100,0.15)",  border:"rgba(60,0,100,0.5)",  text:"#bb77ee" },
+    EGtW: { bg:"rgba(0,60,100,0.15)",  border:"rgba(0,60,100,0.5)",  text:"#55aacc" },
+    VGM:  { bg:"rgba(100,50,0,0.15)",  border:"rgba(100,50,0,0.5)",  text:"#cc8844" },
+    EEPC: { bg:"rgba(0,80,0,0.15)",    border:"rgba(0,80,0,0.5)",    text:"#66cc66" },
+  };
+  const c = colours[source.abbr] || { bg:"rgba(60,60,60,0.2)", border:"rgba(120,120,120,0.4)", text:"#aaa" };
+  return (
+    <span title={`${source.book}${source.page ? `, p.${source.page}` : ""}`}
+      style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"1px 6px", borderRadius:4, fontSize:10,
+        background:c.bg, border:`1px solid ${c.border}`, color:c.text, letterSpacing:0.5, flexShrink:0 }}>
+      {source.abbr}{source.page ? ` p.${source.page}` : ""}
+    </span>
+  );
+}
+
 function StepBar({ STEPS, step, setStep, stepComplete }) {
   return (
     <div style={{ display:"flex", gap:5, marginBottom:28, justifyContent:"center", flexWrap:"wrap" }}>
@@ -2836,6 +2861,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       return src.slice(0,2).join(", ");
                     }).join(" • ")}
                   </div>
+                  {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
                 </div>
               ))}
             </div>
@@ -2916,6 +2942,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     {d.speed}ft • {d.size}
                     {d.subraces && <span style={{ color:"var(--accent)", marginLeft:6 }}>▾ {Object.keys(d.subraces).length} subraces</span>}
                   </div>
+                  {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
                 </div>
               ))}
             </div>
@@ -2958,6 +2985,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                                 {srData.features.slice(0,2).map(f => f.name).join(" • ")}{srData.features.length>2?" +more":""}
                               </div>
                             )}
+                            {srData.source && <div style={{ marginTop:5 }}><SourceBadge source={srData.source}/></div>}
                           </div>
                         );
                       })}
@@ -3111,6 +3139,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                   <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.spellcaster ? "✨ Spellcaster" : "⚔️ Martial"}</div>
+                  {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
                 </div>
               ))}
             </div>

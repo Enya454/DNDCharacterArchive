@@ -77,34 +77,35 @@
             }
           ]
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 29
       }
     },
     "Elf": {
       "abilityBonuses": {
-        "dex": 2,
-        "int": 1
+        "dex": 2
       },
-      "speed": 30,
-      "size": "Medium",
       "autoLanguages": [
         "Common",
         "Elvish"
       ],
+      "size": "Medium",
+      "speed": 30,
       "features": [
         {
           "name": "Darkvision",
           "level": 1,
           "type": "passive",
-          "description": "Accustomed to the twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colour in darkness, only shades of grey."
+          "description": "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
         },
         {
           "name": "Keen Senses",
           "level": 1,
           "type": "passive",
-          "description": "You have proficiency in the Perception skill.",
-          "grantsSkills": [
-            "Perception"
-          ]
+          "description": "You have proficiency in the Perception skill."
         },
         {
           "name": "Fey Ancestry",
@@ -116,7 +117,7 @@
           "name": "Trance",
           "level": 1,
           "type": "passive",
-          "description": "Elves don't need to sleep. Instead, they meditate deeply for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep."
+          "description": "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep."
         }
       ],
       "subraces": {
@@ -124,6 +125,9 @@
           "abilityBonuses": {
             "int": 1
           },
+          "autoLanguages": [
+            "One language of your choice"
+          ],
           "features": [
             {
               "name": "Elf Weapon Training",
@@ -132,21 +136,33 @@
               "description": "You have proficiency with the longsword, shortsword, shortbow, and longbow."
             },
             {
-              "name": "Extra Cantrip",
+              "name": "High Elf Cantrip",
               "level": 1,
               "type": "spell_choice",
+              "count": 1,
               "spellList": "Wizard",
               "spellLevel": 0,
-              "count": 1,
-              "spellcastingAbility": "int",
               "description": "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it."
+            },
+            {
+              "name": "Extra Language",
+              "level": 1,
+              "type": "language_choice",
+              "count": 1,
+              "description": "You can speak, read, and write one extra language of your choice."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 23
+          }
         },
         "Wood Elf": {
           "abilityBonuses": {
             "wis": 1
           },
+          "autoLanguages": [],
           "features": [
             {
               "name": "Elf Weapon Training",
@@ -166,12 +182,20 @@
               "type": "passive",
               "description": "You can attempt to hide even when you are only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 24
+          }
         },
         "Dark Elf (Drow)": {
           "abilityBonuses": {
             "cha": 1
           },
+          "autoLanguages": [
+            "Undercommon"
+          ],
           "features": [
             {
               "name": "Superior Darkvision",
@@ -183,7 +207,7 @@
               "name": "Sunlight Sensitivity",
               "level": 1,
               "type": "passive",
-              "description": "You have disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight when you, the target of your attack, or whatever you are trying to perceive is in direct sunlight."
+              "description": "You have disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight when you, the target of your attack, or whatever you are trying to perceive is in direct sunlight."
             },
             {
               "name": "Drow Magic",
@@ -210,7 +234,7 @@
                   "recharge": "long"
                 }
               ],
-              "description": "You know the dancing lights cantrip. At 3rd level you can cast faerie fire once, and at 5th level you can cast darkness once. Charisma is your spellcasting ability for these spells."
+              "description": "You know the Dancing Lights cantrip. At 3rd level you can cast Faerie Fire once per long rest. At 5th level you can cast Darkness once per long rest. Charisma is your spellcasting ability for these spells."
             },
             {
               "name": "Drow Weapon Training",
@@ -218,8 +242,111 @@
               "type": "passive",
               "description": "You have proficiency with rapiers, shortswords, and hand crossbows."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 24
+          }
+        },
+        "Eladrin": {
+          "abilityBonuses": {
+            "int": 1
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Fey Step",
+              "level": 1,
+              "type": "action",
+              "actionType": "bonus",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "As a bonus action, you can magically teleport up to 30 feet to an unoccupied space you can see. Once you use this trait, you can't do so again until you finish a short or long rest. When you reach 3rd level, your Fey Step gains an additional effect based on the season: Spring (charm creature at destination), Summer (deal fire damage to creatures within 5 ft), Autumn (frighten creatures within 5 ft), Winter (impose disadvantage on attack rolls against you until start of next turn)."
+            },
+            {
+              "name": "Elf Weapon Training",
+              "level": 1,
+              "type": "passive",
+              "description": "You have proficiency with the longsword, shortsword, shortbow, and longbow."
+            }
+          ],
+          "source": {
+            "book": "Mordenkainen Presents: Monsters of the Multiverse",
+            "abbr": "MotM",
+            "page": 36
+          }
+        },
+        "Sea Elf": {
+          "abilityBonuses": {
+            "con": 1
+          },
+          "autoLanguages": [
+            "Aquan"
+          ],
+          "features": [
+            {
+              "name": "Child of the Sea",
+              "level": 1,
+              "type": "passive",
+              "description": "You have a swimming speed of 30 feet, and you can breathe air and water."
+            },
+            {
+              "name": "Friend of the Sea",
+              "level": 1,
+              "type": "passive",
+              "description": "Using gestures and sounds, you can communicate simple ideas with any beast that has a swimming speed."
+            },
+            {
+              "name": "Sea Elf Weapon Training",
+              "level": 1,
+              "type": "passive",
+              "description": "You have proficiency with the spear, trident, light crossbow, and net."
+            }
+          ],
+          "source": {
+            "book": "Mordenkainen Presents: Monsters of the Multiverse",
+            "abbr": "MotM",
+            "page": 40
+          }
+        },
+        "Shadar-kai (Shadow Elf)": {
+          "abilityBonuses": {
+            "con": 1
+          },
+          "autoLanguages": [],
+          "features": [
+            {
+              "name": "Necrotic Resistance",
+              "level": 1,
+              "type": "passive",
+              "description": "You have resistance to necrotic damage."
+            },
+            {
+              "name": "Blessing of the Raven Queen",
+              "level": 1,
+              "type": "action",
+              "actionType": "bonus",
+              "uses": {
+                "max": 1,
+                "per": "long"
+              },
+              "description": "As a bonus action, you can magically teleport up to 30 feet to an unoccupied space you can see. You then have resistance to all damage until the start of your next turn. During that time, you appear ghostly and translucent. Once you use this trait, you can't do so again until you finish a long rest."
+            }
+          ],
+          "source": {
+            "book": "Mordenkainen Presents: Monsters of the Multiverse",
+            "abbr": "MotM",
+            "page": 41
+          }
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 21
       }
     },
     "Dwarf": {
@@ -282,7 +409,12 @@
               "type": "passive",
               "description": "Your hit point maximum increases by 1, and it increases by 1 every time you gain a level."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 20
+          }
         },
         "Mountain Dwarf": {
           "abilityBonuses": {
@@ -295,8 +427,18 @@
               "type": "passive",
               "description": "You have proficiency with light and medium armor."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 20
+          }
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 18
       }
     },
     "Halfling": {
@@ -348,7 +490,12 @@
               "type": "passive",
               "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 28
+          }
         },
         "Stout": {
           "abilityBonuses": {
@@ -361,8 +508,18 @@
               "type": "passive",
               "description": "You have advantage on saving throws against poison, and you have resistance against poison damage."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 28
+          }
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 26
       }
     },
     "Gnome": {
@@ -408,7 +565,12 @@
               "type": "passive",
               "description": "Through sounds and gestures, you can communicate simple ideas with Small or smaller beasts."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 37
+          }
         },
         "Rock Gnome": {
           "abilityBonuses": {
@@ -427,8 +589,18 @@
               "type": "passive",
               "description": "You have proficiency with artisan's tools (tinker's tools). Using these tools you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 37
+          }
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 35
       }
     },
     "Half-Elf": {
@@ -479,7 +651,12 @@
           "count": 1,
           "description": "You can speak, read, and write one extra language of your choice."
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 38
+      }
     },
     "Half-Orc": {
       "abilityBonuses": {
@@ -520,7 +697,12 @@
           "type": "passive",
           "description": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 40
+      }
     },
     "Tiefling": {
       "abilityBonuses": {},
@@ -579,7 +761,12 @@
               ],
               "description": "Thaumaturgy cantrip; Hellish Rebuke (2nd level) 1/long rest at 3rd; Darkness 1/long rest at 5th. CHA is your spellcasting ability."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 42
+          }
         },
         "Asmodeus": {
           "abilityBonuses": {
@@ -615,7 +802,12 @@
               ],
               "description": "Same as standard Infernal Legacy. Patron of Tieflings who trace their descent to Asmodeus."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 42
+          }
         },
         "Zariel": {
           "abilityBonuses": {
@@ -651,7 +843,12 @@
               ],
               "description": "Thaumaturgy cantrip; Searing Smite 1/long rest at 3rd; Branding Smite 1/long rest at 5th. CHA is your spellcasting ability."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 21
+          }
         },
         "Dispater": {
           "abilityBonuses": {
@@ -687,7 +884,12 @@
               ],
               "description": "Thaumaturgy cantrip; Disguise Self 1/long rest at 3rd; Detect Thoughts 1/long rest at 5th."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 21
+          }
         },
         "Glasya": {
           "abilityBonuses": {
@@ -723,7 +925,12 @@
               ],
               "description": "Minor Illusion cantrip; Disguise Self 1/long rest at 3rd; Invisibility 1/long rest at 5th."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 22
+          }
         },
         "Levistus": {
           "abilityBonuses": {
@@ -759,7 +966,12 @@
               ],
               "description": "Ray of Frost cantrip; Armor of Agathys 1/long rest at 3rd; Darkness 1/long rest at 5th."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 22
+          }
         },
         "Mammon": {
           "abilityBonuses": {
@@ -795,7 +1007,12 @@
               ],
               "description": "Mage Hand cantrip; Tenser's Floating Disk 1/long rest at 3rd; Arcane Lock 1/long rest at 5th."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 23
+          }
         },
         "Mephistopheles": {
           "abilityBonuses": {
@@ -831,8 +1048,18 @@
               ],
               "description": "Mage Hand cantrip; Burning Hands 1/long rest at 3rd; Flame Blade 1/long rest at 5th."
             }
-          ]
+          ],
+          "source": {
+            "book": "Mordenkainen's Tome of Foes",
+            "abbr": "MToF",
+            "page": 23
+          }
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 42
       }
     },
     "Dragonborn": {
@@ -883,7 +1110,12 @@
           "type": "passive",
           "description": "You have resistance to the damage type associated with your draconic ancestry."
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 32
+      }
     },
     "Aasimar": {
       "abilityBonuses": {
@@ -1119,7 +1351,12 @@
               "type": "passive",
               "description": "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 49
+          }
         },
         "Path of the Totem Warrior": {
           "features": [
@@ -1162,7 +1399,12 @@
                 "Wolf \u2014 While raging you can use a bonus action to knock a Large or smaller creature prone"
               ]
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 50
+          }
         }
       },
       "startingGoldDice": "2d4",
@@ -1233,7 +1475,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 46
+      }
     },
     "Rogue": {
       "hitDie": 8,
@@ -1418,7 +1665,12 @@
               "type": "passive",
               "description": "When you reach 17th level, you have become adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 97
+          }
         },
         "Assassin": {
           "features": [
@@ -1452,7 +1704,12 @@
               "type": "passive",
               "description": "Starting at 17th level, you become a master of instant death. When you attack and hit a creature that is surprised, it must make a Constitution saving throw (DC 8 + your Dexterity modifier + your proficiency bonus). On a failed save, double the damage of your attack against the creature."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 97
+          }
         },
         "Arcane Trickster": {
           "spellcaster": true,
@@ -1764,6 +2021,11 @@
                 ]
               }
             }
+          },
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 98
           }
         }
       },
@@ -1879,7 +2141,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 94
+      }
     },
     "Fighter": {
       "hitDie": 10,
@@ -2053,7 +2320,12 @@
               "type": "passive",
               "description": "At 18th level, you attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 72
+          }
         },
         "Battle Master": {
           "features": [
@@ -2099,7 +2371,12 @@
               "type": "passive",
               "description": "Starting at 15th level, when you roll initiative and have no superiority dice remaining, you regain one superiority die."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 73
+          }
         },
         "Eldritch Knight": {
           "spellcaster": true,
@@ -2405,6 +2682,11 @@
                 ]
               }
             }
+          },
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 74
           }
         }
       },
@@ -2532,7 +2814,12 @@
             ]
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 70
+      }
     },
     "Wizard": {
       "hitDie": 6,
@@ -2644,7 +2931,12 @@
               "type": "passive",
               "description": "Beginning at 10th level, you can add your Intelligence modifier to one damage roll of any wizard evocation spell you cast."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 117
+          }
         },
         "School of Abjuration": {
           "features": [
@@ -2672,7 +2964,12 @@
               "type": "passive",
               "description": "Beginning at 10th level, when you cast an abjuration spell that requires you to make an ability check as a part of casting that spell, you add your proficiency bonus to that ability check."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 115
+          }
         }
       },
       "spellcastingTable": {
@@ -3047,7 +3344,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 112
+      }
     },
     "Cleric": {
       "hitDie": 8,
@@ -3170,7 +3472,12 @@
               "type": "passive",
               "description": "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 60
+          }
         }
       },
       "spellcastingTable": {
@@ -3591,7 +3898,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 56
+      }
     },
     "Bard": {
       "hitDie": 8,
@@ -3724,7 +4036,12 @@
               "type": "passive",
               "description": "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 54
+          }
         },
         "College of Valor": {
           "features": [
@@ -3755,7 +4072,12 @@
               "type": "passive",
               "description": "At 14th level, you have mastered the art of weaving spellcasting and weapon use into a single harmonious act. When you use your action to cast a bard spell, you can make one weapon attack as a bonus action."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 55
+          }
         }
       },
       "spellcastingTable": {
@@ -4166,7 +4488,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 51
+      }
     },
     "Paladin": {
       "hitDie": 10,
@@ -4314,7 +4641,12 @@
               "type": "passive",
               "description": "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 85
+          }
         }
       },
       "spellcastingTable": {
@@ -4705,7 +5037,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 82
+      }
     },
     "Ranger": {
       "hitDie": 10,
@@ -4715,33 +5052,33 @@
         "dex"
       ],
       "armorProficiencies": [
-        "Light",
-        "Medium",
+        "Light Armor",
+        "Medium Armor",
         "Shields"
       ],
       "weaponProficiencies": [
-        "Simple",
-        "Martial"
+        "Simple Weapons",
+        "Martial Weapons"
       ],
       "toolProficiencies": [],
       "spellcaster": true,
       "spellcastingAbility": "wis",
       "features": [
         {
-          "level": 1,
           "name": "Hit Points",
+          "level": 1,
           "type": "passive",
-          "description": "Hit Dice: 1d10 per Ranger level. HP at 1st level: 10 + Constitution modifier."
+          "description": "Hit Dice: 1d10 per Ranger level. HP at 1st: 10 + CON. HP per level: 1d10 (or 6) + CON modifier."
         },
         {
-          "level": 1,
           "name": "Proficiencies",
+          "level": 1,
           "type": "passive",
-          "description": "Armor: Light, Medium, Shields. Weapons: Simple, Martial. Saving Throws: Strength, Dexterity."
+          "description": "Armor: Light, medium, shields. Weapons: Simple, martial. Tools: None. Saving Throws: Strength, Dexterity. Skills: 3 from Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, and Survival."
         },
         {
-          "level": 1,
           "name": "Skill Proficiencies",
+          "level": 1,
           "type": "proficiency_choice",
           "count": 3,
           "from": [
@@ -4757,10 +5094,9 @@
           "description": "Choose 3 skills from the Ranger list."
         },
         {
-          "level": 1,
           "name": "Favored Enemy",
+          "level": 1,
           "type": "choice",
-          "description": "Beginning at 1st level, you have significant experience studying, tracking, hunting, and even talking to a certain type of enemy. Choose a type of favored enemy.",
           "options": [
             "Aberrations",
             "Beasts",
@@ -4776,13 +5112,13 @@
             "Plants",
             "Undead",
             "Two humanoid races of your choice"
-          ]
+          ],
+          "description": "You have significant experience studying, tracking, hunting, and even talking to a certain type of enemy. You have advantage on Wisdom (Survival) checks to track your favored enemies, as well as on Intelligence checks to recall information about them. When you gain this feature, you also learn one language of your choice that is spoken by your favored enemies, if they speak one at all. You choose one additional favored enemy and language at 6th and 14th level."
         },
         {
-          "level": 1,
           "name": "Natural Explorer",
+          "level": 1,
           "type": "choice",
-          "description": "You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions.",
           "options": [
             "Arctic",
             "Coast",
@@ -4792,94 +5128,503 @@
             "Mountain",
             "Swamp",
             "Underdark"
-          ]
+          ],
+          "description": "You are a master of navigating the natural world, and you react with swift and decisive action when attacked. You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions. Choose one type of favored terrain. When you make an Intelligence or Wisdom check related to your favored terrain, your proficiency bonus is doubled. While traveling for an hour or more in your favored terrain: difficult terrain doesn't slow your group's travel, your group can't become lost except by magical means, you remain alert to danger even when engaged in another activity, you can move stealthily at a normal pace (alone), you find twice as much food when you forage, and you know the terrain. You choose additional favored terrain at 6th and 10th level."
         },
         {
-          "level": 2,
           "name": "Fighting Style",
-          "type": "choice",
-          "description": "At 2nd level, you adopt a particular style of fighting as your specialty.",
-          "options": [
-            "Archery \u2014 +2 to ranged attack rolls",
-            "Defense \u2014 +1 to AC in armor",
-            "Dueling \u2014 +2 damage with one-handed melee weapon",
-            "Two-Weapon Fighting \u2014 Add ability modifier to off-hand attack"
-          ]
-        },
-        {
           "level": 2,
+          "type": "choice",
+          "options": [
+            "Archery \u2014 +2 bonus to attack rolls with ranged weapons.",
+            "Defense \u2014 +1 bonus to AC while wearing armor.",
+            "Dueling \u2014 +2 damage when wielding a melee weapon in one hand and no other weapons.",
+            "Two-Weapon Fighting \u2014 Add ability modifier to the damage of the off-hand attack.",
+            "Blind Fighting \u2014 You have blindsight with a range of 10 feet.",
+            "Thrown Weapon Fighting \u2014 +2 damage with thrown weapons; drawing thrown weapons doesn't use object interaction.",
+            "Close Quarters Shooter \u2014 +1 to attack rolls with ranged weapons; no disadvantage within 5 ft; ignore half/three-quarters cover."
+          ],
+          "description": "You adopt a particular style of fighting as your specialty. You can't take a Fighting Style option more than once."
+        },
+        {
           "name": "Spellcasting",
+          "level": 2,
           "type": "passive",
-          "description": "By the time you reach 2nd level, you have learned to use the magical essence of nature to cast spells, much as a druid does. Your spellcasting ability is Wisdom."
+          "description": "By the time you reach 2nd level, you have learned to use the magical essence of nature to cast spells. Wisdom is your spellcasting ability for ranger spells. Your spell save DC = 8 + proficiency bonus + Wisdom modifier. Your spell attack modifier = proficiency bonus + Wisdom modifier."
         },
         {
-          "level": 3,
           "name": "Ranger Archetype",
+          "level": 3,
           "type": "subclass_choice",
-          "description": "At 3rd level, you choose an archetype that you strive to emulate: Hunter or Beast Master."
+          "description": "At 3rd level, you choose an archetype that you strive to emulate from the list of available archetypes. Your archetype choice grants you features at 3rd level and again at 7th, 11th, and 15th level."
         },
         {
-          "level": 5,
-          "name": "Extra Attack",
+          "name": "Primeval Awareness",
+          "level": 3,
           "type": "passive",
-          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn.",
-          "actionType": "special",
-          "attackCount": 2,
-          "note": "Attack twice instead of once when you take the Attack action"
+          "description": "Beginning at 3rd level, you can use your action and expend one ranger spell slot to focus your awareness on the region around you. For 1 minute per level of the spell slot you expend, you can sense whether the following types of creatures are present within 1 mile of you (or within up to 6 miles if you are in your favored terrain): aberrations, celestials, dragons, elementals, fey, fiends, and undead. This feature doesn't reveal the creatures' location or number."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. Cannot exceed 20."
+        },
+        {
+          "name": "Extra Attack",
+          "level": 5,
+          "type": "passive",
+          "description": "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."
+        },
+        {
+          "name": "Favored Enemy (2nd choice)",
+          "level": 6,
+          "type": "choice",
+          "options": [
+            "Aberrations",
+            "Beasts",
+            "Celestials",
+            "Constructs",
+            "Dragons",
+            "Elementals",
+            "Fey",
+            "Fiends",
+            "Giants",
+            "Monstrosities",
+            "Oozes",
+            "Plants",
+            "Undead",
+            "Two humanoid races of your choice"
+          ],
+          "description": "You choose one additional favored enemy and learn one additional associated language."
+        },
+        {
+          "name": "Natural Explorer (2nd terrain)",
+          "level": 6,
+          "type": "choice",
+          "options": [
+            "Arctic",
+            "Coast",
+            "Desert",
+            "Forest",
+            "Grassland",
+            "Mountain",
+            "Swamp",
+            "Underdark"
+          ],
+          "description": "You choose one additional favored terrain type."
+        },
+        {
+          "name": "Land's Stride",
+          "level": 8,
+          "type": "passive",
+          "description": "Starting at 8th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard. In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement."
+        },
+        {
+          "name": "Ability Score Improvement (8th)",
+          "level": 8,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each."
+        },
+        {
+          "name": "Natural Explorer (3rd terrain)",
+          "level": 10,
+          "type": "choice",
+          "options": [
+            "Arctic",
+            "Coast",
+            "Desert",
+            "Forest",
+            "Grassland",
+            "Mountain",
+            "Swamp",
+            "Underdark"
+          ],
+          "description": "You choose one additional favored terrain type."
+        },
+        {
+          "name": "Hide in Plain Sight",
+          "level": 10,
+          "type": "passive",
+          "description": "Starting at 10th level, you can spend 1 minute creating camouflage for yourself. You must have access to fresh mud, dirt, plants, soot, and other naturally occurring materials with which to create your camouflage. Once you are camouflaged in this way, you can try to hide by pressing yourself up against a solid surface such as a tree or wall. You gain a +10 bonus to Dexterity (Stealth) checks as long as you remain there without moving or taking actions."
+        },
+        {
+          "name": "Ability Score Improvement (12th)",
+          "level": 12,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each."
+        },
+        {
+          "name": "Favored Enemy (3rd choice)",
+          "level": 14,
+          "type": "choice",
+          "options": [
+            "Aberrations",
+            "Beasts",
+            "Celestials",
+            "Constructs",
+            "Dragons",
+            "Elementals",
+            "Fey",
+            "Fiends",
+            "Giants",
+            "Monstrosities",
+            "Oozes",
+            "Plants",
+            "Undead",
+            "Two humanoid races of your choice"
+          ],
+          "description": "You choose one additional favored enemy, and you learn one additional associated language."
+        },
+        {
+          "name": "Vanish",
+          "level": 14,
+          "type": "passive",
+          "description": "Starting at 14th level, you can use the Hide action as a bonus action on your turn. Also, you can't be tracked by nonmagical means, unless you choose to leave a trail."
+        },
+        {
+          "name": "Ability Score Improvement (16th)",
+          "level": 16,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each."
+        },
+        {
+          "name": "Feral Senses",
+          "level": 18,
+          "type": "passive",
+          "description": "At 18th level, you gain preternatural senses that help you fight creatures you can't see. When you attack a creature you can't see, your inability to see it doesn't impose disadvantage on your attack rolls against it. You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn't hidden from you and you aren't blinded or deafened."
+        },
+        {
+          "name": "Ability Score Improvement (19th)",
+          "level": 19,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each."
+        },
+        {
+          "name": "Foe Slayer",
+          "level": 20,
+          "type": "passive",
+          "description": "At 20th level, you become an unparalleled hunter of your enemies. Once on each of your turns, you can add your Wisdom modifier to the attack roll or the damage roll of an attack you make against one of your favored enemies. You can choose to use this feature before or after the roll, but before any effects of the roll are applied."
         }
       ],
       "subclasses": {
         "Hunter": {
+          "spellcaster": false,
           "features": [
             {
-              "level": 3,
               "name": "Hunter's Prey",
+              "level": 3,
               "type": "choice",
-              "description": "At 3rd level, you gain one of the following features of your choice.",
               "options": [
-                "Colossus Slayer \u2014 Extra 1d8 damage to damaged creatures once per turn",
-                "Giant Killer \u2014 Reaction attack when an adjacent Large+ creature misses you",
-                "Horde Breaker \u2014 Attack a second adjacent creature with the same weapon once per turn"
-              ]
+                "Colossus Slayer \u2014 Once per turn, deal an extra 1d8 damage to a creature below its HP maximum.",
+                "Giant Killer \u2014 Reaction attack when a Large or larger creature within 5 ft misses you.",
+                "Horde Breaker \u2014 Once per turn, make an extra attack against a different creature within 5 ft of the first target."
+              ],
+              "description": "At 3rd level, you gain one of the following features of your choice."
             },
             {
-              "level": 7,
               "name": "Defensive Tactics",
+              "level": 7,
               "type": "choice",
-              "description": "At 7th level, you gain one of the following features of your choice.",
               "options": [
-                "Escape the Horde \u2014 Opportunity attacks against you have disadvantage",
-                "Multiattack Defense \u2014 +4 to AC after being hit until the end of the attacker's turn",
-                "Steel Will \u2014 Advantage on saves against being frightened"
-              ]
+                "Escape the Horde \u2014 Opportunity attacks against you are made with disadvantage.",
+                "Multiattack Defense \u2014 When a creature hits you, gain +4 AC against further attacks from that creature that turn.",
+                "Steel Will \u2014 Advantage on saving throws against being frightened."
+              ],
+              "description": "At 7th level, you gain one of the following features of your choice."
             },
             {
-              "level": 11,
               "name": "Multiattack",
+              "level": 11,
               "type": "choice",
-              "description": "At 11th level, you gain one of the following features of your choice.",
               "options": [
-                "Volley \u2014 Attack every creature in a 10-ft radius you can see (ranged)",
-                "Whirlwind Attack \u2014 Melee attack against any number of adjacent creatures"
-              ]
+                "Volley \u2014 Make a ranged attack against any number of creatures within 10 ft of a point within range (one attack roll each).",
+                "Whirlwind Attack \u2014 Make a melee attack against any number of creatures within 5 ft of you (one attack roll each)."
+              ],
+              "description": "At 11th level, you gain one of the following features of your choice."
+            },
+            {
+              "name": "Superior Hunter's Defense",
+              "level": 15,
+              "type": "choice",
+              "options": [
+                "Evasion \u2014 Dex save for half damage: take none on success, half on failure.",
+                "Stand Against the Tide \u2014 When a creature misses you with a melee attack, use reaction to force it to repeat the attack against a creature of your choice.",
+                "Uncanny Dodge \u2014 Use reaction to halve attack damage from an attacker you can see."
+              ],
+              "description": "At 15th level, you gain one of the following features of your choice."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 93
+          }
+        },
+        "Beast Master": {
+          "spellcaster": false,
+          "features": [
+            {
+              "name": "Ranger's Companion",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you gain a beast companion that accompanies you on your adventures and is trained to fight alongside you. Choose a beast no larger than Medium and with CR 1/4 or lower. Add your proficiency bonus to the beast's AC, attack rolls, and damage rolls. Its hit points maximum equals its normal maximum or four times your ranger level, whichever is higher. The beast obeys your commands. On your turn, you can verbally command the beast where to move (no action). To have the beast attack, you must use your action. If the beast dies, you can obtain another one by spending 8 hours magically bonding with a beast that isn't hostile to you."
+            },
+            {
+              "name": "Exceptional Training",
+              "level": 7,
+              "type": "passive",
+              "description": "Beginning at 7th level, on any of your turns when your beast companion doesn't attack, you can use a bonus action to command the beast to take the Dash, Disengage, Dodge, or Help action on its turn. In addition, the beast's attacks now count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage."
+            },
+            {
+              "name": "Bestial Fury",
+              "level": 11,
+              "type": "passive",
+              "description": "Starting at 11th level, your beast companion can make two attacks when you command it to use the Attack action."
+            },
+            {
+              "name": "Share Spells",
+              "level": 15,
+              "type": "passive",
+              "description": "Beginning at 15th level, when you cast a spell targeting yourself, you can also affect your beast companion with the spell if the beast is within 30 feet of you."
+            }
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 93
+          }
+        },
+        "Gloom Stalker": {
+          "spellcaster": true,
+          "spellcastingAbility": "wis",
+          "features": [
+            {
+              "name": "Expanded Spell List (Gloom Stalker)",
+              "level": 3,
+              "type": "passive",
+              "description": "Gloom Stalker Spells: 3rd: Disguise Self, Rope Trick; 5th: Fear, Rope Trick; 9th: Greater Invisibility, Rope Trick; 13th: Freedom of Movement; 17th: Pass without Trace. (Gain at ranger levels 3/5/9/13/17.)"
+            },
+            {
+              "name": "Dread Ambusher",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you master the art of the ambush. You can give yourself a bonus to your initiative rolls equal to your Wisdom modifier. At the start of your first turn of each combat, your walking speed increases by 10 feet, which lasts until the end of that turn. If you take the Attack action on that turn, you can make one additional weapon attack as part of that action. If that attack hits, the target takes an extra 1d8 damage of the weapon's damage type."
+            },
+            {
+              "name": "Umbral Sight",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you gain darkvision out to a range of 60 feet. If you already have darkvision, its range increases by 30 feet. You are also adept at evading creatures that rely on darkvision. While in darkness, you are invisible to any creature that relies on darkvision to see you in that darkness."
+            },
+            {
+              "name": "Iron Mind",
+              "level": 7,
+              "type": "passive",
+              "description": "By 7th level, you have honed your ability to resist the mind-altering powers of your prey. You gain proficiency in Wisdom saving throws. If you already have this proficiency, you instead gain proficiency in Intelligence or Charisma saving throws (your choice)."
+            },
+            {
+              "name": "Stalker's Flurry",
+              "level": 11,
+              "type": "passive",
+              "description": "At 11th level, you learn to attack with such unexpected speed that you can turn a miss into another strike. Once on each of your turns when you miss with a weapon attack, you can make another weapon attack as part of the same action."
+            },
+            {
+              "name": "Shadowy Dodge",
+              "level": 15,
+              "type": "action",
+              "actionType": "reaction",
+              "description": "Beginning at 15th level, you can dodge in unforeseen ways, with wisps of supernatural shadow around you. Whenever a creature makes an attack roll against you and doesn't have advantage on the roll, you can use your reaction to impose disadvantage on it. You must use this feature before you know the outcome of the attack roll."
+            }
+          ],
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 41
+          }
+        },
+        "Horizon Walker": {
+          "spellcaster": true,
+          "spellcastingAbility": "wis",
+          "features": [
+            {
+              "name": "Expanded Spell List (Horizon Walker)",
+              "level": 3,
+              "type": "passive",
+              "description": "Horizon Walker Spells: 3rd: Protection from Evil and Good; 5th: Misty Step; 9th: Haste; 13th: Banishment; 17th: Teleportation Circle."
+            },
+            {
+              "name": "Detect Portal",
+              "level": 3,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "At 3rd level, you gain the ability to magically sense the presence of a planar portal. As an action, you detect the distance and direction to the closest planar portal within 1 mile of you. Once you use this feature, you can't use it again until you finish a short or long rest."
+            },
+            {
+              "name": "Planar Warrior",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you learn to draw on the energy of the multiverse to augment your attacks. As a bonus action, choose one creature you can see within 30 feet. The next time you hit that creature on this turn with a weapon attack, all damage dealt by the attack becomes force damage, and the creature takes an extra 1d8 force damage."
+            },
+            {
+              "name": "Ethereal Step",
+              "level": 7,
+              "type": "action",
+              "actionType": "bonus",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "At 7th level, you learn to step through the Ethereal Plane. As a bonus action on your turn, you can cast the Etherealness spell with this feature, without expending a spell slot, but the spell ends at the end of the current turn. Once you use this feature, you can't use it again until you finish a short or long rest."
+            },
+            {
+              "name": "Distant Strike",
+              "level": 11,
+              "type": "passive",
+              "description": "At 11th level, you gain the ability to pass between the planes in the blink of an eye. When you take the Attack action, you can teleport up to 10 feet before each attack to an unoccupied space you can see. If you attack at least two different creatures with the action, you can make one additional attack against a third creature."
+            },
+            {
+              "name": "Spectral Defense",
+              "level": 15,
+              "type": "action",
+              "actionType": "reaction",
+              "description": "At 15th level, your ability to move between planes enables you to slip through the planar boundaries to lessen the harm done to you. When you take damage from an attack, you can use your reaction to give yourself resistance to all of that attack's damage on this turn."
+            }
+          ],
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 42
+          }
+        },
+        "Monster Slayer": {
+          "spellcaster": true,
+          "spellcastingAbility": "wis",
+          "features": [
+            {
+              "name": "Expanded Spell List (Monster Slayer)",
+              "level": 3,
+              "type": "passive",
+              "description": "Monster Slayer Spells: 3rd: Protection from Evil and Good; 5th: Zone of Truth; 9th: Magic Circle; 13th: Banishment; 17th: Hold Monster."
+            },
+            {
+              "name": "Hunter's Sense",
+              "level": 3,
+              "type": "action",
+              "actionType": "action",
+              "description": "At 3rd level, you gain the ability to peer at a creature and magically discern how best to hurt it. As an action, choose one creature you can see within 60 feet. You immediately learn whether the creature has any damage immunities, resistances, or vulnerabilities and what they are. If the creature is hidden from divination magic, you sense that it has no damage immunities, resistances, or vulnerabilities. You can use this feature a number of times equal to your Wisdom modifier (minimum of 1), and you regain all uses when you finish a long rest."
+            },
+            {
+              "name": "Slayer's Prey",
+              "level": 3,
+              "type": "action",
+              "actionType": "bonus",
+              "description": "Starting at 3rd level, you can focus your ire on one foe, increasing the harm you inflict on it. As a bonus action, you designate one creature you can see within 60 feet as the target of this feature. The first time each turn that you hit that target with a weapon attack, it takes an extra 1d6 damage from the weapon. This benefit lasts until you finish a short or long rest. It ends early if you designate a different creature."
+            },
+            {
+              "name": "Supernatural Defense",
+              "level": 7,
+              "type": "passive",
+              "description": "At 7th level, you gain extra resilience against your prey's assaults on your mind and body. Whenever the target of your Slayer's Prey forces you to make a saving throw and whenever you make an ability check to escape that target's grapple, add 1d6 to your roll."
+            },
+            {
+              "name": "Magic-User's Nemesis",
+              "level": 11,
+              "type": "action",
+              "actionType": "reaction",
+              "uses": {
+                "max": 1,
+                "per": "short"
+              },
+              "description": "At 11th level, you gain the ability to thwart someone else's magic. When you see a creature casting a spell or teleporting within 60 feet of you, you can use your reaction to try to magically foil it. The creature must succeed on a Wisdom saving throw against your spell save DC, or the spell or teleport fails and is wasted. Once you use this feature, you can't use it again until you finish a short or long rest."
+            },
+            {
+              "name": "Slayer's Counter",
+              "level": 15,
+              "type": "action",
+              "actionType": "reaction",
+              "description": "At 15th level, you gain the ability to counterattack when your prey tries to sabotage you. If the target of your Slayer's Prey forces you to make a saving throw, you can use your reaction to make one weapon attack against the quarry. You make this attack immediately before making the saving throw. If your attack hits, your saving throw automatically succeeds, in addition to the attack's normal effects."
+            }
+          ],
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 43
+          }
+        },
+        "Fey Wanderer": {
+          "spellcaster": true,
+          "spellcastingAbility": "wis",
+          "features": [
+            {
+              "name": "Expanded Spell List (Fey Wanderer)",
+              "level": 3,
+              "type": "passive",
+              "description": "Fey Wanderer Spells: 3rd: Charm Person; 5th: Misty Step; 9th: Dispel Magic; 13th: Dimension Door; 17th: Mislead."
+            },
+            {
+              "name": "Dreadful Strikes",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you can augment your weapon strikes with mind-scarring magic, drawn from the gloomy hollows of the Feywild. When you hit a creature with a weapon, you can deal an extra 1d4 psychic damage to the target, which can take this extra damage only once per turn. The extra damage increases to 1d6 at 11th level."
+            },
+            {
+              "name": "Fey Wanderer Magic",
+              "level": 3,
+              "type": "passive",
+              "description": "You also learn the Misty Step spell. It counts as a ranger spell for you, but it doesn't count against the number of ranger spells you know. You can cast it once without expending a spell slot, and you regain the ability to cast it in this way when you finish a short or long rest."
+            },
+            {
+              "name": "Otherworldly Glamour",
+              "level": 3,
+              "type": "passive",
+              "description": "Your fey qualities give you a supernatural charm. As a result, whenever you make a Charisma check, you gain a bonus to the check equal to your Wisdom modifier (minimum of +1). In addition, you gain proficiency in one of the following skills of your choice: Deception, Performance, or Persuasion."
+            },
+            {
+              "name": "Beguiling Twist",
+              "level": 7,
+              "type": "action",
+              "actionType": "reaction",
+              "description": "Beginning at 7th level, the magic of the Feywild guards your mind. You have advantage on saving throws against being charmed or frightened. In addition, whenever you or a creature you can see within 120 feet of you succeeds on a saving throw against being charmed or frightened, you can use your reaction to force a different creature you can see within 120 feet of you to make a Wisdom saving throw against your spell save DC. If the save fails, the target is charmed or frightened by you (your choice) for 1 minute."
+            },
+            {
+              "name": "Fey Reinforcements",
+              "level": 11,
+              "type": "action",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "long"
+              },
+              "description": "Starting at 11th level, you can cast Summon Fey once without expending a spell slot. You regain the ability to do so when you finish a long rest. In addition, whenever you start casting the spell, you can modify it so that it doesn't require concentration. If you do so, the spell's duration becomes 1 minute for that casting."
+            },
+            {
+              "name": "Misty Wanderer",
+              "level": 15,
+              "type": "action",
+              "actionType": "bonus",
+              "description": "When you reach 15th level, you can cast Misty Step without expending a spell slot. You can do so a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a long rest. In addition, whenever you cast Misty Step, you can bring along one willing creature you can see within 5 feet of you."
+            }
+          ],
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 58
+          }
         }
       },
       "spellcastingTable": {
-        "type": "known",
+        "type": "prepared",
         "spellcastingAbility": "wis",
-        "ritualCasting": false,
-        "spellcastingFocus": true,
         "table": {
           "1": {
             "cantrips": 0,
             "spellsKnown": 0,
             "slots": [
-              0,
-              0,
-              0,
-              0,
               0,
               0,
               0,
@@ -4895,10 +5640,6 @@
               0,
               0,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -4907,10 +5648,6 @@
             "spellsKnown": 3,
             "slots": [
               3,
-              0,
-              0,
-              0,
-              0,
               0,
               0,
               0,
@@ -4925,10 +5662,6 @@
               0,
               0,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -4938,10 +5671,6 @@
             "slots": [
               4,
               2,
-              0,
-              0,
-              0,
-              0,
               0,
               0,
               0
@@ -4955,10 +5684,6 @@
               2,
               0,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -4968,10 +5693,6 @@
             "slots": [
               4,
               3,
-              0,
-              0,
-              0,
-              0,
               0,
               0,
               0
@@ -4985,10 +5706,6 @@
               3,
               0,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -4999,10 +5716,6 @@
               4,
               3,
               2,
-              0,
-              0,
-              0,
-              0,
               0,
               0
             ]
@@ -5015,10 +5728,6 @@
               3,
               2,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5029,10 +5738,6 @@
               4,
               3,
               3,
-              0,
-              0,
-              0,
-              0,
               0,
               0
             ]
@@ -5045,10 +5750,6 @@
               3,
               3,
               0,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5060,10 +5761,6 @@
               3,
               3,
               1,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5075,10 +5772,6 @@
               3,
               3,
               1,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5090,10 +5783,6 @@
               3,
               3,
               2,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5105,10 +5794,6 @@
               3,
               3,
               2,
-              0,
-              0,
-              0,
-              0,
               0
             ]
           },
@@ -5120,11 +5805,7 @@
               3,
               3,
               3,
-              1,
-              0,
-              0,
-              0,
-              0
+              1
             ]
           },
           "18": {
@@ -5135,11 +5816,7 @@
               3,
               3,
               3,
-              1,
-              0,
-              0,
-              0,
-              0
+              1
             ]
           },
           "19": {
@@ -5150,11 +5827,7 @@
               3,
               3,
               3,
-              2,
-              0,
-              0,
-              0,
-              0
+              2
             ]
           },
           "20": {
@@ -5165,11 +5838,7 @@
               3,
               3,
               3,
-              2,
-              0,
-              0,
-              0,
-              0
+              2
             ]
           }
         }
@@ -5264,7 +5933,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 89
+      }
     },
     "Druid": {
       "hitDie": 8,
@@ -5404,7 +6078,12 @@
                 "Underdark"
               ]
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 68
+          }
         }
       },
       "spellcastingTable": {
@@ -5771,7 +6450,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 64
+      }
     },
     "Monk": {
       "hitDie": 8,
@@ -5896,7 +6580,12 @@
               "type": "passive",
               "description": "At 17th level, you gain the ability to set up lethal vibrations in someone's body."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 79
+          }
         }
       },
       "startingGoldDice": "5d4",
@@ -5959,7 +6648,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 76
+      }
     },
     "Sorcerer": {
       "hitDie": 6,
@@ -6081,7 +6775,12 @@
               "type": "passive",
               "description": "At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 102
+          }
         },
         "Wild Magic": {
           "features": [
@@ -6103,7 +6802,12 @@
               "type": "passive",
               "description": "Starting at 6th level, you have the ability to twist fate using your wild magic. When another creature you can see makes an attack roll, an ability check, or a saving throw, you can use your reaction and spend 2 sorcery points to roll 1d4 and apply the number rolled as a bonus or penalty (your choice) to the creature's roll."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 103
+          }
         }
       },
       "spellcastingTable": {
@@ -6505,7 +7209,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 99
+      }
     },
     "Warlock": {
       "hitDie": 8,
@@ -6934,7 +7643,12 @@
               },
               "description": "Starting at 14th level, when you hit a creature with an attack, you can use this feature to instantly transport the target through the lower planes. The creature disappears and hurtles through a nightmare landscape. At the end of your next turn, the target returns to the space it previously occupied. The creature takes 10d10 psychic damage as it reels from its horrific experience."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 109
+          }
         },
         "The Archfey": {
           "spellcaster": true,
@@ -6986,7 +7700,12 @@
               },
               "description": "Starting at 14th level, you can plunge a creature into an illusory realm. As an action, choose a creature that you can see within 60 feet. It must make a Wisdom saving throw against your warlock spell save DC. On a failed save, it is charmed or frightened (your choice) for 1 minute. Until the spell ends, the creature is under a hallucination of your choosing."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 108
+          }
         },
         "The Great Old One": {
           "spellcaster": true,
@@ -7028,7 +7747,12 @@
               "actionType": "action",
               "description": "At 14th level, you gain the ability to infect a humanoid's mind with the alien magic of your patron. You can use your action to touch an incapacitated humanoid. That creature is then charmed by you until a Remove Curse spell is cast on it or until you use this feature again."
             }
-          ]
+          ],
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 109
+          }
         },
         "The Celestial": {
           "spellcaster": true,
@@ -7072,7 +7796,12 @@
               "actionType": "reaction",
               "description": "Starting at 14th level, the radiant energy you channel allows you to resist death. When you have to make a death saving throw at the start of your turn, you can instead spring back to your feet with a burst of radiant energy. You regain hit points equal to half your hit point maximum, and then you stand up. Each creature of your choice that is within 30 feet of you takes radiant damage equal to 2d8 + your Charisma modifier."
             }
-          ]
+          ],
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 54
+          }
         },
         "The Undying": {
           "spellcaster": true,
@@ -7118,7 +7847,12 @@
               },
               "description": "When you reach 14th level, you partake of some of the true secrets of the Undying. On your turn, you can use a bonus action to regain hit points equal to 1d8 + your warlock level. Additionally, if you put a severed body part of yours back in place when you use this feature, the part reattaches."
             }
-          ]
+          ],
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 54
+          }
         }
       },
       "spellcastingTable": {
@@ -7573,7 +8307,12 @@
             }
           ]
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 105
+      }
     }
   },
   "backgrounds": {
@@ -7650,7 +8389,12 @@
           "description": "Contains 15gp",
           "gold": 15
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 127
+      }
     },
     "Charlatan": {
       "description": "You have always had a way with people. You know what makes them tick, you can tease out their hearts desires after a few minutes of conversation, and with a few leading questions you can read them like they were children's books.",
@@ -7710,7 +8454,12 @@
           "description": "Contains 15gp",
           "gold": 15
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 128
+      }
     },
     "Criminal": {
       "description": "You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld.",
@@ -7774,7 +8523,12 @@
           "description": "Contains 15gp",
           "gold": 15
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 129
+      }
     },
     "Entertainer": {
       "description": "You thrive in front of an audience. You know how to entrance them, entertain them, and even inspire them. Your poetics can stir the hearts of those who hear you, awakening grief or joy, laughter or anger.",
@@ -7841,7 +8595,12 @@
           "description": "Contains 15gp",
           "gold": 15
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 130
+      }
     },
     "Folk Hero": {
       "description": "You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion, and your destiny calls you to stand against the tyrants and monsters that threaten the common folk everywhere.",
@@ -7933,7 +8692,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 131
+      }
     },
     "Hermit": {
       "description": "You lived in seclusion either in a sheltered community such as a monastery, or entirely alone for a formative part of your life. In your time apart from the clamour of society, you found quiet, solitude, and perhaps some of the answers you were looking for.",
@@ -8007,7 +8771,12 @@
           "description": "Contains 5gp",
           "gold": 5
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 134
+      }
     },
     "Noble": {
       "description": "You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence.",
@@ -8079,7 +8848,12 @@
           "description": "Contains 25gp",
           "gold": 25
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 135
+      }
     },
     "Outlander": {
       "description": "You grew up in the wilds, far from civilisation and the comforts of town and technology. You have witnessed the migration of herds larger than forests and survived weather more extreme than any city-dweller could comprehend.",
@@ -8153,7 +8927,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 136
+      }
     },
     "Sage": {
       "description": "You spent years learning the lore of the multiverse. You scoured manuscripts, studied under sages, and pored over anything you could get your hands on. Your efforts have paid off with a wealth of arcane knowledge.",
@@ -8223,7 +9002,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 137
+      }
     },
     "Sailor": {
       "description": "You sailed on a seagoing vessel for years. In that time, you faced down mighty storms, monsters of the deep, and those who wanted to sink your craft to the bottomless depths.",
@@ -8296,7 +9080,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 139
+      }
     },
     "Soldier": {
       "description": "War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, and learned basic survival techniques, including how to stay alive on the battlefield.",
@@ -8376,7 +9165,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 140
+      }
     },
     "Urchin": {
       "description": "You grew up on the streets alone, orphaned, and poor. You had no one to watch over you or to provide for you, so you learned to provide for yourself. You fought fiercely over food and kept a constant watch out for other desperate souls who might take what you had.",
@@ -8458,7 +9252,12 @@
           "description": "Contains 10gp",
           "gold": 10
         }
-      ]
+      ],
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 141
+      }
     }
   },
   "spells": [
@@ -9210,7 +10009,8 @@
       },
       "classes": [
         "Cleric",
-        "Paladin"
+        "Paladin",
+        "Ranger"
       ]
     },
     {
@@ -9319,7 +10119,8 @@
         "notes": "Remove exhaustion, charm, petrify, curse, ability reduction, or HP max reduction"
       },
       "classes": [
-        "Cleric"
+        "Cleric",
+        "Ranger"
       ]
     },
     {
@@ -9497,7 +10298,8 @@
         "notes": "Difficult terrain in 100-ft radius; OR enrich land over 8 hours"
       },
       "classes": [
-        "Druid"
+        "Druid",
+        "Ranger"
       ]
     },
     {
@@ -9530,7 +10332,8 @@
         "notes": "Summon fey creatures up to CR 2 (or multiple lower CR)"
       },
       "classes": [
-        "Druid"
+        "Druid",
+        "Ranger"
       ]
     },
     {
@@ -11598,7 +12401,8 @@
       "description": "You step into a stone object or surface large enough to fully contain your body, melding yourself and all the equipment you carry with the stone for the duration. Nothing of your presence remains visible to inspection.",
       "classes": [
         "Cleric",
-        "Druid"
+        "Druid",
+        "Ranger"
       ],
       "ritual": true
     },
@@ -12153,6 +12957,421 @@
         "damageType": "radiant",
         "cantripScale": "1d6"
       }
+    },
+    {
+      "name": "Goodberry",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "Up to ten berries appear in your hand and are infused with magic for the duration. A creature can use its action to eat one berry. Eating a berry restores 1 hit point, and the berry provides enough nourishment to sustain a creature for one day.",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Jump",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "1 minute",
+      "description": "You touch a creature. The creature's jump distance is tripled until the spell ends.",
+      "classes": [
+        "Ranger",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Longstrider",
+      "level": 1,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "1 hour",
+      "description": "You touch a creature. The target's speed increases by 10 feet until the spell ends.",
+      "classes": [
+        "Ranger",
+        "Bard",
+        "Druid",
+        "Wizard"
+      ],
+      "combat": {
+        "slotScale": "+1 additional target per slot above 1st"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Hail of Thorns",
+      "level": 1,
+      "school": "Conjuration",
+      "castingTime": "1 bonus action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Concentration, up to 1 minute",
+      "description": "The next time you hit a creature with a ranged weapon attack before the spell ends, this spell creates a rain of thorns that sprouts from your ranged weapon or ammunition. The creature hit by the attack and each creature within 5 feet of it must make a Dexterity saving throw. A creature takes 1d10 piercing damage on a failed save, or half as much on a success.",
+      "classes": [
+        "Ranger"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "1d10",
+        "damageType": "piercing",
+        "slotScale": "+1d10 per slot above 1st"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Animal Friendship",
+      "level": 1,
+      "school": "Enchantment",
+      "castingTime": "1 action",
+      "range": "30 ft",
+      "components": "V, S, M",
+      "duration": "24 hours",
+      "description": "This spell lets you convince a beast that you mean it no harm. Choose a beast that you can see within range. It must make a Wisdom saving throw. If the creature fails its saving throw, it is charmed by you for the spell's duration.",
+      "classes": [
+        "Ranger",
+        "Bard",
+        "Druid"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Cordon of Arrows",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "5 ft",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "You plant four pieces of nonmagical ammunition in the ground within range and lay magic upon them to protect an area. Until the spell ends, whenever a creature other than you comes within 30 feet of the ammunition for the first time on a turn or ends its turn there, one piece of ammunition flies up to strike it.",
+      "classes": [
+        "Ranger"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "1d6",
+        "damageType": "piercing"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Darkvision",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "8 hours",
+      "description": "You touch a willing creature to grant it the ability to see in the dark. For the duration, that creature has darkvision out to a range of 60 feet.",
+      "classes": [
+        "Ranger",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Find Traps",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "120 ft",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You sense the presence of any trap within range that is within line of sight. A trap, for the purpose of this spell, includes anything that would inflict a sudden or unexpected effect you consider harmful or undesirable.",
+      "classes": [
+        "Ranger",
+        "Cleric",
+        "Druid"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Locate Animals or Plants",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 action (ritual)",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "Describe or name a specific kind of beast or plant. Concentrating on the voice of nature in your surroundings, you learn the direction and distance to the closest creature or plant of that kind within 5 miles, if any are present.",
+      "classes": [
+        "Ranger",
+        "Bard",
+        "Druid"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Locate Object",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 10 minutes",
+      "description": "Describe or name an object that is familiar to you. You sense the direction to the object's location, as long as that object is within 1,000 feet of you.",
+      "classes": [
+        "Ranger",
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Protection from Poison",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "1 hour",
+      "description": "You touch a creature. If it is poisoned, you neutralize the poison. For the duration, the target has advantage on saving throws against being poisoned, and it has resistance to poison damage.",
+      "classes": [
+        "Ranger",
+        "Cleric",
+        "Druid",
+        "Paladin"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Summon Beast",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "90 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You call forth a bestial spirit. It manifests in an unoccupied space that you can see within range. This corporeal form uses the Bestial Spirit stat block. When you cast the spell, choose an environment: Air, Land, or Water. The creature resembles an animal of your choice that is native to the chosen environment.",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Conjure Barrage",
+      "level": 3,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Self (60-ft cone)",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You throw a nonmagical weapon or fire a piece of nonmagical ammunition into the air to create a cone of identical weapons that shoot forward and then disappear. Each creature in a 60-foot cone must succeed on a Dexterity saving throw. A creature takes 3d8 damage on a failed save, or half as much damage on a successful one.",
+      "classes": [
+        "Ranger"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "3d8",
+        "damageType": "weapon"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Daylight",
+      "level": 3,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "60 ft",
+      "components": "V, S",
+      "duration": "1 hour",
+      "description": "A 60-foot-radius sphere of light spreads out from a point you choose within range. The sphere is bright light and sheds dim light for an additional 60 feet. If you chose a point on an object you are holding or one that isn't being worn or carried, the light shines from the object with and moves with it.",
+      "classes": [
+        "Ranger",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Sorcerer"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Elemental Weapon",
+      "level": 3,
+      "school": "Transmutation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "A nonmagical weapon you touch becomes a magic weapon. Choose one of the following damage types: acid, cold, fire, lightning, or thunder. For the duration, the weapon has a +1 bonus to attack rolls and deals an extra 1d4 damage of the chosen type on a hit.",
+      "classes": [
+        "Ranger",
+        "Paladin"
+      ],
+      "combat": {
+        "damage": "1d4",
+        "damageType": "elemental",
+        "slotScale": "+1 attack at 5th, +2d4 at 5th; +2 attack at 7th, +3d4 at 7th"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Protection from Energy",
+      "level": 3,
+      "school": "Abjuration",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "description": "For the duration, the willing creature you touch has resistance to one damage type of your choice: acid, cold, fire, lightning, or thunder.",
+      "classes": [
+        "Ranger",
+        "Cleric",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Summon Fey",
+      "level": 3,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "90 ft",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "You call forth a fey spirit. It manifests in an unoccupied space that you can see within range. This corporeal form uses the Fey Spirit stat block. When you cast the spell, choose a mood: Fuming, Mirthful, or Tricksy. The creature resembles a fey creature of your choice marked by the chosen mood, which determines one of the traits in its stat block.",
+      "classes": [
+        "Ranger",
+        "Druid",
+        "Warlock",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Grasping Vine",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "1 bonus action",
+      "range": "30 ft",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You conjure a vine that sprouts from the ground in an unoccupied space of your choice that you can see within range. When you cast this spell, you can direct the vine to lash out at a creature within 30 feet of it that you can see. That creature must succeed on a Dexterity saving throw or be pulled 20 feet directly toward the vine.",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "combat": {
+        "save": "dex",
+        "notes": "Pulls target 20 ft toward vine on failed save"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Guardian of Nature",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "1 bonus action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Concentration, up to 1 minute",
+      "description": "A nature spirit answers your call and transforms you into a powerful guardian. The transformation lasts until the spell ends. You choose one of the following forms: Primal Beast (your body transforms \u2014 speed increases, darkvision, claws deal 1d6 slashing), or Great Tree (your skin turns bark-like \u2014 gain 10 temp HP, advantage on Constitution checks, vines restrain).",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Locate Creature",
+      "level": 4,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 hour",
+      "description": "Describe or name a creature that is familiar to you. You sense the direction to the creature's location, as long as that creature is within 1,000 feet of you.",
+      "classes": [
+        "Ranger",
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Wizard"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Commune with Nature",
+      "level": 5,
+      "school": "Divination",
+      "castingTime": "1 minute (ritual)",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "description": "You briefly become one with nature and gain knowledge of the surrounding territory. In the outdoors, the spell gives you knowledge of the land within 3 miles of you. In caves or other natural underground settings, the radius is limited to 300 feet.",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "ritual": true
+    },
+    {
+      "name": "Conjure Volley",
+      "level": 5,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "150 ft",
+      "components": "V, S, M",
+      "duration": "Instantaneous",
+      "description": "You fire a piece of nonmagical ammunition from a ranged weapon or throw a nonmagical weapon into the air and choose a point within range. Hundreds of duplicates of the ammunition or weapon fall in a volley from above and then disappear. Each creature in a 40-foot-radius, 20-foot-high cylinder centered on that point must make a Dexterity saving throw. A creature takes 8d8 damage on a failed save, or half as much on a successful one.",
+      "classes": [
+        "Ranger"
+      ],
+      "combat": {
+        "save": "dex",
+        "damage": "8d8",
+        "damageType": "weapon"
+      },
+      "ritual": false
+    },
+    {
+      "name": "Swift Quiver",
+      "level": 5,
+      "school": "Transmutation",
+      "castingTime": "1 bonus action",
+      "range": "Touch",
+      "components": "V, S, M",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You transmute your quiver so it produces an endless supply of nonmagical ammunition, which seems to leap into your hand when you reach for it. On each of your turns until the spell ends, you can use a bonus action to make two attacks with a weapon that uses ammunition from the quiver.",
+      "classes": [
+        "Ranger"
+      ],
+      "ritual": false
+    },
+    {
+      "name": "Tree Stride",
+      "level": 5,
+      "school": "Conjuration",
+      "castingTime": "1 action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "description": "You gain the ability to enter a tree and move from inside it to inside another tree of the same kind within 500 feet. Both trees must be living and at least the same size as you.",
+      "classes": [
+        "Ranger",
+        "Druid"
+      ],
+      "ritual": false
     }
   ],
   "themes": {
