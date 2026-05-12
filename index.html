@@ -5480,7 +5480,7 @@ function LoginScreen({ onLogin }) {
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </div>
 
-          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{error}</div>}
+          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{gameError}</div>}
           {msg   && <div style={{ background:"rgba(39,174,96,0.12)",  border:"1px solid #27ae60", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#27ae60" }}>{msg}</div>}
 
           <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp}
@@ -5622,12 +5622,12 @@ function App() {
     </div>
   );
 
-  if (error) return (
+  if (gameError) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
         <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
-        <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{error}</div>
+        <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{gameError}</div>
         <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
           Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
           Quick server: <code style={{ color:"#c9a227" }}>python -m http.server 8000</code><br />
