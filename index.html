@@ -453,19 +453,20 @@ const dbDeleteChar = async id => {
 };
 
 // Share helpers
-const createShareToken = async (charId, userId, charData) => {
-  const { data, error } = await sb.from("shared_characters")
-    .insert({ character_id: charId, user_id: userId, character_data: charData })
-    .select("token")
-    .single();
-  if (error) { console.error("Share error:", error); return null; }
-  return data.token;
-};
-const deleteShareToken = async (token) => {
-  await sb.from("shared_characters").delete().eq("token", token);
+// Share helpers — use char.id directly as the token, store char data in the row
+const setCharShared = async (char, userId, isPublic) => {
+  if (isPublic) {
+    const row = { token: char.id, character_id: char.id, user_id: userId, character_data: char };
+    const { error } = await sb.from("shared_characters").upsert(row, { onConflict: "token" });
+    if (error) { console.error("Share error:", error); return false; }
+    return true;
+  } else {
+    const { error } = await sb.from("shared_characters").delete().eq("token", char.id);
+    if (error) console.error("Unshare error:", error);
+    return false;
+  }
 };
 const fetchSharedChar = async (token) => {
-  // character_data is stored directly in the share row — no auth needed
   const { data, error } = await sb.from("shared_characters")
     .select("character_data")
     .eq("token", token)
@@ -4222,6 +4223,19 @@ const FONT_OPTIONS = [
 function SettingsTab({ char, gameData, onUpdate, onEdit }) {
   const cc = char.custom || {};
   const updCustom = patch => onUpdate({ ...char, custom: { ...cc, ...patch } });
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const toggleShare = async () => {
+    setShareLoading(true);
+    const newShared = !char.shared;
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session) await setCharShared(char, session.user.id, newShared);
+    onUpdate({ ...char, shared: newShared });
+    setShareLoading(false);
+  };
+
+  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${char.id}`;
 
   const sectionHead = txt => (
     <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10, marginTop:18, paddingBottom:5, borderBottom:"1px solid rgba(201,162,39,0.2)" }}>{txt}</div>
@@ -4231,7 +4245,43 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
 
   return (
     <div>
-      {/* ── Edit Character ── */}
+      {/* ── Sharing ── */}
+      <div style={{ marginBottom:6 }}>
+        {sectionHead("Sharing")}
+        <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"var(--surface)", border:`1px solid ${char.shared?"var(--accent)":"var(--border)"}`, borderRadius:10 }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:14, color:"var(--text)", fontFamily:"var(--font-display)", marginBottom:3 }}>
+              {char.shared ? "🌐 Public" : "🔒 Private"}
+            </div>
+            <div style={{ fontSize:12, color:"var(--text-muted)" }}>
+              {char.shared ? "Anyone with the link can view this character (read-only)." : "Only you can see this character."}
+            </div>
+          </div>
+          <button onClick={toggleShare} disabled={shareLoading}
+            style={{ padding:"7px 16px", borderRadius:8, cursor:shareLoading?"not-allowed":"pointer", fontSize:13,
+              fontFamily:"var(--font-display)", transition:"all 0.2s",
+              border:`1px solid ${char.shared?"var(--danger)":"var(--accent)"}`,
+              background:char.shared?"rgba(192,57,43,0.1)":"rgba(201,162,39,0.1)",
+              color:char.shared?"var(--danger)":"var(--accent)",
+              opacity:shareLoading?0.6:1 }}>
+            {shareLoading ? "…" : char.shared ? "Make Private" : "Make Public"}
+          </button>
+        </div>
+        {char.shared && (
+          <div style={{ marginTop:10, display:"flex", gap:8, alignItems:"center" }}>
+            <input readOnly value={shareUrl} onClick={e=>e.target.select()}
+              style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", padding:"7px 10px", borderRadius:7, fontSize:12, fontFamily:"monospace" }}/>
+            <button onClick={()=>{
+              navigator.clipboard.writeText(shareUrl);
+              setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
+            }} style={{ padding:"7px 14px", borderRadius:7, border:"1px solid var(--accent)",
+              background:shareCopied?"var(--accent)":"rgba(201,162,39,0.1)",
+              color:shareCopied?"var(--bg)":"var(--accent)", cursor:"pointer", fontSize:12, flexShrink:0, transition:"all 0.2s" }}>
+              {shareCopied ? "✓ Copied!" : "Copy"}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* ── Edit Character ── */}
       <div style={{ marginBottom:6 }}>
@@ -4838,9 +4888,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   const [saved, setSaved] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [shareModal, setShareModal] = useState(false);
-  const [shareToken, setShareToken] = useState(null);
   const [shareCopied, setShareCopied] = useState(false);
-  const [shareLoading, setShareLoading] = useState(false);
   const [restModal, setRestModal] = useState(null); // null | "short" | "long"
   const fileRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -4961,56 +5009,6 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
         onConfirm={(updates) => { upd({...char, ...updates}); setRestModal(null); }}
         onCancel={() => setRestModal(null)}
       />}
-      {shareModal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:300, display:"flex", alignItems:"center", justifyContent:"center" }}
-          onClick={e=>e.target===e.currentTarget&&setShareModal(false)}>
-          <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:460, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
-            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, marginBottom:8 }}>Share Character</div>
-            <div style={{ fontSize:13, color:"#8a8070", marginBottom:20, lineHeight:1.7 }}>
-              Generate a read-only link for your DM or party members. They can view the character sheet but cannot make any changes.
-            </div>
-            {!shareToken ? (
-              <button onClick={async ()=>{
-                setShareLoading(true);
-                const { data:{ session } } = await sb.auth.getSession();
-                if (!session) return;
-                const token = await createShareToken(char.id, session.user.id, char);
-                if (token) setShareToken(token);
-                setShareLoading(false);
-              }} disabled={shareLoading}
-                style={{ width:"100%", padding:"11px", borderRadius:8, cursor:shareLoading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", border:"1px solid #c9a227", background:"rgba(201,162,39,0.1)", color:"#c9a227", opacity:shareLoading?0.6:1 }}>
-                {shareLoading ? "Generating…" : "🔗 Generate Share Link"}
-              </button>
-            ) : (
-              <div>
-                <div style={{ fontSize:11, color:"#8a8070", marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Share Link</div>
-                <div style={{ display:"flex", gap:8, marginBottom:14 }}>
-                  <input readOnly value={`${window.location.origin}${window.location.pathname}?share=${shareToken}`}
-                    style={{ flex:1, background:"rgba(255,255,255,0.05)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"9px 12px", borderRadius:7, fontSize:12, fontFamily:"monospace" }}
-                    onClick={e=>e.target.select()}/>
-                  <button onClick={()=>{
-                    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${shareToken}`);
-                    setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-                  }} style={{ padding:"9px 16px", borderRadius:7, border:"1px solid #c9a227", background:shareCopied?"#c9a227":"rgba(201,162,39,0.1)", color:shareCopied?"#0d0d0f":"#c9a227", cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", flexShrink:0, transition:"all 0.2s" }}>
-                    {shareCopied ? "✓ Copied!" : "Copy"}
-                  </button>
-                </div>
-                <div style={{ fontSize:12, color:"#554f45", marginBottom:16, lineHeight:1.6 }}>
-                  Anyone with this link can view {char.name}'s sheet. You can revoke access at any time.
-                </div>
-                <button onClick={async ()=>{
-                  await deleteShareToken(shareToken);
-                  setShareToken(null);
-                }} style={{ width:"100%", padding:"8px", borderRadius:7, border:"1px solid rgba(192,57,43,0.4)", background:"transparent", color:"#e74c3c", cursor:"pointer", fontSize:13 }}>
-                  🗑 Revoke Link
-                </button>
-              </div>
-            )}
-            <button onClick={()=>setShareModal(false)} style={{ width:"100%", marginTop:12, padding:"8px", borderRadius:7, border:"1px solid rgba(255,255,255,0.1)", background:"transparent", color:"#554f45", cursor:"pointer", fontSize:13 }}>Close</button>
-          </div>
-        </div>
-      )}
-
       {/* ── Sticky top bar ── */}
       <div style={{ background:theme.card, borderBottom:`2px solid ${theme.accent}`, padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -5050,7 +5048,14 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
             {!readOnly && <>
               <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":theme.border}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
-              <button onClick={()=>setShareModal(true)} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>🔗 Share</button>
+              {char.shared && (
+                <button onClick={()=>{
+                  navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
+                  setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
+                }} style={{ background:"transparent", border:`1px solid ${theme.accent}`, color:theme.accent, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                  {shareCopied ? "✓ Copied!" : "🔗 Copy Link"}
+                </button>
+              )}
               <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
             </>}
           </div>
