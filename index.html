@@ -5,20 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tome of Heroes — D&D 5e Character Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=MedievalSharp&family=Inter:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-  <style>
-    @font-face {
-      font-family: 'MedievalSharp';
-      src: url('https://cdn.jsdelivr.net/gh/ctrlcctrlv/MedievalSharp@main/MedievalSharp.woff2') format('woff2'),
-           url('https://cdn.jsdelivr.net/gh/ctrlcctrlv/MedievalSharp@main/MedievalSharp.woff') format('woff');
-      font-weight: normal;
-      font-style: normal;
-      font-display: swap;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-size: 15px; font-family: 'Inter', system-ui, sans-serif; }
+    body { margin: 0; font-size: 15px; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0d0d0f; }
     ::-webkit-scrollbar-thumb { background: #3a3a45; border-radius: 3px; }
@@ -517,8 +507,8 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   const g1  = cc.bgG1    || "rgba(60,20,100,0.22)";
   const g2  = cc.bgG2    || "rgba(80,40,10,0.18)";
   const accent = cc.accentColor|| t.accent  || "#c9a227";
-  const fontD  = "'Inter',system-ui,sans-serif";
-  const fontB  = cc.fontBody   || t.fontBody    || "'Inter',system-ui,sans-serif";
+  const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel Decorative',serif";
+  const fontB  = cc.fontBody   || t.fontBody    || "serif";
   return (
     <div style={{
       "--bg":bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
@@ -1828,7 +1818,7 @@ function LibraryItemAdder({ gameData, onAdd }) {
               {inCategory.map(it=>(
                   <div key={it.name} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 10px", background:"var(--surface)", borderRadius:6, border:`1px solid ${added===it.name?"var(--success)":"var(--border)"}`, transition:"border-color 0.3s" }}>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <span style={{ fontSize:14, color:"var(--text)", fontWeight:500 }}>{it.name}</span>
+                      <span style={{ fontSize:13, color:"var(--text)", fontWeight:500 }}>{it.name}</span>
                       <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:10 }}>
                         {it.damage && <span style={{color:"var(--danger)",marginRight:8}}>{it.damage} {it.damageType}</span>}
                         {it.acFormula && <span style={{color:"var(--info)",marginRight:8}}>AC: {it.acFormula}</span>}
@@ -2508,7 +2498,7 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
             ].map(([label, val]) => (
               <div key={label}>
                 <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{label}</div>
-                <div style={{ fontSize:15, color:"var(--text)", marginTop:1 }}>{val}</div>
+                <div style={{ fontSize:14, color:"var(--text)", marginTop:1 }}>{val}</div>
               </div>
             ))}
           </div>
@@ -2520,7 +2510,7 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
               ⬆ Upcasting: {c.slotScale}
             </div>
           )}
-          <p style={{ fontSize:15, color:"var(--text)", lineHeight:1.7, margin:0 }}>{spell.description}</p>
+          <p style={{ fontSize:14, color:"var(--text)", lineHeight:1.7, margin:0 }}>{spell.description}</p>
         </div>
       )}
     </div>
@@ -3016,7 +3006,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     languageSources: keptLangSources,
                   };
                 })}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {(d.features||[]).filter(f=>f.type==="proficiency_choice"||f.fixed).map(f=>{
                       if (f.displayText) return f.displayText;
@@ -3094,7 +3084,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       featureChoices: newChoices,
                     };
                   })}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>
                     {[
                       ...Object.entries(d.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`),
@@ -3139,7 +3129,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                               );
                               return { ...c, subrace: srName, featureChoices: newChoices, skillProfSources: newSources, skillProficiencies: newProfs };
                             })}>
-                            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{srName}</div>
+                            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{srName}</div>
                             <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:3 }}>
                               {Object.entries(srData.abilityBonuses || {}).map(([ab, v]) => `+${v} ${ABILITY_SHORT[ab]}`).join(", ") || "No bonus"}
                             </div>
@@ -3299,7 +3289,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       };
                     });
                   }}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--text)", marginBottom:4 }}>{n}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"var(--text)", marginBottom:4 }}>{n}</div>
                   <div style={{ fontSize:11, color:"var(--text-muted)" }}>d{d.hitDie} • {ABILITY_SHORT[d.primaryAbility]}</div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>{d.spellcaster ? "✨ Spellcaster" : "⚔️ Martial"}</div>
                   {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
@@ -4365,7 +4355,7 @@ function FeaturesTab({ char, gameData }) {
             </span>
           )}
         </div>
-        <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.8, margin:"0 0 0 0" }}>{feat.description}</p>
+        <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 0 0" }}>{feat.description}</p>
         {chosen && !Array.isArray(chosen) && feat.type === "choice" && (
           <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:8 }}>
             <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Your Choice</div>
@@ -4437,7 +4427,7 @@ function FeaturesTab({ char, gameData }) {
     return (
       <div key="spell-grants" style={{ marginBottom:14, padding:"14px 16px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10 }}>
         <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>Heritage Spells</div>
-        <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.8, margin:"0 0 10px 0" }}>
+        <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 10px 0" }}>
           Your ancestry grants you the following spells. These are always available and do not count against your spell limit.
         </p>
         {available.map(g => (
@@ -4524,9 +4514,8 @@ const SYMBOL_PRESETS = {
 };
 
 const FONT_OPTIONS = [
-  ["'Inter',system-ui,sans-serif",         "Inter (Clean/Modern)"],
-  ["'Inter',system-ui,sans-serif",           "Cinzel (Fantasy)"],
-  ["'Inter',system-ui,sans-serif",               "Medieval Sharp"],
+  ["'Cinzel Decorative',serif",           "Cinzel (Fantasy)"],
+  ["'MedievalSharp',serif",               "Medieval Sharp"],
   ["Georgia,serif",                        "Georgia (Classic)"],
   ["'Palatino Linotype',serif",            "Palatino"],
   ["'Courier New',monospace",              "Courier (Typewriter)"],
@@ -4565,7 +4554,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         {sectionHead("Sharing")}
         <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"var(--surface)", border:`1px solid ${char.shared?"var(--accent)":"var(--border)"}`, borderRadius:10 }}>
           <div style={{ flex:1 }}>
-            <div style={{ fontSize:15, color:"var(--text)", fontFamily:"var(--font-display)", marginBottom:3 }}>
+            <div style={{ fontSize:14, color:"var(--text)", fontFamily:"var(--font-display)", marginBottom:3 }}>
               {char.shared ? "🌐 Public" : "🔒 Private"}
             </div>
             <div style={{ fontSize:12, color:"var(--text-muted)" }}>
@@ -4659,11 +4648,11 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
       {/* Display font */}
       <div style={{ marginBottom:14 }}>
         <label style={label}>Title Font</label>
-        <select value={cc.fontDisplay || "'Inter',system-ui,sans-serif"} onChange={e=>updCustom({fontDisplay:e.target.value})}
+        <select value={cc.fontDisplay || "'Cinzel Decorative',serif"} onChange={e=>updCustom({fontDisplay:e.target.value})}
           style={{...inp, cursor:"pointer"}}>
           {FONT_OPTIONS.map(([v,l])=><option key={v} value={v} style={{fontFamily:v}}>{l}</option>)}
         </select>
-        <div style={{ marginTop:6, fontFamily: cc.fontDisplay || "'Inter',system-ui,sans-serif", color:"var(--accent)", fontSize:16 }}>
+        <div style={{ marginTop:6, fontFamily: cc.fontDisplay || "'Cinzel Decorative',serif", color:"var(--accent)", fontSize:16 }}>
           Preview: The Tome of Heroes
         </div>
       </div>
@@ -5277,7 +5266,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
   const ts = active => ({
     padding:"7px 14px", cursor:"pointer", fontSize:13, whiteSpace:"nowrap",
-    transition:"all 0.15s", fontFamily:"'Inter',system-ui,sans-serif", fontWeight:500,
+    transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
     background: active ? theme.card : "transparent",
     color:      active ? theme.accent : theme.textMuted,
     border:     `1px solid ${active ? theme.border : "transparent"}`,
@@ -5309,7 +5298,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const sectionLabel = txt => (
-    <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:600, color:theme.accent, fontSize:11, textTransform:"uppercase", letterSpacing:1.5, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
+    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
   );
 
   return (
@@ -5473,8 +5462,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length}, 1fr)`, gap:8 }}>
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8 }}>
-                  <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:26, lineHeight:1 }}>{s.v}</div>
+                  <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -5499,16 +5488,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                     if (!bg) return <p style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic" }}>No background data available.</p>;
 
                     const features     = bg.features || [];
-                    // The special feature: tagged explicitly, or the last passive that isn't a tool/proficiency
-                    const specialFeat = features.find(f => f.feature_type === "background_feature")
-                      || features.filter(f =>
-                          f.type === "passive" &&
-                          !f.name.toLowerCase().includes("tool") &&
-                          !f.name.toLowerCase().includes("proficien") &&
-                          !f.name.toLowerCase().includes("kit") &&
-                          !f.name.toLowerCase().includes("vehicle") &&
-                          !f.name.toLowerCase().includes("instrument")
-                        ).pop(); // last one — tool proficiencies tend to come first
+                    // The special feature: the unique passive that defines the background
+                    const specialFeat  = features.find(f => f.type === "passive" && !f.name.toLowerCase().includes("tool") && !f.name.toLowerCase().includes("proficien"));
                     // Skill proficiencies
                     const skillFeat    = features.find(f => f.type === "proficiency_choice");
                     // Language features
@@ -5539,14 +5520,14 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                     return (<>
                       {/* ── Background name & description ── */}
                       <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, marginBottom: bg.description ? 10 : 16 }}>{char.background}</div>
-                      {bg.description && <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.8, marginBottom:16 }}>{bg.description}</p>}
+                      {bg.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, marginBottom:16 }}>{bg.description}</p>}
 
                       {/* ── Special feature — pinned at top ── */}
                       {specialFeat && (<>
                         {divider("Background Feature")}
                         <div style={{ background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:10, padding:"14px 16px", marginBottom:4 }}>
                           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>{specialFeat.name}</div>
-                          <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.8, margin:0 }}>{specialFeat.description}</p>
+                          <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:0 }}>{specialFeat.description}</p>
                         </div>
                       </>)}
 
@@ -5706,89 +5687,65 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
   const hp    = char.hp || { current:0, max:1 };
   const pct   = Math.min(100, (hp.current / Math.max(1, hp.max)) * 100);
   const hpC   = pct > 50 ? theme.success : pct > 25 ? "#f39c12" : theme.danger;
-  const label = char.subclass ? `${char.class} · ${char.subclass}` : char.class;
-  const bodyFont = "'Inter',system-ui,sans-serif";
+  const label = char.subclass ? `${char.class} (${char.subclass})` : char.class;
 
   return (
-    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14,
-      transition:"all 0.22s", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column" }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.4)`; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
-
-      {/* Accent stripe */}
+    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, transition:"all 0.22s", position:"relative", overflow:"hidden" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; }}>
       <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary || theme.accent})` }} />
-
       {/* Main clickable area */}
-      <div onClick={onClick} style={{ cursor:"pointer", padding:18, paddingTop:20, flex:1 }}>
-
-        {/* Portrait + name row */}
-        <div style={{ display:"flex", gap:14, alignItems:"flex-start", marginBottom:14 }}>
-          {/* Profile picture */}
-          <div style={{ width:64, height:64, borderRadius:10, flexShrink:0, overflow:"hidden",
-            border:`2px solid ${theme.accent}`, background:theme.surface, position:"relative" }}>
+      <div onClick={onClick} style={{ cursor:"pointer" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12, gap:12 }}>
+          {/* Portrait */}
+          <div style={{ width:56, height:56, borderRadius:8, flexShrink:0, overflow:"hidden",
+            border:`2px solid ${theme.accent}`, background:theme.surface }}>
             {char.profileImage
               ? <img src={char.profileImage} alt={char.name}
                   style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}
-                  onError={e=>{e.target.style.display="none";}}/>
+                  onError={e=>e.target.style.display="none"}/>
               : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center",
-                  justifyContent:"center", fontSize:26, color:theme.accent, background:`rgba(0,0,0,0.2)` }}>
+                  justifyContent:"center", fontFamily:theme.fontDisplay, fontSize:22, color:theme.accent }}>
                   {(char.name||"?")[0].toUpperCase()}
                 </div>
             }
           </div>
-
-          {/* Name, class, level */}
+          {/* Name + class */}
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:18, lineHeight:1.2,
-              marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-              {char.name || "Unnamed"}
-            </div>
-            <div style={{ fontSize:13, color:theme.text, fontFamily:bodyFont, marginBottom:2 }}>
-              {char.species}{char.species && label ? " · " : ""}{label}
-            </div>
-            <div style={{ fontSize:12, color:theme.textMuted, fontFamily:bodyFont }}>
-              {char.background}
-              {char.background && char.alignment ? " · " : ""}{char.alignment}
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:20, lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{char.name}</div>
+            <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
+              <span style={{ color:theme.text }}>{char.species}</span>
+              {char.species && label ? " · " : ""}<span>{label}</span>
             </div>
           </div>
-
-          {/* Level badge */}
-          <div style={{ textAlign:"center", flexShrink:0, background:`rgba(0,0,0,0.2)`,
-            border:`1px solid ${theme.border}`, borderRadius:8, padding:"6px 10px" }}>
-            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{char.level}</div>
-            <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>LVL</div>
+          {/* Level */}
+          <div style={{ textAlign:"right", flexShrink:0 }}>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
+            <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
           </div>
         </div>
-
-        {/* HP bar */}
-        <div>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12,
-            fontFamily:bodyFont, color:theme.textMuted, marginBottom:5 }}>
-            <span>HP</span>
-            <span style={{ color:hpC, fontWeight:600 }}>{hp.current} / {hp.max}</span>
+        <div style={{ marginBottom:12 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
+            <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
           </div>
-          <div style={{ height:6, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
+          <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
             <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
           </div>
         </div>
+        <div style={{ fontSize:12, color:theme.textMuted, marginBottom:12 }}>
+          <span>{char.background}</span>
+          <span style={{ color:theme.textDim, marginLeft:8 }}>{char.alignment}</span>
+        </div>
       </div>
-
       {/* Action buttons */}
-      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, padding:"10px 18px" }}>
-        <button onClick={e=>{e.stopPropagation();onClick();}}
-          style={{ flex:1, padding:"7px", borderRadius:7, border:`1px solid ${theme.accent}`,
-            background:"rgba(201,162,39,0.1)", color:theme.accent, cursor:"pointer",
-            fontSize:13, fontFamily:bodyFont, fontWeight:500 }}>
+      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, paddingTop:10 }}>
+        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(201,162,39,0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
           Open
         </button>
-        <button onClick={e=>{e.stopPropagation();onEdit();}}
-          style={{ flex:1, padding:"7px", borderRadius:7, border:`1px solid ${theme.border}`,
-            background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:13, fontFamily:bodyFont }}>
+        <button onClick={e=>{e.stopPropagation();onEdit();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.border}`, background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:12 }}>
           ✏️ Edit
         </button>
-        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}}
-          style={{ padding:"7px 12px", borderRadius:7, border:`1px solid ${theme.danger}`,
-            background:"transparent", color:theme.danger, cursor:"pointer", fontSize:13 }}>
+        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}} style={{ padding:"6px 10px", borderRadius:6, border:`1px solid ${theme.danger}`, background:"transparent", color:theme.danger, cursor:"pointer", fontSize:12 }}>
           🗑
         </button>
       </div>
@@ -5853,8 +5810,8 @@ function AccountModal({ session, onClose }) {
   };
 
   const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"10px 14px", borderRadius:7, fontSize:14, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:10 };
-  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Inter',system-ui,sans-serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
-  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Inter',system-ui,sans-serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
+  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
+  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center" }}
@@ -5862,7 +5819,7 @@ function AccountModal({ session, onClose }) {
       <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:420, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
         {/* Header */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-          <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
           <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
         </div>
 
@@ -5956,7 +5913,7 @@ function LoginScreen({ onLogin }) {
   };
 
   const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
-  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Inter',system-ui,sans-serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
+  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
 
   return (
     <div style={{ background:"radial-gradient(ellipse at 20% 10%, rgba(60,20,100,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(80,40,10,0.2) 0%, transparent 55%), #0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Crimson Pro',serif", position:"relative", overflow:"hidden" }}>
@@ -5964,7 +5921,7 @@ function LoginScreen({ onLogin }) {
       <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth:420, padding:"0 24px" }}>
         {/* Title */}
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div className="tome-title-text" style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
+          <div className="tome-title-text" style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
           <div style={{ color:"#8a8070", fontSize:14, fontStyle:"italic" }}>Your personal D&D 5e character compendium</div>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, margin:"14px auto 0", maxWidth:280 }}>
             <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
@@ -5975,7 +5932,7 @@ function LoginScreen({ onLogin }) {
 
         {/* Card */}
         <div style={{ background:"rgba(26,26,31,0.92)", border:"1px solid rgba(201,162,39,0.2)", borderRadius:14, padding:32, backdropFilter:"blur(8px)", boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
-          <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </div>
 
@@ -6022,7 +5979,7 @@ function SharedCharacterView({ token, gameData }) {
   if (loading) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading character…</div>
       </div>
     </div>
@@ -6032,7 +5989,7 @@ function SharedCharacterView({ token, gameData }) {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:440, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>🔗</div>
-        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
         <div style={{ color:"#8a8070", fontSize:14 }}>{error || "This share link is invalid or has been removed."}</div>
         <button onClick={()=>window.location.href=window.location.pathname} style={{ marginTop:20, padding:"8px 20px", borderRadius:8, border:"1px solid #c9a227", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:14 }}>Go to Tome of Heroes</button>
       </div>
@@ -6092,31 +6049,24 @@ function App() {
   // ── Load characters when session appears ──
   useEffect(() => {
     if (!session) return;
+    // Show localStorage chars immediately so UI isn't blank while Supabase loads
+    const local = loadChars();
+    if (local.length > 0) setCharacters(local);
     setCharLoading(true);
     dbLoadChars().then(chars => {
       if (chars.length > 0) {
-        // Supabase is authoritative — use only Supabase data
-        // Deduplicate by id just in case
-        const seen = new Set();
-        const deduped = chars.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
-        setCharacters(deduped);
-        saveChars(deduped);
-      } else {
-        // No Supabase chars — check localStorage for migration
-        const local = loadChars();
-        if (local.length > 0) {
-          Promise.all(local.map(c => dbSaveChar(c))).then(() => {
-            saveChars([]);
-          });
-          setCharacters(local);
-        }
+        // Supabase is authoritative — merge: Supabase wins for chars that exist there
+        setCharacters(chars);
+        saveChars(chars); // keep localStorage in sync
+      } else if (local.length > 0) {
+        // First login migration: push local chars to Supabase
+        Promise.all(local.map(c => dbSaveChar(c))).then(() => {
+          saveChars([]); // clear local after migration
+        });
+        setCharacters(local);
       }
-    }).catch(e => {
-      console.error("dbLoadChars error:", e);
-      // Fall back to localStorage only on error
-      const local = loadChars();
-      if (local.length > 0) setCharacters(local);
-    }).finally(() => setCharLoading(false));
+    }).catch(e => console.error("dbLoadChars error:", e))
+      .finally(() => setCharLoading(false));
   }, [session?.user?.id]);
 
   // ── Loading states ──
@@ -6124,7 +6074,7 @@ function App() {
     if (!gameData && !gameError) return (
       <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
         <div style={{ textAlign:"center" }}>
-          <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
           <div style={{ color:"#8a8070" }}>Loading…</div>
         </div>
       </div>
@@ -6135,7 +6085,7 @@ function App() {
   if (session === undefined || (!gameData && !gameError)) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading…</div>
       </div>
     </div>
@@ -6145,7 +6095,7 @@ function App() {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
-        <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
         <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{gameError}</div>
         <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
           Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
@@ -6161,15 +6111,11 @@ function App() {
 
   // ── Save / delete ──
   const saveChar = async char => {
-    const exists = characters.find(c => c.id === char.id);
-    const raw = exists
+    const list = characters.find(c => c.id === char.id)
       ? characters.map(c => c.id === char.id ? char : c)
       : [...characters, char];
-    // Deduplicate by id — safety net against race conditions
-    const seen = new Set();
-    const list = raw.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
     setCharacters(list);
-    saveChars(list);
+    saveChars(list); // local backup
     await dbSaveChar(char);
     setSelId(char.id); setView("sheet");
   };
@@ -6194,9 +6140,9 @@ function App() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
-      <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "'Inter',system-ui,sans-serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
+      <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
 
         {/* Floating runes + glow pools */}
         <MysticBackground density="normal"/>
@@ -6208,8 +6154,8 @@ function App() {
           {/* User info + account + logout — top right */}
           <div style={{ position:"absolute", top:16, right:20, display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:12, color:dt.textMuted || "#8a8070" }}>{session.user.email}</span>
-            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"'Inter',system-ui,sans-serif" }}>Account</button>
-            <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"'Inter',system-ui,sans-serif" }}>Log out</button>
+            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Account</button>
+            <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Log out</button>
           </div>
 
           {/* Inner hero radial glow */}
@@ -6218,7 +6164,7 @@ function App() {
           {/* Ornamental divider line */}
           <div style={{ position:"absolute", top:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.4), rgba(180,120,255,0.3), rgba(201,162,39,0.4), transparent)" }}/>
 
-          <div className="tome-title-text" style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:"clamp(28px,5.5vw,56px)", letterSpacing:3, position:"relative" }}>
+          <div className="tome-title-text" style={{ fontFamily:dt.fontDisplay, fontSize:"clamp(28px,5.5vw,56px)", letterSpacing:3, position:"relative" }}>
             ⚔️ TOME OF HEROES
           </div>
           <div style={{ color:dt.textMuted, fontSize:15, marginTop:10, fontStyle:"italic", position:"relative", letterSpacing:0.5 }}>
@@ -6234,7 +6180,7 @@ function App() {
 
           <button onClick={() => setView("create")} style={{
             padding:"14px 40px", border:"1px solid rgba(201,162,39,0.5)", color:dt.bg || "#0d0d0f",
-            borderRadius:10, cursor:"pointer", fontFamily:"'Inter',system-ui,sans-serif", fontSize:15, letterSpacing:1.5, position:"relative",
+            borderRadius:10, cursor:"pointer", fontFamily:dt.fontDisplay, fontSize:15, letterSpacing:1.5, position:"relative",
             background:"linear-gradient(135deg, #c9a227 0%, #e8c84a 40%, #c9a227 70%, #8b6914 100%)",
             boxShadow:"0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)", transition:"all 0.25s"
           }}
@@ -6252,12 +6198,12 @@ function App() {
           {characters.length === 0 ? (
             <div style={{ textAlign:"center", padding:"80px 20px" }}>
               <div style={{ fontSize:72, marginBottom:18, filter:"drop-shadow(0 0 20px rgba(201,162,39,0.3))" }}>📖</div>
-              <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
+              <div style={{ fontFamily:dt.fontDisplay, fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
               <div style={{ color:dt.textDim, fontSize:15, fontStyle:"italic" }}>Create your first character to begin your adventure</div>
             </div>
           ) : (
             <>
-              <div style={{ fontFamily:"'Inter',system-ui,sans-serif", color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
+              <div style={{ fontFamily:dt.fontDisplay, color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
                 {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
