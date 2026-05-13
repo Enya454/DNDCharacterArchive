@@ -517,7 +517,7 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   const g1  = cc.bgG1    || "rgba(60,20,100,0.22)";
   const g2  = cc.bgG2    || "rgba(80,40,10,0.18)";
   const accent = cc.accentColor|| t.accent  || "#c9a227";
-  const fontD  = cc.fontDisplay|| t.fontDisplay || "'MedievalSharp',serif,'Cinzel',serif";
+  const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel',serif";
   const fontB  = cc.fontBody   || t.fontBody    || "'Inter',system-ui,sans-serif";
   return (
     <div style={{
@@ -4526,7 +4526,7 @@ const SYMBOL_PRESETS = {
 const FONT_OPTIONS = [
   ["'Inter',system-ui,sans-serif",         "Inter (Clean/Modern)"],
   ["'Cinzel Decorative',serif",           "Cinzel (Fantasy)"],
-  ["'MedievalSharp',serif",               "Medieval Sharp"],
+  ["'Cinzel',serif",               "Medieval Sharp"],
   ["Georgia,serif",                        "Georgia (Classic)"],
   ["'Palatino Linotype',serif",            "Palatino"],
   ["'Courier New',monospace",              "Courier (Typewriter)"],
@@ -4659,11 +4659,11 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
       {/* Display font */}
       <div style={{ marginBottom:14 }}>
         <label style={label}>Title Font</label>
-        <select value={cc.fontDisplay || "'MedievalSharp',serif,'Cinzel',serif"} onChange={e=>updCustom({fontDisplay:e.target.value})}
+        <select value={cc.fontDisplay || "'Cinzel',serif"} onChange={e=>updCustom({fontDisplay:e.target.value})}
           style={{...inp, cursor:"pointer"}}>
           {FONT_OPTIONS.map(([v,l])=><option key={v} value={v} style={{fontFamily:v}}>{l}</option>)}
         </select>
-        <div style={{ marginTop:6, fontFamily: cc.fontDisplay || "'MedievalSharp',serif,'Cinzel',serif", color:"var(--accent)", fontSize:16 }}>
+        <div style={{ marginTop:6, fontFamily: cc.fontDisplay || "'Cinzel',serif", color:"var(--accent)", fontSize:16 }}>
           Preview: The Tome of Heroes
         </div>
       </div>
@@ -5277,7 +5277,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
   const ts = active => ({
     padding:"7px 14px", cursor:"pointer", fontSize:13, whiteSpace:"nowrap",
-    transition:"all 0.15s", fontFamily:theme.fontBody || "'Inter',system-ui,sans-serif",
+    transition:"all 0.15s", fontFamily:"'Inter',system-ui,sans-serif", fontWeight:500,
     background: active ? theme.card : "transparent",
     color:      active ? theme.accent : theme.textMuted,
     border:     `1px solid ${active ? theme.border : "transparent"}`,
@@ -5309,7 +5309,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const sectionLabel = txt => (
-    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
+    <div style={{ fontFamily:"'Inter',system-ui,sans-serif", fontWeight:600, color:theme.accent, fontSize:11, textTransform:"uppercase", letterSpacing:1.5, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
   );
 
   return (
@@ -5853,8 +5853,8 @@ function AccountModal({ session, onClose }) {
   };
 
   const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"10px 14px", borderRadius:7, fontSize:14, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:10 };
-  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'MedievalSharp',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
-  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'MedievalSharp',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
+  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Cinzel',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
+  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center" }}
@@ -5862,7 +5862,7 @@ function AccountModal({ session, onClose }) {
       <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:420, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
         {/* Header */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-          <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
+          <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
           <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
         </div>
 
@@ -5956,7 +5956,7 @@ function LoginScreen({ onLogin }) {
   };
 
   const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
-  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'MedievalSharp',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
+  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
 
   return (
     <div style={{ background:"radial-gradient(ellipse at 20% 10%, rgba(60,20,100,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(80,40,10,0.2) 0%, transparent 55%), #0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Crimson Pro',serif", position:"relative", overflow:"hidden" }}>
@@ -5964,7 +5964,7 @@ function LoginScreen({ onLogin }) {
       <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth:420, padding:"0 24px" }}>
         {/* Title */}
         <div style={{ textAlign:"center", marginBottom:36 }}>
-          <div className="tome-title-text" style={{ fontFamily:"'MedievalSharp',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
+          <div className="tome-title-text" style={{ fontFamily:"'Cinzel',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
           <div style={{ color:"#8a8070", fontSize:14, fontStyle:"italic" }}>Your personal D&D 5e character compendium</div>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, margin:"14px auto 0", maxWidth:280 }}>
             <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
@@ -5975,7 +5975,7 @@ function LoginScreen({ onLogin }) {
 
         {/* Card */}
         <div style={{ background:"rgba(26,26,31,0.92)", border:"1px solid rgba(201,162,39,0.2)", borderRadius:14, padding:32, backdropFilter:"blur(8px)", boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
-          <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
+          <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </div>
 
@@ -6022,7 +6022,7 @@ function SharedCharacterView({ token, gameData }) {
   if (loading) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading character…</div>
       </div>
     </div>
@@ -6032,7 +6032,7 @@ function SharedCharacterView({ token, gameData }) {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:440, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>🔗</div>
-        <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
+        <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
         <div style={{ color:"#8a8070", fontSize:14 }}>{error || "This share link is invalid or has been removed."}</div>
         <button onClick={()=>window.location.href=window.location.pathname} style={{ marginTop:20, padding:"8px 20px", borderRadius:8, border:"1px solid #c9a227", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:14 }}>Go to Tome of Heroes</button>
       </div>
@@ -6124,7 +6124,7 @@ function App() {
     if (!gameData && !gameError) return (
       <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
         <div style={{ textAlign:"center" }}>
-          <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+          <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
           <div style={{ color:"#8a8070" }}>Loading…</div>
         </div>
       </div>
@@ -6135,7 +6135,7 @@ function App() {
   if (session === undefined || (!gameData && !gameError)) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading…</div>
       </div>
     </div>
@@ -6145,7 +6145,7 @@ function App() {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
-        <div style={{ fontFamily:"'MedievalSharp',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
+        <div style={{ fontFamily:"'Cinzel',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
         <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{gameError}</div>
         <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
           Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />

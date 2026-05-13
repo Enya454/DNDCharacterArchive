@@ -13554,8 +13554,8 @@
       "danger": "#c0392b",
       "success": "#27ae60",
       "info": "#2980b9",
-      "fontDisplay": "'MedievalSharp',serif",
-      "fontBody": "'Crimson Pro', serif",
+      "fontDisplay": "'Cinzel',serif",
+      "fontBody": "'Inter',system-ui,sans-serif",
       "gradientHero": "linear-gradient(135deg, #1a1208 0%, #0d0d0f 50%, #08080d 100%)"
     },
     "arcane": {
@@ -13572,8 +13572,8 @@
       "danger": "#e53e3e",
       "success": "#38a169",
       "info": "#4299e1",
-      "fontDisplay": "'MedievalSharp',serif",
-      "fontBody": "'Philosopher', serif",
+      "fontDisplay": "'Cinzel',serif",
+      "fontBody": "'Inter',system-ui,sans-serif",
       "gradientHero": "linear-gradient(135deg, #050510 0%, #0d0525 50%, #10052a 100%)"
     },
     "forest": {
@@ -13590,8 +13590,8 @@
       "danger": "#e53e3e",
       "success": "#4caf50",
       "info": "#29b6f6",
-      "fontDisplay": "'MedievalSharp',serif",
-      "fontBody": "'Lora', serif",
+      "fontDisplay": "'Cinzel',serif",
+      "fontBody": "'Inter',system-ui,sans-serif",
       "gradientHero": "linear-gradient(135deg, #061006 0%, #0a1a0a 50%, #081408 100%)"
     },
     "infernal": {
@@ -13608,8 +13608,8 @@
       "danger": "#ff1a1a",
       "success": "#52b788",
       "info": "#4cc9f0",
-      "fontDisplay": "'MedievalSharp',serif",
-      "fontBody": "'Spectral', serif",
+      "fontDisplay": "'Cinzel',serif",
+      "fontBody": "'Inter',system-ui,sans-serif",
       "gradientHero": "linear-gradient(135deg, #1a0500 0%, #0d0300 50%, #100800 100%)"
     },
     "ice": {
@@ -13626,8 +13626,8 @@
       "danger": "#e53e3e",
       "success": "#48bb78",
       "info": "#63b3ed",
-      "fontDisplay": "'MedievalSharp',serif",
-      "fontBody": "'Libre Baskerville', serif",
+      "fontDisplay": "'Cinzel',serif",
+      "fontBody": "'Inter',system-ui,sans-serif",
       "gradientHero": "linear-gradient(135deg, #020810 0%, #05101c 50%, #03080f 100%)"
     }
   },
