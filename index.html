@@ -1634,17 +1634,17 @@ function AbilityRoller({ abilities, onChange, char, setChar }) {
       {method === "manual" && (
         <div>
           <p style={{ fontSize:13, color:"var(--text-muted)", marginBottom:14 }}>
-            Enter any value between 1 and 30 for each stat.
+            Enter any value between 3 and 18 for each stat (the range possible with standard dice rolls).
           </p>
           <div style={grid}>{Object.keys(abilities).map(ab => (
             <div key={ab} style={{ ...card, border:`1px solid ${abilities[ab] !== 10 ? "var(--accent)" : "var(--border)"}` }}>
               <div style={lbl}>{ABILITY_SHORT[ab]}</div>
               <input
-                type="number" min={1} max={30}
+                type="number" min={3} max={18}
                 value={abilities[ab]}
                 onChange={e => {
                   const n = parseInt(e.target.value, 10);
-                  if (!isNaN(n) && n >= 1 && n <= 30) onChange({ ...abilities, [ab]: n });
+                  if (!isNaN(n) && n >= 3 && n <= 18) onChange({ ...abilities, [ab]: n });
                 }}
                 style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--accent)", padding:"6px 8px", borderRadius:6, fontSize:26, fontFamily:"var(--font-display)", textAlign:"center", marginTop:6, boxSizing:"border-box" }}
               />
