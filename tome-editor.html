@@ -1289,6 +1289,8 @@ function FeatsEditor({data, onChange}) {
 
 function ListsEditor({data,onChange}) {
   const updList = (key,val) => onChange({...data,[key]:val});
+
+  // ── Simple string list ──
   const SimpleList = ({title,listKey}) => {
     const list = data[listKey]||[];
     return (
@@ -1301,11 +1303,162 @@ function ListsEditor({data,onChange}) {
       </div>
     );
   };
+
+  // ── Abilities editor (key → {name, short}) ──
+  const AbilitiesEditor = () => {
+    const abs = data.abilities || {};
+    const [newKey, setNewKey] = useState("");
+    return (
+      <div style={{marginBottom:24}}>
+        <div style={sectionHead}>Ability Scores</div>
+        <div style={{fontSize:11,color:T.muted,marginBottom:10}}>Keys used internally (e.g. str, dex). Changes here affect the whole system.</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:8,marginBottom:10}}>
+          {Object.entries(abs).map(([key,val])=>(
+            <div key={key} style={{padding:"8px 10px",background:T.surface,borderRadius:7,border:`1px solid ${T.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                <span style={{fontFamily:T.display,color:T.accent,fontSize:13}}>{key}</span>
+                <button onClick={()=>{const a={...abs};delete a[key];updList("abilities",a);}}
+                  style={{...btn("danger"),padding:"2px 7px",fontSize:10}}>×</button>
+              </div>
+              <input value={val.name||""} onChange={e=>{const a={...abs,[key]:{...val,name:e.target.value}};updList("abilities",a);}}
+                placeholder="Full name" style={{...inp,fontSize:12,marginBottom:5}}/>
+              <input value={val.short||""} onChange={e=>{const a={...abs,[key]:{...val,short:e.target.value}};updList("abilities",a);}}
+                placeholder="Abbreviation (e.g. STR)" style={{...inp,fontSize:12}}/>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:6}}>
+          <input value={newKey} onChange={e=>setNewKey(e.target.value.toLowerCase())}
+            placeholder="New ability key (e.g. str)…" style={{...inp,flex:1,fontSize:12}}
+            onKeyDown={e=>{if(e.key==="Enter"&&newKey.trim()){updList("abilities",{...abs,[newKey.trim()]:{name:"",short:""}});setNewKey("");}}}/>
+          <button onClick={()=>{if(newKey.trim()){updList("abilities",{...abs,[newKey.trim()]:{name:"",short:""}});setNewKey("");}}}
+            style={{...btn("primary"),padding:"5px 12px"}}>+ Add</button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Skills editor (key → ability) ──
+  const SkillsEditor = () => {
+    const skills = data.skills || {};
+    const abilityKeys = Object.keys(data.abilities || {str:1,dex:1,con:1,int:1,wis:1,cha:1});
+    const [newSkill, setNewSkill] = useState("");
+    const [newAb, setNewAb] = useState(abilityKeys[0]||"str");
+    return (
+      <div style={{marginBottom:24}}>
+        <div style={sectionHead}>Skills ({Object.keys(skills).length})</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:6,marginBottom:10}}>
+          {Object.entries(skills).sort((a,b)=>a[0].localeCompare(b[0])).map(([skill,abil])=>{
+            const ab = typeof abil === "string" ? abil : abil?.ability || "";
+            return (
+              <div key={skill} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",background:T.surface,borderRadius:6,border:`1px solid ${T.border}`}}>
+                <span style={{flex:1,fontSize:12,color:T.text}}>{skill}</span>
+                <select value={ab} onChange={e=>updList("skills",{...skills,[skill]:e.target.value})}
+                  style={{...inp,fontSize:11,padding:"2px 4px",width:52}}>
+                  {abilityKeys.map(k=><option key={k} value={k}>{k.toUpperCase()}</option>)}
+                </select>
+                <button onClick={()=>{const s={...skills};delete s[skill];updList("skills",s);}}
+                  style={{...btn("danger"),padding:"2px 6px",fontSize:10}}>×</button>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{display:"flex",gap:6}}>
+          <input value={newSkill} onChange={e=>setNewSkill(e.target.value)} placeholder="New skill name…"
+            style={{...inp,flex:1,fontSize:12}}
+            onKeyDown={e=>{if(e.key==="Enter"&&newSkill.trim()){updList("skills",{...skills,[newSkill.trim()]:newAb});setNewSkill("");}}}/>
+          <select value={newAb} onChange={e=>setNewAb(e.target.value)} style={{...inp,width:60,fontSize:12}}>
+            {abilityKeys.map(k=><option key={k} value={k}>{k.toUpperCase()}</option>)}
+          </select>
+          <button onClick={()=>{if(newSkill.trim()){updList("skills",{...skills,[newSkill.trim()]:newAb});setNewSkill("");}}}
+            style={{...btn("primary"),padding:"5px 12px"}}>+ Add</button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Currencies editor ──
+  const CurrenciesEditor = () => {
+    const currs = data.currencies || [];
+    const upd = (i,patch) => { const a=[...currs]; a[i]={...a[i],...patch}; updList("currencies",a); };
+    return (
+      <div style={{marginBottom:24}}>
+        <div style={sectionHead}>Currencies ({currs.length})</div>
+        {currs.map((c,i)=>(
+          <div key={i} style={{display:"grid",gridTemplateColumns:"70px 1fr 80px 50px auto",gap:8,alignItems:"center",marginBottom:6}}>
+            <input value={c.key||""} onChange={e=>upd(i,{key:e.target.value})} placeholder="key" style={{...inp,fontSize:12}}/>
+            <input value={c.name||""} onChange={e=>upd(i,{name:e.target.value})} placeholder="Name" style={{...inp,fontSize:12}}/>
+            <input value={c.short||""} onChange={e=>upd(i,{short:e.target.value})} placeholder="Short" style={{...inp,fontSize:12}}/>
+            <input type="color" value={c.color||"#ffffff"} onChange={e=>upd(i,{color:e.target.value})}
+              style={{width:40,height:34,border:"none",borderRadius:5,cursor:"pointer",padding:2,background:"transparent"}}/>
+            <button onClick={()=>updList("currencies",currs.filter((_,j)=>j!==i))} style={{...btn("danger"),padding:"4px 8px",fontSize:11}}>×</button>
+          </div>
+        ))}
+        <button onClick={()=>updList("currencies",[...currs,{key:"",name:"",short:"",color:"#cccccc"}])}
+          style={{...btn(),fontSize:12,marginTop:4}}>+ Add Currency</button>
+      </div>
+    );
+  };
+
+  // ── Wizard steps editor ──
+  const WizardStepsEditor = () => {
+    const steps = data.wizardSteps || [];
+    return (
+      <div style={{marginBottom:24}}>
+        <div style={sectionHead}>Character Creation Steps</div>
+        <div style={{fontSize:11,color:T.muted,marginBottom:8}}>These labels appear as the wizard step tabs.</div>
+        {steps.map((s,i)=>(
+          <div key={i} style={{display:"flex",gap:6,alignItems:"center",marginBottom:5}}>
+            <span style={{fontSize:11,color:T.muted,width:20,textAlign:"right"}}>{i+1}.</span>
+            <input value={s} onChange={e=>{const a=[...steps];a[i]=e.target.value;updList("wizardSteps",a);}}
+              style={{...inp,flex:1,fontSize:13}}/>
+            <button onClick={()=>updList("wizardSteps",steps.filter((_,j)=>j!==i))}
+              style={{...btn("danger"),padding:"3px 8px",fontSize:11}}>×</button>
+          </div>
+        ))}
+        <button onClick={()=>updList("wizardSteps",[...steps,"New Step"])}
+          style={{...btn(),fontSize:12,marginTop:4}}>+ Add Step</button>
+      </div>
+    );
+  };
+
+  // ── Character defaults editor ──
+  const DefaultsEditor = () => {
+    const defs = data.characterDefaults || {};
+    const abilityKeys = Object.keys(data.abilities || {str:1,dex:1,con:1,int:1,wis:1,cha:1});
+    const updDefs = patch => updList("characterDefaults",{...defs,...patch});
+    return (
+      <div style={{marginBottom:24}}>
+        <div style={sectionHead}>Character Defaults</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <Field label="Default Level" value={String(defs.level||1)} onChange={v=>updDefs({level:+v})}/>
+          <Field label="Default Alignment" value={defs.alignment||""} onChange={v=>updDefs({alignment:v})}/>
+        </div>
+        <div style={{fontSize:11,color:T.muted,marginBottom:6}}>Default ability scores</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))",gap:6}}>
+          {abilityKeys.map(k=>(
+            <div key={k}>
+              <label style={{...label,marginBottom:3}}>{k.toUpperCase()}</label>
+              <input type="number" min={1} max={30} value={defs.abilities?.[k]||10}
+                onChange={e=>updDefs({abilities:{...defs.abilities,[k]:+e.target.value}})}
+                style={{...inp,textAlign:"center",fontSize:16}}/>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
-      <SimpleList title="Languages" listKey="languages"/>
-      <SimpleList title="Skills" listKey="skills"/>
+      <AbilitiesEditor/>
+      <SkillsEditor/>
+      <CurrenciesEditor/>
+      <WizardStepsEditor/>
+      <DefaultsEditor/>
       <SimpleList title="Alignments" listKey="alignments"/>
+      <SimpleList title="Languages" listKey="languages"/>
+      <SimpleList title="Conditions" listKey="conditions"/>
     </div>
   );
 }
@@ -1374,7 +1527,7 @@ const TABS = [
   {id:"weapons",     label:"🗡️ Weapons"},
   {id:"armor",       label:"🛡️ Armor"},
   {id:"gear",        label:"🎒 Gear"},
-  {id:"lists",       label:"📋 Lists"},
+  {id:"lists",       label:"⚙️ System"},
   {id:"themes",      label:"🎨 Themes"},
 ];
 

@@ -124,22 +124,40 @@ const useGameData = () => {
   useEffect(() => {
     fetch("./tome-data.json")
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} — could not load tome-data.json`); return r.json(); })
-      .then(setData)
+      .then(data => { hydrateSystemConstants(data); setData(data); })
       .catch(err => setError(err.message));
   }, []);
   return { data, error };
 };
 
 // ── Constants ──
-const ABILITY_NAMES = { str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma" };
-const ABILITY_SHORT = { str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA" };
-const SKILLS_MAP = {
+// ── Ability / skill constants — populated from gameData at runtime ──
+// These are fallback values only; the real data comes from tome-data.json
+// so the engine has zero hardcoded D&D content.
+let ABILITY_NAMES = { str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma" };
+let ABILITY_SHORT = { str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA" };
+let ABILITY_KEYS  = ["str","dex","con","int","wis","cha"];
+let SKILLS_MAP = {
   Acrobatics:"dex","Animal Handling":"wis",Arcana:"int",Athletics:"str",
   Deception:"cha",History:"int",Insight:"wis",Intimidation:"cha",
   Investigation:"int",Medicine:"wis",Nature:"int",Perception:"wis",
   Performance:"cha",Persuasion:"cha",Religion:"int","Sleight of Hand":"dex",
   Stealth:"dex",Survival:"wis"
 };
+
+// Called once gameData loads — replaces fallbacks with JSON-driven values
+function hydrateSystemConstants(gameData) {
+  if (gameData.abilities) {
+    ABILITY_NAMES = Object.fromEntries(Object.entries(gameData.abilities).map(([k,v])=>[k,v.name]));
+    ABILITY_SHORT = Object.fromEntries(Object.entries(gameData.abilities).map(([k,v])=>[k,v.short]));
+    ABILITY_KEYS  = Object.keys(gameData.abilities);
+  }
+  if (gameData.skills) {
+    SKILLS_MAP = Object.fromEntries(
+      Object.entries(gameData.skills).map(([sk, data]) => [sk, typeof data === "string" ? data : data.ability])
+    );
+  }
+}
 
 // ── Math helpers ──
 const calcMod   = s => Math.floor((s - 10) / 2);
@@ -497,6 +515,20 @@ const DEFAULT_CHAR = {
   currencies:{ cp:0, sp:0, ep:0, gp:0, pp:0 },
   theme:"dungeon", music:"none", customMusicUrl:"",
   createdAt:null, updatedAt:null
+};
+
+// Returns a fresh DEFAULT_CHAR merged with any system defaults from gameData
+const makeDefaultChar = (gameData) => {
+  const defs = gameData?.characterDefaults || {};
+  const abKeys = gameData?.abilities ? Object.keys(gameData.abilities) : ["str","dex","con","int","wis","cha"];
+  const currKeys = gameData?.currencies ? Object.fromEntries(gameData.currencies.map(c=>[c.key,0])) : { cp:0,sp:0,ep:0,gp:0,pp:0 };
+  return {
+    ...DEFAULT_CHAR,
+    abilities: abKeys.reduce((a,k)=>({...a,[k]:defs.abilities?.[k]||10}),{}),
+    currencies: currKeys,
+    alignment: defs.alignment || "True Neutral",
+    level: defs.level || 1,
+  };
 };
 
 // ── Theme wrapper ──
@@ -2367,17 +2399,14 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
       <div style={{marginTop:20,padding:"14px 16px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:10}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Currency</div>
         <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([coin,label,color])=>(
+          {(gameData?.currencies||[{key:"cp",name:"Copper",color:"#b87333"},{key:"sp",name:"Silver",color:"#c0c0c0"},{key:"ep",name:"Electrum",color:"#a8bba8"},{key:"gp",name:"Gold",color:"#ffd700"},{key:"pp",name:"Platinum",color:"#e5e4e2"}]).map(cur=>{const[coin,label,color]=[cur.key,cur.name,cur.color]; return (
             <div key={coin} style={{textAlign:"center"}}>
               <div style={{width:28,height:28,borderRadius:"50%",background:color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{coin.toUpperCase()}</div>
               <input type="number" value={currency[coin]||0} onChange={e=>setCurrency(coin,e.target.value)} style={{...inp,width:72,textAlign:"center",fontSize:15,padding:"4px 0"}}/>
               <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{label}</div>
             </div>
-          ))}
+          );})}
         </div>
-      </div>
-
-      {/* ── Add Item ── */}
       <div style={{marginTop:16}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Item to Inventory</div>
         <LibraryItemAdder
@@ -2597,7 +2626,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
   const [char, setChar] = useState(editChar ? { ...editChar } : { ...DEFAULT_CHAR });
   const { species:speciesDb, classes, backgrounds, themes, alignments, languages:languageList, skills:allSkills } = gameData;
 
-  const STEPS = ["Identity","Class","Background","Species","Abilities","Equipment & Spells","Finalise"];
+  const STEPS = gameData?.wizardSteps || ["Identity","Class","Background","Species","Abilities","Equipment & Spells","Finalise"];
   const speciesData  = speciesDb?.[char.species];
   const subraceData  = char.subrace ? speciesData?.subraces?.[char.subrace] : null;
   const classData    = classes?.[char.class];
@@ -4106,7 +4135,7 @@ function InventoryTab({ char, gameData, onUpdate }) {
       <div style={{ background:"var(--card)", border:"1px solid var(--border)", borderRadius:10, padding:16, marginBottom:18 }}>
         <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", marginBottom:12, fontSize:13 }}>CURRENCY</div>
         <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
-          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([t, n, c]) => (
+          {(gameData?.currencies||[{key:"cp",name:"Copper",color:"#b87333"},{key:"sp",name:"Silver",color:"#c0c0c0"},{key:"ep",name:"Electrum",color:"#a8bba8"},{key:"gp",name:"Gold",color:"#ffd700"},{key:"pp",name:"Platinum",color:"#e5e4e2"}]).map(({key:t,name:n,color:c}) => (
             <div key={t} style={{ textAlign:"center", minWidth:64 }}>
               <div style={{ width:30, height:30, borderRadius:"50%", background:c, margin:"0 auto 4px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:"bold", color:"#333" }}>{t.toUpperCase()}</div>
               <input type="number" value={curr[t]} onChange={e => ucu(t, e.target.value)}
