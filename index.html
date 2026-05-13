@@ -2178,6 +2178,57 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
     );
   };
 
+  const renderedGroups = groups.map((group, gi) => {
+    const chosenOi = choices[`class-${gi}`] ?? 0;
+    const unresolved = (group.fixed||[]).filter((it,ii) => it.pick && !pickSels[`fixed-${gi}-${ii}`]);
+    const hasIssue = unresolved.length > 0;
+    if (group.fixed) return (
+      <div key={gi} style={{marginBottom:12,padding:"10px 14px",background:"var(--surface)",
+        border:`1px solid ${hasIssue?"#e67e22":"var(--border)"}`,borderRadius:8,
+        boxShadow:hasIssue?"0 0 0 1px rgba(230,126,34,0.3)":undefined}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+          <div style={{fontSize:11,color:hasIssue?"#e67e22":"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>You always get</div>
+          {hasIssue && <div style={{fontSize:10,color:"#e67e22"}}>⚠ Choose {unresolved.length} item{unresolved.length>1?"s":""}</div>}
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {group.fixed.map((it,ii)=>
+            it.pick ? (
+              <div key={`p-${gi}-${ii}`} style={{borderRadius:6,border:!pickSels[`fixed-${gi}-${ii}`]?"1px solid rgba(230,126,34,0.4)":"none",padding:!pickSels[`fixed-${gi}-${ii}`]?"4px":"0"}}>
+                {renderOptionItem(it, `fixed-${gi}-${ii}`)}
+                {!pickSels[`fixed-${gi}-${ii}`] && <div style={{fontSize:10,color:"#e67e22",marginTop:3}}>⚠ Selection required</div>}
+              </div>
+            ) : (
+              <div key={it.name} style={{fontSize:13}}>
+                {it.qty>1?`${it.qty}× `:""}
+                <strong>{it.name}</strong>
+                {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    );
+    return (
+      <div key={gi} style={{marginBottom:14}}>
+        <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Choice {gi+1} — pick one</div>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {group.options.map((option,oi)=>(
+            <div key={oi} style={{padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
+              border:`1px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,
+              background:chosenOi===oi?"rgba(201,162,39,0.08)":"var(--surface)"}}>
+              <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(ch=>({...ch,[`class-${gi}`]:oi}))}>
+                <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,background:chosenOi===oi?"var(--accent)":"transparent"}}/>
+                <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
+                  {option.map((it,ii)=>renderOptionItem(it,`class-${gi}-${oi}-${ii}`))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  });
+
   return (
     <div>
       {/* Mode toggle */}
@@ -2203,58 +2254,7 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
               <div style={{fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:12,textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>
                 {char.class} Starting Equipment
               </div>
-              {groups.map((group,gi)=>{
-                const chosenOi = choices[`class-${gi}`] ?? 0;
-                const unresolved = (group.fixed||[]).filter((it,ii) => it.pick && !pickSels[`fixed-${gi}-${ii}`]);
-                const hasIssue = unresolved.length > 0;
-                if (group.fixed) return (
-                  <div key={gi} style={{marginBottom:12,padding:"10px 14px",background:"var(--surface)",
-                    border:`1px solid ${hasIssue?"#e67e22":"var(--border)"}`,borderRadius:8,
-                    boxShadow:hasIssue?"0 0 0 1px rgba(230,126,34,0.3)":undefined}}>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                      <div style={{fontSize:11,color:hasIssue?"#e67e22":"var(--text-muted)",textTransform:"uppercase",letterSpacing:1}}>You always get</div>
-                      {hasIssue && <div style={{fontSize:10,color:"#e67e22"}}>⚠ Choose {unresolved.length} item{unresolved.length>1?"s":""}</div>}
-                    </div>
-                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {group.fixed.map((it,ii)=>
-                        it.pick ? (
-                          <div key={`p-${gi}-${ii}`} style={{borderRadius:6, border:!pickSels[`fixed-${gi}-${ii}`]?"1px solid rgba(230,126,34,0.4)":"none", padding:!pickSels[`fixed-${gi}-${ii}`]?"4px":"0"}}>
-                            {renderOptionItem(it, `fixed-${gi}-${ii}`)}
-                            {!pickSels[`fixed-${gi}-${ii}`] && <div style={{fontSize:10,color:"#e67e22",marginTop:3}}>⚠ Selection required</div>}
-                          </div>
-                        ) : (
-                          <div key={it.name} style={{fontSize:13}}>
-                            {it.qty>1?`${it.qty}× `:""}
-                            <strong>{it.name}</strong>
-                            {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                );
-                return (
-                  <div key={gi} style={{marginBottom:14}}>
-                    <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Choice {gi+1} — pick one</div>
-                    <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                      {group.options.map((option,oi)=>(
-                        <div key={oi} style={{
-                          padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
-                          border:`1px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,
-                          background:chosenOi===oi?"rgba(201,162,39,0.08)":"var(--surface)"
-                        }}>
-                          <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(ch=>({...ch,[`class-${gi}`]:oi}))}>
-                            <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,background:chosenOi===oi?"var(--accent)":"transparent"}}/>
-                            <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
-                              {option.map((it,ii)=>renderOptionItem(it,`class-${gi}-${oi}-${ii}`))}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+              {renderedGroups}
 
               {/* Background items */}
               {bgData?.startingItems?.length>0 && (
@@ -2353,7 +2353,6 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
       <div style={{marginTop:20,padding:"14px 16px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:10}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Currency</div>
         <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-<<<<<<< HEAD
           {(gameData?.currencies||[{key:"cp",name:"Copper",color:"#b87333"},{key:"sp",name:"Silver",color:"#c0c0c0"},{key:"ep",name:"Electrum",color:"#a8bba8"},{key:"gp",name:"Gold",color:"#ffd700"},{key:"pp",name:"Platinum",color:"#e5e4e2"}]).map(cur=>(
             <div key={cur.key} style={{textAlign:"center"}}>
               <div style={{width:28,height:28,borderRadius:"50%",background:cur.color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{cur.key.toUpperCase()}</div>
@@ -2361,20 +2360,10 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
               <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{cur.name}</div>
             </div>
           ))}
-
-=======
-          {[["cp","Copper","#b87333"],["sp","Silver","#c0c0c0"],["ep","Electrum","#a8bba8"],["gp","Gold","#ffd700"],["pp","Platinum","#e5e4e2"]].map(([coin,label,color])=>(
-            <div key={coin} style={{textAlign:"center"}}>
-              <div style={{width:28,height:28,borderRadius:"50%",background:color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{coin.toUpperCase()}</div>
-              <input type="number" value={currency[coin]||0} onChange={e=>setCurrency(coin,e.target.value)} style={{...inp,width:72,textAlign:"center",fontSize:15,padding:"4px 0"}}/>
-              <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{label}</div>
-            </div>
-          ))}
         </div>
       </div>
 
       {/* ── Add Item ── */}
->>>>>>> parent of 672def7 (Complete restructure of systems with Tome Editor)
       <div style={{marginTop:16}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Item to Inventory</div>
         <LibraryItemAdder
