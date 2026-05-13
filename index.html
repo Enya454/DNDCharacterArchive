@@ -705,6 +705,56 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 ))}
               </div>
 
+              {/* Humanoid race sub-picker — shown when "Two humanoid races" is selected */}
+              {chosen?.includes("humanoid") && (() => {
+                const HUMANOID_RACES = [
+                  "Aarakocra","Aasimar","Bugbear","Centaur","Changeling","Dragonborn","Dwarf","Elf",
+                  "Fairy","Firbolg","Genasi","Githyanki","Githzerai","Gnoll","Gnome","Goblin","Goliath",
+                  "Half-Elf","Half-Orc","Halfling","Harengon","Hobgoblin","Human","Kalashtar","Kenku",
+                  "Kobold","Leonin","Lizardfolk","Loxodon","Minotaur","Orc","Satyr","Shifter",
+                  "Simic Hybrid","Tabaxi","Tiefling","Tortle","Triton","Vedalken","Verdan","Warforged","Yuan-ti"
+                ].sort();
+                const subKey   = feature.name + "_humanoids";
+                const picked   = Array.isArray(choices?.[subKey]) ? choices[subKey] : [];
+                const maxPick  = 2;
+                const toggle   = race => {
+                  const isIn = picked.includes(race);
+                  const next = isIn
+                    ? picked.filter(r => r !== race)
+                    : picked.length < maxPick ? [...picked, race] : picked;
+                  onChoice && onChoice(subKey, next);
+                };
+                return (
+                  <div style={{ marginTop:12, padding:"12px 14px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--accent2)", borderRadius:8 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
+                      Choose 2 Humanoid Races ({picked.length}/{maxPick})
+                    </div>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:180, overflowY:"auto" }}>
+                      {HUMANOID_RACES.map(race => {
+                        const isPicked = picked.includes(race);
+                        const canPick  = isPicked || picked.length < maxPick;
+                        return (
+                          <div key={race} onClick={() => canPick && toggle(race)}
+                            style={{ padding:"3px 10px", borderRadius:16, cursor:canPick?"pointer":"not-allowed",
+                              fontSize:12, transition:"all 0.15s",
+                              border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
+                              background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                              color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                              opacity:!canPick&&!isPicked?0.45:1 }}>
+                            {isPicked?"✓ ":""}{race}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {picked.length > 0 && (
+                      <div style={{ marginTop:8, fontSize:12, color:"var(--accent)" }}>
+                        Selected: {picked.join(", ")}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* Pact of the Tome — choose 3 cantrips from any class */}
               {feature.name === "Pact Boon" && chosen?.includes("Tome") && (() => {
                 const allCantrips = (gameData?.spells || []).filter(s => s.level === 0);
