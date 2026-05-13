@@ -2571,12 +2571,30 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
     const fa = Object.keys(char.abilities).reduce((acc, ab) => { acc[ab] = totalAb(ab); return acc; }, {});
     const lvl = char.level || 1;
     const isEdit = !!editChar;
+
+    // Merge auto-languages from species/subrace into char.languages
+    const existingLangs = char.languages || [];
+    const existingSources = char.languageSources || {};
+    const speciesAutoLangs = (speciesData?.autoLanguages || []);
+    const subraceAutoLangs = (subraceData?.autoLanguages || []);
+    const allAutoLangs = [...new Set([...speciesAutoLangs, ...subraceAutoLangs])];
+    const newLangs = [...existingLangs];
+    const newSources = { ...existingSources };
+    for (const lang of allAutoLangs) {
+      if (!newLangs.includes(lang)) {
+        newLangs.push(lang);
+        newSources[lang] = speciesAutoLangs.includes(lang) ? "Species" : "Subrace";
+      }
+    }
+
     onSave({
       ...char,
       id: isEdit ? char.id : Date.now().toString(),
       abilities: fa,
       hp: isEdit ? char.hp : { current: maxHP, max: maxHP, temp:0 },
       hitDice: isEdit ? char.hitDice : { current: lvl, max: lvl },
+      languages: newLangs,
+      languageSources: newSources,
       createdAt: isEdit ? char.createdAt : new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -5346,13 +5364,13 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                     );
 
                     // What skills did the character actually choose for this background?
-                    const bgSkillSource = char.background;
-                    const chosenSkills  = Object.entries(char.skillProfSources || {})
-                      .filter(([, src]) => src === bgSkillSource)
+                    // Background skills are stored in skillProfSources with source "Background"
+                    const chosenSkills = Object.entries(char.skillProfSources || {})
+                      .filter(([, src]) => src === "Background" || src === char.background)
                       .map(([sk]) => sk);
                     // Fallback: if fixed (not "all"), show those
                     const fixedSkills = Array.isArray(skillFeat?.fixed) ? skillFeat.fixed
-                      : Array.isArray(skillFeat?.from) ? skillFeat.from : null;
+                      : (Array.isArray(skillFeat?.from) && skillFeat.from !== "all") ? skillFeat.from : null;
 
                     const displaySkills = chosenSkills.length > 0 ? chosenSkills : fixedSkills;
 
@@ -5404,8 +5422,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                           {(() => {
                             const bgLangSrc = char.background + "_lang";
                             const bgLangs = (char.languages || []).filter(l =>
-                              (char.languageSources||{})[l] === char.background ||
-                              (char.languageSources||{})[l] === bgLangSrc
+                              (char.languageSources||{})[l] === "Background"
                             );
                             const autoLangs = bg.autoLanguages || [];
                             const allLangs = [...new Set([...autoLangs, ...bgLangs])];
