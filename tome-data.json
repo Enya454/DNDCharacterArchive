@@ -8495,7 +8495,8 @@
         {
           "name": "Shelter of the Faithful",
           "type": "passive",
-          "description": "As an acolyte, you command the respect of those who share your faith and can perform religious ceremonies of your deity. You and your companions can expect free healing and care at a temple of your faith, though you must provide material components for spells. Those who share your religion will support you at a modest lifestyle. You might have a residence at a specific temple where you have a home."
+          "description": "As an acolyte, you command the respect of those who share your faith and can perform religious ceremonies of your deity. You and your companions can expect free healing and care at a temple of your faith, though you must provide material components for spells. Those who share your religion will support you at a modest lifestyle. You might have a residence at a specific temple where you have a home.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8574,7 +8575,8 @@
         {
           "name": "False Identity",
           "type": "passive",
-          "description": "You have created a second identity including documentation, established acquaintances, and disguises. You can also forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or handwriting you are trying to copy."
+          "description": "You have created a second identity including documentation, established acquaintances, and disguises. You can also forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or handwriting you are trying to copy.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8650,7 +8652,8 @@
         {
           "name": "Criminal Contact",
           "type": "passive",
-          "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances, through messengers, corrupt caravan masters, and seedy sailors."
+          "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances, through messengers, corrupt caravan masters, and seedy sailors.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8713,7 +8716,8 @@
         {
           "name": "By Popular Demand",
           "type": "passive",
-          "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, theatre, or noble's court. You receive free lodging and food of a modest or comfortable standard as long as you perform each night. Your performance makes you something of a local figure wherever you have performed."
+          "description": "You can always find a place to perform, usually in an inn or tavern but possibly with a circus, theatre, or noble's court. You receive free lodging and food of a modest or comfortable standard as long as you perform each night. Your performance makes you something of a local figure wherever you have performed.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8804,7 +8808,8 @@
         {
           "name": "Rustic Hospitality",
           "type": "passive",
-          "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you."
+          "description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8883,7 +8888,8 @@
         {
           "name": "Discovery",
           "type": "passive",
-          "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It might be a site that no one else has ever seen, or a fact long forgotten, or a relic of the past that could rewrite history."
+          "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation is up to you and your DM, but it might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It might be a site that no one else has ever seen, or a fact long forgotten, or a relic of the past that could rewrite history.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -8968,7 +8974,8 @@
         {
           "name": "Position of Privilege",
           "type": "passive",
-          "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to."
+          "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -9039,7 +9046,8 @@
         {
           "name": "Wanderer",
           "type": "passive",
-          "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth."
+          "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -9107,7 +9115,8 @@
         {
           "name": "Researcher",
           "type": "passive",
-          "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually this comes from a library, scriptorium, university, or sage. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign."
+          "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually this comes from a library, scriptorium, university, or sage. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -9192,7 +9201,8 @@
         {
           "name": "Ships Passage",
           "type": "passive",
-          "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return for your free passage, you and your companions are expected to assist the crew during the voyage."
+          "description": "When you need to, you can secure free passage on a sailing ship for yourself and your adventuring companions. You might sail on the ship you served on, or another ship you have good relations with. In return for your free passage, you and your companions are expected to assist the crew during the voyage.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -9276,7 +9286,8 @@
         {
           "name": "Military Rank",
           "type": "passive",
-          "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organisation still recognise your authority and influence, and defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can usually gain access to friendly military encampments and fortresses where your rank is recognised."
+          "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organisation still recognise your authority and influence, and defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can usually gain access to friendly military encampments and fortresses where your rank is recognised.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [
@@ -9355,7 +9366,8 @@
         {
           "name": "City Secrets",
           "type": "passive",
-          "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow."
+          "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow.",
+          "feature_type": "background_feature"
         }
       ],
       "startingItems": [

@@ -5488,8 +5488,16 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                     if (!bg) return <p style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic" }}>No background data available.</p>;
 
                     const features     = bg.features || [];
-                    // The special feature: the unique passive that defines the background
-                    const specialFeat  = features.find(f => f.type === "passive" && !f.name.toLowerCase().includes("tool") && !f.name.toLowerCase().includes("proficien"));
+                    // The special feature: tagged explicitly, or the last passive that isn't a tool/proficiency
+                    const specialFeat = features.find(f => f.feature_type === "background_feature")
+                      || features.filter(f =>
+                          f.type === "passive" &&
+                          !f.name.toLowerCase().includes("tool") &&
+                          !f.name.toLowerCase().includes("proficien") &&
+                          !f.name.toLowerCase().includes("kit") &&
+                          !f.name.toLowerCase().includes("vehicle") &&
+                          !f.name.toLowerCase().includes("instrument")
+                        ).pop(); // last one — tool proficiencies tend to come first
                     // Skill proficiencies
                     const skillFeat    = features.find(f => f.type === "proficiency_choice");
                     // Language features
