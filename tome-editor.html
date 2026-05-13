@@ -137,6 +137,70 @@ function FeatureEditor({feat, onChange, onRemove, index}) {
           <label style={label}>Options (one per line)</label>
           <textarea value={(feat.options||[]).join("\n")} onChange={e=>upd("options",e.target.value.split("\n"))}
             rows={4} style={{...inp,resize:"vertical"}}/>
+
+          {/* optionSubChoices — per-option cascading pickers */}
+          <div style={{marginTop:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+              <label style={label}>Option Sub-Choices (cascading pickers)</label>
+              <button onClick={()=>{
+                const existing=feat.optionSubChoices||{};
+                const firstOption=(feat.options||[""])[0]||"";
+                if(!existing[firstOption]){
+                  upd("optionSubChoices",{...existing,[firstOption]:{label:"Choose…",type:"multi",count:1,options:[]}});
+                }
+              }} style={{...btn(),fontSize:11,padding:"3px 8px"}}>+ Add Sub-Choice</button>
+            </div>
+            {Object.entries(feat.optionSubChoices||{}).map(([triggerOpt, sub],si)=>(
+              <div key={si} style={{padding:"10px",background:"rgba(0,0,0,0.2)",borderRadius:7,marginBottom:8,border:"1px solid rgba(255,255,255,0.08)"}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:6,marginBottom:6,alignItems:"start"}}>
+                  <div>
+                    <label style={{...label,marginBottom:3}}>Triggers when option equals:</label>
+                    <select value={triggerOpt} onChange={e=>{
+                      const newKey=e.target.value;
+                      if(newKey===triggerOpt) return;
+                      const all={...(feat.optionSubChoices||{})};
+                      delete all[triggerOpt];
+                      all[newKey]=sub;
+                      upd("optionSubChoices",all);
+                    }} style={{...inp,fontSize:12}}>
+                      {(feat.options||[]).map(o=><option key={o} value={o}>{o||"(empty)"}</option>)}
+                    </select>
+                  </div>
+                  <button onClick={()=>{
+                    const all={...(feat.optionSubChoices||{})};
+                    delete all[triggerOpt];
+                    upd("optionSubChoices",Object.keys(all).length?all:undefined);
+                  }} style={{...btn("danger"),padding:"4px 8px",fontSize:11,marginTop:18}}>×</button>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 80px",gap:8,marginBottom:6}}>
+                  <div>
+                    <label style={{...label,marginBottom:3}}>Label</label>
+                    <input value={sub.label||""} onChange={e=>{
+                      const all={...(feat.optionSubChoices||{})};
+                      all[triggerOpt]={...sub,label:e.target.value};
+                      upd("optionSubChoices",all);
+                    }} style={{...inp,fontSize:12}} placeholder="e.g. Choose 2 Humanoid Races"/>
+                  </div>
+                  <div>
+                    <label style={{...label,marginBottom:3}}>Count</label>
+                    <input type="number" min={1} max={10} value={sub.count||1} onChange={e=>{
+                      const all={...(feat.optionSubChoices||{})};
+                      all[triggerOpt]={...sub,count:+e.target.value};
+                      upd("optionSubChoices",all);
+                    }} style={{...inp,fontSize:12,textAlign:"center"}}/>
+                  </div>
+                </div>
+                <label style={{...label,marginBottom:3}}>Sub-options (one per line)</label>
+                <textarea value={(sub.options||[]).join("\n")} onChange={e=>{
+                  const all={...(feat.optionSubChoices||{})};
+                  all[triggerOpt]={...sub,options:e.target.value.split("\n").map(s=>s.trim()).filter(Boolean)};
+                  upd("optionSubChoices",all);
+                }} rows={5} style={{...inp,resize:"vertical",fontSize:12}}
+                  placeholder={"Human\nElf\nDwarf\n…"}/>
+                <div style={{fontSize:10,color:T.muted,marginTop:3}}>{(sub.options||[]).length} options defined</div>
+              </div>
+            ))}
+          </div>
         </div>}
         {feat.type==="proficiency_choice"&&<div style={{marginBottom:10}}>
           <label style={label}>Skill pool ("all" or comma-separated)</label>
