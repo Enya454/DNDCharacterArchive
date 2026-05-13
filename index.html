@@ -1368,16 +1368,21 @@ function AbilityRoller({ abilities, onChange, char, setChar }) {
   const usedPts  = Object.values(pb).reduce((s, v) => s + (PB_COST[v] || 0), 0);
 
   const rollAll = () => {
-    const nr = {}, na = {};
-    Object.keys(abilities).forEach(ab => {
+    // Roll 6 independent values — 4d6 drop lowest each
+    const pool = Array.from({length: 6}, () => {
       const dice = [1,2,3,4].map(() => Math.floor(Math.random() * 6) + 1).sort((a,b) => a-b);
-      nr[ab] = { rolls:dice, total:dice.slice(1).reduce((a,b) => a+b, 0) };
-      na[ab] = nr[ab].total;
+      return { total: dice.slice(1).reduce((a,b) => a+b, 0), dice };
     });
-    setRolls(nr); setManualRolls({});
-    persist({_rolls:nr});
-    onChange(na);
+    // Clear any previous assignments
+    setAssigned({});
+    persist({_rolls: pool, _assigned: {}});
+    setRolledPool(pool);
+    onChange(Object.keys(abilities).reduce((acc, ab) => ({ ...acc, [ab]: 8 }), {}));
   };
+
+  const [rolledPool, setRolledPool] = useState(
+    Array.isArray(char._rolls) ? char._rolls : []
+  );
 
   // Standard array: which values are still in the pool
   const usedValues = Object.values(assigned);
@@ -1517,43 +1522,116 @@ function AbilityRoller({ abilities, onChange, char, setChar }) {
       {method === "roll" && (
         <div>
           <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:16, flexWrap:"wrap" }}>
-            <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)" }}>🎲 Roll All (4d6 drop lowest)</button>
-            <span style={{ fontSize:12, color:"var(--text-muted)" }}>or enter your own rolls below:</span>
+            <button onClick={rollAll} style={{ ...mBtn(false), background:"var(--accent)", color:"var(--bg)" }}>🎲 Roll (4d6 drop lowest)</button>
+            {rolledPool.length > 0 && (
+              <button onClick={() => { setAssigned({}); persist({_assigned:{}}); onChange(Object.keys(abilities).reduce((acc,ab)=>({...acc,[ab]:8}),{})); setRolledPool([]); }}
+                style={{ ...mBtn(false) }}>↺ Reroll</button>
+            )}
           </div>
-          <div style={grid}>{Object.keys(abilities).map(ab => {
-            const hasRoll = !!rolls[ab];
-            const hasManual = manualRolls[ab] !== undefined && manualRolls[ab] !== "";
-            const displayVal = hasManual ? manualRolls[ab] : hasRoll ? abilities[ab] : "";
-            const highlighted = hasRoll || hasManual;
-            return (
-            <div key={ab} style={{ ...card, border:`1px solid ${highlighted ? "var(--accent)" : "var(--border)"}` }}>
-              <div style={lbl}>{ABILITY_SHORT[ab]}</div>
-              <input
-                type="number" min={3} max={18}
-                value={displayVal}
-                placeholder="--"
-                onChange={e => {
-                  const raw = e.target.value;
-                  setManualRolls(r => ({...r, [ab]: raw}));
-                  const n = parseInt(raw, 10);
-                  if (!isNaN(n) && n >= 3 && n <= 18) {
-                    const nr = {...rolls, [ab]: null};
-                    setRolls(nr);
-                    persist({_rolls:nr});
-                    onChange({ ...abilities, [ab]: n });
-                  }
-                }}
-                style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--accent)", padding:"6px 8px", borderRadius:6, fontSize:26, fontFamily:"var(--font-display)", textAlign:"center", marginTop:6, boxSizing:"border-box" }}
-              />
-              {rolls[ab] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:4 }}>[{rolls[ab].rolls.join(", ")}] drop lowest</div>}
-              {highlighted && <span style={mod}>{modStr(calcMod(abilities[ab]))}</span>}
+
+          {rolledPool.length === 0 ? (
+            <div style={{ textAlign:"center", padding:"28px 0", color:"var(--text-muted)", fontSize:13, fontStyle:"italic" }}>
+              Click Roll to generate 6 scores, then assign them to your stats.
             </div>
-          );})}</div>
-          <p style={{ fontSize:11, color:"var(--text-dim)", marginTop:4 }}>
-            Click "Roll All" to auto-roll, or type any value 3–18 directly into each box.
-          </p>
+          ) : (<>
+            {/* Pool of rolled values */}
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
+                Click a score to select it, then click a stat box to assign it. Hover for dice breakdown.
+              </div>
+              <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                {rolledPool.map((r, i) => {
+                  const usedByIndex = Object.values(assigned);
+                  const isAssignedOut = usedByIndex.includes(i);
+                  const isSelected = rolledPool._selected === i;
+                  return (
+                    <div key={i}
+                      onClick={() => {
+                        if (isAssignedOut) return;
+                        setRolledPool(prev => {
+                          const next = [...prev];
+                          next._selected = prev._selected === i ? undefined : i;
+                          return next;
+                        });
+                      }}
+                      title={`Rolled: [${r.dice.join(", ")}] — dropped ${r.dice[0]}, kept ${r.dice.slice(1).join("+")}`}
+                      style={{ padding:"8px 16px", borderRadius:10, cursor:isAssignedOut?"not-allowed":"pointer",
+                        background:isAssignedOut?"var(--surface)":isSelected?"var(--accent)":"var(--card)",
+                        border:`2px solid ${isAssignedOut?"var(--border)":isSelected?"var(--accent)":"var(--accent2)"}`,
+                        color:isAssignedOut?"var(--text-dim)":isSelected?"var(--bg)":"var(--accent)",
+                        fontFamily:"var(--font-display)", fontSize:22, opacity:isAssignedOut?0.35:1,
+                        transition:"all 0.15s", minWidth:56, textAlign:"center" }}>
+                      {r.total}
+                      <div style={{ fontSize:9, color:isAssignedOut?"var(--text-dim)":isSelected?"rgba(0,0,0,0.45)":"var(--text-dim)", marginTop:2 }}>
+                        [{r.dice.slice(1).join("+")}]
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {rolledPool._selected !== undefined && (
+                <div style={{ marginTop:8, fontSize:12, color:"var(--accent)", fontStyle:"italic" }}>
+                  ✦ {rolledPool[rolledPool._selected]?.total} selected — click a stat below to assign it
+                </div>
+              )}
+            </div>
+
+            {/* Stat boxes for assignment */}
+            <div style={grid}>{Object.keys(abilities).map(ab => {
+              const assignedIdx = assigned[ab];
+              const isAssigned  = assignedIdx !== undefined;
+              const val         = isAssigned ? rolledPool[assignedIdx]?.total : null;
+              const canAssign   = rolledPool._selected !== undefined && !isAssigned;
+              return (
+                <div key={ab} style={{ ...card,
+                  border:`2px solid ${isAssigned?"var(--accent)":canAssign?"rgba(201,162,39,0.5)":"var(--border)"}`,
+                  cursor: isAssigned || canAssign ? "pointer" : "default",
+                  background: canAssign ? "rgba(201,162,39,0.04)" : "var(--surface)",
+                  transition:"all 0.15s"
+                }}
+                  onClick={() => {
+                    const sel = rolledPool._selected;
+                    if (isAssigned) {
+                      // Unassign — clear this stat
+                      const newAssigned = { ...assigned };
+                      delete newAssigned[ab];
+                      setAssigned(newAssigned);
+                      persist({_assigned: newAssigned});
+                      onChange({ ...abilities, [ab]: 8 });
+                    } else if (sel !== undefined) {
+                      // Assign selected pool value
+                      const newAssigned = { ...assigned, [ab]: sel };
+                      setAssigned(newAssigned);
+                      persist({_assigned: newAssigned});
+                      onChange({ ...abilities, [ab]: rolledPool[sel].total });
+                      setRolledPool(prev => { const n=[...prev]; n._selected=undefined; return n; });
+                    }
+                  }}>
+                  <div style={lbl}>{ABILITY_SHORT[ab]}</div>
+                  {isAssigned ? (<>
+                    <div style={{ fontSize:28, fontFamily:"var(--font-display)", color:"var(--accent)", marginTop:4, lineHeight:1 }}>{val}</div>
+                    <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:3 }}>click to clear</div>
+                    <span style={mod}>{modStr(calcMod(val))}</span>
+                  </>) : (
+                    <div style={{ fontSize:12, color:canAssign?"var(--accent)":"var(--text-dim)", marginTop:10, fontStyle:"italic" }}>
+                      {canAssign ? "← assign" : "—"}
+                    </div>
+                  )}
+                </div>
+              );
+            })}</div>
+
+            <div style={{ marginTop:10, fontSize:12, color:"var(--text-muted)" }}>
+              {Object.keys(abilities).length - Object.keys(assigned).length > 0
+                ? `${Object.keys(abilities).length - Object.keys(assigned).length} stat${Object.keys(abilities).length - Object.keys(assigned).length!==1?"s":""} still need a score`
+                : <span style={{ color:"var(--success)" }}>✓ All stats assigned!</span>}
+            </div>
+          </>)}
         </div>
       )}
+    </div>
+  );
+
     </div>
   );
 }
