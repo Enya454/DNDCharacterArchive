@@ -726,7 +726,14 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             <div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
                 {feature.options.map(opt => (
-                  <div key={opt} onClick={() => onChoice(feature.name, opt)} style={{
+                  <div key={opt} onClick={() => {
+                    // If switching away from an option that has sub-choices, clear them
+                    if (chosen && chosen !== opt && feature.optionSubChoices?.[chosen]) {
+                      const oldSubKey = feature.name + "_sub_" + chosen.replace(/\s+/g,"_");
+                      onChoice && onChoice(oldSubKey, []);
+                    }
+                    onChoice(feature.name, opt);
+                  }} style={{
                     padding:"8px 12px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
                     border:`1px solid ${chosen === opt ? "var(--accent)" : "var(--border)"}`,
                     background: chosen === opt ? "rgba(201,162,39,0.1)" : "var(--surface)",
@@ -737,43 +744,36 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 ))}
               </div>
 
-              {/* Humanoid race sub-picker — shown when "Two humanoid races" is selected */}
-              {chosen?.includes("humanoid") && (() => {
-                const HUMANOID_RACES = [
-                  "Aarakocra","Aasimar","Bugbear","Centaur","Changeling","Dragonborn","Dwarf","Elf",
-                  "Fairy","Firbolg","Genasi","Githyanki","Githzerai","Gnoll","Gnome","Goblin","Goliath",
-                  "Half-Elf","Half-Orc","Halfling","Harengon","Hobgoblin","Human","Kalashtar","Kenku",
-                  "Kobold","Leonin","Lizardfolk","Loxodon","Minotaur","Orc","Satyr","Shifter",
-                  "Simic Hybrid","Tabaxi","Tiefling","Tortle","Triton","Vedalken","Verdan","Warforged","Yuan-ti"
-                ].sort();
-                const subKey   = feature.name + "_humanoids";
-                const picked   = Array.isArray(choices?.[subKey]) ? choices[subKey] : [];
-                const maxPick  = 2;
-                const toggle   = race => {
-                  const isIn = picked.includes(race);
+              {/* Option sub-choices — driven by feature.optionSubChoices in JSON */}
+              {chosen && feature.optionSubChoices?.[chosen] && (() => {
+                const sub    = feature.optionSubChoices[chosen];
+                const subKey = feature.name + "_sub_" + chosen.replace(/\s+/g,"_");
+                const picked = Array.isArray(choices?.[subKey]) ? choices[subKey] : [];
+                const toggle = val => {
+                  const isIn = picked.includes(val);
                   const next = isIn
-                    ? picked.filter(r => r !== race)
-                    : picked.length < maxPick ? [...picked, race] : picked;
+                    ? picked.filter(v => v !== val)
+                    : picked.length < sub.count ? [...picked, val] : picked;
                   onChoice && onChoice(subKey, next);
                 };
                 return (
                   <div style={{ marginTop:12, padding:"12px 14px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--accent2)", borderRadius:8 }}>
                     <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
-                      Choose 2 Humanoid Races ({picked.length}/{maxPick})
+                      {sub.label} ({picked.length}/{sub.count})
                     </div>
                     <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:180, overflowY:"auto" }}>
-                      {HUMANOID_RACES.map(race => {
-                        const isPicked = picked.includes(race);
-                        const canPick  = isPicked || picked.length < maxPick;
+                      {sub.options.map(opt => {
+                        const isPicked = picked.includes(opt);
+                        const canPick  = isPicked || picked.length < sub.count;
                         return (
-                          <div key={race} onClick={() => canPick && toggle(race)}
+                          <div key={opt} onClick={() => canPick && toggle(opt)}
                             style={{ padding:"3px 10px", borderRadius:16, cursor:canPick?"pointer":"not-allowed",
                               fontSize:12, transition:"all 0.15s",
                               border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
                               background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
                               color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
                               opacity:!canPick&&!isPicked?0.45:1 }}>
-                            {isPicked?"✓ ":""}{race}
+                            {isPicked?"✓ ":""}{opt}
                           </div>
                         );
                       })}
@@ -2399,14 +2399,14 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
       <div style={{marginTop:20,padding:"14px 16px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:10}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>Currency</div>
         <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-          {(gameData?.currencies||[{key:"cp",name:"Copper",color:"#b87333"},{key:"sp",name:"Silver",color:"#c0c0c0"},{key:"ep",name:"Electrum",color:"#a8bba8"},{key:"gp",name:"Gold",color:"#ffd700"},{key:"pp",name:"Platinum",color:"#e5e4e2"}]).map(cur=>{const[coin,label,color]=[cur.key,cur.name,cur.color]; return (
-            <div key={coin} style={{textAlign:"center"}}>
-              <div style={{width:28,height:28,borderRadius:"50%",background:color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{coin.toUpperCase()}</div>
-              <input type="number" value={currency[coin]||0} onChange={e=>setCurrency(coin,e.target.value)} style={{...inp,width:72,textAlign:"center",fontSize:15,padding:"4px 0"}}/>
-              <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{label}</div>
+          {(gameData?.currencies||[{key:"cp",name:"Copper",color:"#b87333"},{key:"sp",name:"Silver",color:"#c0c0c0"},{key:"ep",name:"Electrum",color:"#a8bba8"},{key:"gp",name:"Gold",color:"#ffd700"},{key:"pp",name:"Platinum",color:"#e5e4e2"}]).map(cur=>(
+            <div key={cur.key} style={{textAlign:"center"}}>
+              <div style={{width:28,height:28,borderRadius:"50%",background:cur.color,margin:"0 auto 4px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:"bold",color:"#333"}}>{cur.key.toUpperCase()}</div>
+              <input type="number" value={currency[cur.key]||0} onChange={e=>setCurrency(cur.key,e.target.value)} style={{...inp,width:72,textAlign:"center",fontSize:15,padding:"4px 0"}}/>
+              <div style={{fontSize:10,color:"var(--text-muted)",marginTop:2}}>{cur.name}</div>
             </div>
-          );})}
-        </div>
+          ))}
+
       <div style={{marginTop:16}}>
         <div style={{fontSize:12,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Add Item to Inventory</div>
         <LibraryItemAdder
