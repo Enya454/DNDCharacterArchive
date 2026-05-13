@@ -517,7 +517,7 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   const g1  = cc.bgG1    || "rgba(60,20,100,0.22)";
   const g2  = cc.bgG2    || "rgba(80,40,10,0.18)";
   const accent = cc.accentColor|| t.accent  || "#c9a227";
-  const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel',serif";
+  const fontD  = (cc.fontDisplay === "'Cinzel Decorative',serif" ? "'Cinzel',serif" : cc.fontDisplay) || t.fontDisplay || "'Cinzel',serif";
   const fontB  = cc.fontBody   || t.fontBody    || "'Inter',system-ui,sans-serif";
   return (
     <div style={{
@@ -6194,7 +6194,7 @@ function App() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
       <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "'Inter',system-ui,sans-serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
 
