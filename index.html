@@ -6042,24 +6042,31 @@ function App() {
   // ── Load characters when session appears ──
   useEffect(() => {
     if (!session) return;
-    // Show localStorage chars immediately so UI isn't blank while Supabase loads
-    const local = loadChars();
-    if (local.length > 0) setCharacters(local);
     setCharLoading(true);
     dbLoadChars().then(chars => {
       if (chars.length > 0) {
-        // Supabase is authoritative — merge: Supabase wins for chars that exist there
-        setCharacters(chars);
-        saveChars(chars); // keep localStorage in sync
-      } else if (local.length > 0) {
-        // First login migration: push local chars to Supabase
-        Promise.all(local.map(c => dbSaveChar(c))).then(() => {
-          saveChars([]); // clear local after migration
-        });
-        setCharacters(local);
+        // Supabase is authoritative — use only Supabase data
+        // Deduplicate by id just in case
+        const seen = new Set();
+        const deduped = chars.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+        setCharacters(deduped);
+        saveChars(deduped);
+      } else {
+        // No Supabase chars — check localStorage for migration
+        const local = loadChars();
+        if (local.length > 0) {
+          Promise.all(local.map(c => dbSaveChar(c))).then(() => {
+            saveChars([]);
+          });
+          setCharacters(local);
+        }
       }
-    }).catch(e => console.error("dbLoadChars error:", e))
-      .finally(() => setCharLoading(false));
+    }).catch(e => {
+      console.error("dbLoadChars error:", e);
+      // Fall back to localStorage only on error
+      const local = loadChars();
+      if (local.length > 0) setCharacters(local);
+    }).finally(() => setCharLoading(false));
   }, [session?.user?.id]);
 
   // ── Loading states ──
@@ -6104,11 +6111,15 @@ function App() {
 
   // ── Save / delete ──
   const saveChar = async char => {
-    const list = characters.find(c => c.id === char.id)
+    const exists = characters.find(c => c.id === char.id);
+    const raw = exists
       ? characters.map(c => c.id === char.id ? char : c)
       : [...characters, char];
+    // Deduplicate by id — safety net against race conditions
+    const seen = new Set();
+    const list = raw.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
     setCharacters(list);
-    saveChars(list); // local backup
+    saveChars(list);
     await dbSaveChar(char);
     setSelId(char.id); setView("sheet");
   };
