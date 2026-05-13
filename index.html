@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tome of Heroes — D&D 5e Character Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-size: 15px; }
+    body { margin: 0; font-size: 15px; font-family: 'Inter', system-ui, sans-serif; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0d0d0f; }
     ::-webkit-scrollbar-thumb { background: #3a3a45; border-radius: 3px; }
@@ -508,7 +508,7 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   const g2  = cc.bgG2    || "rgba(80,40,10,0.18)";
   const accent = cc.accentColor|| t.accent  || "#c9a227";
   const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel Decorative',serif";
-  const fontB  = cc.fontBody   || t.fontBody    || "serif";
+  const fontB  = cc.fontBody   || t.fontBody    || "'Inter',system-ui,sans-serif";
   return (
     <div style={{
       "--bg":bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
@@ -4514,6 +4514,7 @@ const SYMBOL_PRESETS = {
 };
 
 const FONT_OPTIONS = [
+  ["'Inter',system-ui,sans-serif",         "Inter (Clean/Modern)"],
   ["'Cinzel Decorative',serif",           "Cinzel (Fantasy)"],
   ["'MedievalSharp',serif",               "Medieval Sharp"],
   ["Georgia,serif",                        "Georgia (Classic)"],
@@ -5266,7 +5267,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
   const ts = active => ({
     padding:"7px 14px", cursor:"pointer", fontSize:13, whiteSpace:"nowrap",
-    transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
+    transition:"all 0.15s", fontFamily:theme.fontBody || "'Inter',system-ui,sans-serif",
     background: active ? theme.card : "transparent",
     color:      active ? theme.accent : theme.textMuted,
     border:     `1px solid ${active ? theme.border : "transparent"}`,
@@ -5695,50 +5696,89 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
   const hp    = char.hp || { current:0, max:1 };
   const pct   = Math.min(100, (hp.current / Math.max(1, hp.max)) * 100);
   const hpC   = pct > 50 ? theme.success : pct > 25 ? "#f39c12" : theme.danger;
-  const label = char.subclass ? `${char.class} (${char.subclass})` : char.class;
+  const label = char.subclass ? `${char.class} · ${char.subclass}` : char.class;
+  const bodyFont = "'Inter',system-ui,sans-serif";
 
   return (
-    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, transition:"all 0.22s", position:"relative", overflow:"hidden" }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; }}>
+    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14,
+      transition:"all 0.22s", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.4)`; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+
+      {/* Accent stripe */}
       <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary || theme.accent})` }} />
+
       {/* Main clickable area */}
-      <div onClick={onClick} style={{ cursor:"pointer" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
-          <div>
-            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:20, lineHeight:1.2 }}>{char.name}</div>
-            <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
-              <span style={{ color:theme.text }}>{char.species}</span>
-              {char.species && label ? " · " : ""}<span>{label}</span>
+      <div onClick={onClick} style={{ cursor:"pointer", padding:18, paddingTop:20, flex:1 }}>
+
+        {/* Portrait + name row */}
+        <div style={{ display:"flex", gap:14, alignItems:"flex-start", marginBottom:14 }}>
+          {/* Profile picture */}
+          <div style={{ width:64, height:64, borderRadius:10, flexShrink:0, overflow:"hidden",
+            border:`2px solid ${theme.accent}`, background:theme.surface, position:"relative" }}>
+            {char.profileImage
+              ? <img src={char.profileImage} alt={char.name}
+                  style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}
+                  onError={e=>{e.target.style.display="none";}}/>
+              : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center",
+                  justifyContent:"center", fontSize:26, color:theme.accent, background:`rgba(0,0,0,0.2)` }}>
+                  {(char.name||"?")[0].toUpperCase()}
+                </div>
+            }
+          </div>
+
+          {/* Name, class, level */}
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:18, lineHeight:1.2,
+              marginBottom:4, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+              {char.name || "Unnamed"}
+            </div>
+            <div style={{ fontSize:13, color:theme.text, fontFamily:bodyFont, marginBottom:2 }}>
+              {char.species}{char.species && label ? " · " : ""}{label}
+            </div>
+            <div style={{ fontSize:12, color:theme.textMuted, fontFamily:bodyFont }}>
+              {char.background}
+              {char.background && char.alignment ? " · " : ""}{char.alignment}
             </div>
           </div>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
-            <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
+
+          {/* Level badge */}
+          <div style={{ textAlign:"center", flexShrink:0, background:`rgba(0,0,0,0.2)`,
+            border:`1px solid ${theme.border}`, borderRadius:8, padding:"6px 10px" }}>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{char.level}</div>
+            <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>LVL</div>
           </div>
         </div>
-        <div style={{ marginBottom:12 }}>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
-            <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
+
+        {/* HP bar */}
+        <div>
+          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12,
+            fontFamily:bodyFont, color:theme.textMuted, marginBottom:5 }}>
+            <span>HP</span>
+            <span style={{ color:hpC, fontWeight:600 }}>{hp.current} / {hp.max}</span>
           </div>
-          <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
+          <div style={{ height:6, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
             <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
           </div>
         </div>
-        <div style={{ fontSize:12, color:theme.textMuted, marginBottom:12 }}>
-          <span>{char.background}</span>
-          <span style={{ color:theme.textDim, marginLeft:8 }}>{char.alignment}</span>
-        </div>
       </div>
+
       {/* Action buttons */}
-      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, paddingTop:10 }}>
-        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(201,162,39,0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
+      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, padding:"10px 18px" }}>
+        <button onClick={e=>{e.stopPropagation();onClick();}}
+          style={{ flex:1, padding:"7px", borderRadius:7, border:`1px solid ${theme.accent}`,
+            background:"rgba(201,162,39,0.1)", color:theme.accent, cursor:"pointer",
+            fontSize:13, fontFamily:bodyFont, fontWeight:500 }}>
           Open
         </button>
-        <button onClick={e=>{e.stopPropagation();onEdit();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.border}`, background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:12 }}>
+        <button onClick={e=>{e.stopPropagation();onEdit();}}
+          style={{ flex:1, padding:"7px", borderRadius:7, border:`1px solid ${theme.border}`,
+            background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:13, fontFamily:bodyFont }}>
           ✏️ Edit
         </button>
-        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}} style={{ padding:"6px 10px", borderRadius:6, border:`1px solid ${theme.danger}`, background:"transparent", color:theme.danger, cursor:"pointer", fontSize:12 }}>
+        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}}
+          style={{ padding:"7px 12px", borderRadius:7, border:`1px solid ${theme.danger}`,
+            background:"transparent", color:theme.danger, cursor:"pointer", fontSize:13 }}>
           🗑
         </button>
       </div>
@@ -6146,7 +6186,7 @@ function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
-      <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
+      <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "'Inter',system-ui,sans-serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
 
         {/* Floating runes + glow pools */}
         <MysticBackground density="normal"/>
@@ -6158,8 +6198,8 @@ function App() {
           {/* User info + account + logout — top right */}
           <div style={{ position:"absolute", top:16, right:20, display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:12, color:dt.textMuted || "#8a8070" }}>{session.user.email}</span>
-            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Account</button>
-            <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Log out</button>
+            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"'Inter',system-ui,sans-serif" }}>Account</button>
+            <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"'Inter',system-ui,sans-serif" }}>Log out</button>
           </div>
 
           {/* Inner hero radial glow */}
