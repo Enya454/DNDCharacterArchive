@@ -1847,10 +1847,8 @@ function LibraryItemAdder({ gameData, onAdd }) {
             {/* Item rows */}
             <div style={{ maxHeight:260, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
               {inCategory.length===0 && <div style={{fontSize:13,color:"var(--text-dim)",padding:"8px 0"}}>No items found.</div>}
-              {inCategory.map(it=>{
-                const justAdded = added===it.name;
-                return (
-                  <div key={it.name} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 10px", background:"var(--surface)", borderRadius:6, border:`1px solid ${justAdded?"var(--success)":"var(--border)"}`, transition:"border-color 0.3s" }}>
+              {inCategory.map(it=>(
+                  <div key={it.name} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 10px", background:"var(--surface)", borderRadius:6, border:`1px solid ${added===it.name?"var(--success)":"var(--border)"}`, transition:"border-color 0.3s" }}>
                     <div style={{ flex:1, minWidth:0 }}>
                       <span style={{ fontSize:13, color:"var(--text)", fontWeight:500 }}>{it.name}</span>
                       <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:10 }}>
@@ -1866,13 +1864,12 @@ function LibraryItemAdder({ gameData, onAdd }) {
                     </div>
                     <button onClick={()=>addFromLibrary(it)} style={{
                       padding:"4px 12px", borderRadius:6, fontSize:12, cursor:"pointer", flexShrink:0,
-                      border:`1px solid ${justAdded?"var(--success)":"var(--accent)"}`,
-                      background:justAdded?"var(--success)":"var(--accent)",
+                      border:`1px solid ${added===it.name?"var(--success)":"var(--accent)"}`,
+                      background:added===it.name?"var(--success)":"var(--accent)",
                       color:"var(--bg)", transition:"all 0.2s"
-                    }}>{justAdded?"✓":"+ Add"}</button>
+                    }}>{added===it.name?"✓":"+ Add"}</button>
                   </div>
-                );
-              })}
+              ))}
             </div>
 
             {/* Qty */}
@@ -2239,11 +2236,10 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
                 {char.class} Starting Equipment
               </div>
               {groups.map((group,gi)=>{
-                if (group.fixed) {
-                  // Check if any pick items in this fixed group are unresolved
-                  const unresolved = group.fixed.filter((it,ii) => it.pick && !pickSels[`fixed-${gi}-${ii}`]);
-                  const hasIssue = unresolved.length > 0;
-                  return (
+                const chosenOi = choices[`class-${gi}`] ?? 0;
+                const unresolved = (group.fixed||[]).filter((it,ii) => it.pick && !pickSels[`fixed-${gi}-${ii}`]);
+                const hasIssue = unresolved.length > 0;
+                if (group.fixed) return (
                   <div key={gi} style={{marginBottom:12,padding:"10px 14px",background:"var(--surface)",
                     border:`1px solid ${hasIssue?"#e67e22":"var(--border)"}`,borderRadius:8,
                     boxShadow:hasIssue?"0 0 0 1px rgba(230,126,34,0.3)":undefined}}>
@@ -2252,51 +2248,41 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
                       {hasIssue && <div style={{fontSize:10,color:"#e67e22"}}>⚠ Choose {unresolved.length} item{unresolved.length>1?"s":""}</div>}
                     </div>
                     <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {group.fixed.map((it,ii)=>{
-                        if (it.pick) {
-                          const pickKey = `fixed-${gi}-${ii}`;
-                          const isUnresolved = !pickSels[pickKey];
-                          return (
-                            <div key={pickKey} style={{borderRadius:6, border:isUnresolved?"1px solid rgba(230,126,34,0.4)":"none", padding:isUnresolved?"4px":"0"}}>
-                              {renderOptionItem(it, pickKey)}
-                              {isUnresolved && <div style={{fontSize:10,color:"#e67e22",marginTop:3}}>⚠ Selection required</div>}
-                            </div>
-                          );
-                        }
-                        return (
+                      {group.fixed.map((it,ii)=>
+                        it.pick ? (
+                          <div key={`p-${gi}-${ii}`} style={{borderRadius:6, border:!pickSels[`fixed-${gi}-${ii}`]?"1px solid rgba(230,126,34,0.4)":"none", padding:!pickSels[`fixed-${gi}-${ii}`]?"4px":"0"}}>
+                            {renderOptionItem(it, `fixed-${gi}-${ii}`)}
+                            {!pickSels[`fixed-${gi}-${ii}`] && <div style={{fontSize:10,color:"#e67e22",marginTop:3}}>⚠ Selection required</div>}
+                          </div>
+                        ) : (
                           <div key={it.name} style={{fontSize:13}}>
                             {it.qty>1?`${it.qty}× `:""}
                             <strong>{it.name}</strong>
                             {it.description&&<span style={{color:"var(--text-dim)",fontSize:11,marginLeft:6}}>{it.description}</span>}
                           </div>
-                        );
-                      })}
+                        )
+                      )}
                     </div>
                   </div>
-                  );
-                }
-                const chosenOi = choices[`class-${gi}`] ?? 0;
+                );
                 return (
                   <div key={gi} style={{marginBottom:14}}>
                     <div style={{fontSize:11,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Choice {gi+1} — pick one</div>
                     <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                      {group.options.map((option,oi)=>{
-                        const isSel = chosenOi===oi;
-                        return (
-                          <div key={oi} style={{
-                            padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
-                            border:`1px solid ${isSel?"var(--accent)":"var(--border)"}`,
-                            background:isSel?"rgba(201,162,39,0.08)":"var(--surface)"
-                          }}>
-                            <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(c=>({...c,[`class-${gi}`]:oi}))}>
-                              <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${isSel?"var(--accent)":"var(--border)"}`,background:isSel?"var(--accent)":"transparent"}}/>
-                              <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
-                                {option.map((it,ii)=>renderOptionItem(it,`class-${gi}-${oi}-${ii}`))}
-                              </div>
+                      {group.options.map((option,oi)=>(
+                        <div key={oi} style={{
+                          padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
+                          border:`1px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,
+                          background:chosenOi===oi?"rgba(201,162,39,0.08)":"var(--surface)"
+                        }}>
+                          <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(ch=>({...ch,[`class-${gi}`]:oi}))}>
+                            <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,background:chosenOi===oi?"var(--accent)":"transparent"}}/>
+                            <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
+                              {option.map((it,ii)=>renderOptionItem(it,`class-${gi}-${oi}-${ii}`))}
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
