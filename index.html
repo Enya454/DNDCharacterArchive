@@ -5718,10 +5718,12 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
               {char.species && label ? " · " : ""}<span>{label}</span>
             </div>
           </div>
-          {/* Level */}
-          <div style={{ textAlign:"right", flexShrink:0 }}>
-            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:28 }}>{char.level}</div>
-            <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>Level</div>
+
+          {/* Level badge */}
+          <div style={{ textAlign:"center", flexShrink:0, background:`rgba(0,0,0,0.2)`,
+            border:`1px solid ${theme.border}`, borderRadius:8, padding:"6px 10px" }}>
+            <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{char.level}</div>
+            <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>LVL</div>
           </div>
         </div>
         <div style={{ marginBottom:12 }}>
