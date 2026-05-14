@@ -2986,7 +2986,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       { id:"infernal", name:"Infernal",  bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",    effect:null },
                       { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",   effect:null },
                       { id:"winter",      name:"Winter Dark",  bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
-                      { id:"winterlight", name:"Winter Light",  bg:"#c8dff5", g1:"rgba(200,225,255,0.55)", g2:"rgba(180,215,255,0.35)",effect:"winter-light" },
+                      { id:"winterlight", name:"Winter Light",  bg:"linear-gradient(180deg,#dbeeff 0%,#c2d8f0 35%,#b8cfe8 65%,#d0e4f5 100%)", g1:"rgba(255,255,255,0.45)", g2:"rgba(160,200,240,0.30)",effect:"winter-light" },
                     ].map(p => {
                       const cur = (char.custom||{}).bgPreset || "dungeon";
                       const active = cur === p.id;
@@ -4687,7 +4687,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
             { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",   effect:null },
             { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",  effect:null },
             { id:"winter",      name:"Winter Dark",  bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
-            { id:"winterlight", name:"Winter Light",  bg:"#c8dff5", g1:"rgba(200,225,255,0.55)", g2:"rgba(180,215,255,0.35)",effect:"winter-light" },
+            { id:"winterlight", name:"Winter Light",  bg:"linear-gradient(180deg,#dbeeff 0%,#c2d8f0 35%,#b8cfe8 65%,#d0e4f5 100%)", g1:"rgba(255,255,255,0.45)", g2:"rgba(160,200,240,0.30)",effect:"winter-light" },
           ].map(p => {
             const cur = cc.bgPreset || "dungeon";
             const active = cur === p.id;
@@ -5800,19 +5800,30 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
         </>
       ) : isWinterLight ? (
         <>
-          {/* Soft daylight god rays */}
-          <GodRays colour="rgba(200,225,255,0.18)"/>
-          {/* Warm-white sky glow at top */}
-          <div style={{ position:"fixed", top:"-10%", left:"10%", width:"80vw", height:"50vw",
-            background:"radial-gradient(ellipse, rgba(220,235,255,0.30) 0%, transparent 65%)",
+          {/* Sun behind clouds — bright diffuse source top-right */}
+          <div style={{ position:"fixed", top:"-15%", right:"15%", width:"55vw", height:"55vw",
+            background:"radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, rgba(220,238,255,0.25) 40%, transparent 70%)",
             pointerEvents:"none", zIndex:0 }}/>
-          {/* Soft horizon glow */}
-          <div style={{ position:"fixed", bottom:"-20%", left:"0%", width:"100vw", height:"50vw",
-            background:"radial-gradient(ellipse, rgba(180,215,255,0.12) 0%, transparent 55%)",
+          {/* Bright sky glow across top */}
+          <div style={{ position:"fixed", top:0, left:0, right:0, height:"40vh",
+            background:"linear-gradient(180deg, rgba(220,240,255,0.45) 0%, transparent 100%)",
             pointerEvents:"none", zIndex:0 }}/>
-          {/* Light frost at corners */}
+          {/* Snow-ground reflection — bright along the bottom */}
+          <div style={{ position:"fixed", bottom:0, left:0, right:0, height:"30vh",
+            background:"linear-gradient(0deg, rgba(235,245,255,0.35) 0%, transparent 100%)",
+            pointerEvents:"none", zIndex:0 }}/>
+          {/* Subtle mid-depth atmospheric haze */}
+          <div style={{ position:"fixed", top:"30%", left:"-10%", width:"70vw", height:"50vh",
+            background:"radial-gradient(ellipse, rgba(200,225,245,0.18) 0%, transparent 65%)",
+            pointerEvents:"none", zIndex:0 }}/>
+          <div style={{ position:"fixed", top:"20%", right:"-5%", width:"50vw", height:"60vh",
+            background:"radial-gradient(ellipse, rgba(180,215,240,0.14) 0%, transparent 60%)",
+            pointerEvents:"none", zIndex:0 }}/>
+          {/* Pale god rays from sun source */}
+          <GodRays colour="rgba(255,255,255,0.12)"/>
+          {/* Frost vignette at edges */}
           <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0,
-            background:"radial-gradient(ellipse at 0% 0%, rgba(200,225,255,0.10) 0%, transparent 25%), radial-gradient(ellipse at 100% 0%, rgba(200,225,255,0.08) 0%, transparent 20%)" }}/>
+            background:"radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(180,210,240,0.18) 100%)" }}/>
         </>
       ) : (
         <>
