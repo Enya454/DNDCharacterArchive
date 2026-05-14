@@ -6142,7 +6142,7 @@ function App() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Philosopher:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
       `}</style>
       <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
 
@@ -6166,7 +6166,7 @@ function App() {
           {/* Ornamental divider line */}
           <div style={{ position:"absolute", top:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.4), rgba(180,120,255,0.3), rgba(201,162,39,0.4), transparent)" }}/>
 
-          <div className="tome-title-text" style={{ fontFamily:dt.fontDisplay, fontSize:"clamp(28px,5.5vw,56px)", letterSpacing:3, position:"relative" }}>
+          <div className="tome-title-text" style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:"clamp(28px,5.5vw,56px)", letterSpacing:3, position:"relative" }}>
             ⚔️ TOME OF HEROES
           </div>
           <div style={{ color:dt.textMuted, fontSize:15, marginTop:10, fontStyle:"italic", position:"relative", letterSpacing:0.5 }}>
@@ -6182,7 +6182,7 @@ function App() {
 
           <button onClick={() => setView("create")} style={{
             padding:"14px 40px", border:"1px solid rgba(201,162,39,0.5)", color:dt.bg || "#0d0d0f",
-            borderRadius:10, cursor:"pointer", fontFamily:dt.fontDisplay, fontSize:15, letterSpacing:1.5, position:"relative",
+            borderRadius:10, cursor:"pointer", fontFamily:"'Cinzel Decorative',serif", fontSize:15, letterSpacing:1.5, position:"relative",
             background:"linear-gradient(135deg, #c9a227 0%, #e8c84a 40%, #c9a227 70%, #8b6914 100%)",
             boxShadow:"0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)", transition:"all 0.25s"
           }}
@@ -6200,12 +6200,12 @@ function App() {
           {characters.length === 0 ? (
             <div style={{ textAlign:"center", padding:"80px 20px" }}>
               <div style={{ fontSize:72, marginBottom:18, filter:"drop-shadow(0 0 20px rgba(201,162,39,0.3))" }}>📖</div>
-              <div style={{ fontFamily:dt.fontDisplay, fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
+              <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
               <div style={{ color:dt.textDim, fontSize:15, fontStyle:"italic" }}>Create your first character to begin your adventure</div>
             </div>
           ) : (
             <>
-              <div style={{ fontFamily:dt.fontDisplay, color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
+              <div style={{ fontFamily:"'Cinzel Decorative',serif", color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
                 {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
