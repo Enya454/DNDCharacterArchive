@@ -2962,27 +2962,18 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
 
                 {/* Background preset */}
                 <div>
-                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Background</div>
+                  <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Theme</div>
                   <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6 }}>
-                    {[
-                      { id:"dungeon",  name:"Dungeon",   bg:"#0d0d0f", g1:"rgba(60,20,100,0.22)",  g2:"rgba(80,40,10,0.18)"  },
-                      { id:"abyss",    name:"Void",      bg:"#050508", g1:"rgba(20,0,80,0.35)",    g2:"rgba(0,20,60,0.25)"   },
-                      { id:"crimson",  name:"Crimson",   bg:"#0e0608", g1:"rgba(120,10,30,0.28)",  g2:"rgba(60,0,10,0.2)"    },
-                      { id:"forest",   name:"Grove",     bg:"#050d07", g1:"rgba(10,60,20,0.30)",   g2:"rgba(30,80,10,0.18)"  },
-                      { id:"ocean",    name:"Abyss Sea", bg:"#030810", g1:"rgba(0,40,120,0.30)",   g2:"rgba(10,20,80,0.22)"  },
-                      { id:"desert",   name:"Desert",    bg:"#0e0c05", g1:"rgba(120,80,10,0.28)",  g2:"rgba(80,40,5,0.20)"   },
-                      { id:"frost",    name:"Frost",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)"},
-                      { id:"infernal", name:"Infernal",  bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)"   },
-                      { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)"  },
-                    ].map(p => {
-                      const cur = (char.custom||{}).bgPreset || "dungeon";
-                      const active = cur === p.id;
+                    {Object.entries(gameData?.themes || {}).map(([id, t]) => {
+                      const active = (char.theme || "dungeon") === id;
+                      const bg = t.bg || "#0d0d0f";
+                      const g1 = t.surface ? t.surface + "88" : "rgba(60,20,100,0.22)";
                       return (
-                        <div key={p.id} onClick={()=>setChar(c=>({...c,custom:{...c.custom||{},bgPreset:p.id,bgColor:p.bg,bgG1:p.g1,bgG2:p.g2}}))}
+                        <div key={id} onClick={()=>setChar(c=>({...c, theme:id}))}
                           style={{ padding:"8px 4px", borderRadius:7, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
-                            border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
-                            background:`radial-gradient(ellipse at 30% 20%, ${p.g1} 0%, transparent 70%), ${p.bg}` }}>
-                          <div style={{ fontSize:10, color:active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
+                            border:`2px solid ${active?t.accent||"var(--accent)":"var(--border)"}`,
+                            background:`radial-gradient(ellipse at 30% 20%, ${g1} 0%, transparent 70%), ${bg}` }}>
+                          <div style={{ fontSize:10, color:active?t.accent||"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{t.name || id}</div>
                         </div>
                       );
                     })}
@@ -4660,27 +4651,19 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
 
       {/* Background preset */}
       <div style={{ marginBottom:16 }}>
-        <label style={label}>Background Style</label>
+        <label style={label}>Theme</label>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
-          {[
-            { id:"dungeon",  name:"Dungeon Stone",  bg:"#0d0d0f", g1:"rgba(60,20,100,0.22)",  g2:"rgba(80,40,10,0.18)" },
-            { id:"abyss",    name:"Void Abyss",     bg:"#050508", g1:"rgba(20,0,80,0.35)",    g2:"rgba(0,20,60,0.25)"  },
-            { id:"crimson",  name:"Crimson Court",  bg:"#0e0608", g1:"rgba(120,10,30,0.28)",  g2:"rgba(60,0,10,0.2)"   },
-            { id:"forest",   name:"Druid Grove",    bg:"#050d07", g1:"rgba(10,60,20,0.30)",   g2:"rgba(30,80,10,0.18)" },
-            { id:"ocean",    name:"Abyssal Sea",    bg:"#030810", g1:"rgba(0,40,120,0.30)",   g2:"rgba(10,20,80,0.22)" },
-            { id:"desert",   name:"Desert Tomb",    bg:"#0e0c05", g1:"rgba(120,80,10,0.28)",  g2:"rgba(80,40,5,0.20)"  },
-            { id:"frost",    name:"Frost Cave",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)"},
-            { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)"  },
-            { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)" },
-          ].map(p => {
-            const cur = cc.bgPreset || "dungeon";
-            const active = cur === p.id;
+          {Object.entries(gameData?.themes || {}).map(([id, t]) => {
+            const active = (char.theme || "dungeon") === id;
+            const bg = t.bg || "#0d0d0f";
+            const g1 = t.surface ? t.surface + "88" : "rgba(60,20,100,0.22)";
             return (
-              <div key={p.id} onClick={()=>updCustom({ bgPreset:p.id, bgColor:p.bg, bgG1:p.g1, bgG2:p.g2 })}
+              <div key={id} onClick={()=>onUpdate({...char, theme:id})}
                 style={{ padding:"10px 8px", borderRadius:8, cursor:"pointer", textAlign:"center", transition:"all 0.2s",
-                  border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
-                  background:`radial-gradient(ellipse at 20% 10%, ${p.g1} 0%, transparent 60%), ${p.bg}` }}>
-                <div style={{ fontSize:12, color: active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
+                  border:`2px solid ${active?t.accent||"var(--accent)":"var(--border)"}`,
+                  background:`radial-gradient(ellipse at 20% 10%, ${g1} 0%, transparent 60%), ${bg}` }}>
+                <div style={{ fontSize:12, color:active?t.accent||"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{t.name || id}</div>
+                {t.backgroundEffect && <div style={{ fontSize:9, color: active?t.accent||"var(--accent)":"var(--text-dim)", marginTop:3, textTransform:"uppercase", letterSpacing:1 }}>✦ {t.backgroundEffect}</div>}
               </div>
             );
           })}
