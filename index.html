@@ -45,6 +45,61 @@
       88%  { opacity: 0.7; }
       100% { transform: translateY(-130vh)   translateX(8px)   rotate(20deg); opacity: 0; }
     }
+
+    /* Snow falls DOWN */
+    @keyframes snowfall {
+      0%   { transform: translateY(-10vh) translateX(0px)   rotate(0deg);  opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 0.8; }
+      100% { transform: translateY(110vh)  translateX(30px)  rotate(360deg); opacity: 0; }
+    }
+    @keyframes snowfallSway {
+      0%   { transform: translateY(-10vh) translateX(0px)   rotate(0deg);  opacity: 0; }
+      5%   { opacity: 1; }
+      25%  { transform: translateY(25vh)  translateX(-20px) rotate(90deg); }
+      50%  { transform: translateY(55vh)  translateX(15px)  rotate(180deg); }
+      75%  { transform: translateY(80vh)  translateX(-10px) rotate(270deg); }
+      100% { transform: translateY(110vh) translateX(5px)   rotate(360deg); opacity: 0; }
+    }
+
+    /* God rays / crepuscular light */
+    @keyframes godRaySweep {
+      0%   { opacity: 0;    transform: rotate(-2deg) scaleX(1);   }
+      15%  { opacity: 1;    }
+      50%  { opacity: 0.6;  transform: rotate(2deg)  scaleX(1.08); }
+      85%  { opacity: 1;    }
+      100% { opacity: 0;    transform: rotate(-2deg) scaleX(1);   }
+    }
+    @keyframes godRaySweep2 {
+      0%   { opacity: 0;    transform: rotate(1deg)  scaleX(1);   }
+      20%  { opacity: 0.7;  }
+      50%  { opacity: 0.4;  transform: rotate(-1deg) scaleX(1.05); }
+      80%  { opacity: 0.7;  }
+      100% { opacity: 0;    transform: rotate(1deg)  scaleX(1);   }
+    }
+
+    .god-ray {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      top: -20vh;
+      transform-origin: top center;
+    }
+
+    /* Frost rime at the edges */
+    @keyframes frostPulse {
+      0%,100% { opacity: 0.35; }
+      50%      { opacity: 0.55; }
+    }
+    .frost-overlay {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse at 0% 0%, rgba(180,220,255,0.12) 0%, transparent 35%),
+        radial-gradient(ellipse at 100% 0%, rgba(160,210,255,0.10) 0%, transparent 30%),
+        radial-gradient(ellipse at 0% 100%, rgba(180,220,255,0.10) 0%, transparent 30%),
+        radial-gradient(ellipse at 100% 100%, rgba(140,200,255,0.08) 0%, transparent 25%);
+      animation: frostPulse 6s ease-in-out infinite;
+    }
     @keyframes shimmer {
       0%   { background-position: -200% center; }
       100% { background-position:  200% center; }
@@ -525,7 +580,8 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
     }}>
       <MysticBackground density={cc.symbolDensity || "subtle"}
         symbolSet={cc.symbolSet?.length > 0 ? cc.symbolSet : null}
-        symbolOpacity={cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1}/>
+        symbolOpacity={cc.symbolOpacity !== undefined ? cc.symbolOpacity : 1}
+        backgroundEffect={t.backgroundEffect}/>
       <div style={{ position:"relative", zIndex:1 }}>{children}</div>
     </div>
   );
@@ -5642,51 +5698,101 @@ const SYMBOLS = [
   "△","▽","◇","⬦","✩","⁕",
 ];
 
-function MysticBackground({ density = "normal", symbolSet, symbolOpacity }) {
-  const count  = density === "subtle" ? 12 : density === "off" ? 0 : 20;
-  const pool   = symbolSet?.length > 0 ? symbolSet : SYMBOLS;
-  const opMul  = symbolOpacity !== undefined ? symbolOpacity : 1;
-  const symbols = React.useMemo(() => {
-    if (count === 0) return [];
-    return Array.from({ length: count }, (_, i) => {
-      const left     = (i * 97 + 11) % 100;
-      const startTop = 100 + (i * 37) % 40;
-      const delay    = (i * 3.7) % 20;
-      const dur      = 18 + (i * 4.1) % 22;
-      const size     = 12 + (i * 7) % 18;
-      const sym      = pool[i % pool.length];
-      const anim     = i % 2 === 0 ? "floatUp" : "floatUpSway";
-      const baseA    = [0.28, 0.22, 0.20, 0.22, 0.15];
-      const colours  = [
-        `rgba(201,162,39,${(baseA[0]*opMul).toFixed(2)})`,
-        `rgba(180,130,255,${(baseA[1]*opMul).toFixed(2)})`,
-        `rgba(120,180,255,${(baseA[2]*opMul).toFixed(2)})`,
-        `rgba(255,245,210,${(baseA[3]*opMul).toFixed(2)})`,
-        `rgba(255,255,255,${(baseA[4]*opMul).toFixed(2)})`,
-      ];
-      const colour = colours[i % colours.length];
-      return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
-    });
-  }, [count, pool.join(""), opMul]);
+function GodRays({ colour = "rgba(160,210,255,0.06)" }) {
+  const rays = React.useMemo(() => Array.from({length: 7}, (_, i) => ({
+    id: i,
+    left: 8 + i * 13,
+    width: 60 + (i * 37) % 120,
+    height: 55 + (i * 23) % 30,
+    delay: i * 1.8,
+    dur: 8 + (i * 2.3) % 7,
+    phase: i % 2 === 0 ? "godRaySweep" : "godRaySweep2",
+    skew: -15 + i * 5,
+  })), []);
 
   return (
     <>
-      <div className="bg-glow-tl"/>
-      <div className="bg-glow-br"/>
-      <div className="bg-glow-center"/>
+      {rays.map(r => (
+        <div key={r.id} className="god-ray" style={{
+          left: `${r.left}%`,
+          width: `${r.width}px`,
+          height: `${r.height}vh`,
+          background: `linear-gradient(180deg, ${colour} 0%, transparent 100%)`,
+          transform: `skewX(${r.skew}deg)`,
+          animation: `${r.phase} ${r.dur}s ease-in-out ${r.delay}s infinite`,
+        }}/>
+      ))}
+    </>
+  );
+}
+
+const SNOWFLAKES = ["❄","❅","❆","✦","·","*","⬡"];
+
+function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgroundEffect }) {
+  const isWinter  = backgroundEffect === "winter";
+  const count     = density === "subtle" ? 12 : density === "off" ? 0 : 20;
+  const snowCount = isWinter ? (density === "off" ? 0 : density === "subtle" ? 30 : 50) : 0;
+  const pool      = symbolSet?.length > 0 ? symbolSet : (isWinter ? SNOWFLAKES : SYMBOLS);
+  const opMul     = symbolOpacity !== undefined ? symbolOpacity : 1;
+
+  const symbols = React.useMemo(() => {
+    if (count === 0 && !isWinter) return [];
+    const total = isWinter ? snowCount : count;
+    if (total === 0) return [];
+    return Array.from({ length: total }, (_, i) => {
+      const left     = (i * 97 + 11) % 100;
+      const startTop = isWinter ? (-(i * 13) % 120) : 100 + (i * 37) % 40;
+      const delay    = (i * 2.3) % 25;
+      const dur      = isWinter ? (8 + (i * 3.1) % 18) : (18 + (i * 4.1) % 22);
+      const size     = isWinter ? (8 + (i * 5) % 16) : (12 + (i * 7) % 18);
+      const sym      = pool[i % pool.length];
+      const anim     = isWinter
+        ? (i % 3 === 0 ? "snowfall" : "snowfallSway")
+        : (i % 2 === 0 ? "floatUp" : "floatUpSway");
+
+      const colour = isWinter
+        ? `rgba(${180 + (i*7)%60},${210 + (i*5)%40},255,${((0.15 + (i*0.03)%0.25)*opMul).toFixed(2)})`
+        : [
+            `rgba(201,162,39,${(0.28*opMul).toFixed(2)})`,
+            `rgba(180,130,255,${(0.22*opMul).toFixed(2)})`,
+            `rgba(120,180,255,${(0.20*opMul).toFixed(2)})`,
+            `rgba(255,245,210,${(0.22*opMul).toFixed(2)})`,
+            `rgba(255,255,255,${(0.15*opMul).toFixed(2)})`,
+          ][i % 5];
+
+      return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
+    });
+  }, [count, snowCount, isWinter, pool.join(""), opMul]);
+
+  return (
+    <>
+      {isWinter ? (
+        <>
+          <div className="frost-overlay"/>
+          <GodRays colour="rgba(160,210,255,0.055)"/>
+          {/* Cold blue glow pools */}
+          <div style={{ position:"fixed", top:"-20%", left:"20%", width:"60vw", height:"60vw",
+            background:"radial-gradient(ellipse, rgba(80,140,220,0.08) 0%, transparent 65%)",
+            pointerEvents:"none", zIndex:0 }}/>
+          <div style={{ position:"fixed", bottom:"-20%", right:"10%", width:"50vw", height:"50vw",
+            background:"radial-gradient(ellipse, rgba(100,180,255,0.06) 0%, transparent 65%)",
+            pointerEvents:"none", zIndex:0 }}/>
+        </>
+      ) : (
+        <>
+          <div className="bg-glow-tl"/>
+          <div className="bg-glow-br"/>
+          <div className="bg-glow-center"/>
+        </>
+      )}
       {symbols.map(s => (
-        <span
-          key={s.id}
-          className="mystic-symbol"
-          style={{
-            left:      `${s.left}%`,
-            top:       `${s.startTop}vh`,
-            fontSize:  `${s.size}px`,
-            color:     s.colour,
-            animation: `${s.anim} ${s.dur}s linear ${s.delay}s infinite`,
-          }}>
-          {s.sym}
-        </span>
+        <span key={s.id} className="mystic-symbol" style={{
+          left:      `${s.left}%`,
+          top:       `${s.startTop}vh`,
+          fontSize:  `${s.size}px`,
+          color:     s.colour,
+          animation: `${s.anim} ${s.dur}s linear ${s.delay}s infinite`,
+        }}>{s.sym}</span>
       ))}
     </>
   );
@@ -6158,7 +6264,7 @@ function App() {
       <div style={{ background: `radial-gradient(ellipse at 20% 10%, rgba(70,30,120,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(100,60,20,0.22) 0%, transparent 55%), ${dt.bg || "#0d0d0f"}`, minHeight:"100vh", fontFamily:dt.fontBody || "serif", color:dt.text || "#e8e0d0", position:"relative", overflow:"hidden" }}>
 
         {/* Floating runes + glow pools */}
-        <MysticBackground density="normal"/>
+        <MysticBackground density="normal" backgroundEffect={dt.backgroundEffect}/>
 
         {/* Hero banner */}
         <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(201,162,39,0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",

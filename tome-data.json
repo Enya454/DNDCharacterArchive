@@ -13629,6 +13629,25 @@
       "fontDisplay": "'Cinzel Decorative',serif",
       "fontBody": "'Libre Baskerville',serif",
       "gradientHero": "linear-gradient(135deg, #020810 0%, #05101c 50%, #03080f 100%)"
+    },
+    "winter": {
+      "name": "Winter's Grasp",
+      "bg": "#020810",
+      "surface": "#060e1a",
+      "card": "#0a1520",
+      "border": "rgba(140,200,255,0.18)",
+      "accent": "#a8d8ff",
+      "accentSecondary": "#c8e8ff",
+      "text": "#e8f4ff",
+      "textMuted": "#8ab8d8",
+      "textDim": "#4a7898",
+      "danger": "#ff6b6b",
+      "success": "#6bc8a8",
+      "info": "#88ccff",
+      "fontDisplay": "'Cinzel Decorative',serif",
+      "fontBody": "'Crimson Pro',serif",
+      "gradientHero": "linear-gradient(135deg, #020810 0%, #051525 50%, #020810 100%)",
+      "backgroundEffect": "winter"
     }
   },
   "music": {
