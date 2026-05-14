@@ -5489,7 +5489,15 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
                     const features     = bg.features || [];
                     // The special feature: the unique passive that defines the background
-                    const specialFeat  = features.find(f => f.type === "passive" && !f.name.toLowerCase().includes("tool") && !f.name.toLowerCase().includes("proficien"));
+                    const specialFeat = features.find(f => f.feature_type === "background_feature")
+                      || features.filter(f =>
+                          f.type === "passive" &&
+                          !f.name.toLowerCase().includes("tool") &&
+                          !f.name.toLowerCase().includes("proficien") &&
+                          !f.name.toLowerCase().includes("kit") &&
+                          !f.name.toLowerCase().includes("vehicle") &&
+                          !f.name.toLowerCase().includes("instrument")
+                        ).pop();
                     // Skill proficiencies
                     const skillFeat    = features.find(f => f.type === "proficiency_choice");
                     // Language features
