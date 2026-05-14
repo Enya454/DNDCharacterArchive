@@ -2985,7 +2985,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       { id:"frost",    name:"Frost",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)", effect:null },
                       { id:"infernal", name:"Infernal",  bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",    effect:null },
                       { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",   effect:null },
-                      { id:"winter",   name:"Winter",    bg:"#e8f2ff", g1:"rgba(180,210,255,0.45)", g2:"rgba(200,230,255,0.30)",effect:"winter" },
+                      { id:"winter",   name:"Winter",    bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
                     ].map(p => {
                       const cur = (char.custom||{}).bgPreset || "dungeon";
                       const active = cur === p.id;
@@ -4685,7 +4685,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
             { id:"frost",    name:"Frost Cave",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)",effect:null },
             { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",   effect:null },
             { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",  effect:null },
-            { id:"winter",   name:"Winter's Grasp", bg:"#e8f2ff", g1:"rgba(180,210,255,0.45)", g2:"rgba(200,230,255,0.30)",effect:"winter" },
+            { id:"winter",   name:"Winter's Grasp", bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
           ].map(p => {
             const cur = cc.bgPreset || "dungeon";
             const active = cur === p.id;
@@ -5372,7 +5372,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const sectionLabel = txt => (
-    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
+    <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
   );
 
   return (
@@ -5388,12 +5388,12 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
         onCancel={() => setRestModal(null)}
       />}
       {/* ── Sticky top bar ── */}
-      <div style={{ background:theme.card, borderBottom:`2px solid ${theme.accent}`, padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
+      <div style={{ background:theme.card, borderBottom:"2px solid var(--accent)", padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${theme.border}`, color:theme.textMuted, padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
           {/* Name */}
           <div style={{ flexShrink:0, minWidth:0 }}>
-            <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:theme.accent, lineHeight:1.1 }}>{char.name}</div>
+            <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:"var(--accent)", lineHeight:1.1 }}>{char.name}</div>
             <div style={{ fontSize:10, color:theme.textMuted, whiteSpace:"nowrap" }}>
               {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Lvl ${char.level}`].filter(Boolean).join(" · ")}
             </div>
@@ -5419,7 +5419,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
             <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.border}`, color:theme.textMuted, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
-            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:theme.surface, border:`1px solid ${theme.accent}`, color:theme.accent, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
+            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:theme.surface, border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
           </div>
           {/* Controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
@@ -5430,7 +5430,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                 <button onClick={()=>{
                   navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
                   setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-                }} style={{ background:"transparent", border:`1px solid ${theme.accent}`, color:theme.accent, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
                   {shareCopied ? "✓ Copied!" : "🔗 Copy Link"}
                 </button>
               )}
@@ -5450,9 +5450,9 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {/* Portrait */}
           <div style={{ textAlign:"center", marginBottom:12 }}>
             <div onClick={()=>fileRef.current.click()} title="Click to upload portrait"
-              style={{ width:110, height:110, borderRadius:10, margin:"0 auto", cursor:"pointer", position:"relative", overflow:"hidden", border:`2px solid ${theme.accent}`, background:theme.surface, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 0 16px rgba(201,162,39,0.2)`, transition:"box-shadow 0.2s" }}
+              style={{ width:110, height:110, borderRadius:10, margin:"0 auto", cursor:"pointer", position:"relative", overflow:"hidden", border:"2px solid var(--accent)", background:theme.surface, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 0 16px rgba(var(--accent-rgb,201,162,39),0.2)`, transition:"box-shadow 0.2s" }}
               onMouseEnter={e=>e.currentTarget.style.boxShadow="0 0 24px var(--accent)44"}
-              onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 16px rgba(201,162,39,0.2)"}>
+              onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 16px rgba(var(--accent-rgb,201,162,39),0.2)"}>
               {char.profileImage && !imgError
                 ? <img src={char.profileImage} alt="portrait" onError={()=>setImgError(true)} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
                 : <div style={{ textAlign:"center", color:theme.textDim }}><div style={{ fontSize:28 }}>🧙</div><div style={{ fontSize:9, marginTop:4, color:theme.textMuted }}>Add portrait</div></div>
@@ -5468,7 +5468,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               return (
                 <div key={ab} style={{ textAlign:"center", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:7, padding:"5px 2px" }}>
                   <div style={{ fontSize:10, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:theme.accent, lineHeight:1.2 }}>{score}</div>
+                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:"var(--accent)", lineHeight:1.2 }}>{score}</div>
                   <div style={{ fontSize:13, color:theme.text }}>{modStr(calcMod(score))}</div>
                 </div>
               );
@@ -5482,7 +5482,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               <div key={ab} style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 6px", borderRadius:4 }}>
                 <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0, background:sv.proficient?theme.accent:"transparent", border:`2px solid ${sv.proficient?theme.accent:theme.border}` }}/>
                 <span style={{ flex:1, fontSize:12, color:sv.proficient?theme.text:theme.textMuted }}>{ABILITY_NAMES[ab]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:13 }}>{modStr(sv.value)}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13 }}>{modStr(sv.value)}</span>
               </div>
             ))}
           </div>
@@ -5495,7 +5495,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                 <span style={{ width:7, height:7, flexShrink:0, display:"inline-block", borderRadius:d.expertise?0:"50%", transform:d.expertise?"rotate(45deg)":"none", background:d.proficient||d.expertise?theme.accent:"transparent", border:`2px solid ${d.proficient||d.expertise?theme.accent:theme.border}` }}/>
                 <span style={{ flex:1, fontSize:12, color:d.proficient?theme.text:theme.textMuted, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
                 <span style={{ fontSize:10, color:theme.textDim, marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
               </div>
             ))}
           </div>
@@ -5537,7 +5537,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:theme.surface, border:`1px solid ${theme.border}`, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:24, lineHeight:1 }}>{s.v}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:24, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -5766,7 +5766,7 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
         : (i % 2 === 0 ? "floatUp" : "floatUpSway");
 
       const colour = isWinter
-        ? `rgba(${60 + (i*11)%80},${100 + (i*7)%80},${180 + (i*5)%60},${((0.15 + (i*0.03)%0.30)*opMul).toFixed(2)})`
+        ? `rgba(${160 + (i*7)%60},${210 + (i*5)%40},255,${((0.25 + (i*0.03)%0.35)*opMul).toFixed(2)})`
         : [
             `rgba(201,162,39,${(0.28*opMul).toFixed(2)})`,
             `rgba(180,130,255,${(0.22*opMul).toFixed(2)})`,
