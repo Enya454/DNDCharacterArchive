@@ -567,10 +567,21 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   const accent = cc.accentColor|| t.accent  || "#c9a227";
   const fontD  = cc.fontDisplay|| t.fontDisplay || "'Cinzel Decorative',serif";
   const fontB  = cc.fontBody   || t.fontBody    || "serif";
+  // Parse accent colour to RGB for use in rgba() strings
+  const accentRgb = (() => {
+    const hex = accent.replace('#','');
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0,2),16);
+      const g = parseInt(hex.slice(2,4),16);
+      const b = parseInt(hex.slice(4,6),16);
+      return `${r},${g},${b}`;
+    }
+    return '201,162,39';
+  })();
   return (
     <div style={{
       "--bg":bg,"--surface":t.surface,"--card":t.card,"--border":t.border,
-      "--accent":accent,"--accent2":t.accentSecondary,"--text":t.text,
+      "--accent":accent,"--accent-rgb":accentRgb,"--accent2":t.accentSecondary,"--text":t.text,
       "--text-muted":t.textMuted,"--text-dim":t.textDim,
       "--danger":t.danger,"--success":t.success,"--info":t.info,
       "--font-display":fontD,"--font-body":fontB,"--gradient-hero":t.gradientHero,
@@ -597,7 +608,7 @@ const ws = {
   optGrid: { display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))", gap:10 },
   optCard: sel => ({ padding:"13px 14px", borderRadius:8, cursor:"pointer", transition:"all 0.18s", textAlign:"center",
     border:`2px solid ${sel ? "var(--accent)" : "var(--border)"}`,
-    background: sel ? "rgba(201,162,39,0.08)" : "var(--surface)" }),
+    background: sel ? "rgba(var(--accent-rgb,201,162,39),0.08)" : "var(--surface)" }),
   tag:     { display:"inline-block", padding:"3px 10px", background:"var(--bg)", border:"1px solid var(--accent2)", borderRadius:12, color:"var(--accent)", fontSize:12, margin:"3px 4px 3px 0" },
   secTitle:{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, textTransform:"uppercase", letterSpacing:1, marginBottom:10, marginTop:20 },
   fCard:   locked => ({ padding:"14px 16px", borderRadius:8, border:"1px solid var(--border)", marginBottom:10,
@@ -638,7 +649,7 @@ function SkillPicker({ title, count, from, allSkills, current, onToggle, skillSo
             <div key={skill} onClick={() => canAdd && onToggle(skill)} style={{
               display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
               transition:"all 0.15s", cursor: canAdd ? "pointer" : "not-allowed",
-              background: ownedHere ? "rgba(201,162,39,0.08)" : otherSource ? "rgba(41,128,185,0.08)" : "var(--surface)",
+              background: ownedHere ? "rgba(var(--accent-rgb,201,162,39),0.08)" : otherSource ? "rgba(41,128,185,0.08)" : "var(--surface)",
               border:`1px solid ${ownedHere ? "var(--accent)" : otherSource ? "var(--info)" : "var(--border)"}`,
               opacity: !canAdd && !otherSource ? 0.4 : 1
             }}>
@@ -797,7 +808,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                             style={{ padding:"3px 10px", borderRadius:16, cursor:canPick?"pointer":"not-allowed",
                               fontSize:12, transition:"all 0.15s",
                               border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
-                              background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                              background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
                               color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
                               opacity:!canPick&&!isPicked?0.45:1 }}>
                             {isPicked?"✓ ":""}{opt}
@@ -844,7 +855,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                             style={{ padding:"4px 10px", borderRadius:16, cursor:canPick?"pointer":"not-allowed",
                               fontSize:12, transition:"all 0.15s",
                               border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
-                              background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                              background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
                               color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
                               opacity:!canPick&&!isPicked?0.5:1 }}>
                             {isPicked?"✓ ":""}{spell.name}
@@ -910,7 +921,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill)} style={{
                           display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
                           cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
-                          background: isSel ? "rgba(201,162,39,0.12)" : "var(--surface)",
+                          background: isSel ? "rgba(var(--accent-rgb,201,162,39),0.12)" : "var(--surface)",
                           border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
                           opacity: !canAdd ? 0.4 : 1
                         }}>
@@ -964,7 +975,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         background: isAuto
                           ? "rgba(100,100,200,0.12)"
                           : isMine
-                            ? "rgba(201,162,39,0.08)"
+                            ? "rgba(var(--accent-rgb,201,162,39),0.08)"
                             : isOthers
                               ? "rgba(100,100,100,0.08)"
                               : "var(--surface)",
@@ -1080,7 +1091,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         style={{padding:"5px 12px",borderRadius:20,cursor:canPick||isPicked?"pointer":"not-allowed",
                           fontSize:12,fontFamily:"var(--font-display)",transition:"all 0.15s",
                           border:`1px solid ${isPicked?"var(--accent)":!canLevel||!canPrereq?"var(--border)":"var(--border)"}`,
-                          background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                          background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
                           color:isPicked?"var(--accent)":!canLevel||!canPrereq?"var(--text-dim)":"var(--text)",
                           opacity:!canLevel||!canPrereq?0.45:1,
                           position:"relative"}}>
@@ -1158,7 +1169,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                               style={{ padding:"4px 10px", borderRadius:16, cursor:(canPick&&!inExtra)?"pointer":"not-allowed",
                                 fontSize:12, transition:"all 0.15s",
                                 border:`1px solid ${isPicked?"var(--accent)":inExtra?"var(--border)":"var(--border)"}`,
-                                background:isPicked?"rgba(201,162,39,0.15)":"var(--surface)",
+                                background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
                                 color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
                                 opacity:(!canPick&&!isPicked)||inExtra?0.4:1 }}>
                               {isPicked?"✓ ":""}{spell.name}
@@ -1235,7 +1246,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                       <div key={spell.name} onClick={() => canAdd && onRacialSpellToggle && onRacialSpellToggle(spell.name, feature.name, spell)}
                         style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
                           padding:"7px 10px", borderRadius:7, cursor: canAdd ? "pointer" : "not-allowed",
-                          background: alreadyGranted ? "rgba(201,162,39,0.08)" : "var(--surface)",
+                          background: alreadyGranted ? "rgba(var(--accent-rgb,201,162,39),0.08)" : "var(--surface)",
                           border:`1px solid ${alreadyGranted ? "var(--accent)" : "var(--border)"}`,
                           opacity: !canAdd ? 0.4 : 1 }}>
                         <div>
@@ -1384,7 +1395,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 {hasFeat && (
                   <div>
                     {chosenFeat && chosenFeat !== "__pending__" ? (
-                      <div style={{ padding:"10px 14px", background:"rgba(201,162,39,0.08)", border:"1px solid var(--accent)", borderRadius:8, marginBottom:10 }}>
+                      <div style={{ padding:"10px 14px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid var(--accent)", borderRadius:8, marginBottom:10 }}>
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                           <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15 }}>🏆 {chosenFeat}</span>
                           <button onClick={()=>onFeatChoice(feature.name,"__pending__")} style={{ padding:"3px 10px", borderRadius:6, fontSize:12, cursor:"pointer", border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>Change</button>
@@ -1693,7 +1704,7 @@ function AbilityRoller({ abilities, onChange, char, setChar }) {
               const canAssign   = rolledPool._selected !== undefined && !isAssigned;
               return (
                 <div key={ab} style={{ ...card,
-                  border:`2px solid ${isAssigned?"var(--accent)":canAssign?"rgba(201,162,39,0.5)":"var(--border)"}`,
+                  border:`2px solid ${isAssigned?"var(--accent)":canAssign?"var(--accent)88":"var(--border)"}`,
                   cursor: isAssigned || canAssign ? "pointer" : "default",
                   background: canAssign ? "rgba(201,162,39,0.04)" : "var(--surface)",
                   transition:"all 0.15s"
@@ -2274,7 +2285,7 @@ function WizardEquipmentStep({ char, setChar, gameData }) {
           {group.options.map((option,oi)=>(
             <div key={oi} style={{padding:"12px 14px",borderRadius:8,transition:"all 0.15s",
               border:`1px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,
-              background:chosenOi===oi?"rgba(201,162,39,0.08)":"var(--surface)"}}>
+              background:chosenOi===oi?"rgba(var(--accent-rgb,201,162,39),0.08)":"var(--surface)"}}>
               <div style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}} onClick={()=>setChoices(ch=>({...ch,[`class-${gi}`]:oi}))}>
                 <span style={{width:14,height:14,borderRadius:"50%",flexShrink:0,marginTop:2,display:"inline-block",border:`2px solid ${chosenOi===oi?"var(--accent)":"var(--border)"}`,background:chosenOi===oi?"var(--accent)":"transparent"}}/>
                 <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
@@ -2467,7 +2478,7 @@ function SpellCard({ spell, charLevel, isKnown, disabled, disabledReason, onTogg
   })();
 
   const lvlTag = { display:"inline-block", padding:"2px 8px", borderRadius:10, fontSize:11,
-    background: spell.level===0 ? "rgba(100,100,100,0.2)" : "rgba(201,162,39,0.12)",
+    background: spell.level===0 ? "rgba(100,100,100,0.2)" : "rgba(var(--accent-rgb,201,162,39),0.12)",
     border:`1px solid ${spell.level===0 ? "var(--border)" : "var(--accent2)"}`,
     color: spell.level===0 ? "var(--text-muted)" : "var(--accent)" };
 
@@ -2974,7 +2985,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       { id:"frost",    name:"Frost",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)", effect:null },
                       { id:"infernal", name:"Infernal",  bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",    effect:null },
                       { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",   effect:null },
-                      { id:"winter",   name:"Winter",    bg:"#020810", g1:"rgba(80,160,255,0.20)", g2:"rgba(120,200,255,0.12)",effect:"winter" },
+                      { id:"winter",   name:"Winter",    bg:"#e8f2ff", g1:"rgba(180,210,255,0.45)", g2:"rgba(200,230,255,0.30)",effect:"winter" },
                     ].map(p => {
                       const cur = (char.custom||{}).bgPreset || "dungeon";
                       const active = cur === p.id;
@@ -2995,7 +3006,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                 <div>
                   <div style={{ fontSize:11, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Accent Colour</div>
                   <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:16 }}>
-                    {["#c9a227","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
+                    {["var(--accent)","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
                       <div key={col} onClick={()=>setChar(c=>({...c,custom:{...c.custom||{},accentColor:col}}))}
                         style={{ width:24, height:24, borderRadius:"50%", background:col, cursor:"pointer", flexShrink:0,
                           border:`3px solid ${((char.custom||{}).accentColor||"#c9a227")===col?"white":"transparent"}`,
@@ -3691,7 +3702,7 @@ function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slo
             <button onClick={()=>{ if (canCast) spendRacialUse(spell.name); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
-                background:canCast?"rgba(201,162,39,0.12)":"transparent",
+                background:canCast?"rgba(var(--accent-rgb,201,162,39),0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? "Cast ▸" : "No uses"}
             </button>
@@ -3699,7 +3710,7 @@ function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slo
             <button onClick={()=>{ if (canCast) onUpdate({...char,spellSlots:{...slotsSpent,pact:(slotsSpent["pact"]||0)+1}}); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
-                background:canCast?"rgba(201,162,39,0.12)":"transparent",
+                background:canCast?"rgba(var(--accent-rgb,201,162,39),0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? `Cast L${limits.pactSlotLevel} ▸` : "No slots"}
             </button>
@@ -3707,7 +3718,7 @@ function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slo
             <button onClick={()=>{ setCasting(spell); setUpcastLvl(spell.level); }} disabled={!canCast}
               style={{ padding:"3px 10px", borderRadius:6, fontSize:11, cursor:canCast?"pointer":"not-allowed",
                 fontFamily:"var(--font-display)", border:`1px solid ${canCast?"var(--accent)":"var(--border)"}`,
-                background:canCast?"rgba(201,162,39,0.12)":"transparent",
+                background:canCast?"rgba(var(--accent-rgb,201,162,39),0.12)":"transparent",
                 color:canCast?"var(--accent)":"var(--text-dim)", opacity:canCast?1:0.5 }}>
               {canCast ? "Cast ▸" : "No slot"}
             </button>
@@ -4290,7 +4301,7 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
       <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => toggle(toggleKey)}>
         <span style={{ fontFamily:"var(--font-display)", color: locked ? "var(--text-dim)" : "var(--accent)", fontSize:14, flex:1 }}>{feat.name}</span>
         {feat.type === "asi" && chosenFeat && chosenFeat !== "__pending__" && (
-          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, background:"rgba(201,162,39,0.12)", border:"1px solid var(--accent)", color:"var(--accent)" }}>🏆 {chosenFeat}</span>
+          <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, background:"rgba(var(--accent-rgb,201,162,39),0.12)", border:"1px solid var(--accent)", color:"var(--accent)" }}>🏆 {chosenFeat}</span>
         )}
         {feat.type === "asi" && !chosenFeat && (
           <span style={{ fontSize:11, padding:"1px 8px", borderRadius:10, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-dim)" }}>ASI</span>
@@ -4304,10 +4315,10 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
         <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
           <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{feat.description}</p>
           {chosen && (
-            <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(201,162,39,0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>✓ Chosen: {chosen}</div>
+            <div style={{ marginTop:8, padding:"6px 10px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", borderRadius:6, fontSize:12, color:"var(--accent)" }}>✓ Chosen: {chosen}</div>
           )}
           {feat.type === "asi" && chosenFeat && chosenFeat !== "__pending__" && (
-            <div style={{ marginTop:8, padding:"8px 12px", background:"rgba(201,162,39,0.08)", border:"1px solid var(--accent)", borderRadius:8 }}>
+            <div style={{ marginTop:8, padding:"8px 12px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid var(--accent)", borderRadius:8 }}>
               <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:4 }}>🏆 {chosenFeat}</div>
               <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.5 }}>
                 {(featList||[]).find(f=>f.name===chosenFeat)?.description}
@@ -4405,13 +4416,13 @@ function FeaturesTab({ char, gameData }) {
           )}
           {feat._sublabel && feat._sublabel !== char.class && (
             <span style={{ fontSize:10, padding:"1px 6px", borderRadius:4,
-              background:"rgba(201,162,39,0.08)", border:"1px solid rgba(201,162,39,0.25)", color:"var(--accent2)" }}>
+              background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", color:"var(--accent2)" }}>
               {feat._sublabel}
             </span>
           )}
           {feat._isFeat && (
             <span style={{ fontSize:10, padding:"1px 6px", borderRadius:4,
-              background:"rgba(201,162,39,0.08)", border:"1px solid rgba(201,162,39,0.3)", color:"var(--accent)" }}>
+              background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid rgba(201,162,39,0.3)", color:"var(--accent)" }}>
               🏆 Feat
             </span>
           )}
@@ -4429,7 +4440,7 @@ function FeaturesTab({ char, gameData }) {
             {invList.map(name => {
               const inv = (feat.invocations||[]).find(i=>i.name===name);
               return (
-                <div key={name} style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(201,162,39,0.18)", borderRadius:7, marginBottom:6 }}>
+                <div key={name} style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.18)", borderRadius:7, marginBottom:6 }}>
                   <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:4 }}>
                     {name}{inv?.prereq && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>Requires: {inv.prereq}</span>}
                   </div>
@@ -4451,7 +4462,7 @@ function FeaturesTab({ char, gameData }) {
         {feat.name === "Pact Boon" && chosen?.includes("Tome") && (() => {
           const tc = char.featureChoices?.["pact_tome_cantrips"] || [];
           return tc.length > 0 ? (
-            <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(201,162,39,0.18)", borderRadius:7 }}>
+            <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.18)", borderRadius:7 }}>
               <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Book of Shadows Cantrips</div>
               <div style={{ fontSize:13, color:"var(--accent)" }}>{tc.join(", ")}</div>
             </div>
@@ -4492,7 +4503,7 @@ function FeaturesTab({ char, gameData }) {
           Your ancestry grants you the following spells. These are always available and do not count against your spell limit.
         </p>
         {available.map(g => (
-          <div key={g.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 10px", background:"rgba(201,162,39,0.04)", borderRadius:6, border:"1px solid rgba(201,162,39,0.15)", marginBottom:5 }}>
+          <div key={g.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 10px", background:"rgba(201,162,39,0.04)", borderRadius:6, border:"1px solid rgba(var(--accent-rgb,201,162,39),0.15)", marginBottom:5 }}>
             <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, flex:1 }}>{g.spellName}</span>
             <span style={{ fontSize:11, color:"var(--text-dim)" }}>{g.uses === null || g.uses === undefined ? "At will" : `${g.uses}× / ${g.recharge === "long" ? "Long Rest" : "Short Rest"}`}</span>
             <span style={{ fontSize:10, color:"var(--accent2)", padding:"1px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>✓ Unlocked</span>
@@ -4512,7 +4523,7 @@ function FeaturesTab({ char, gameData }) {
     padding:"5px 16px", borderRadius:20, cursor:"pointer", fontSize:12,
     fontFamily:"var(--font-display)", letterSpacing:0.5, transition:"all 0.15s",
     border:`1px solid ${active?"var(--accent)":"var(--border)"}`,
-    background: active?"rgba(201,162,39,0.12)":"transparent",
+    background: active?"rgba(var(--accent-rgb,201,162,39),0.12)":"transparent",
     color: active?"var(--accent)":"var(--text-muted)",
   });
 
@@ -4674,7 +4685,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
             { id:"frost",    name:"Frost Cave",     bg:"#050d10", g1:"rgba(0,80,120,0.25)",   g2:"rgba(60,120,140,0.15)",effect:null },
             { id:"infernal", name:"Infernal",       bg:"#0e0403", g1:"rgba(160,20,0,0.30)",   g2:"rgba(80,10,0,0.22)",   effect:null },
             { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",  effect:null },
-            { id:"winter",   name:"Winter's Grasp", bg:"#020810", g1:"rgba(80,160,255,0.20)", g2:"rgba(120,200,255,0.12)",effect:"winter" },
+            { id:"winter",   name:"Winter's Grasp", bg:"#e8f2ff", g1:"rgba(180,210,255,0.45)", g2:"rgba(200,230,255,0.30)",effect:"winter" },
           ].map(p => {
             const cur = cc.bgPreset || "dungeon";
             const active = cur === p.id;
@@ -4695,7 +4706,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
       <div style={{ marginBottom:14 }}>
         <label style={label}>Accent Colour</label>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          {["#c9a227","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
+          {["var(--accent)","#e05252","#52a8e0","#52e07a","#b452e0","#e09a52","#e0d452","#52e0d4"].map(col=>(
             <div key={col} onClick={()=>updCustom({accentColor:col})}
               style={{ width:28, height:28, borderRadius:"50%", background:col, cursor:"pointer", flexShrink:0,
                 border:`3px solid ${(cc.accentColor||"#c9a227")===col?"white":"transparent"}`,
@@ -4957,7 +4968,7 @@ function FeatureAction({ feat, char, onUpdate }) {
             </span>
             {/* Use button */}
             {remaining > 0 && (
-              <button onClick={markUsed} style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(201,162,39,0.15)", border:"1px solid var(--accent)", color:"var(--accent)" }}>Use</button>
+              <button onClick={markUsed} style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(var(--accent-rgb,201,162,39),0.15)", border:"1px solid var(--accent)", color:"var(--accent)" }}>Use</button>
             )}
             {/* Recover button */}
             {spent > 0 && restLabel && (
@@ -5361,7 +5372,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const sectionLabel = txt => (
-    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(201,162,39,0.15)` }}>{txt}</div>
+    <div style={{ fontFamily:theme.fontDisplay, color:theme.accent, fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
   );
 
   return (
@@ -5440,7 +5451,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           <div style={{ textAlign:"center", marginBottom:12 }}>
             <div onClick={()=>fileRef.current.click()} title="Click to upload portrait"
               style={{ width:110, height:110, borderRadius:10, margin:"0 auto", cursor:"pointer", position:"relative", overflow:"hidden", border:`2px solid ${theme.accent}`, background:theme.surface, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 0 16px rgba(201,162,39,0.2)`, transition:"box-shadow 0.2s" }}
-              onMouseEnter={e=>e.currentTarget.style.boxShadow="0 0 24px rgba(201,162,39,0.45)"}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow="0 0 24px var(--accent)44"}
               onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 16px rgba(201,162,39,0.2)"}>
               {char.profileImage && !imgError
                 ? <img src={char.profileImage} alt="portrait" onError={()=>setImgError(true)} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
@@ -5609,7 +5620,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                           {displaySkills && displaySkills.length > 0 ? (
                             <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
                               {displaySkills.map(sk => (
-                                <span key={sk} style={{ padding:"4px 12px", background:"rgba(201,162,39,0.08)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:13, color:"var(--accent)", fontFamily:"var(--font-display)" }}>
+                                <span key={sk} style={{ padding:"4px 12px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:13, color:"var(--accent)", fontFamily:"var(--font-display)" }}>
                                   {sk}
                                 </span>
                               ))}
@@ -5755,7 +5766,7 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
         : (i % 2 === 0 ? "floatUp" : "floatUpSway");
 
       const colour = isWinter
-        ? `rgba(${180 + (i*7)%60},${210 + (i*5)%40},255,${((0.15 + (i*0.03)%0.25)*opMul).toFixed(2)})`
+        ? `rgba(${60 + (i*11)%80},${100 + (i*7)%80},${180 + (i*5)%60},${((0.15 + (i*0.03)%0.30)*opMul).toFixed(2)})`
         : [
             `rgba(201,162,39,${(0.28*opMul).toFixed(2)})`,
             `rgba(180,130,255,${(0.22*opMul).toFixed(2)})`,
@@ -5773,7 +5784,7 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
       {isWinter ? (
         <>
           <div className="frost-overlay"/>
-          <GodRays colour="rgba(160,210,255,0.055)"/>
+          <GodRays colour="rgba(100,160,240,0.08)"/>
           {/* Cold blue glow pools */}
           <div style={{ position:"fixed", top:"-20%", left:"20%", width:"60vw", height:"60vw",
             background:"radial-gradient(ellipse, rgba(80,140,220,0.08) 0%, transparent 65%)",
@@ -5862,7 +5873,7 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
       </div>
       {/* Action buttons */}
       <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, paddingTop:10 }}>
-        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(201,162,39,0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
+        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(var(--accent-rgb,201,162,39),0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
           Open
         </button>
         <button onClick={e=>{e.stopPropagation();onEdit();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.border}`, background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:12 }}>
@@ -5933,16 +5944,16 @@ function AccountModal({ session, onClose }) {
   };
 
   const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.2)", color:"#e8e0d0", padding:"10px 14px", borderRadius:7, fontSize:14, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:10 };
-  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"#c9a227":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"#c9a227":"#8a8070" });
-  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"#c9a227"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"#c9a227", opacity:loading?0.6:1 });
+  const tabBtn = (t) => ({ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontFamily:"'Cinzel Decorative',serif", transition:"all 0.15s", border:`1px solid ${tab===t?"var(--accent)":"rgba(255,255,255,0.1)"}`, background:tab===t?"rgba(201,162,39,0.1)":"transparent", color:tab===t?"var(--accent)":"#8a8070" });
+  const btn = (danger) => ({ width:"100%", padding:"11px", borderRadius:7, cursor:loading?"not-allowed":"pointer", fontSize:14, fontFamily:"'Cinzel Decorative',serif", letterSpacing:0.5, border:`1px solid ${danger?"#c0392b":"var(--accent)"}`, background:danger?"rgba(192,57,43,0.12)":"rgba(201,162,39,0.1)", color:danger?"#e74c3c":"var(--accent)", opacity:loading?0.6:1 });
 
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center" }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{ background:"#1a1a1f", border:"1px solid rgba(201,162,39,0.25)", borderRadius:14, padding:28, maxWidth:420, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
+      <div style={{ background:"#1a1a1f", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", borderRadius:14, padding:28, maxWidth:420, width:"90%", boxShadow:"0 8px 48px rgba(0,0,0,0.7)" }}>
         {/* Header */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:15 }}>Account Settings</div>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:15 }}>Account Settings</div>
           <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
         </div>
 
@@ -6035,8 +6046,8 @@ function LoginScreen({ onLogin }) {
     } finally { setLoading(false); }
   };
 
-  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
-  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"#c9a227":"rgba(255,255,255,0.15)"}`, background:primary?"#c9a227":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
+  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
+  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"var(--accent)":"rgba(255,255,255,0.15)"}`, background:primary?"var(--accent)":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
 
   return (
     <div style={{ background:"radial-gradient(ellipse at 20% 10%, rgba(60,20,100,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(80,40,10,0.2) 0%, transparent 55%), #0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Crimson Pro',serif", position:"relative", overflow:"hidden" }}>
@@ -6047,15 +6058,15 @@ function LoginScreen({ onLogin }) {
           <div className="tome-title-text" style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
           <div style={{ color:"#8a8070", fontSize:14, fontStyle:"italic" }}>Your personal D&D 5e character compendium</div>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, margin:"14px auto 0", maxWidth:280 }}>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(var(--accent-rgb,201,162,39),0.35))" }}/>
             <span style={{ color:"rgba(201,162,39,0.4)", fontSize:14 }}>✦</span>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(201,162,39,0.35), transparent)" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(var(--accent-rgb,201,162,39),0.35), transparent)" }}/>
           </div>
         </div>
 
         {/* Card */}
         <div style={{ background:"rgba(26,26,31,0.92)", border:"1px solid rgba(201,162,39,0.2)", borderRadius:14, padding:32, backdropFilter:"blur(8px)", boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
-          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:16, textAlign:"center", marginBottom:24 }}>
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </div>
 
@@ -6073,8 +6084,8 @@ function LoginScreen({ onLogin }) {
 
           <div style={{ textAlign:"center", marginTop:16, fontSize:13, color:"#554f45" }}>
             {mode === "login"
-              ? <><span>No account? </span><span onClick={()=>{setMode("signup");setError(null);setMsg(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Sign up</span></>
-              : <><span>Have an account? </span><span onClick={()=>{setMode("login");setError(null);setMsg(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Log in</span></>
+              ? <><span>No account? </span><span onClick={()=>{setMode("signup");setError(null);setMsg(null);}} style={{ color:"var(--accent)", cursor:"pointer" }}>Sign up</span></>
+              : <><span>Have an account? </span><span onClick={()=>{setMode("login");setError(null);setMsg(null);}} style={{ color:"var(--accent)", cursor:"pointer" }}>Log in</span></>
             }
           </div>
         </div>
@@ -6102,7 +6113,7 @@ function SharedCharacterView({ token, gameData }) {
   if (loading) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading character…</div>
       </div>
     </div>
@@ -6112,9 +6123,9 @@ function SharedCharacterView({ token, gameData }) {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:440, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>🔗</div>
-        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:20, marginBottom:12 }}>Link Not Found</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:20, marginBottom:12 }}>Link Not Found</div>
         <div style={{ color:"#8a8070", fontSize:14 }}>{error || "This share link is invalid or has been removed."}</div>
-        <button onClick={()=>window.location.href=window.location.pathname} style={{ marginTop:20, padding:"8px 20px", borderRadius:8, border:"1px solid #c9a227", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:14 }}>Go to Tome of Heroes</button>
+        <button onClick={()=>window.location.href=window.location.pathname} style={{ marginTop:20, padding:"8px 20px", borderRadius:8, border:"1px solid #c9a227", background:"transparent", color:"var(--accent)", cursor:"pointer", fontSize:14 }}>Go to Tome of Heroes</button>
       </div>
     </div>
   );
@@ -6197,7 +6208,7 @@ function App() {
     if (!gameData && !gameError) return (
       <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0" }}>
         <div style={{ textAlign:"center" }}>
-          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:24, marginBottom:12 }}>⚔️ Tome of Heroes</div>
           <div style={{ color:"#8a8070" }}>Loading…</div>
         </div>
       </div>
@@ -6208,7 +6219,7 @@ function App() {
   if (session === undefined || (!gameData && !gameError)) return (
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center" }}>
-        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:28, marginBottom:12 }}>⚔️ Tome of Heroes</div>
         <div style={{ color:"#8a8070" }}>Loading…</div>
       </div>
     </div>
@@ -6218,12 +6229,12 @@ function App() {
     <div style={{ background:"#0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"#e8e0d0", fontFamily:"serif" }}>
       <div style={{ textAlign:"center", maxWidth:560, padding:32 }}>
         <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
-        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
+        <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:22, marginBottom:12 }}>Could Not Load Game Data</div>
         <div style={{ background:"#1a0a0a", border:"1px solid #5a1a1a", borderRadius:8, padding:16, marginBottom:20, fontSize:13, color:"#c0392b", textAlign:"left", fontFamily:"monospace", wordBreak:"break-all" }}>{gameError}</div>
         <div style={{ color:"#8a8070", fontSize:14, lineHeight:1.8 }}>
-          Make sure <strong style={{ color:"#c9a227" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
-          Quick server: <code style={{ color:"#c9a227" }}>python -m http.server 8000</code><br />
-          Then visit: <code style={{ color:"#c9a227" }}>http://localhost:8000</code>
+          Make sure <strong style={{ color:"var(--accent)" }}>tome-data.json</strong> is in the same folder and you are using a local server.<br />
+          Quick server: <code style={{ color:"var(--accent)" }}>python -m http.server 8000</code><br />
+          Then visit: <code style={{ color:"var(--accent)" }}>http://localhost:8000</code>
         </div>
       </div>
     </div>
@@ -6271,18 +6282,18 @@ function App() {
         <MysticBackground density="normal" backgroundEffect={dt.backgroundEffect}/>
 
         {/* Hero banner */}
-        <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(201,162,39,0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",
+        <div style={{ position:"relative", zIndex:1, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.18)`, padding:"52px 24px 40px", textAlign:"center", overflow:"hidden",
           background:"linear-gradient(180deg, rgba(40,15,80,0.45) 0%, rgba(20,10,40,0.25) 60%, transparent 100%)" }}>
 
           {/* User info + account + logout — top right */}
           <div style={{ position:"absolute", top:16, right:20, display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:12, color:dt.textMuted || "#8a8070" }}>{session.user.email}</span>
-            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"#c9a227", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Account</button>
+            <button onClick={()=>setShowAccount(true)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(201,162,39,0.3)", background:"transparent", color:"var(--accent)", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Account</button>
             <button onClick={()=>signOut()} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:dt.textMuted||"#8a8070", cursor:"pointer", fontSize:12, fontFamily:dt.fontBody||"serif" }}>Log out</button>
           </div>
 
           {/* Inner hero radial glow */}
-          <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 65%)", animation:"heroGlow 4s ease-in-out infinite", pointerEvents:"none" }}/>
+          <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb,201,162,39),0.12) 0%, transparent 65%)", animation:"heroGlow 4s ease-in-out infinite", pointerEvents:"none" }}/>
 
           {/* Ornamental divider line */}
           <div style={{ position:"absolute", top:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.4), rgba(180,120,255,0.3), rgba(201,162,39,0.4), transparent)" }}/>
@@ -6296,24 +6307,24 @@ function App() {
 
           {/* Ornamental rule below subtitle */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, margin:"18px auto 20px", maxWidth:320 }}>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(var(--accent-rgb,201,162,39),0.35))" }}/>
             <span style={{ color:"rgba(201,162,39,0.5)", fontSize:16 }}>✦</span>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(201,162,39,0.35), transparent)" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(var(--accent-rgb,201,162,39),0.35), transparent)" }}/>
           </div>
 
           <button onClick={() => setView("create")} style={{
             padding:"14px 40px", border:"1px solid rgba(201,162,39,0.5)", color:dt.bg || "#0d0d0f",
             borderRadius:10, cursor:"pointer", fontFamily:"'Cinzel Decorative',serif", fontSize:15, letterSpacing:1.5, position:"relative",
             background:"linear-gradient(135deg, #c9a227 0%, #e8c84a 40%, #c9a227 70%, #8b6914 100%)",
-            boxShadow:"0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)", transition:"all 0.25s"
+            boxShadow:"0 4px 24px rgba(var(--accent-rgb,201,162,39),0.35), 0 0 60px rgba(var(--accent-rgb,201,162,39),0.08)", transition:"all 0.25s"
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform="scale(1.05)"; e.currentTarget.style.boxShadow="0 6px 32px rgba(201,162,39,0.5), 0 0 80px rgba(201,162,39,0.12)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform="scale(1)";   e.currentTarget.style.boxShadow="0 4px 24px rgba(201,162,39,0.35), 0 0 60px rgba(201,162,39,0.08)"; }}>
+            onMouseEnter={e => { e.currentTarget.style.transform="scale(1.05)"; e.currentTarget.style.boxShadow="0 6px 32px rgba(201,162,39,0.5), 0 0 80px rgba(var(--accent-rgb,201,162,39),0.12)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform="scale(1)";   e.currentTarget.style.boxShadow="0 4px 24px rgba(var(--accent-rgb,201,162,39),0.35), 0 0 60px rgba(var(--accent-rgb,201,162,39),0.08)"; }}>
             + Create New Character
           </button>
 
           {/* Bottom ornamental line */}
-          <div style={{ position:"absolute", bottom:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.25), transparent)" }}/>
+          <div style={{ position:"absolute", bottom:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(var(--accent-rgb,201,162,39),0.25), transparent)" }}/>
         </div>
 
         {/* Character grid */}
@@ -6340,7 +6351,7 @@ function App() {
           )}
         </div>
 
-        <div style={{ position:"relative", zIndex:1, textAlign:"center", padding:24, borderTop:`1px solid rgba(201,162,39,0.12)`, color:dt.textDim, fontSize:12, fontStyle:"italic" }}>
+        <div style={{ position:"relative", zIndex:1, textAlign:"center", padding:24, borderTop:`1px solid rgba(var(--accent-rgb,201,162,39),0.12)`, color:dt.textDim, fontSize:12, fontStyle:"italic" }}>
           <span style={{ color:"rgba(201,162,39,0.3)", marginRight:8 }}>✦</span>
           Tome of Heroes • Edit <strong style={{ color:dt.textMuted }}>tome-data.json</strong> to customise species, classes, spells, themes &amp; more
           <span style={{ color:"rgba(201,162,39,0.3)", marginLeft:8 }}>✦</span>
