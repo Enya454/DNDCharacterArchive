@@ -9580,7 +9580,7 @@
           "description": "An Alchemist is an expert at combining reagents to produce mystical effects. Alchemists use their creations to give life and to leech it away.",
           "features": [
             {
-              "name": "Tool Proficiency",
+              "name": "Alchemist Tool Proficiency",
               "level": 3,
               "type": "choice",
               "description": "You gain proficiency with Alchemist's supplies. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice.",
@@ -9720,7 +9720,7 @@
           "description": "An Armorer infuses their armor with elemental energy and turns it into a weapon. Armorers walk into the thick of combat, shielded by their extraordinary inventions.",
           "features": [
             {
-              "name": "Tools of the Trade",
+              "name": "Armorer Tool Proficiency",
               "level": 3,
               "type": "choice",
               "description": "You gain proficiency with one type of artisan's tools of your choice.",
@@ -9861,7 +9861,7 @@
           "description": "An Artillerist specializes in using magic to hurl energy, projectiles, and explosions on a battlefield. This destructive power is valued by armies in the wars on many different worlds.",
           "features": [
             {
-              "name": "Tool Proficiency",
+              "name": "Artillerist Tool Proficiency",
               "level": 3,
               "type": "choice",
               "description": "You gain proficiency with Woodcarver's tools. If you already have this proficiency (from your level 1 tool choice), you gain proficiency with one other type of artisan's tools of your choice.",
@@ -9997,7 +9997,7 @@
           "description": "Armies require a good supply of weapons and armor, and someone has to fill that need. Artificers of the Battle Smith subclass defend others and target foes from a distance using the magic-infused weapon of their own creation.",
           "features": [
             {
-              "name": "Tool Proficiency",
+              "name": "Battle Smith Tool Proficiency",
               "level": 3,
               "type": "choice",
               "description": "You gain proficiency with Smith's tools. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice.",
