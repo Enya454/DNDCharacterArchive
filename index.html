@@ -865,6 +865,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         const picked = (choices?.[feature.name] || []).length;
         return picked >= maxCount;
       }
+      case "ancestral_legacy": return !!(choices?.[feature.name]?.race);
       case "proficiency_choice": {
         const owned = skillSources && thisSource
           ? Object.entries(skillSources).filter(([,s]) => s === thisSource).map(([sk]) => sk)
@@ -1233,7 +1234,116 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* spell_grant — racial spells auto-granted at certain levels */}
 
-          {/* ── Infusion Choice (Artificer Infuse Item) ── */}
+          {/* ── Ancestral Legacy (Dhampir) — pick another race to inherit skill profs ── */}
+          {!locked && feature.type === "ancestral_legacy" && (() => {
+            const stored    = choices?.[feature.name] || {};
+            const chosenRace = stored.race || null;
+            const standalone = stored.standalone || false;
+            const allSpecies = Object.entries(gameData?.species || {}).filter(([name]) => name !== "Dhampir");
+
+            const setLegacy = patch => onChoice && onChoice(feature.name, { ...stored, ...patch });
+
+            // Get skill proficiency features from the chosen ancestral race
+            const ancestralSpecies = chosenRace ? gameData?.species?.[chosenRace] : null;
+            const ancestralSkillFeat = (ancestralSpecies?.features || []).find(f =>
+              f.type === "proficiency_choice"
+            );
+
+            return (
+              <div>
+                {/* Mode selector */}
+                <div style={{ display:"flex", gap:8, marginBottom:12 }}>
+                  <div onClick={()=>setLegacy({standalone:false, race:null})}
+                    style={{ flex:1, padding:"8px 10px", borderRadius:8, cursor:"pointer", textAlign:"center",
+                      border:`1px solid ${!standalone?"var(--accent)":"var(--border)"}`,
+                      background:!standalone?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                      fontSize:13, color:!standalone?"var(--accent)":"var(--text-muted)", transition:"all 0.15s" }}>
+                    🧬 Inherit from a race
+                  </div>
+                  <div onClick={()=>setLegacy({standalone:true, race:null})}
+                    style={{ flex:1, padding:"8px 10px", borderRadius:8, cursor:"pointer", textAlign:"center",
+                      border:`1px solid ${standalone?"var(--accent)":"var(--border)"}`,
+                      background:standalone?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                      fontSize:13, color:standalone?"var(--accent)":"var(--text-muted)", transition:"all 0.15s" }}>
+                    ✦ Standalone (2 free skills)
+                  </div>
+                </div>
+
+                {!standalone && (<>
+                  <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
+                    Choose which race's heritage your Dhampir lineage replaces:
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:6, marginBottom:12 }}>
+                    {allSpecies.map(([name, sp]) => (
+                      <div key={name} onClick={()=>setLegacy({race:name, standalone:false})}
+                        style={{ padding:"7px 10px", borderRadius:7, cursor:"pointer", fontSize:13,
+                          border:`1px solid ${chosenRace===name?"var(--accent)":"var(--border)"}`,
+                          background:chosenRace===name?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                          color:chosenRace===name?"var(--accent)":"var(--text)", transition:"all 0.15s" }}>
+                        {chosenRace===name && "✓ "}{name}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Show inherited skill proficiency picker if the chosen race has one */}
+                  {chosenRace && ancestralSkillFeat && (
+                    <div style={{ padding:"10px 12px", background:"rgba(0,0,0,0.15)", borderRadius:8,
+                      border:"1px solid var(--border)", marginBottom:8 }}>
+                      <div style={{ fontSize:12, color:"var(--accent)", marginBottom:8, fontFamily:"var(--font-display)" }}>
+                        Inherited from {chosenRace}
+                      </div>
+                      <FeaturePanel
+                        feature={{ ...ancestralSkillFeat, name: "Ancestral Legacy Skills" }}
+                        locked={false}
+                        choices={choices}
+                        onChoice={onChoice}
+                        skillProfs={skillProfs}
+                        onSkillToggle={skill => onSkillToggle && onSkillToggle(skill)}
+                        charLevel={charLevel}
+                        gameData={gameData}
+                      />
+                      {/* Also inherit any extra movement speeds */}
+                      {(ancestralSpecies?.speed > 30 || ancestralSpecies?.climbSpeed || ancestralSpecies?.swimSpeed || ancestralSpecies?.flySpeed) && (
+                        <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:8 }}>
+                          Also inherits:
+                          {ancestralSpecies?.speed > 30 && <span style={{ marginLeft:6 }}>🏃 Speed {ancestralSpecies.speed}ft</span>}
+                          {ancestralSpecies?.climbSpeed && <span style={{ marginLeft:6 }}>🧗 Climb {ancestralSpecies.climbSpeed}ft</span>}
+                          {ancestralSpecies?.swimSpeed && <span style={{ marginLeft:6 }}>🏊 Swim {ancestralSpecies.swimSpeed}ft</span>}
+                          {ancestralSpecies?.flySpeed && <span style={{ marginLeft:6 }}>🦅 Fly {ancestralSpecies.flySpeed}ft</span>}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {chosenRace && !ancestralSkillFeat && (
+                    <div style={{ fontSize:12, color:"var(--text-muted)", padding:"8px 10px",
+                      background:"rgba(0,0,0,0.1)", borderRadius:7, border:"1px solid var(--border)" }}>
+                      {chosenRace} has no skill proficiency choices to inherit. You still gain any special movement speeds.
+                    </div>
+                  )}
+                </>)}
+
+                {standalone && (
+                  <div style={{ padding:"10px 12px", background:"rgba(0,0,0,0.15)", borderRadius:8,
+                    border:"1px solid var(--border)" }}>
+                    <div style={{ fontSize:12, color:"var(--accent)", marginBottom:8, fontFamily:"var(--font-display)" }}>
+                      Choose 2 skill proficiencies
+                    </div>
+                    <FeaturePanel
+                      feature={{ name:"Ancestral Legacy Skills", type:"proficiency_choice", count:2, from:"all" }}
+                      locked={false}
+                      choices={choices}
+                      onChoice={onChoice}
+                      skillProfs={skillProfs}
+                      onSkillToggle={skill => onSkillToggle && onSkillToggle(skill)}
+                      charLevel={charLevel}
+                      gameData={gameData}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {feature.type === "infusion_choice" && (() => {
             const countByLevel = feature.countByLevel || {"2":4};
             let maxCount = 0;
