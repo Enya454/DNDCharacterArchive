@@ -4644,7 +4644,7 @@ const FONT_OPTIONS = [
 // ============================================================
 function DocumentsTab({ char, onUpdate, session, readOnly }) {
   const docs       = char.documents || [];
-  const isGoogle   = session?.user?.app_metadata?.provider === "google";
+  const isGoogle   = session?.user?.identities?.some(i => i.provider === "google") ?? false;
   const hasDrive   = isGoogle && !!session?.provider_token;
   const [adding,   setAdding]  = useState(false);
   const [url,      setUrl]     = useState("");
@@ -6218,7 +6218,7 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
 // ACCOUNT MODAL
 // ============================================================
 function AccountModal({ session, onClose }) {
-  const isGoogle     = session?.user?.app_metadata?.provider === "google";
+  const isGoogle     = session?.user?.identities?.some(i => i.provider === "google") ?? false;
   const [tab,         setTab]         = useState(isGoogle ? "delete" : "password");
   const [newEmail,    setNewEmail]     = useState("");
   const [newPassword, setNewPassword]  = useState("");
@@ -6363,14 +6363,31 @@ function LoginScreen({ onLogin }) {
     // On success, Supabase redirects — no need to call onLogin()
   };
 
+  const [googleLinked, setGoogleLinked] = useState(false);
+
   const handleEmail = async () => {
     if (!email || !password) { setError("Please enter your email and password."); return; }
-    setLoading(true); setError(null); setMsg(null);
+    setLoading(true); setError(null); setMsg(null); setGoogleLinked(false);
     try {
-      const { error: err } = mode === "login" ? await signIn(email, password) : await signUp(email, password);
-      if (err) { setError(err.message); }
-      else if (mode === "signup") { setMsg("Check your email to confirm your account, then log in."); setMode("login"); }
-      else { onLogin(); }
+      const { data, error: err } = mode === "login"
+        ? await signIn(email, password)
+        : await signUp(email, password);
+
+      if (err) {
+        setError(err.message);
+      } else if (mode === "signup") {
+        setMsg("Check your email to confirm your account, then log in.");
+        setMode("login");
+      } else {
+        // Successfully logged in — check if this account has a Google identity
+        const hasGoogle = data?.user?.identities?.some(i => i.provider === "google");
+        if (hasGoogle) {
+          await signOut(); // sign them back out immediately
+          setGoogleLinked(true);
+        } else {
+          onLogin();
+        }
+      }
     } finally { setLoading(false); }
   };
 
@@ -6399,8 +6416,42 @@ function LoginScreen({ onLogin }) {
             {showEmail ? (mode === "login" ? "Welcome Back" : "Create Account") : "Begin Your Journey"}
           </div>
 
-          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{error}</div>}
-          {msg   && <div style={{ background:"rgba(39,174,96,0.12)",  border:"1px solid #27ae60", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#27ae60" }}>{msg}</div>}
+          {error      && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{error}</div>}
+          {msg        && <div style={{ background:"rgba(39,174,96,0.12)",  border:"1px solid #27ae60", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#27ae60" }}>{msg}</div>}
+          {googleLinked && (
+            <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:100,
+              display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+              <div style={{ background:"#1a1a1f", border:"1px solid rgba(66,133,244,0.4)", borderRadius:14,
+                padding:28, maxWidth:360, width:"100%", textAlign:"center",
+                boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
+                <div style={{ fontSize:32, marginBottom:12 }}>🔗</div>
+                <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#7ab3f5", fontSize:15, marginBottom:10 }}>
+                  Google Account Detected
+                </div>
+                <div style={{ fontSize:13, color:"#8a8070", lineHeight:1.6, marginBottom:20 }}>
+                  This account is linked to Google. For the best experience, please sign in with Google instead.
+                </div>
+                <button onClick={()=>{ setGoogleLinked(false); setShowEmail(false); setError(null); }}
+                  style={{ width:"100%", padding:"11px", borderRadius:8, cursor:"pointer", fontSize:14,
+                    border:"1px solid rgba(66,133,244,0.5)", background:"rgba(66,133,244,0.15)",
+                    color:"#7ab3f5", display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:8 }}>
+                  <svg width="16" height="16" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                  Sign in with Google
+                </button>
+                <button onClick={()=>{ setGoogleLinked(false); setError(null); }}
+                  style={{ width:"100%", padding:"9px", borderRadius:8, cursor:"pointer", fontSize:13,
+                    border:"1px solid rgba(255,255,255,0.1)", background:"transparent", color:"#554f45" }}>
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
 
           {!showEmail ? (<>
             {/* Google sign-in button */}
@@ -6454,7 +6505,7 @@ function LoginScreen({ onLogin }) {
               }
             </div>
             <div style={{ textAlign:"center" }}>
-              <span onClick={()=>{setShowEmail(false);setError(null);}} style={{ fontSize:12, color:"#554f45", cursor:"pointer" }}>← Back</span>
+              <span onClick={()=>{setShowEmail(false);setError(null);setGoogleLinked(false);}} style={{ fontSize:12, color:"#554f45", cursor:"pointer" }}>← Back</span>
             </div>
           </>)}
         </div>
@@ -6544,7 +6595,11 @@ function App() {
     sb.auth.getSession().then(({ data }) => setSession(data.session ?? null));
     const { data: { subscription } } = sb.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
-      if (!sess) { setCharacters([]); setView("home"); }
+      if (!sess) {
+        setCharacters([]);
+        saveChars([]); // clear localStorage so next user doesn't see stale chars
+        setView("home");
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -6552,24 +6607,28 @@ function App() {
   // ── Load characters when session appears ──
   useEffect(() => {
     if (!session) return;
-    // Show localStorage chars immediately so UI isn't blank while Supabase loads
-    const local = loadChars();
-    if (local.length > 0) setCharacters(local);
     setCharLoading(true);
     dbLoadChars().then(chars => {
       if (chars.length > 0) {
-        // Supabase is authoritative — merge: Supabase wins for chars that exist there
-        setCharacters(chars);
-        saveChars(chars); // keep localStorage in sync
-      } else if (local.length > 0) {
-        // First login migration: push local chars to Supabase
-        Promise.all(local.map(c => dbSaveChar(c))).then(() => {
-          saveChars([]); // clear local after migration
-        });
-        setCharacters(local);
+        // Supabase is authoritative
+        const seen = new Set();
+        const deduped = chars.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+        setCharacters(deduped);
+        saveChars(deduped);
+      } else {
+        // No Supabase chars — check localStorage for migration (first login with existing local data)
+        const local = loadChars();
+        if (local.length > 0) {
+          Promise.all(local.map(c => dbSaveChar(c))).then(() => saveChars([]));
+          setCharacters(local);
+        }
       }
-    }).catch(e => console.error("dbLoadChars error:", e))
-      .finally(() => setCharLoading(false));
+    }).catch(e => {
+      console.error("dbLoadChars error:", e);
+      // Only fall back to localStorage if Supabase fails entirely
+      const local = loadChars();
+      if (local.length > 0) setCharacters(local);
+    }).finally(() => setCharLoading(false));
   }, [session?.user?.id]);
 
   // ── Loading states ──
