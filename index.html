@@ -517,18 +517,50 @@ const dbDeleteChar = async id => {
 
 // Share helpers
 // Share helpers — use char.id directly as the token, store char data in the row
-const setCharShared = async (char, userId, isPublic) => {
-  if (isPublic) {
-    const row = { token: char.id, character_id: char.id, user_id: userId, character_data: char };
-    const { error } = await sb.from("shared_characters").upsert(row, { onConflict: "token" });
-    if (error) { console.error("Share error:", error); return false; }
-    return true;
-  } else {
-    const { error } = await sb.from("shared_characters").delete().eq("token", char.id);
-    if (error) console.error("Unshare error:", error);
+const setCharShared = async (char, userId, shareMode) => {
+  // shareMode: "private" | "public" | "dm"
+  const publicToken = char.id;
+  const dmToken     = char.id + "-dm";
+
+  // Filter documents by visibility for each share context
+  const filterDocs = (mode) => {
+    const docs = char.documents || [];
+    if (mode === "dm")     return docs.filter(d => d.visibility !== "private");
+    if (mode === "public") return docs.filter(d => d.visibility === "public");
+    return [];
+  };
+
+  if (shareMode === "private") {
+    // Delete both share rows
+    await sb.from("shared_characters").delete().eq("token", publicToken);
+    await sb.from("shared_characters").delete().eq("token", dmToken);
     return false;
   }
+
+  if (shareMode === "dm" || shareMode === "public") {
+    // Always upsert DM row (includes public + dm docs)
+    const dmChar = { ...char, documents: filterDocs("dm"), shareMode };
+    await sb.from("shared_characters").upsert(
+      { token: dmToken, character_id: char.id, user_id: userId, character_data: dmChar },
+      { onConflict: "token" }
+    );
+  }
+
+  if (shareMode === "public") {
+    // Also upsert public row (public docs only)
+    const pubChar = { ...char, documents: filterDocs("public"), shareMode };
+    const { error } = await sb.from("shared_characters").upsert(
+      { token: publicToken, character_id: char.id, user_id: userId, character_data: pubChar },
+      { onConflict: "token" }
+    );
+    if (error) { console.error("Share error:", error); return false; }
+  } else {
+    // DM only — delete the public row
+    await sb.from("shared_characters").delete().eq("token", publicToken);
+  }
+  return true;
 };
+
 const fetchSharedChar = async (token) => {
   const { data, error } = await sb.from("shared_characters")
     .select("character_data")
@@ -4637,10 +4669,11 @@ const FONT_OPTIONS = [
 // ============================================================
 function DocumentsTab({ char, onUpdate, session, readOnly }) {
   const docs    = char.documents || [];
-  const [adding, setAdding] = useState(false);
-  const [url,    setUrl]    = useState("");
-  const [label,  setLabel]  = useState("");
-  const [error,  setError]  = useState(null);
+  const [adding,     setAdding]     = useState(false);
+  const [url,        setUrl]        = useState("");
+  const [label,      setLabel]      = useState("");
+  const [visibility, setVisibility] = useState("public");
+  const [error,      setError]      = useState(null);
 
   const parseDriveUrl = raw => {
     const docMatch   = raw.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
@@ -4654,22 +4687,31 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
 
   const iconFor   = type => ({ doc:"📄", sheet:"📊", slide:"📑", file:"📎" })[type] || "📎";
   const colourFor = type => ({ doc:"#4285f4", sheet:"#0f9d58", slide:"#f4b400", file:"#9e9e9e" })[type] || "#9e9e9e";
+  const visIcon   = v => ({ public:"🌐", dm:"🎲", private:"🔒" })[v] || "🌐";
+  const visLabel  = v => ({ public:"Public", dm:"DM Only", private:"Private" })[v] || "Public";
+  const visColour = v => ({ public:"var(--success)", dm:"#f4b400", private:"var(--text-dim)" })[v] || "var(--success)";
 
   const addFromUrl = () => {
     if (!url.trim()) { setError("Please enter a URL."); return; }
     const { id, type } = parseDriveUrl(url);
     const doc = {
-      id:      id || Date.now().toString(),
-      label:   label.trim() || "Untitled Document",
-      url:     url.trim(),
+      id:         id || Date.now().toString(),
+      label:      label.trim() || "Untitled Document",
+      url:        url.trim(),
       type,
-      addedAt: new Date().toISOString(),
+      visibility,
+      addedAt:    new Date().toISOString(),
     };
     onUpdate({ ...char, documents: [...docs, doc] });
-    setAdding(false); setUrl(""); setLabel(""); setError(null);
+    setAdding(false); setUrl(""); setLabel(""); setVisibility("public"); setError(null);
   };
 
   const removeDoc = id => onUpdate({ ...char, documents: docs.filter(d => d.id !== id) });
+
+  const setDocVisibility = (id, vis) => onUpdate({
+    ...char,
+    documents: docs.map(d => d.id === id ? { ...d, visibility: vis } : d)
+  });
 
   return (
     <div style={{ padding:"4px 0" }}>
@@ -4700,6 +4742,22 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
           <input value={label} onChange={e=>setLabel(e.target.value)} placeholder="Label (e.g. Session Notes, Backstory…)"
             style={{ width:"100%", background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text)",
               padding:"9px 12px", borderRadius:7, fontSize:13, boxSizing:"border-box", marginBottom:10 }}/>
+          {/* Visibility selector */}
+          <div style={{ marginBottom:10 }}>
+            <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:6 }}>Visibility</div>
+            <div style={{ display:"flex", gap:6 }}>
+              {["public","dm","private"].map(v => (
+                <div key={v} onClick={()=>setVisibility(v)}
+                  style={{ flex:1, padding:"7px 4px", borderRadius:7, cursor:"pointer", textAlign:"center",
+                    border:`1px solid ${visibility===v?"var(--accent)":"var(--border)"}`,
+                    background:visibility===v?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                    transition:"all 0.15s" }}>
+                  <div style={{ fontSize:14 }}>{visIcon(v)}</div>
+                  <div style={{ fontSize:10, color:visibility===v?"var(--accent)":"var(--text-muted)", marginTop:2 }}>{visLabel(v)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
           {error && <div style={{ fontSize:12, color:"var(--danger)", marginBottom:8 }}>{error}</div>}
           <div style={{ display:"flex", gap:8 }}>
             <button onClick={addFromUrl}
@@ -4707,7 +4765,7 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
                 border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>
               Add Document
             </button>
-            <button onClick={()=>{setAdding(false);setUrl("");setLabel("");setError(null);}}
+            <button onClick={()=>{setAdding(false);setUrl("");setLabel("");setVisibility("public");setError(null);}}
               style={{ padding:"8px 16px", borderRadius:7, cursor:"pointer", fontSize:13,
                 border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>
               Cancel
@@ -4727,6 +4785,7 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
       <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
         {docs.map(doc => {
           const rgb = colourFor(doc.type).replace('#','').match(/../g).map(x=>parseInt(x,16)).join(',');
+          const vis = doc.visibility || "public";
           return (
             <div key={doc.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px",
               background:"var(--surface)", border:"1px solid var(--border)", borderRadius:9, transition:"border-color 0.15s" }}
@@ -4742,12 +4801,22 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
                   overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
                   {doc.label}
                 </div>
-                <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:2 }}>
-                  {doc.type === "doc" ? "Google Doc" : doc.type === "sheet" ? "Google Sheet" : doc.type === "slide" ? "Google Slides" : "Drive File"}
-                  {doc.addedAt && ` · Added ${new Date(doc.addedAt).toLocaleDateString()}`}
+                <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:2, display:"flex", alignItems:"center", gap:8 }}>
+                  <span>{doc.type === "doc" ? "Google Doc" : doc.type === "sheet" ? "Google Sheet" : doc.type === "slide" ? "Google Slides" : "Drive File"}</span>
+                  <span style={{ color:visColour(vis) }}>{visIcon(vis)} {visLabel(vis)}</span>
                 </div>
               </div>
-              <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+              <div style={{ display:"flex", gap:6, flexShrink:0, alignItems:"center" }}>
+                {/* Visibility toggle */}
+                {!readOnly && (
+                  <select value={vis} onChange={e=>setDocVisibility(doc.id, e.target.value)}
+                    style={{ background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)",
+                      borderRadius:6, padding:"4px 6px", fontSize:11, cursor:"pointer" }}>
+                    <option value="public">🌐 Public</option>
+                    <option value="dm">🎲 DM Only</option>
+                    <option value="private">🔒 Private</option>
+                  </select>
+                )}
                 <a href={doc.url} target="_blank" rel="noopener noreferrer"
                   style={{ padding:"5px 12px", borderRadius:6, fontSize:12, textDecoration:"none",
                     border:"1px solid var(--border)", background:"var(--surface)", color:"var(--text-muted)",
@@ -4774,18 +4843,25 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
   const cc = char.custom || {};
   const updCustom = patch => onUpdate({ ...char, custom: { ...cc, ...patch } });
   const [shareLoading, setShareLoading] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
+  const [copiedLink,   setCopiedLink]   = useState(null); // "public" | "dm" | null
 
-  const toggleShare = async () => {
+  const shareMode   = char.shareMode || "private";
+  const publicUrl   = `${window.location.origin}${window.location.pathname}?share=${char.id}`;
+  const dmUrl       = `${window.location.origin}${window.location.pathname}?share=${char.id}-dm`;
+
+  const setShareMode = async (mode) => {
     setShareLoading(true);
-    const newShared = !char.shared;
     const { data:{ session } } = await sb.auth.getSession();
-    if (session) await setCharShared(char, session.user.id, newShared);
-    onUpdate({ ...char, shared: newShared });
+    if (session) await setCharShared(char, session.user.id, mode);
+    onUpdate({ ...char, shareMode: mode });
     setShareLoading(false);
   };
 
-  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${char.id}`;
+  const copyLink = (type) => {
+    navigator.clipboard.writeText(type === "dm" ? dmUrl : publicUrl);
+    setCopiedLink(type);
+    setTimeout(() => setCopiedLink(null), 2000);
+  };
 
   const sectionHead = txt => (
     <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, textTransform:"uppercase", letterSpacing:1, marginBottom:10, marginTop:18, paddingBottom:5, borderBottom:"1px solid rgba(201,162,39,0.2)" }}>{txt}</div>
@@ -4798,37 +4874,66 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
       {/* ── Sharing ── */}
       <div style={{ marginBottom:6 }}>
         {sectionHead("Sharing")}
-        <div style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"var(--surface)", border:`1px solid ${char.shared?"var(--accent)":"var(--border)"}`, borderRadius:10 }}>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:14, color:"var(--text)", fontFamily:"var(--font-display)", marginBottom:3 }}>
-              {char.shared ? "🌐 Public" : "🔒 Private"}
+
+        {/* Mode selector */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:12 }}>
+          {[
+            { mode:"private", icon:"🔒", label:"Private",  desc:"Only you" },
+            { mode:"dm",      icon:"🎲", label:"DM Link",   desc:"DM share only" },
+            { mode:"public",  icon:"🌐", label:"Public",   desc:"Both links" },
+          ].map(({ mode, icon, label, desc }) => (
+            <div key={mode} onClick={()=>!shareLoading&&setShareMode(mode)}
+              style={{ padding:"10px 8px", borderRadius:9, cursor:shareLoading?"not-allowed":"pointer",
+                textAlign:"center", transition:"all 0.2s",
+                border:`2px solid ${shareMode===mode?"var(--accent)":"var(--border)"}`,
+                background:shareMode===mode?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                opacity:shareLoading?0.6:1 }}>
+              <div style={{ fontSize:18, marginBottom:4 }}>{icon}</div>
+              <div style={{ fontSize:12, color:shareMode===mode?"var(--accent)":"var(--text)", fontFamily:"var(--font-display)" }}>{label}</div>
+              <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:2 }}>{desc}</div>
             </div>
-            <div style={{ fontSize:12, color:"var(--text-muted)" }}>
-              {char.shared ? "Anyone with the link can view this character (read-only)." : "Only you can see this character."}
-            </div>
-          </div>
-          <button onClick={toggleShare} disabled={shareLoading}
-            style={{ padding:"7px 16px", borderRadius:8, cursor:shareLoading?"not-allowed":"pointer", fontSize:13,
-              fontFamily:"var(--font-display)", transition:"all 0.2s",
-              border:`1px solid ${char.shared?"var(--danger)":"var(--accent)"}`,
-              background:char.shared?"rgba(192,57,43,0.1)":"rgba(201,162,39,0.1)",
-              color:char.shared?"var(--danger)":"var(--accent)",
-              opacity:shareLoading?0.6:1 }}>
-            {shareLoading ? "…" : char.shared ? "Make Private" : "Make Public"}
-          </button>
+          ))}
         </div>
-        {char.shared && (
-          <div style={{ marginTop:10, display:"flex", gap:8, alignItems:"center" }}>
-            <input readOnly value={shareUrl} onClick={e=>e.target.select()}
-              style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", padding:"7px 10px", borderRadius:7, fontSize:12, fontFamily:"monospace" }}/>
-            <button onClick={()=>{
-              navigator.clipboard.writeText(shareUrl);
-              setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-            }} style={{ padding:"7px 14px", borderRadius:7, border:"1px solid var(--accent)",
-              background:shareCopied?"var(--accent)":"rgba(201,162,39,0.1)",
-              color:shareCopied?"var(--bg)":"var(--accent)", cursor:"pointer", fontSize:12, flexShrink:0, transition:"all 0.2s" }}>
-              {shareCopied ? "✓ Copied!" : "Copy"}
-            </button>
+
+        {/* Description */}
+        <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:12, lineHeight:1.6, padding:"8px 12px",
+          background:"var(--surface)", borderRadius:7, border:"1px solid var(--border)" }}>
+          {shareMode === "private" && "Only you can see this character."}
+          {shareMode === "dm"      && "Only people with the DM link can view. DM documents are included."}
+          {shareMode === "public"  && "Anyone with the public link can view. DM-only documents are hidden from the public link but shown on the DM link."}
+        </div>
+
+        {/* Share links */}
+        {(shareMode === "dm" || shareMode === "public") && (
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            {shareMode === "public" && (
+              <div>
+                <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:4 }}>🌐 Public Link</div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <input readOnly value={publicUrl} onClick={e=>e.target.select()}
+                    style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", padding:"7px 10px", borderRadius:7, fontSize:11, fontFamily:"monospace" }}/>
+                  <button onClick={()=>copyLink("public")}
+                    style={{ padding:"7px 14px", borderRadius:7, border:"1px solid var(--accent)",
+                      background:copiedLink==="public"?"var(--accent)":"rgba(var(--accent-rgb,201,162,39),0.1)",
+                      color:copiedLink==="public"?"var(--bg)":"var(--accent)", cursor:"pointer", fontSize:12, flexShrink:0, transition:"all 0.2s" }}>
+                    {copiedLink==="public" ? "✓" : "Copy"}
+                  </button>
+                </div>
+              </div>
+            )}
+            <div>
+              <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:4 }}>🎲 DM Link</div>
+              <div style={{ display:"flex", gap:8 }}>
+                <input readOnly value={dmUrl} onClick={e=>e.target.select()}
+                  style={{ flex:1, background:"var(--surface)", border:"1px solid var(--border)", color:"var(--text-muted)", padding:"7px 10px", borderRadius:7, fontSize:11, fontFamily:"monospace" }}/>
+                <button onClick={()=>copyLink("dm")}
+                  style={{ padding:"7px 14px", borderRadius:7, border:"1px solid var(--accent)",
+                    background:copiedLink==="dm"?"var(--accent)":"rgba(var(--accent-rgb,201,162,39),0.1)",
+                    color:copiedLink==="dm"?"var(--bg)":"var(--accent)", cursor:"pointer", fontSize:12, flexShrink:0, transition:"all 0.2s" }}>
+                  {copiedLink==="dm" ? "✓" : "Copy"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -5462,6 +5567,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
   const [imgError, setImgError] = useState(false);
   const [shareModal, setShareModal] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [dmCopied,    setDmCopied]    = useState(false);
   const [restModal, setRestModal] = useState(null); // null | "short" | "long"
   const fileRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -5622,13 +5728,23 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
             {!readOnly && <>
               <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":"var(--border)"}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
-              {char.shared && (
-                <button onClick={()=>{
-                  navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
-                  setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-                }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
-                  {shareCopied ? "✓ Copied!" : "🔗 Copy Link"}
-                </button>
+              {(char.shareMode === "public" || char.shareMode === "dm") && (
+                <div style={{ display:"flex", gap:4 }}>
+                  {char.shareMode === "public" && (
+                    <button onClick={()=>{
+                      navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
+                      setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
+                    }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                      {shareCopied ? "✓" : "🌐 Link"}
+                    </button>
+                  )}
+                  <button onClick={()=>{
+                    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}-dm`);
+                    setDmCopied(true); setTimeout(()=>setDmCopied(false), 2000);
+                  }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                    {dmCopied ? "✓" : "🎲 DM Link"}
+                  </button>
+                </div>
               )}
               <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
             </>}
