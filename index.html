@@ -3691,7 +3691,7 @@ function SpellRow({ spell, badge, grant, char, onUpdate, limits, slotsSpent, slo
         padding:"6px 10px", borderBottom: open ? "none" : "1px solid rgba(255,255,255,0.04)",
         cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
         <div>
-          <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{spell.name}</span>
+          <span style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:13 }}>{spell.name}</span>
           <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:5 }}>{open?"▲":"▼"}</span>
           {spell.school && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:7 }}>{spell.school}</span>}
           {spell.combat?.damage && <span style={{ fontSize:10, color:"var(--danger)", marginLeft:7 }}>{spell.combat.damage} {spell.combat.damageType}</span>}
@@ -4535,7 +4535,7 @@ function FeaturesTab({ char, gameData }) {
         </p>
         {available.map(g => (
           <div key={g.spellName} style={{ display:"flex", alignItems:"center", gap:10, padding:"6px 10px", background:"rgba(201,162,39,0.04)", borderRadius:6, border:"1px solid rgba(var(--accent-rgb,201,162,39),0.15)", marginBottom:5 }}>
-            <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, flex:1 }}>{g.spellName}</span>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:13, flex:1 }}>{g.spellName}</span>
             <span style={{ fontSize:11, color:"var(--text-dim)" }}>{g.uses === null || g.uses === undefined ? "At will" : `${g.uses}× / ${g.recharge === "long" ? "Long Rest" : "Short Rest"}`}</span>
             <span style={{ fontSize:10, color:"var(--accent2)", padding:"1px 6px", border:"1px solid var(--accent2)", borderRadius:4 }}>✓ Unlocked</span>
           </div>
