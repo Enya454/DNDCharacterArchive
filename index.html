@@ -929,6 +929,12 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             const l1ToolChoice  = choices?.["Tool Proficiency"];
             const defaultC      = feature.defaultChoice;
             const alreadyHasDefault = feature.defaultExcludeIfChosen && defaultC && l1ToolChoice === defaultC;
+
+            // Auto-select the default if not already chosen at L1
+            if (defaultC && !alreadyHasDefault && chosen !== defaultC) {
+              onChoice && onChoice(feature.name, defaultC);
+            }
+
             const displayOptions = alreadyHasDefault
               ? feature.options.filter(o => o !== defaultC)
               : feature.options;
@@ -938,8 +944,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8, padding:"6px 10px",
                   background:"rgba(var(--accent-rgb,201,162,39),0.06)", borderRadius:6,
                   border:"1px solid rgba(var(--accent-rgb,201,162,39),0.2)" }}>
-                  ✦ You automatically gain <strong style={{ color:"var(--accent)" }}>{defaultC}</strong>.
-                  If you already have this proficiency, choose a different tool below.
+                  ✦ <strong style={{ color:"var(--accent)" }}>{defaultC}</strong> automatically granted.
                 </div>
               )}
               {alreadyHasDefault && (
@@ -951,7 +956,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 </div>
               )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:8 }}>
-                {displayOptions.map(opt => (
+                {(!defaultC || alreadyHasDefault) && displayOptions.map(opt => (
                   <div key={opt} onClick={() => {
                     if (chosen && chosen !== opt && feature.optionSubChoices?.[chosen]) {
                       const oldSubKey = feature.name + "_sub_" + chosen.replace(/\s+/g,"_");
