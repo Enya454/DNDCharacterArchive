@@ -5988,7 +5988,8 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
 // ACCOUNT MODAL
 // ============================================================
 function AccountModal({ session, onClose }) {
-  const [tab,         setTab]         = useState("password");
+  const isGoogle     = session?.user?.app_metadata?.provider === "google";
+  const [tab,         setTab]         = useState(isGoogle ? "delete" : "password");
   const [newEmail,    setNewEmail]     = useState("");
   const [newPassword, setNewPassword]  = useState("");
   const [confirm,     setConfirm]      = useState("");
@@ -6043,12 +6044,15 @@ function AccountModal({ session, onClose }) {
           <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
         </div>
 
-        <div style={{ fontSize:12, color:"#554f45", marginBottom:16, fontStyle:"italic" }}>Logged in as {session.user.email}</div>
+        <div style={{ fontSize:12, color:"#554f45", marginBottom:16, fontStyle:"italic", display:"flex", alignItems:"center", gap:8 }}>
+          {isGoogle && <span style={{ fontSize:11, background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:4, padding:"2px 7px", color:"#8a8070", fontStyle:"normal" }}>Google Account</span>}
+          Logged in as {session.user.email}
+        </div>
 
-        {/* Tab selector */}
+        {/* Tab selector — hide password/email for Google users */}
         <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-          <button style={tabBtn("password")} onClick={()=>{setTab("password");setMsg(null);}}>Password</button>
-          <button style={tabBtn("email")}    onClick={()=>{setTab("email");setMsg(null);}}>Email</button>
+          {!isGoogle && <button style={tabBtn("password")} onClick={()=>{setTab("password");setMsg(null);}}>Password</button>}
+          {!isGoogle && <button style={tabBtn("email")}    onClick={()=>{setTab("email");setMsg(null);}}>Email</button>}
           <button style={tabBtn("delete")}   onClick={()=>{setTab("delete");setMsg(null);}}>Delete</button>
         </div>
 
