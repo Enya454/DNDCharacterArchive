@@ -5391,7 +5391,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
     padding:"7px 14px", cursor:"pointer", fontSize:13, whiteSpace:"nowrap",
     transition:"all 0.15s", fontFamily:theme.fontBody || "serif",
     background: active ? "var(--card)" : "transparent",
-    color:      active ? theme.accent : "var(--text)"Muted,
+    color:      active ? theme.accent : "var(--text-muted)",
     border:     `1px solid ${active ? "var(--border)" : "transparent"}`,
     borderBottom: active ? `1px solid ${"var(--card)"}` : "none",
     borderRadius:"6px 6px 0 0",
@@ -5439,23 +5439,23 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
       {/* ── Sticky top bar ── */}
       <div style={{ background:"var(--card)", borderBottom:"2px solid var(--accent)", padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${"var(--border)"}`, color:"var(--text)"Muted, padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
+          <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
           {/* Name */}
           <div style={{ flexShrink:0, minWidth:0 }}>
             <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:"var(--accent)", lineHeight:1.1 }}>{char.name}</div>
-            <div style={{ fontSize:10, color:"var(--text)"Muted, whiteSpace:"nowrap" }}>
+            <div style={{ fontSize:10, color:"var(--text-muted)", whiteSpace:"nowrap" }}>
               {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Lvl ${char.level}`].filter(Boolean).join(" · ")}
             </div>
           </div>
           {/* HP — compact inline with controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flex:1, minWidth:0, margin:"0 8px" }}>
             <span style={{ fontFamily:theme.fontDisplay, fontSize:20, color:hpColour, lineHeight:1, flexShrink:0 }}>{char.hp.current}</span>
-            <span style={{ color:"var(--text)"Dim, fontSize:13, flexShrink:0 }}>/{char.hp.max}</span>
+            <span style={{ color:"var(--text-dim)", fontSize:13, flexShrink:0 }}>/{char.hp.max}</span>
             {char.hp.temp > 0 && <span style={{ fontSize:10, color:theme.info, flexShrink:0 }}>+{char.hp.temp}</span>}
             <div style={{ flex:1, height:7, background:"var(--bg)", borderRadius:4, overflow:"hidden", minWidth:40 }}>
               <div style={{ height:"100%", width:`${Math.max(0,Math.min(100,(char.hp.current/Math.max(1,char.hp.max))*100))}%`, background:hpColour, borderRadius:4, transition:"all 0.3s" }}/>
             </div>
-            <span style={{ fontSize:9, color:"var(--text)"Dim, flexShrink:0 }}>HP</span>
+            <span style={{ fontSize:9, color:"var(--text-dim)", flexShrink:0 }}>HP</span>
             {/* Inline DMG / Heal controls */}
             <input id="hp-delta" placeholder="±" style={{ width:42, background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text)", padding:"3px 5px", borderRadius:5, fontSize:13, textAlign:"center", fontFamily:theme.fontBody, flexShrink:0 }}
               onKeyDown={e => {
@@ -5467,7 +5467,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               }}/>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
-            <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text)"Muted, borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
+            <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
             <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
           </div>
           {/* Controls */}
@@ -5504,7 +5504,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               onMouseLeave={e=>e.currentTarget.style.boxShadow="0 0 16px rgba(var(--accent-rgb,201,162,39),0.2)"}>
               {char.profileImage && !imgError
                 ? <img src={char.profileImage} alt="portrait" onError={()=>setImgError(true)} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
-                : <div style={{ textAlign:"center", color:"var(--text)"Dim }}><div style={{ fontSize:28 }}>🧙</div><div style={{ fontSize:9, marginTop:4, color:"var(--text)"Muted }}>Add portrait</div></div>
+                : <div style={{ textAlign:"center", color:"var(--text-dim)" }}><div style={{ fontSize:28 }}>🧙</div><div style={{ fontSize:9, marginTop:4, color:"var(--text-muted)" }}>Add portrait</div></div>
               }
             </div>
           </div>
@@ -5516,7 +5516,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               const score = char.abilities[ab];
               return (
                 <div key={ab} style={{ textAlign:"center", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:7, padding:"5px 2px" }}>
-                  <div style={{ fontSize:10, color:"var(--text)"Muted, textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
+                  <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
                   <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:"var(--accent)", lineHeight:1.2 }}>{score}</div>
                   <div style={{ fontSize:13, color:"var(--text)" }}>{modStr(calcMod(score))}</div>
                 </div>
@@ -5530,7 +5530,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             {Object.entries(saves).map(([ab, sv]) => (
               <div key={ab} style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 6px", borderRadius:4 }}>
                 <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0, background:sv.proficient?theme.accent:"transparent", border:`2px solid ${sv.proficient?theme.accent:"var(--border)"}` }}/>
-                <span style={{ flex:1, fontSize:12, color:sv.proficient?"var(--text)":"var(--text)"Muted }}>{ABILITY_NAMES[ab]}</span>
+                <span style={{ flex:1, fontSize:12, color:sv.proficient?"var(--text)":"var(--text-muted)" }}>{ABILITY_NAMES[ab]}</span>
                 <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13 }}>{modStr(sv.value)}</span>
               </div>
             ))}
@@ -5542,8 +5542,8 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             {Object.entries(skills).map(([sk, d]) => (
               <div key={sk} style={{ display:"flex", alignItems:"center", gap:5, padding:"2px 4px", borderRadius:3, background:d.expertise?"rgba(201,162,39,0.05)":d.proficient?"rgba(201,162,39,0.02)":"transparent" }}>
                 <span style={{ width:7, height:7, flexShrink:0, display:"inline-block", borderRadius:d.expertise?0:"50%", transform:d.expertise?"rotate(45deg)":"none", background:d.proficient||d.expertise?theme.accent:"transparent", border:`2px solid ${d.proficient||d.expertise?theme.accent:"var(--border)"}` }}/>
-                <span style={{ flex:1, fontSize:12, color:d.proficient?"var(--text)":"var(--text)"Muted, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
-                <span style={{ fontSize:10, color:"var(--text)"Dim, marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
+                <span style={{ flex:1, fontSize:12, color:d.proficient?"var(--text)":"var(--text-muted)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
+                <span style={{ fontSize:10, color:"var(--text-dim)", marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
                 <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
               </div>
             ))}
@@ -5553,10 +5553,10 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           {classData && (<>
             {sectionLabel("Proficiencies")}
             <div style={{ fontSize:13, lineHeight:2, marginBottom:4 }}>
-              <div><span style={{ color:"var(--text)"Muted }}>Armor: </span><span style={{ color:"var(--text)" }}>{(classData.armorProficiencies||[]).join(", ")||"None"}</span></div>
-              <div><span style={{ color:"var(--text)"Muted }}>Weapons: </span><span style={{ color:"var(--text)" }}>{(classData.weaponProficiencies||[]).join(", ")||"None"}</span></div>
-              <div><span style={{ color:"var(--text)"Muted }}>Saves: </span><span style={{ color:"var(--text)" }}>{(classData.savingThrows||[]).map(ab=>ABILITY_SHORT[ab]).join(", ")}</span></div>
-              {char.skillProficiencies?.length>0 && <div><span style={{ color:"var(--text)"Muted }}>Skills: </span><span style={{ color:"var(--text)" }}>{char.skillProficiencies.join(", ")}</span></div>}
+              <div><span style={{ color:"var(--text-muted)" }}>Armor: </span><span style={{ color:"var(--text)" }}>{(classData.armorProficiencies||[]).join(", ")||"None"}</span></div>
+              <div><span style={{ color:"var(--text-muted)" }}>Weapons: </span><span style={{ color:"var(--text)" }}>{(classData.weaponProficiencies||[]).join(", ")||"None"}</span></div>
+              <div><span style={{ color:"var(--text-muted)" }}>Saves: </span><span style={{ color:"var(--text)" }}>{(classData.savingThrows||[]).map(ab=>ABILITY_SHORT[ab]).join(", ")}</span></div>
+              {char.skillProficiencies?.length>0 && <div><span style={{ color:"var(--text-muted)" }}>Skills: </span><span style={{ color:"var(--text)" }}>{char.skillProficiencies.join(", ")}</span></div>}
             </div>
           </>)}
 
@@ -5569,7 +5569,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             {sectionLabel("Languages")}
             <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:4 }}>
               {[...(char.languages||[])].sort().map(lang => (
-                <span key={lang} style={{ padding:"2px 8px", background:"rgba(80,120,200,0.08)", border:"1px solid rgba(80,120,200,0.25)", borderRadius:12, fontSize:11, color:"var(--text)"Muted }}>
+                <span key={lang} style={{ padding:"2px 8px", background:"rgba(80,120,200,0.08)", border:"1px solid rgba(80,120,200,0.25)", borderRadius:12, fontSize:11, color:"var(--text-muted)" }}>
                   {lang}
                 </span>
               ))}
@@ -5585,7 +5585,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length}, 1fr)`, gap:8 }}>
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:8 }}>
-                  <div style={{ fontSize:9, color:"var(--text)"Muted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
+                  <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
                   <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:24, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
