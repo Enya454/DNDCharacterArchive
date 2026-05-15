@@ -9143,8 +9143,18 @@
         {
           "name": "Proficiencies",
           "level": 1,
-          "type": "passive",
-          "description": "Armor: Light armor, medium armor, shields. Weapons: Simple weapons. Tools: Thieves' tools, tinker's tools, one type of artisan's tools of your choice. Saving Throws: Constitution, Intelligence. Skills: Choose 2 from Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand."
+          "type": "proficiency_choice",
+          "description": "Choose 2 skills from: Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand.",
+          "count": 2,
+          "from": [
+            "Arcana",
+            "History",
+            "Investigation",
+            "Medicine",
+            "Nature",
+            "Perception",
+            "Sleight of Hand"
+          ]
         },
         {
           "name": "Magical Tinkering",
@@ -9159,12 +9169,124 @@
           "description": "You've studied the workings of magic and how to cast spells, channeling the magic through objects. Spell Slots: The Artificer table shows how many spell slots you have. Intelligence is your spellcasting ability. Spell save DC = 8 + proficiency bonus + Intelligence modifier. Infuse Item: You learn to channel magic into objects (gained at 2nd level)."
         },
         {
+          "name": "Tool Proficiency",
+          "level": 1,
+          "type": "choice",
+          "options": [
+            "Alchemist's supplies",
+            "Brewer's supplies",
+            "Calligrapher's supplies",
+            "Carpenter's tools",
+            "Cartographer's tools",
+            "Cobbler's tools",
+            "Cook's utensils",
+            "Glassblower's tools",
+            "Jeweler's tools",
+            "Leatherworker's tools",
+            "Mason's tools",
+            "Painter's supplies",
+            "Potter's tools",
+            "Smith's tools",
+            "Tinker's tools",
+            "Weaver's tools",
+            "Woodcarver's tools"
+          ],
+          "description": "You gain proficiency with one type of artisan's tools of your choice."
+        },
+        {
           "name": "Infuse Item",
           "level": 2,
-          "type": "passive",
-          "description": "At 2nd level, you gain the ability to imbue mundane items with certain magical infusions, turning those objects into magic items. You learn 4 infusions at 2nd level and gain more as you level up (total 12 at level 20). Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions. You can attune to it immediately. You can have a number of infused items active simultaneously equal to half your artificer level (rounded down).",
+          "type": "eldritch_invocations",
+          "infusionLabel": "Infusions Known",
+          "countByLevel": {
+            "2": 4,
+            "6": 6,
+            "10": 8,
+            "14": 10,
+            "18": 12,
+            "20": 12
+          },
+          "invocations": [
+            {
+              "name": "Arcane Propulsion Armor",
+              "description": "The wearer of this armor gains these benefits: The wearer's walking speed increases by 5 feet. The armor includes gauntlets, each of which is a magic melee weapon that can be wielded only when the hand is holding nothing. The gauntlet deals 1d8 force damage on a hit and has the thrown property, with a normal range of 20 feet and a long range of 60 feet. If the target is a creature, it must succeed on a Strength saving throw (DC equals your spell save DC) or be pushed up to 10 feet away from you in a horizontal direction.",
+              "levelReq": 14
+            },
+            {
+              "name": "Armor of Magical Strength",
+              "description": "This armor has 6 charges. The wearer can expend the armor's charges in the following ways: When the wearer makes a Strength check or a Strength saving throw, it can expend 1 charge to add a bonus to the roll equal to its Intelligence modifier. When an effect would knock the wearer prone, it can expend 1 charge as a reaction to avoid being knocked prone. The armor regains 1d6 expended charges daily at dawn.",
+              "levelReq": 2
+            },
+            {
+              "name": "Boots of the Winding Path",
+              "description": "While wearing these boots, a creature can teleport up to 15 feet as a bonus action to an unoccupied space the creature can see. The creature must have occupied that space at some point during the current turn.",
+              "levelReq": 6
+            },
+            {
+              "name": "Enhanced Arcane Focus",
+              "description": "While holding this rod, orb, or staff, a creature gains a +1 bonus to spell attack rolls and ignores half cover when making a spell attack. The bonus increases to +2 when you reach 10th level in this class.",
+              "levelReq": 2
+            },
+            {
+              "name": "Enhanced Defense",
+              "description": "A creature gains a +1 bonus to Armor Class while wearing (armor) or wielding (shield) the infused item. The bonus increases to +2 when you reach 10th level in this class.",
+              "levelReq": 2
+            },
+            {
+              "name": "Enhanced Weapon",
+              "description": "A simple or martial weapon gains a +1 bonus to attack and damage rolls made with it. The bonus increases to +2 when you reach 10th level in this class.",
+              "levelReq": 2
+            },
+            {
+              "name": "Helm of Awareness",
+              "description": "While wearing this helmet, a creature has advantage on initiative rolls. In addition, the wearer can't be surprised, provided it isn't incapacitated.",
+              "levelReq": 10
+            },
+            {
+              "name": "Homunculus Servant",
+              "description": "You learn intricate methods for magically creating a special homunculus that serves you. The item you infuse serves as the creature's heart, around which the creature's body instantly forms. You determine the homunculus's appearance. It is friendly to you and your companions, and it obeys your commands.",
+              "levelReq": 2
+            },
+            {
+              "name": "Mind Sharpener",
+              "description": "The infused item can send a jolt to the wearer to refocus their mind. The item has 4 charges. When the wearer fails a Constitution saving throw to maintain concentration on a spell, the wearer can use its reaction to expend 1 of the item's charges to succeed instead. The item regains 1d4 expended charges daily at dawn.",
+              "levelReq": 2
+            },
+            {
+              "name": "Radiant Weapon",
+              "description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it. While holding it, the wielder can take a bonus action to cause it to shed bright light in a 30-foot radius and dim light for an additional 30 feet. The wielder can extinguish the light as a bonus action. The weapon has 4 charges. As a reaction immediately after being hit by an attack, the wielder can expend 1 charge and cause the attacker to be blinded until the end of the attacker's next turn, unless the attacker succeeds on a Constitution saving throw against your spell save DC. The weapon regains 1d4 expended charges daily at dawn.",
+              "levelReq": 6
+            },
+            {
+              "name": "Repulsion Shield",
+              "description": "A creature gains a +1 bonus to Armor Class while wielding this shield. The shield has 4 charges. While holding it, the wielder can use a reaction immediately after being hit by a melee attack to expend 1 of the shield's charges and push the attacker up to 15 feet away. The shield regains 1d4 expended charges daily at dawn.",
+              "levelReq": 6
+            },
+            {
+              "name": "Resistant Armor",
+              "description": "While wearing this armor, a creature has resistance to one of the following damage types, which you choose when you infuse the item: acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder.",
+              "levelReq": 6
+            },
+            {
+              "name": "Returning Weapon",
+              "description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it, and it returns to the wielder's hand immediately after it is used to make a ranged attack.",
+              "levelReq": 2
+            },
+            {
+              "name": "Spell-Refueling Ring",
+              "description": "While wearing this ring, the creature can recover one expended spell slot as an action. The recovered slot can be of 3rd level or lower. Once used, the ring can't be used again until the next dawn.",
+              "levelReq": 6
+            },
+            {
+              "name": "Replicate Magic Item",
+              "description": "Using this infusion, you replicate a particular magic item. You can learn this infusion multiple times; each time you do so, choose a magic item that you can make with it. See the Replicate Magic Item table in Tasha's Cauldron of Everything for the full list of replicable items by level.",
+              "levelReq": 2
+            }
+          ],
+          "description": "You learn 4 infusions at 2nd level. You gain more as you level: 6 at 6th, 8 at 10th, 10 at 14th, 12 at 18th. Whenever you finish a long rest, you can apply your known infusions to nonmagical items. The number of items you can have infused at once equals half your artificer level (rounded down).",
           "uses": "Half level (items active)",
-          "recharge": "long rest"
+          "recharge": "long rest",
+          "invocationLabel": "infusion"
         },
         {
           "name": "Artificer Specialist",

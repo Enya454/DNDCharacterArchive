@@ -1178,7 +1178,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             return (
               <div>
                 <div style={{fontSize:12,color:"var(--text-muted)",marginBottom:10}}>
-                  Choose {maxCount} invocation{maxCount!==1?"s":""} — {pickedNames.length}/{maxCount} selected.
+                  Choose {maxCount} {feature.invocationLabel||"invocation"}{maxCount!==1?"s":""} — {pickedNames.length}/{maxCount} selected.
                   {charLevel >= 5 && " (More unlock at higher levels.)"}
                 </div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
