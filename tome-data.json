@@ -8838,7 +8838,11 @@
     },
     "Artificer": {
       "name": "Artificer",
-      "source": "TCoE",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 9
+      },
       "page": 9,
       "description": "Masters of invention, artificers use ingenuity and magic to unlock extraordinary capabilities in objects. They see magic as a complex system waiting to be decoded and then harnessed in their spells and inventions.",
       "hitDie": 8,
@@ -9190,7 +9194,11 @@
       "subclasses": {
         "Alchemist": {
           "name": "Alchemist",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 14
+          },
           "page": 14,
           "description": "An Alchemist is an expert at combining reagents to produce mystical effects. Alchemists use their creations to give life and to leech it away.",
           "features": [
@@ -9240,7 +9248,11 @@
         },
         "Armorer": {
           "name": "Armorer",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 15
+          },
           "page": 15,
           "description": "An Armorer infuses their armor with elemental energy and turns it into a weapon. Armorers walk into the thick of combat, shielded by their extraordinary inventions.",
           "features": [
@@ -9294,7 +9306,11 @@
         },
         "Artillerist": {
           "name": "Artillerist",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 17
+          },
           "page": 17,
           "description": "An Artillerist specializes in using magic to hurl energy, projectiles, and explosions on a battlefield. This destructive power is valued by armies in the wars on many different worlds.",
           "features": [
@@ -9340,7 +9356,11 @@
         },
         "Battle Smith": {
           "name": "Battle Smith",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 18
+          },
           "page": 18,
           "description": "Armies require a good supply of weapons and armor, and someone has to fill that need. Artificers of the Battle Smith subclass defend others and target foes from a distance using the magic-infused weapon of their own creation.",
           "features": [
