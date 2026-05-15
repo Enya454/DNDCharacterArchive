@@ -2672,12 +2672,17 @@ function SourceBadge({ source }) {
     VGM:  { bg:"rgba(100,50,0,0.15)",  border:"rgba(100,50,0,0.5)",  text:"#cc8844" },
     EEPC: { bg:"rgba(0,80,0,0.15)",    border:"rgba(0,80,0,0.5)",    text:"#66cc66" },
   };
-  const c = colours[source.abbr] || { bg:"rgba(60,60,60,0.2)", border:"rgba(120,120,120,0.4)", text:"#aaa" };
+  // Handle both plain string ("PHB") and object ({abbr:"PHB", book:"...", page:9})
+  const abbr = typeof source === "string" ? source : source?.abbr;
+  const page = typeof source === "object" ? source?.page : null;
+  const book = typeof source === "object" ? source?.book : abbr;
+  if (!abbr) return null;
+  const c = colours[abbr] || { bg:"rgba(60,60,60,0.2)", border:"rgba(120,120,120,0.4)", text:"#aaa" };
   return (
-    <span title={`${source.book}${source.page ? `, p.${source.page}` : ""}`}
+    <span title={`${book || abbr}${page ? `, p.${page}` : ""}`}
       style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"1px 6px", borderRadius:4, fontSize:10,
         background:c.bg, border:`1px solid ${c.border}`, color:c.text, letterSpacing:0.5, flexShrink:0 }}>
-      {source.abbr}{source.page ? ` p.${source.page}` : ""}
+      {abbr}{page ? ` p.${page}` : ""}
     </span>
   );
 }

@@ -1302,7 +1302,13 @@
           ],
           "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."
         }
-      ]
+      ],
+      "source": {
+        "book": "Mordenkainen Monsters of the Multiverse",
+        "abbr": "MotM",
+        "page": 6
+      },
+      "description": "Aasimar are mortals who carry a spark of the Upper Planes within their souls. They can innately access this power to heal others, sear foes, and manifest luminous wings."
     }
   },
   "classes": {
