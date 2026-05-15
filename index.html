@@ -1290,19 +1290,34 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     <div style={{ padding:"10px 12px", background:"rgba(0,0,0,0.15)", borderRadius:8,
                       border:"1px solid var(--border)", marginBottom:8 }}>
                       <div style={{ fontSize:12, color:"var(--accent)", marginBottom:8, fontFamily:"var(--font-display)" }}>
-                        Inherited from {chosenRace}
+                        Inherited from {chosenRace} — choose {ancestralSkillFeat.count} skill{ancestralSkillFeat.count!==1?"s":""}
                       </div>
-                      <FeaturePanel
-                        feature={{ ...ancestralSkillFeat, name: "Ancestral Legacy Skills" }}
-                        locked={false}
-                        choices={choices}
-                        onChoice={onChoice}
-                        skillProfs={skillProfs}
-                        onSkillToggle={skill => onSkillToggle && onSkillToggle(skill)}
-                        charLevel={charLevel}
-                        gameData={gameData}
-                      />
-                      {/* Also inherit any extra movement speeds */}
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                        {(ancestralSkillFeat.from === "all" ? Object.keys(SKILLS_MAP).sort() : (ancestralSkillFeat.from||[])).map(skill => {
+                          const key    = "Ancestral Legacy Skills";
+                          const picked = choices?.[key] || [];
+                          const max    = ancestralSkillFeat.count || 2;
+                          const isChosen = picked.includes(skill);
+                          const canPick  = isChosen || picked.length < max;
+                          return (
+                            <div key={skill} onClick={() => {
+                              if (!canPick && !isChosen) return;
+                              const next = isChosen ? picked.filter(s=>s!==skill) : [...picked, skill];
+                              onChoice && onChoice(key, next);
+                            }} style={{ padding:"4px 10px", borderRadius:16, cursor:canPick||isChosen?"pointer":"not-allowed",
+                              fontSize:12, transition:"all 0.15s",
+                              border:`1px solid ${isChosen?"var(--accent)":"var(--border)"}`,
+                              background:isChosen?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
+                              color:isChosen?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                              opacity:!canPick&&!isChosen?0.45:1 }}>
+                              {isChosen?"✓ ":""}{skill}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {(() => { const p = choices?.["Ancestral Legacy Skills"]||[]; return p.length > 0 && (
+                        <div style={{ fontSize:12, color:"var(--accent)", marginTop:8 }}>Selected: {p.join(", ")} ({p.length}/{ancestralSkillFeat.count||2})</div>
+                      ); })()}
                       {(ancestralSpecies?.speed > 30 || ancestralSpecies?.climbSpeed || ancestralSpecies?.swimSpeed || ancestralSpecies?.flySpeed) && (
                         <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:8 }}>
                           Also inherits:
@@ -1329,16 +1344,35 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     <div style={{ fontSize:12, color:"var(--accent)", marginBottom:8, fontFamily:"var(--font-display)" }}>
                       Choose 2 skill proficiencies
                     </div>
-                    <FeaturePanel
-                      feature={{ name:"Ancestral Legacy Skills", type:"proficiency_choice", count:2, from:"all" }}
-                      locked={false}
-                      choices={choices}
-                      onChoice={onChoice}
-                      skillProfs={skillProfs}
-                      onSkillToggle={skill => onSkillToggle && onSkillToggle(skill)}
-                      charLevel={charLevel}
-                      gameData={gameData}
-                    />
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                      {Object.keys(SKILLS_MAP).sort().map(skill => {
+                        const key = "Ancestral Legacy Skills";
+                        const picked = choices?.[key] || [];
+                        const isPicked = isPicked => skillProfs?.includes(skill) && !isPicked;
+                        const isChosen = picked.includes(skill);
+                        const canPick  = isChosen || picked.length < 2;
+                        return (
+                          <div key={skill} onClick={() => {
+                            if (!canPick && !isChosen) return;
+                            const next = isChosen
+                              ? picked.filter(s => s !== skill)
+                              : [...picked, skill];
+                            onChoice && onChoice(key, next);
+                            onSkillToggle && onSkillToggle(skill);
+                          }} style={{ padding:"4px 10px", borderRadius:16, cursor:canPick||isChosen?"pointer":"not-allowed",
+                            fontSize:12, transition:"all 0.15s",
+                            border:`1px solid ${isChosen?"var(--accent)":"var(--border)"}`,
+                            background:isChosen?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
+                            color:isChosen?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                            opacity:!canPick&&!isChosen?0.45:1 }}>
+                            {isChosen?"✓ ":""}{skill}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {(() => { const p = choices?.["Ancestral Legacy Skills"]||[]; return p.length > 0 && (
+                      <div style={{ fontSize:12, color:"var(--accent)", marginTop:8 }}>Selected: {p.join(", ")} ({p.length}/2)</div>
+                    ); })()}
                   </div>
                 )}
               </div>
@@ -3594,6 +3628,34 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     </div>
                   ) : null;
                 })()}
+
+                {/* Speed and size */}
+                <div style={{ ...ws.card, fontSize:13, display:"flex", gap:20, alignItems:"center" }}>
+                  <span>
+                    <span style={{ color:"var(--text-muted)" }}>Speed: </span>
+                    <span style={{ color:"var(--accent)" }}>
+                      {(() => {
+                        const base = speciesData.speed || 30;
+                        const sub  = subraceData?.speed;
+                        const spd  = sub || base;
+                        return `${spd}ft`;
+                      })()}
+                    </span>
+                  </span>
+                  <span>
+                    <span style={{ color:"var(--text-muted)" }}>Size: </span>
+                    <span style={{ color:"var(--accent)" }}>{subraceData?.size || speciesData.size || "Medium"}</span>
+                  </span>
+                  {(speciesData.climbSpeed || subraceData?.climbSpeed) && (
+                    <span><span style={{ color:"var(--text-muted)" }}>Climb: </span><span style={{ color:"var(--accent)" }}>{subraceData?.climbSpeed || speciesData.climbSpeed}ft</span></span>
+                  )}
+                  {(speciesData.swimSpeed || subraceData?.swimSpeed) && (
+                    <span><span style={{ color:"var(--text-muted)" }}>Swim: </span><span style={{ color:"var(--accent)" }}>{subraceData?.swimSpeed || speciesData.swimSpeed}ft</span></span>
+                  )}
+                  {(speciesData.flySpeed || subraceData?.flySpeed) && (
+                    <span><span style={{ color:"var(--text-muted)" }}>Fly: </span><span style={{ color:"var(--accent)" }}>{subraceData?.flySpeed || speciesData.flySpeed}ft</span></span>
+                  )}
+                </div>
 
                 {/* Species features */}
                 <div style={ws.secTitle}>Species Features</div>

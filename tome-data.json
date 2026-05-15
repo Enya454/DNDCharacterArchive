@@ -1322,7 +1322,8 @@
       "abilityBonuses": {},
       "abilityChoices": {
         "count": 3,
-        "amount": 1
+        "amount": 1,
+        "flexible": true
       },
       "autoLanguages": [
         "Common"
@@ -1333,8 +1334,10 @@
         {
           "name": "Ability Score Increases",
           "level": 1,
-          "type": "passive",
-          "description": "When determining your character's ability scores, increase one score by 2 and increase a different score by 1, or increase three different scores by 1. Follow this rule regardless of the method you use to determine the scores."
+          "type": "asi_points",
+          "points": 3,
+          "mode": "flexible",
+          "description": "Increase one ability score by 2 and another by 1, or increase three different ability scores by 1 each."
         },
         {
           "name": "Size",
