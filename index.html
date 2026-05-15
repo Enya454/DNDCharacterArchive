@@ -100,6 +100,40 @@
         radial-gradient(ellipse at 100% 100%, rgba(140,200,255,0.08) 0%, transparent 25%);
       animation: frostPulse 6s ease-in-out infinite;
     }
+
+    /* ── Fire & Ember animations ── */
+    @keyframes emberRise {
+      0%   { transform: translateY(0)     translateX(0px)   scale(1);    opacity: 0; }
+      5%   { opacity: 1; }
+      30%  { transform: translateY(-30vh) translateX(12px)  scale(0.85); }
+      60%  { transform: translateY(-65vh) translateX(-8px)  scale(0.6);  }
+      85%  { opacity: 0.6; }
+      100% { transform: translateY(-105vh)translateX(5px)   scale(0.2);  opacity: 0; }
+    }
+    @keyframes emberRiseSway {
+      0%   { transform: translateY(0)     translateX(0px)   scale(1);    opacity: 0; }
+      5%   { opacity: 1; }
+      25%  { transform: translateY(-25vh) translateX(-15px) scale(0.9);  }
+      50%  { transform: translateY(-55vh) translateX(18px)  scale(0.65); }
+      75%  { transform: translateY(-80vh) translateX(-6px)  scale(0.4);  }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-108vh)translateX(10px)  scale(0.1);  opacity: 0; }
+    }
+    @keyframes flamePulse {
+      0%,100% { opacity: 0.55; transform: scaleX(1)   scaleY(1); }
+      25%     { opacity: 0.75; transform: scaleX(1.04) scaleY(1.02); }
+      50%     { opacity: 0.45; transform: scaleX(0.96) scaleY(0.98); }
+      75%     { opacity: 0.70; transform: scaleX(1.02) scaleY(1.03); }
+    }
+    @keyframes flamePulse2 {
+      0%,100% { opacity: 0.40; transform: scaleX(1)   scaleY(1); }
+      33%     { opacity: 0.60; transform: scaleX(1.06) scaleY(1.04); }
+      66%     { opacity: 0.30; transform: scaleX(0.94) scaleY(0.97); }
+    }
+    @keyframes heatHaze {
+      0%,100% { opacity: 0.18; }
+      50%     { opacity: 0.30; }
+    }
     @keyframes shimmer {
       0%   { background-position: -200% center; }
       100% { background-position:  200% center; }
@@ -3059,6 +3093,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       { id:"arcane",   name:"Arcane",    bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",   effect:null },
                       { id:"winter",      name:"Winter Dark",  bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
                       { id:"winterlight", name:"Winter Light",  bg:"linear-gradient(180deg,#dbeeff 0%,#c2d8f0 35%,#b8cfe8 65%,#d0e4f5 100%)", g1:"rgba(255,255,255,0.45)", g2:"rgba(160,200,240,0.30)",effect:"winter-light" },
+                      { id:"hearthfire",  name:"Hearthfire",    bg:"#0e0500", g1:"rgba(200,60,0,0.30)",   g2:"rgba(120,30,0,0.20)",  effect:"fire" },
                     ].map(p => {
                       const cur = (char.custom||{}).bgPreset || "dungeon";
                       const active = cur === p.id;
@@ -3068,7 +3103,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                             border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
                             background:`radial-gradient(ellipse at 30% 20%, ${p.g1} 0%, transparent 70%), ${p.bg}` }}>
                           <div style={{ fontSize:10, color:active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
-                          {p.effect && <div style={{ fontSize:8, color:active?"var(--accent)":"var(--text-dim)", marginTop:1 }}>❄</div>}
+                          {p.effect && <div style={{ fontSize:8, color:active?"var(--accent)":"var(--text-dim)", marginTop:1 }}>{p.effect==="fire"?"🔥":"❄"}</div>}
                         </div>
                       );
                     })}
@@ -4971,6 +5006,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
             { id:"arcane",   name:"Arcane Library", bg:"#07050e", g1:"rgba(80,20,160,0.30)",  g2:"rgba(40,0,100,0.22)",  effect:null },
             { id:"winter",      name:"Winter Dark",  bg:"#040c18", g1:"rgba(80,160,255,0.22)", g2:"rgba(40,100,200,0.15)",effect:"winter" },
             { id:"winterlight", name:"Winter Light",  bg:"linear-gradient(180deg,#dbeeff 0%,#c2d8f0 35%,#b8cfe8 65%,#d0e4f5 100%)", g1:"rgba(255,255,255,0.45)", g2:"rgba(160,200,240,0.30)",effect:"winter-light" },
+            { id:"hearthfire",  name:"Hearthfire",    bg:"#0e0500", g1:"rgba(200,60,0,0.30)",   g2:"rgba(120,30,0,0.20)",  effect:"fire" },
           ].map(p => {
             const cur = cc.bgPreset || "dungeon";
             const active = cur === p.id;
@@ -4980,7 +5016,7 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
                   border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
                   background:`radial-gradient(ellipse at 20% 10%, ${p.g1} 0%, transparent 60%), ${p.bg}` }}>
                 <div style={{ fontSize:12, color:active?"var(--accent)":"var(--text-muted)", fontFamily:"var(--font-display)" }}>{p.name}</div>
-                {p.effect && <div style={{ fontSize:9, color:active?"var(--accent)":"var(--text-dim)", marginTop:2 }}>❄ animated</div>}
+                {p.effect && <div style={{ fontSize:9, color:active?"var(--accent)":"var(--text-dim)", marginTop:2 }}>{p.effect==="fire"?"🔥 animated":"❄ animated"}</div>}
               </div>
             );
           })}
@@ -6031,6 +6067,35 @@ const SYMBOLS = [
   "△","▽","◇","⬦","✩","⁕",
 ];
 
+function FireAtmosphere() {
+  return (
+    <>
+      {/* Deep fire glow at bottom — the hearth */}
+      <div style={{ position:"fixed", bottom:"-15%", left:"50%", transform:"translateX(-50%)",
+        width:"90vw", height:"55vh",
+        background:"radial-gradient(ellipse, rgba(255,80,0,0.28) 0%, rgba(255,40,0,0.12) 40%, transparent 70%)",
+        pointerEvents:"none", zIndex:0, animation:"flamePulse 2.8s ease-in-out infinite" }}/>
+      {/* Secondary flame bloom, offset */}
+      <div style={{ position:"fixed", bottom:"-20%", left:"35%",
+        width:"50vw", height:"45vh",
+        background:"radial-gradient(ellipse, rgba(255,120,0,0.20) 0%, transparent 65%)",
+        pointerEvents:"none", zIndex:0, animation:"flamePulse2 3.4s ease-in-out infinite" }}/>
+      <div style={{ position:"fixed", bottom:"-20%", right:"25%",
+        width:"45vw", height:"40vh",
+        background:"radial-gradient(ellipse, rgba(255,60,0,0.18) 0%, transparent 60%)",
+        pointerEvents:"none", zIndex:0, animation:"flamePulse 4.1s ease-in-out infinite 0.9s" }}/>
+      {/* Heat haze across the middle */}
+      <div style={{ position:"fixed", top:"30%", left:0, right:0, height:"40vh",
+        background:"radial-gradient(ellipse at 50% 100%, rgba(255,100,20,0.12) 0%, transparent 55%)",
+        pointerEvents:"none", zIndex:0, animation:"heatHaze 3.2s ease-in-out infinite" }}/>
+      {/* Dark vignette at top to frame the fire glow */}
+      <div style={{ position:"fixed", top:0, left:0, right:0, height:"45vh",
+        background:"linear-gradient(180deg, rgba(5,2,0,0.5) 0%, transparent 100%)",
+        pointerEvents:"none", zIndex:0 }}/>
+    </>
+  );
+}
+
 function GodRays({ colour = "rgba(160,210,255,0.06)" }) {
   const rays = React.useMemo(() => Array.from({length: 7}, (_, i) => ({
     id: i,
@@ -6065,30 +6130,38 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
   const isWinterDark  = backgroundEffect === "winter";
   const isWinterLight = backgroundEffect === "winter-light";
   const isWinter      = isWinterDark || isWinterLight;
+  const isFire        = backgroundEffect === "fire";
   const count     = density === "subtle" ? 12 : density === "off" ? 0 : 20;
   const snowCount = isWinter ? (density === "off" ? 0 : density === "subtle" ? 30 : 50) : 0;
+  const emberCount= isFire   ? (density === "off" ? 0 : density === "subtle" ? 35 : 55) : 0;
   const pool      = symbolSet?.length > 0 ? symbolSet : (isWinter ? SNOWFLAKES : SYMBOLS);
   const opMul     = symbolOpacity !== undefined ? symbolOpacity : 1;
 
   const symbols = React.useMemo(() => {
-    if (count === 0 && !isWinter) return [];
-    const total = isWinter ? snowCount : count;
+    if (count === 0 && !isWinter && !isFire) return [];
+    const total = isWinter ? snowCount : isFire ? emberCount : count;
     if (total === 0) return [];
     return Array.from({ length: total }, (_, i) => {
       const left     = (i * 97 + 11) % 100;
-      const startTop = isWinter ? (-(i * 13) % 120) : 100 + (i * 37) % 40;
-      const delay    = (i * 2.3) % 25;
-      const dur      = isWinter ? (8 + (i * 3.1) % 18) : (18 + (i * 4.1) % 22);
-      const size     = isWinter ? (8 + (i * 5) % 16) : (12 + (i * 7) % 18);
-      const sym      = pool[i % pool.length];
-      const anim     = isWinter
-        ? (i % 3 === 0 ? "snowfall" : "snowfallSway")
-        : (i % 2 === 0 ? "floatUp" : "floatUpSway");
+      const startTop = (isWinter || isFire) ? (100 + (i * 7) % 25) : 100 + (i * 37) % 40;
+      const delay    = (i * 1.9) % 20;
+      const dur      = isWinter ? (8 + (i * 3.1) % 18)
+                     : isFire   ? (4 + (i * 2.3) % 10)
+                     : (18 + (i * 4.1) % 22);
+      const size     = isWinter ? (8 + (i * 5) % 16)
+                     : isFire   ? (3 + (i * 3) % 8)
+                     : (12 + (i * 7) % 18);
+      const sym      = isFire ? (i % 4 === 0 ? "✦" : i % 4 === 1 ? "·" : i % 4 === 2 ? "•" : "◦") : pool[i % pool.length];
+      const anim     = isWinter ? (i % 3 === 0 ? "snowfall" : "snowfallSway")
+                     : isFire   ? (i % 2 === 0 ? "emberRise" : "emberRiseSway")
+                     : (i % 2 === 0 ? "floatUp" : "floatUpSway");
 
       const colour = isWinterDark
         ? `rgba(${160 + (i*7)%60},${210 + (i*5)%40},255,${((0.25 + (i*0.03)%0.35)*opMul).toFixed(2)})`
         : isWinterLight
         ? `rgba(${100 + (i*11)%60},${140 + (i*7)%60},${200 + (i*5)%40},${((0.20 + (i*0.04)%0.30)*opMul).toFixed(2)})`
+        : isFire
+        ? `rgba(${220 + (i*5)%35},${50 + (i*11)%80},${5 + (i*3)%20},${((0.55 + (i*0.04)%0.35)*opMul).toFixed(2)})`
         : [
             `rgba(201,162,39,${(0.28*opMul).toFixed(2)})`,
             `rgba(180,130,255,${(0.22*opMul).toFixed(2)})`,
@@ -6099,11 +6172,13 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
 
       return { sym, left, startTop, delay, dur, size, colour, anim, id: i };
     });
-  }, [count, snowCount, isWinter, isWinterLight, pool.join(""), opMul]);
+  }, [count, snowCount, emberCount, isWinter, isWinterLight, isFire, pool.join(""), opMul]);
 
   return (
     <>
-      {isWinterDark ? (
+      {isFire ? (
+        <FireAtmosphere/>
+      ) : isWinterDark ? (
         <>
           <div className="frost-overlay"/>
           <GodRays colour="rgba(100,160,240,0.08)"/>
