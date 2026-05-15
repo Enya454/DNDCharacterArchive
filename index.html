@@ -486,10 +486,14 @@ const sb = _supabaseLib
 if (!sb) console.error("Supabase library failed to load. Check CDN connectivity.");
 
 // Auth helpers
-const getSession  = async () => { if (!sb) return null; const { data } = await sb.auth.getSession(); return data.session; };
-const signUp      = (email, password) => sb?.auth.signUp({ email, password });
-const signIn      = (email, password) => sb?.auth.signInWithPassword({ email, password });
-const signOut     = () => sb?.auth.signOut();
+const getSession      = async () => { if (!sb) return null; const { data } = await sb.auth.getSession(); return data.session; };
+const signUp          = (email, password) => sb?.auth.signUp({ email, password });
+const signIn          = (email, password) => sb?.auth.signInWithPassword({ email, password });
+const signOut         = () => sb?.auth.signOut();
+const signInWithGoogle = () => sb?.auth.signInWithOAuth({
+  provider: "google",
+  options: { redirectTo: window.location.origin + window.location.pathname }
+});
 
 // Character CRUD
 const dbLoadChars = async () => {
@@ -6110,14 +6114,22 @@ function AccountModal({ session, onClose }) {
 }
 
 function LoginScreen({ onLogin }) {
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [mode,     setMode]     = useState("login"); // "login" | "signup"
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState(null);
-  const [msg,      setMsg]      = useState(null);
+  const [showEmail, setShowEmail]   = useState(false);
+  const [email,     setEmail]       = useState("");
+  const [password,  setPassword]    = useState("");
+  const [mode,      setMode]        = useState("login");
+  const [loading,   setLoading]     = useState(false);
+  const [error,     setError]       = useState(null);
+  const [msg,       setMsg]         = useState(null);
 
-  const submit = async () => {
+  const handleGoogle = async () => {
+    setLoading(true); setError(null);
+    const { error: err } = await signInWithGoogle();
+    if (err) { setError(err.message); setLoading(false); }
+    // On success, Supabase redirects — no need to call onLogin()
+  };
+
+  const handleEmail = async () => {
     if (!email || !password) { setError("Please enter your email and password."); return; }
     setLoading(true); setError(null); setMsg(null);
     try {
@@ -6128,48 +6140,89 @@ function LoginScreen({ onLogin }) {
     } finally { setLoading(false); }
   };
 
-  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
-  const btn = (primary) => ({ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer", fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s", border:`1px solid ${primary?"var(--accent)":"rgba(255,255,255,0.15)"}`, background:primary?"var(--accent)":"transparent", color:primary?"#0d0d0f":"#8a8070", opacity:loading?0.6:1 });
+  const inp = { width:"100%", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(201,162,39,0.25)", color:"#e8e0d0", padding:"12px 16px", borderRadius:8, fontSize:15, fontFamily:"'Crimson Pro',serif", boxSizing:"border-box", marginBottom:12 };
 
   return (
     <div style={{ background:"radial-gradient(ellipse at 20% 10%, rgba(60,20,100,0.28) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(80,40,10,0.2) 0%, transparent 55%), #0d0d0f", minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Crimson Pro',serif", position:"relative", overflow:"hidden" }}>
       <MysticBackground density="normal"/>
       <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth:420, padding:"0 24px" }}>
+
         {/* Title */}
         <div style={{ textAlign:"center", marginBottom:36 }}>
           <div className="tome-title-text" style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:36, letterSpacing:3, marginBottom:8 }}>⚔️ TOME OF HEROES</div>
           <div style={{ color:"#8a8070", fontSize:14, fontStyle:"italic" }}>Your personal D&D 5e character compendium</div>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, margin:"14px auto 0", maxWidth:280 }}>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(var(--accent-rgb,201,162,39),0.35))" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, transparent, rgba(201,162,39,0.35))" }}/>
             <span style={{ color:"rgba(201,162,39,0.4)", fontSize:14 }}>✦</span>
-            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(var(--accent-rgb,201,162,39),0.35), transparent)" }}/>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(201,162,39,0.35), transparent)" }}/>
           </div>
         </div>
 
         {/* Card */}
         <div style={{ background:"rgba(26,26,31,0.92)", border:"1px solid rgba(201,162,39,0.2)", borderRadius:14, padding:32, backdropFilter:"blur(8px)", boxShadow:"0 8px 48px rgba(0,0,0,0.6)" }}>
-          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"var(--accent)", fontSize:16, textAlign:"center", marginBottom:24 }}>
-            {mode === "login" ? "Welcome Back" : "Create Account"}
+
+          <div style={{ fontFamily:"'Cinzel Decorative',serif", color:"#c9a227", fontSize:16, textAlign:"center", marginBottom:24 }}>
+            {showEmail ? (mode === "login" ? "Welcome Back" : "Create Account") : "Begin Your Journey"}
           </div>
 
-          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{gameError}</div>}
+          {error && <div style={{ background:"rgba(192,57,43,0.15)", border:"1px solid #c0392b", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#e74c3c" }}>{error}</div>}
           {msg   && <div style={{ background:"rgba(39,174,96,0.12)",  border:"1px solid #27ae60", borderRadius:7, padding:"10px 14px", marginBottom:14, fontSize:13, color:"#27ae60" }}>{msg}</div>}
 
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp}
-            onKeyDown={e=>e.key==="Enter"&&submit()}/>
-          <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={inp}
-            onKeyDown={e=>e.key==="Enter"&&submit()}/>
+          {!showEmail ? (<>
+            {/* Google sign-in button */}
+            <button onClick={handleGoogle} disabled={loading}
+              style={{ width:"100%", padding:"13px 16px", borderRadius:8, cursor:loading?"not-allowed":"pointer",
+                fontSize:15, fontFamily:"'Crimson Pro',serif", letterSpacing:0.3, transition:"all 0.2s",
+                border:"1px solid rgba(255,255,255,0.18)", background:"#ffffff", color:"#1a1a1a",
+                display:"flex", alignItems:"center", justifyContent:"center", gap:12,
+                boxShadow:"0 2px 8px rgba(0,0,0,0.3)", opacity:loading?0.7:1, marginBottom:16 }}>
+              {/* Google G logo */}
+              <svg width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+              </svg>
+              {loading ? "Redirecting…" : "Continue with Google"}
+            </button>
 
-          <button onClick={submit} style={btn(true)} disabled={loading}>
-            {loading ? "…" : mode === "login" ? "Enter the Tome" : "Create Account"}
-          </button>
+            {/* Divider */}
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
+              <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.1)" }}/>
+              <span style={{ color:"#554f45", fontSize:12 }}>or</span>
+              <div style={{ flex:1, height:1, background:"rgba(255,255,255,0.1)" }}/>
+            </div>
 
-          <div style={{ textAlign:"center", marginTop:16, fontSize:13, color:"#554f45" }}>
-            {mode === "login"
-              ? <><span>No account? </span><span onClick={()=>{setMode("signup");setError(null);setMsg(null);}} style={{ color:"var(--accent)", cursor:"pointer" }}>Sign up</span></>
-              : <><span>Have an account? </span><span onClick={()=>{setMode("login");setError(null);setMsg(null);}} style={{ color:"var(--accent)", cursor:"pointer" }}>Log in</span></>
-            }
-          </div>
+            {/* Email fallback */}
+            <button onClick={()=>setShowEmail(true)}
+              style={{ width:"100%", padding:"12px", borderRadius:8, cursor:"pointer",
+                fontSize:14, fontFamily:"'Crimson Pro',serif", transition:"all 0.2s",
+                border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"#8a8070" }}>
+              Sign in with Email
+            </button>
+          </>) : (<>
+            {/* Email/password form */}
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" type="email" style={inp}
+              onKeyDown={e=>e.key==="Enter"&&handleEmail()}/>
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" style={inp}
+              onKeyDown={e=>e.key==="Enter"&&handleEmail()}/>
+            <button onClick={handleEmail} disabled={loading}
+              style={{ width:"100%", padding:"13px", borderRadius:8, cursor:loading?"not-allowed":"pointer",
+                fontSize:15, fontFamily:"'Cinzel Decorative',serif", letterSpacing:1, transition:"all 0.2s",
+                border:"1px solid #c9a227", background:"#c9a227", color:"#0d0d0f", opacity:loading?0.6:1, marginBottom:12 }}>
+              {loading ? "…" : mode === "login" ? "Enter the Tome" : "Create Account"}
+            </button>
+            <div style={{ textAlign:"center", fontSize:13, color:"#554f45", marginBottom:8 }}>
+              {mode === "login"
+                ? <><span>No account? </span><span onClick={()=>{setMode("signup");setError(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Sign up</span></>
+                : <><span>Have an account? </span><span onClick={()=>{setMode("login");setError(null);}} style={{ color:"#c9a227", cursor:"pointer" }}>Log in</span></>
+              }
+            </div>
+            <div style={{ textAlign:"center" }}>
+              <span onClick={()=>{setShowEmail(false);setError(null);}} style={{ fontSize:12, color:"#554f45", cursor:"pointer" }}>← Back</span>
+            </div>
+          </>)}
         </div>
       </div>
     </div>
