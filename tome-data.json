@@ -652,7 +652,11 @@
           "description": "You can speak, read, and write Common, Elvish, and one extra language of your choice."
         }
       ],
-      "source": "PHB",
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 38
+      },
       "page": 38,
       "abilityChoices": {
         "count": 2,
@@ -666,14 +670,22 @@
       "subraces": {
         "Standard Half-Elf": {
           "name": "Standard Half-Elf",
-          "source": "PHB",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 38
+          },
           "page": 38,
           "description": "The most common half-elves, born of human and elf unions throughout the world.",
           "features": []
         },
         "Aquatic Half-Elf": {
           "name": "Aquatic Half-Elf",
-          "source": "SCAG",
+          "source": {
+            "book": "Sword Coast Adventurer's Guide",
+            "abbr": "SCAG",
+            "page": 116
+          },
           "page": 116,
           "description": "Some half-elves near the sea carry the legacy of sea elf blood.",
           "features": [
@@ -687,7 +699,11 @@
         },
         "Drow Half-Elf": {
           "name": "Drow Half-Elf",
-          "source": "SCAG",
+          "source": {
+            "book": "Sword Coast Adventurer's Guide",
+            "abbr": "SCAG",
+            "page": 116
+          },
           "page": 116,
           "description": "Drawing on a drow parent's heritage, some half-elves have particularly strong ties to the Underdark.",
           "features": [
@@ -723,7 +739,11 @@
         },
         "High Elf Half-Elf": {
           "name": "High Elf Half-Elf",
-          "source": "SCAG",
+          "source": {
+            "book": "Sword Coast Adventurer's Guide",
+            "abbr": "SCAG",
+            "page": 116
+          },
           "page": 116,
           "description": "Some half-elves with high elf blood have an innate gift for magic.",
           "features": [
@@ -739,7 +759,11 @@
         },
         "Wood Elf Half-Elf": {
           "name": "Wood Elf Half-Elf",
-          "source": "SCAG",
+          "source": {
+            "book": "Sword Coast Adventurer's Guide",
+            "abbr": "SCAG",
+            "page": 116
+          },
           "page": 116,
           "description": "Half-elves with wood elf blood are fleet of foot and stealthy.",
           "features": [
@@ -1797,7 +1821,11 @@
               "description": "When you reach 17th level, you have become adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10."
             }
           ],
-          "source": "PHB",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 97
+          },
           "page": 97
         },
         "Assassin": {
@@ -1833,7 +1861,11 @@
               "description": "Starting at 17th level, you become a master of instant death. When you attack and hit a creature that is surprised, it must make a Constitution saving throw (DC 8 + your Dexterity modifier + your proficiency bonus). On a failed save, double the damage of your attack against the creature."
             }
           ],
-          "source": "PHB",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 97
+          },
           "page": 97
         },
         "Arcane Trickster": {
@@ -2147,12 +2179,20 @@
               }
             }
           },
-          "source": "PHB",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 97
+          },
           "page": 97
         },
         "Inquisitive": {
           "name": "Inquisitive",
-          "source": "XGtE",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 45
+          },
           "page": 45,
           "description": "An archetypal Inquisitive focuses on rooting out secrets and lies. You rely on a sharp eye for detail, but also on a finely honed ability to read the words and deeds of other creatures.",
           "features": [
@@ -2198,7 +2238,11 @@
         },
         "Mastermind": {
           "name": "Mastermind",
-          "source": "XGtE",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 46
+          },
           "page": 46,
           "description": "Your focus is on people and on the influence and secrets they have. Many spies, courtiers, and schemers follow this archetype, leading lives of intrigue.",
           "features": [
@@ -2236,7 +2280,11 @@
         },
         "Scout": {
           "name": "Scout",
-          "source": "XGtE",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 47
+          },
           "page": 47,
           "description": "You are an expert in navigating the wilderness. You learn to evade both the beastly hunters and the humanoid scouts who frequent the wilds.",
           "features": [
@@ -2274,7 +2322,11 @@
         },
         "Swashbuckler": {
           "name": "Swashbuckler",
-          "source": "XGtE",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 47
+          },
           "page": 47,
           "description": "You focus your training on the art of the blade, relying on speed, elegance, and charm in equal parts. While some warriors are brutes clad in heavy armor, your method of fighting looks almost like a performance.",
           "features": [
@@ -2312,7 +2364,11 @@
         },
         "Phantom": {
           "name": "Phantom",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 62
+          },
           "page": 62,
           "description": "Many rogues walk a fine line between life and death, risking their own lives and taking the lives of others. While adventuring on that line, some rogues discover a mystical connection to death itself.",
           "features": [
@@ -2356,7 +2412,11 @@
         },
         "Soulknife": {
           "name": "Soulknife",
-          "source": "TCoE",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 63
+          },
           "page": 63,
           "description": "Most assassins strike with physical weapons, and many burglars and spies use thieves' tools in their trade. In contrast, a Soulknife strikes and infiltrates with the mind, cutting through barriers both physical and psychic.",
           "features": [
@@ -2514,7 +2574,11 @@
           ]
         }
       ],
-      "source": "PHB",
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 94
+      },
       "page": 94
     },
     "Fighter": {
