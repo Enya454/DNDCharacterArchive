@@ -4644,7 +4644,8 @@ const FONT_OPTIONS = [
 // ============================================================
 function DocumentsTab({ char, onUpdate, session, readOnly }) {
   const docs       = char.documents || [];
-  const isGoogle   = session?.user?.app_metadata?.provider === "google";
+  const providers  = session?.user?.app_metadata?.providers || [session?.user?.app_metadata?.provider].filter(Boolean);
+  const isGoogle   = providers.includes("google") && session?.user?.identities?.some(i => i.provider === "google");
   const hasDrive   = isGoogle && !!session?.provider_token;
   const [adding,   setAdding]  = useState(false);
   const [url,      setUrl]     = useState("");
@@ -6218,11 +6219,10 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
 // ACCOUNT MODAL
 // ============================================================
 function AccountModal({ session, onClose }) {
-  const isGoogle     = session?.user?.app_metadata?.provider === "google";
-  // DEBUG — remove after checking
-  console.log("AccountModal session.user.app_metadata:", JSON.stringify(session?.user?.app_metadata));
-  console.log("AccountModal session.user.identities:", JSON.stringify(session?.user?.identities?.map(i=>({provider:i.provider,created_at:i.created_at}))));
-  const [tab,         setTab]         = useState(isGoogle ? "delete" : "password");
+  const providers   = session?.user?.app_metadata?.providers || [session?.user?.app_metadata?.provider].filter(Boolean);
+  const hasEmail    = providers.includes("email");
+  const hasGoogle   = providers.includes("google") && session?.user?.identities?.some(i => i.provider === "google");
+  const [tab,       setTab]        = useState(hasEmail ? "password" : "delete");
   const [newEmail,    setNewEmail]     = useState("");
   const [newPassword, setNewPassword]  = useState("");
   const [confirm,     setConfirm]      = useState("");
@@ -6231,15 +6231,6 @@ function AccountModal({ session, onClose }) {
   const [msg,         setMsg]          = useState(null);  // { type: "ok"|"err", text }
 
   const flash = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg(null), 4000); };
-
-  const changeEmail = async () => {
-    if (!newEmail) return;
-    setLoading(true);
-    const { error } = await sb.auth.updateUser({ email: newEmail });
-    setLoading(false);
-    if (error) flash("err", error.message);
-    else { flash("ok", "Confirmation sent to both addresses. Check your inbox."); setNewEmail(""); }
-  };
 
   const changePassword = async () => {
     if (!newPassword) return;
@@ -6277,16 +6268,16 @@ function AccountModal({ session, onClose }) {
           <button onClick={onClose} style={{ background:"transparent", border:"none", color:"#554f45", cursor:"pointer", fontSize:20, lineHeight:1 }}>×</button>
         </div>
 
-        <div style={{ fontSize:12, color:"#554f45", marginBottom:16, fontStyle:"italic", display:"flex", alignItems:"center", gap:8 }}>
-          {isGoogle && <span style={{ fontSize:11, background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:4, padding:"2px 7px", color:"#8a8070", fontStyle:"normal" }}>Google Account</span>}
-          Logged in as {session.user.email}
+        <div style={{ fontSize:12, color:"#554f45", marginBottom:16, fontStyle:"italic", display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+          {hasEmail  && <span style={{ fontSize:11, background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:4, padding:"2px 7px", color:"#8a8070", fontStyle:"normal" }}>✉ Email</span>}
+          {hasGoogle && <span style={{ fontSize:11, background:"rgba(66,133,244,0.12)", border:"1px solid rgba(66,133,244,0.3)", borderRadius:4, padding:"2px 7px", color:"#7ab3f5", fontStyle:"normal" }}>G Google</span>}
+          {session.user.email}
         </div>
 
-        {/* Tab selector — hide password/email for Google users */}
+        {/* Tab selector — password only if email is linked, no email change tab */}
         <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-          {!isGoogle && <button style={tabBtn("password")} onClick={()=>{setTab("password");setMsg(null);}}>Password</button>}
-          {!isGoogle && <button style={tabBtn("email")}    onClick={()=>{setTab("email");setMsg(null);}}>Email</button>}
-          <button style={tabBtn("delete")}   onClick={()=>{setTab("delete");setMsg(null);}}>Delete</button>
+          {hasEmail && <button style={tabBtn("password")} onClick={()=>{setTab("password");setMsg(null);}}>Password</button>}
+          <button style={tabBtn("delete")} onClick={()=>{setTab("delete");setMsg(null);}}>Delete Account</button>
         </div>
 
         {/* Feedback */}
@@ -6309,21 +6300,6 @@ function AccountModal({ session, onClose }) {
               onKeyDown={e=>e.key==="Enter"&&changePassword()}/>
             <button onClick={changePassword} style={btn(false)} disabled={loading}>
               {loading ? "Updating…" : "Change Password"}
-            </button>
-          </div>
-        )}
-
-        {/* Change email */}
-        {tab === "email" && (
-          <div>
-            <div style={{ fontSize:13, color:"#8a8070", marginBottom:12, lineHeight:1.6 }}>
-              Supabase will send a confirmation link to both your old and new email addresses. You'll need to click both to complete the change.
-            </div>
-            <input type="email" value={newEmail} onChange={e=>setNewEmail(e.target.value)}
-              placeholder="New email address" style={inp}
-              onKeyDown={e=>e.key==="Enter"&&changeEmail()}/>
-            <button onClick={changeEmail} style={btn(false)} disabled={loading}>
-              {loading ? "Sending…" : "Change Email"}
             </button>
           </div>
         )}
