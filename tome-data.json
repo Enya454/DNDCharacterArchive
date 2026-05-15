@@ -622,13 +622,13 @@
           "exclude": [
             "cha"
           ],
-          "description": "Two ability scores of your choice each increase by 1. You cannot increase Charisma (already covered by the fixed +2). You may put both points into the same ability for a +2."
+          "description": "Two different ability scores of your choice each increase by 1."
         },
         {
           "name": "Darkvision",
           "level": 1,
           "type": "passive",
-          "description": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+          "description": "Thanks to your elven heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern colour in darkness, only shades of grey."
         },
         {
           "name": "Fey Ancestry",
@@ -645,17 +645,118 @@
           "description": "You gain proficiency in two skills of your choice."
         },
         {
-          "name": "Extra Language",
+          "name": "Languages",
           "level": 1,
           "type": "language_choice",
           "count": 1,
-          "description": "You can speak, read, and write one extra language of your choice."
+          "description": "You can speak, read, and write Common, Elvish, and one extra language of your choice."
         }
       ],
-      "source": {
-        "book": "Player's Handbook",
-        "abbr": "PHB",
-        "page": 38
+      "source": "PHB",
+      "page": 38,
+      "abilityChoices": {
+        "count": 2,
+        "amount": 1,
+        "exclude": [
+          "cha"
+        ]
+      },
+      "bonusLanguages": 1,
+      "description": "Half-elves combine the curiosity, inventiveness, and ambition of their human heritage with the refined senses, love of nature, and artistic tastes of their elven heritage.",
+      "subraces": {
+        "Standard Half-Elf": {
+          "name": "Standard Half-Elf",
+          "source": "PHB",
+          "page": 38,
+          "description": "The most common half-elves, born of human and elf unions throughout the world.",
+          "features": []
+        },
+        "Aquatic Half-Elf": {
+          "name": "Aquatic Half-Elf",
+          "source": "SCAG",
+          "page": 116,
+          "description": "Some half-elves near the sea carry the legacy of sea elf blood.",
+          "features": [
+            {
+              "name": "Swim Speed",
+              "level": 1,
+              "type": "passive",
+              "description": "You have a swimming speed of 30 feet."
+            }
+          ]
+        },
+        "Drow Half-Elf": {
+          "name": "Drow Half-Elf",
+          "source": "SCAG",
+          "page": 116,
+          "description": "Drawing on a drow parent's heritage, some half-elves have particularly strong ties to the Underdark.",
+          "features": [
+            {
+              "name": "Drow Magic",
+              "level": 1,
+              "type": "passive",
+              "spell_grant": true,
+              "description": "You know the Dancing Lights cantrip. When you reach 3rd level, you can cast Faerie Fire once and need to finish a long rest before you can cast it again. When you reach 5th level, you can also cast Darkness once and need to finish a long rest before you can do so again. Charisma is your spellcasting ability for these spells.",
+              "spells_granted": [
+                {
+                  "name": "Dancing Lights",
+                  "level": 0,
+                  "uses": "at will"
+                },
+                {
+                  "name": "Faerie Fire",
+                  "level": 1,
+                  "uses": "1/long rest",
+                  "unlock_at": 3
+                },
+                {
+                  "name": "Darkness",
+                  "level": 2,
+                  "uses": "1/long rest",
+                  "unlock_at": 5
+                }
+              ],
+              "uses": "See description",
+              "recharge": "long rest"
+            }
+          ]
+        },
+        "High Elf Half-Elf": {
+          "name": "High Elf Half-Elf",
+          "source": "SCAG",
+          "page": 116,
+          "description": "Some half-elves with high elf blood have an innate gift for magic.",
+          "features": [
+            {
+              "name": "Cantrip",
+              "level": 1,
+              "type": "spell_choice",
+              "count": 1,
+              "from": "Wizard",
+              "description": "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it."
+            }
+          ]
+        },
+        "Wood Elf Half-Elf": {
+          "name": "Wood Elf Half-Elf",
+          "source": "SCAG",
+          "page": 116,
+          "description": "Half-elves with wood elf blood are fleet of foot and stealthy.",
+          "features": [
+            {
+              "name": "Fleet of Foot",
+              "level": 1,
+              "type": "passive",
+              "description": "Your base walking speed increases to 35 feet."
+            },
+            {
+              "name": "Mask of the Wild",
+              "level": 1,
+              "type": "passive",
+              "description": "You can attempt to hide even when you are only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena."
+            }
+          ]
+        }
       }
     },
     "Half-Orc": {
@@ -1602,10 +1703,28 @@
           "description": "Beginning at 7th level, you can nimbly dodge out of the way of certain area effects. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."
         },
         {
+          "name": "Ability Score Improvement",
+          "level": 8,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 10,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
           "level": 11,
           "name": "Reliable Talent",
           "type": "passive",
           "description": "By 11th level, you have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your proficiency bonus, you can treat a d20 roll of 9 or lower as a 10."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 12,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
         },
         {
           "level": 14,
@@ -1620,10 +1739,22 @@
           "description": "By 15th level, you have acquired greater mental strength. You gain proficiency in Wisdom saving throws."
         },
         {
+          "name": "Ability Score Improvement",
+          "level": 16,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
           "level": 18,
           "name": "Elusive",
           "type": "passive",
           "description": "Beginning at 18th level, you are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 19,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
         },
         {
           "level": 20,
@@ -1666,11 +1797,8 @@
               "description": "When you reach 17th level, you have become adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10."
             }
           ],
-          "source": {
-            "book": "Player's Handbook",
-            "abbr": "PHB",
-            "page": 97
-          }
+          "source": "PHB",
+          "page": 97
         },
         "Assassin": {
           "features": [
@@ -1705,11 +1833,8 @@
               "description": "Starting at 17th level, you become a master of instant death. When you attack and hit a creature that is surprised, it must make a Constitution saving throw (DC 8 + your Dexterity modifier + your proficiency bonus). On a failed save, double the damage of your attack against the creature."
             }
           ],
-          "source": {
-            "book": "Player's Handbook",
-            "abbr": "PHB",
-            "page": 97
-          }
+          "source": "PHB",
+          "page": 97
         },
         "Arcane Trickster": {
           "spellcaster": true,
@@ -2022,11 +2147,258 @@
               }
             }
           },
-          "source": {
-            "book": "Player's Handbook",
-            "abbr": "PHB",
-            "page": 98
-          }
+          "source": "PHB",
+          "page": 97
+        },
+        "Inquisitive": {
+          "name": "Inquisitive",
+          "source": "XGtE",
+          "page": 45,
+          "description": "An archetypal Inquisitive focuses on rooting out secrets and lies. You rely on a sharp eye for detail, but also on a finely honed ability to read the words and deeds of other creatures.",
+          "features": [
+            {
+              "name": "Ear for Deceit",
+              "level": 3,
+              "type": "passive",
+              "description": "You develop a talent for picking out lies. Whenever you make a Wisdom (Insight) check to determine whether a creature is lying, treat a roll of 7 or lower on the d20 as an 8."
+            },
+            {
+              "name": "Eye for Detail",
+              "level": 3,
+              "type": "passive",
+              "description": "You can use a bonus action to make a Wisdom (Perception) check to spot a hidden creature or object or to make an Intelligence (Investigation) check to uncover or decipher clues."
+            },
+            {
+              "name": "Insightful Fighting",
+              "level": 3,
+              "type": "passive",
+              "description": "You can use a bonus action to make a Wisdom (Insight) check against a creature you can see that isn't incapacitated, contested by that creature's Charisma (Deception) check. If you succeed, you can use your Sneak Attack against that target even if you don't have advantage on the attack roll, but not if you have disadvantage on it. This benefit lasts for 1 minute or until you successfully use this feature against a different target."
+            },
+            {
+              "name": "Steady Eye",
+              "level": 9,
+              "type": "passive",
+              "description": "You have advantage on any Wisdom (Perception) or Intelligence (Investigation) check if you move no more than half your speed on the same turn."
+            },
+            {
+              "name": "Unerring Eye",
+              "level": 13,
+              "type": "action",
+              "description": "Your senses are almost impossible to foil. As an action, you sense the presence within 30 feet of you of illusions, shapechangers not in their original form, and other magic designed to deceive the senses, though you can't determine the nature of the deception. You can use this feature a number of times equal to your Wisdom modifier (minimum of 1). You regain all expended uses when you finish a long rest.",
+              "uses": "Wis mod",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Eye for Weakness",
+              "level": 17,
+              "type": "passive",
+              "description": "You learn to exploit a creature's weaknesses by carefully studying it during battle. While your Insightful Fighting feature applies to a creature, your Sneak Attack damage against that creature increases by 3d6."
+            }
+          ]
+        },
+        "Mastermind": {
+          "name": "Mastermind",
+          "source": "XGtE",
+          "page": 46,
+          "description": "Your focus is on people and on the influence and secrets they have. Many spies, courtiers, and schemers follow this archetype, leading lives of intrigue.",
+          "features": [
+            {
+              "name": "Master of Intrigue",
+              "level": 3,
+              "type": "passive",
+              "description": "You gain proficiency with the disguise kit, the forgery kit, and one gaming set of your choice. You also learn two languages of your choice. Additionally, you can unerringly mimic the speech patterns and accent of a creature that you have heard speak for at least 1 minute."
+            },
+            {
+              "name": "Master of Tactics",
+              "level": 3,
+              "type": "passive",
+              "description": "You can use the Help action as a bonus action. Additionally, when you use the Help action to aid an ally in attacking a creature, the target of that attack can be within 30 feet of you, rather than 5 feet, if the target can see or hear you."
+            },
+            {
+              "name": "Insightful Manipulator",
+              "level": 9,
+              "type": "passive",
+              "description": "If you spend at least 1 minute observing or interacting with another creature outside combat, you can learn certain information about its capabilities compared to your own. The DM tells you if the creature is your equal, superior, or inferior in regard to two of the following: Intelligence score, Wisdom score, Charisma score, or class levels (if any). At the DM's option, you might also realize you know a piece of the creature's history or a secret it holds."
+            },
+            {
+              "name": "Misdirection",
+              "level": 13,
+              "type": "passive",
+              "description": "You can sometimes cause another creature to suffer for your misdeeds. When you are targeted by an attack while a creature within 5 feet of you is granting you cover against that attack, you can use your reaction to have the attack target that creature instead of you."
+            },
+            {
+              "name": "Soul of Deceit",
+              "level": 17,
+              "type": "passive",
+              "description": "Your thoughts can't be determined by telepathy or other means, unless you choose to allow it. You can present false thoughts by making a DC 15 Charisma (Deception) check. Additionally, no matter what you say, magic that would determine if you are telling the truth indicates you are being truthful if you so choose, and you can't be compelled to tell the truth by magic."
+            }
+          ]
+        },
+        "Scout": {
+          "name": "Scout",
+          "source": "XGtE",
+          "page": 47,
+          "description": "You are an expert in navigating the wilderness. You learn to evade both the beastly hunters and the humanoid scouts who frequent the wilds.",
+          "features": [
+            {
+              "name": "Skirmisher",
+              "level": 3,
+              "type": "passive",
+              "description": "You are difficult to pin down during a fight. You can move up to half your speed as a reaction when an enemy ends its turn within 5 feet of you. This movement doesn't provoke opportunity attacks."
+            },
+            {
+              "name": "Survivalist",
+              "level": 3,
+              "type": "passive",
+              "description": "You gain proficiency in the Nature and Survival skills if you don't already have it. Your proficiency bonus is doubled for any ability check you make that uses either of those proficiencies."
+            },
+            {
+              "name": "Superior Mobility",
+              "level": 9,
+              "type": "passive",
+              "description": "Your walking speed increases by 10 feet. If you have a climbing or swimming speed, this increase applies to that speed as well."
+            },
+            {
+              "name": "Ambush Master",
+              "level": 13,
+              "type": "passive",
+              "description": "You excel at leading ambushes and acting first in a fight. You have advantage on initiative rolls. In addition, the first creature you hit during the first round of a combat becomes easier for you and others to strike; attack rolls against that target have advantage until the start of your next turn."
+            },
+            {
+              "name": "Sudden Strike",
+              "level": 17,
+              "type": "passive",
+              "description": "You can strike with deadly speed. If you take the Attack action, you can make one additional attack as a bonus action. This attack can benefit from your Sneak Attack even if you have already used it this turn, but you can't use your Sneak Attack twice on the same target."
+            }
+          ]
+        },
+        "Swashbuckler": {
+          "name": "Swashbuckler",
+          "source": "XGtE",
+          "page": 47,
+          "description": "You focus your training on the art of the blade, relying on speed, elegance, and charm in equal parts. While some warriors are brutes clad in heavy armor, your method of fighting looks almost like a performance.",
+          "features": [
+            {
+              "name": "Fancy Footwork",
+              "level": 3,
+              "type": "passive",
+              "description": "When you choose this archetype at 3rd level, you learn how to land a strike and then slip away without reprisal. During your turn, if you make a melee attack against a creature, that creature can't make opportunity attacks against you for the rest of your turn."
+            },
+            {
+              "name": "Rakish Audacity",
+              "level": 3,
+              "type": "passive",
+              "description": "Your confidence propels you into battle. You can give yourself a bonus to your initiative rolls equal to your Charisma modifier. You also gain an additional way to use your Sneak Attack; you don't need advantage on the attack roll to use your Sneak Attack against a creature if you are within 5 feet of it, no other creatures are within 5 feet of you, and you don't have disadvantage on the attack roll."
+            },
+            {
+              "name": "Panache",
+              "level": 9,
+              "type": "action",
+              "description": "Your charm becomes extraordinarily beguiling. As an action, you can make a Charisma (Persuasion) check contested by a creature's Wisdom (Insight) check. If you succeed, the creature is charmed by you for 1 minute, or until one of your companions attacks it, or until you attack another creature. While charmed, a hostile creature has disadvantage on attack rolls against targets other than you, and must make a Wisdom saving throw (DC = 8 + your proficiency bonus + your Charisma modifier) each time it tries to move more than 30 feet away from you; if it succeeds, this feature doesn't restrict its movement for that turn."
+            },
+            {
+              "name": "Elegant Maneuver",
+              "level": 13,
+              "type": "passive",
+              "description": "You can use a bonus action on your turn to gain advantage on the next Dexterity (Acrobatics) or Strength (Athletics) check you make during the same turn."
+            },
+            {
+              "name": "Master Duelist",
+              "level": 17,
+              "type": "passive",
+              "description": "Your mastery of the blade lets you turn failure into success in combat. If you miss with an attack roll, you can roll it again with advantage. Once you do so, you can't use this feature again until you finish a short or long rest."
+            }
+          ]
+        },
+        "Phantom": {
+          "name": "Phantom",
+          "source": "TCoE",
+          "page": 62,
+          "description": "Many rogues walk a fine line between life and death, risking their own lives and taking the lives of others. While adventuring on that line, some rogues discover a mystical connection to death itself.",
+          "features": [
+            {
+              "name": "Whispers of the Dead",
+              "level": 3,
+              "type": "passive",
+              "description": "Echoes of those who have died cling to you. Whenever you finish a short or long rest, you can choose one skill or tool proficiency that you lack and gain it, as a ghostly presence shares its knowledge with you. You lose this proficiency when you use this feature again."
+            },
+            {
+              "name": "Wails from the Grave",
+              "level": 3,
+              "type": "passive",
+              "description": "As you nudge someone closer to the grave, you can channel the power of death to harm someone else as well. Immediately after you deal your Sneak Attack damage to a creature on your turn, you can target a second creature within 30 feet of the first. Roll half the number of Sneak Attack dice (rounded down), and the second creature takes necrotic damage equal to the roll. You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
+              "uses": "Prof bonus",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Tokens of the Departed",
+              "level": 9,
+              "type": "action",
+              "description": "When a creature you can see dies within 30 feet of you, you can use your reaction to magically summon that creature's soul in a tiny object \u2014 a token of the departed. The token is a Tiny object and has an AC of 10, 1 hit point, and immunity to psychic and poison damage. You can have a maximum number of tokens equal to your proficiency bonus, and you can use a token in a number of ways.",
+              "uses": "Prof bonus tokens",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Ghost Walk",
+              "level": 13,
+              "type": "action",
+              "description": "You can phase partially into the realm of the dead, becoming like a ghost. As a bonus action, you assume a spectral form. While in this form, you have a flying speed of 10 feet, you can move through creatures and objects as if they were difficult terrain, and you have resistance to all damage. You can remain in this form for up to 10 minutes or until you end it as a bonus action. To use this feature again, you must finish a long rest or expend a Wails from the Grave use.",
+              "uses": "1 (or expend Wails from the Grave)",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Death's Friend",
+              "level": 17,
+              "type": "passive",
+              "description": "Your association with death has become so close that you gain the following benefits: When you use your Wails from the Grave, you can deal the necrotic damage to both the first and the second creature. At the end of a long rest, a life force pays you a small visit. Roll any die, and you gain a number of temporary hit points equal to the roll plus your Charisma modifier (minimum 1 temporary hit point)."
+            }
+          ]
+        },
+        "Soulknife": {
+          "name": "Soulknife",
+          "source": "TCoE",
+          "page": 63,
+          "description": "Most assassins strike with physical weapons, and many burglars and spies use thieves' tools in their trade. In contrast, a Soulknife strikes and infiltrates with the mind, cutting through barriers both physical and psychic.",
+          "features": [
+            {
+              "name": "Psionic Power",
+              "level": 3,
+              "type": "passive",
+              "description": "You harbor a wellspring of psionic energy within yourself. It is represented by your Psionic Energy dice, which are d6s. You have a number of these dice equal to twice your proficiency bonus, and they fuel various psionic powers you have. When you use a psionic power, some of these dice are expended. You regain all your expended Psionic Energy dice when you finish a long rest, and you regain one when you finish a short rest (minimum 1). Psy-Bolstered Knack, Psychic Whispers.",
+              "uses": "Prof bonus \u00d7 2 (d6s)",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Psychic Blades",
+              "level": 3,
+              "type": "passive",
+              "description": "You can manifest your psionic power as shimmering blades of psychic energy. Whenever you take the Attack action, you can manifest a psychic blade from your free hand and make the attack with that blade. This magic blade is a simple melee weapon with finesse and thrown properties (range 60/120 ft.). It deals 1d6 psychic damage on hit, and vanishes after striking or missing. You can't attack with it again until you take the Attack action again. You can manifest a second psychic blade as a bonus action for an off-hand attack."
+            },
+            {
+              "name": "Soul Blades",
+              "level": 9,
+              "type": "passive",
+              "description": "Your Psychic Blades are now an expression of your psi-suffused soul, granting you these benefits: Homing Strikes \u2014 you can add one Psionic Energy die to the damage of your psychic blade attack that missed. Psychic Teleportation \u2014 as a bonus action, you manifest a psychic blade, expend one Psionic Energy die, and throw the blade at an unoccupied space up to 30 feet away, teleporting to that space.",
+              "uses": "Psionic Energy dice",
+              "recharge": "short or long rest"
+            },
+            {
+              "name": "Psychic Veil",
+              "level": 13,
+              "type": "action",
+              "description": "You can weave a veil of psychic static to mask yourself. As an action, you can magically become invisible, along with anything you are wearing or carrying, for 1 hour or until you dismiss this effect (no action required). This invisibility ends early immediately after you deal damage to a creature or you force a creature to make a saving throw. You can use this feature once, and you regain the ability to do so when you finish a long rest, or when you expend a Psionic Energy die (no action required).",
+              "uses": "1",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Rend Mind",
+              "level": 17,
+              "type": "passive",
+              "description": "You can sweep your Psychic Blades through a creature's mind. When you use your Psychic Blades to deal Sneak Attack damage to a creature, you can force that target to make a Wisdom saving throw (DC = 8 + your proficiency bonus + your Dexterity modifier). If the save fails, the target is stunned until the end of your next turn. You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
+              "uses": "Prof bonus",
+              "recharge": "long rest"
+            }
+          ]
         }
       },
       "startingGoldDice": "4d4",
@@ -2142,11 +2514,8 @@
           ]
         }
       ],
-      "source": {
-        "book": "Player's Handbook",
-        "abbr": "PHB",
-        "page": 94
-      }
+      "source": "PHB",
+      "page": 94
     },
     "Fighter": {
       "hitDie": 10,
@@ -8466,6 +8835,564 @@
         "abbr": "PHB",
         "page": 105
       }
+    },
+    "Artificer": {
+      "name": "Artificer",
+      "source": "TCoE",
+      "page": 9,
+      "description": "Masters of invention, artificers use ingenuity and magic to unlock extraordinary capabilities in objects. They see magic as a complex system waiting to be decoded and then harnessed in their spells and inventions.",
+      "hitDie": 8,
+      "primaryAbility": "int",
+      "savingThrows": [
+        "con",
+        "int"
+      ],
+      "armorProficiencies": [
+        "Light armor",
+        "Medium armor",
+        "Shields"
+      ],
+      "weaponProficiencies": [
+        "Simple weapons"
+      ],
+      "toolProficiencies": [
+        "Thieves' tools",
+        "Tinker's tools",
+        "One type of artisan's tools of your choice"
+      ],
+      "skillChoices": {
+        "count": 2,
+        "from": [
+          "Arcana",
+          "History",
+          "Investigation",
+          "Medicine",
+          "Nature",
+          "Perception",
+          "Sleight of Hand"
+        ]
+      },
+      "spellcastingAbility": "int",
+      "spellcastingType": "half",
+      "spellList": "Artificer",
+      "spellSlots": {
+        "1": [
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          4,
+          2,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          4,
+          2,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          4,
+          3,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          4,
+          3,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          4,
+          3,
+          2,
+          0,
+          0
+        ],
+        "10": [
+          4,
+          3,
+          2,
+          0,
+          0
+        ],
+        "11": [
+          4,
+          3,
+          3,
+          0,
+          0
+        ],
+        "12": [
+          4,
+          3,
+          3,
+          0,
+          0
+        ],
+        "13": [
+          4,
+          3,
+          3,
+          1,
+          0
+        ],
+        "14": [
+          4,
+          3,
+          3,
+          1,
+          0
+        ],
+        "15": [
+          4,
+          3,
+          3,
+          2,
+          0
+        ],
+        "16": [
+          4,
+          3,
+          3,
+          2,
+          0
+        ],
+        "17": [
+          4,
+          3,
+          3,
+          3,
+          1
+        ],
+        "18": [
+          4,
+          3,
+          3,
+          3,
+          1
+        ],
+        "19": [
+          4,
+          3,
+          3,
+          3,
+          2
+        ],
+        "20": [
+          4,
+          3,
+          3,
+          3,
+          2
+        ]
+      },
+      "startingEquipment": [
+        {
+          "fixed": [
+            {
+              "name": "Any two simple weapons",
+              "qty": 1
+            }
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Light crossbow and 20 bolts",
+              "qty": 1
+            }
+          ]
+        },
+        {
+          "options": [
+            [
+              {
+                "name": "Scale mail",
+                "qty": 1
+              }
+            ],
+            [
+              {
+                "name": "Leather armor",
+                "qty": 1
+              }
+            ]
+          ]
+        },
+        {
+          "fixed": [
+            {
+              "name": "Thieves' tools and a dungeoneer's pack",
+              "qty": 1
+            }
+          ]
+        }
+      ],
+      "features": [
+        {
+          "name": "Hit Points",
+          "level": 1,
+          "type": "passive",
+          "description": "Hit Dice: 1d8 per artificer level. Hit Points at 1st Level: 8 + your Constitution modifier. Hit Points at Higher Levels: 1d8 (or 5) + your Constitution modifier per artificer level after 1st."
+        },
+        {
+          "name": "Proficiencies",
+          "level": 1,
+          "type": "passive",
+          "description": "Armor: Light armor, medium armor, shields. Weapons: Simple weapons. Tools: Thieves' tools, tinker's tools, one type of artisan's tools of your choice. Saving Throws: Constitution, Intelligence. Skills: Choose 2 from Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand."
+        },
+        {
+          "name": "Magical Tinkering",
+          "level": 1,
+          "type": "passive",
+          "description": "At 1st level, you've learned how to invest a spark of magic into mundane objects. To use this ability, you must have thieves' tools or artisan's tools in hand. You then touch a Tiny nonmagical object as an action and give it one of the following magical properties: shedding light, emitting a recorded message, emitting an odor or nonverbal sound, or creating a visual effect. You can have a number of such objects active at once equal to your Intelligence modifier (minimum 1). You can dismiss an object's magic as an action."
+        },
+        {
+          "name": "Spellcasting",
+          "level": 1,
+          "type": "passive",
+          "description": "You've studied the workings of magic and how to cast spells, channeling the magic through objects. Spell Slots: The Artificer table shows how many spell slots you have. Intelligence is your spellcasting ability. Spell save DC = 8 + proficiency bonus + Intelligence modifier. Infuse Item: You learn to channel magic into objects (gained at 2nd level)."
+        },
+        {
+          "name": "Infuse Item",
+          "level": 2,
+          "type": "passive",
+          "description": "At 2nd level, you gain the ability to imbue mundane items with certain magical infusions, turning those objects into magic items. You learn 4 infusions at 2nd level and gain more as you level up (total 12 at level 20). Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions. You can attune to it immediately. You can have a number of infused items active simultaneously equal to half your artificer level (rounded down).",
+          "uses": "Half level (items active)",
+          "recharge": "long rest"
+        },
+        {
+          "name": "Artificer Specialist",
+          "level": 3,
+          "type": "subclass_choice",
+          "description": "Choose the type of specialist you are: Alchemist, Armorer, Artillerist, or Battle Smith. Your choice grants you features at 3rd level and again at 5th, 9th, and 15th level."
+        },
+        {
+          "name": "The Right Tool for the Job",
+          "level": 3,
+          "type": "passive",
+          "description": "At 3rd level, you've learned how to produce exactly the tool you need: with thieves' tools or artisan's tools in hand, you can magically create one set of artisan's tools in an unoccupied space within 5 feet of you. This creation requires 1 hour of uninterrupted work, which can coincide with a short or long rest. Though the product of magic, the tools are nonmagical, and they vanish when you use this feature again."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Arcane Armament",
+          "level": 5,
+          "type": "passive",
+          "description": "Starting at 5th level, you can attack twice, rather than once, whenever you take the Attack action on your turn, but one of the attacks must be made with a magic weapon. This replaces the Extra Attack feature for Artificers."
+        },
+        {
+          "name": "Tool Expertise",
+          "level": 6,
+          "type": "passive",
+          "description": "At 6th level, your proficiency bonus is now doubled for any ability check you make that uses your proficiency with a tool."
+        },
+        {
+          "name": "Flash of Genius",
+          "level": 7,
+          "type": "passive",
+          "description": "At 7th level, you've gained the ability to come up with solutions under pressure. When you or another creature you can see within 30 feet of you makes an ability check or a saving throw, you can use your reaction to add your Intelligence modifier to the roll. You can use this feature a number of times equal to your Intelligence modifier (minimum once). You regain all expended uses when you finish a long rest.",
+          "uses": "Int modifier",
+          "recharge": "long rest"
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 8,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Magic Item Adept",
+          "level": 10,
+          "type": "passive",
+          "description": "When you reach 10th level, you achieve a profound understanding of how to use and make magic items: You can attune to up to four magic items at once. If you craft a magic item with a rarity of common or uncommon, it takes you a quarter of the normal time, and it costs you half as much of the usual gold."
+        },
+        {
+          "name": "Spell-Storing Item",
+          "level": 11,
+          "type": "action",
+          "description": "At 11th level, you can now store a spell in an object. Whenever you finish a long rest, you can touch one simple or martial weapon or one item that you can use as a spellcasting focus, and you store a spell in it, choosing a 1st- or 2nd-level spell from the artificer spell list that requires 1 action to cast. While holding the object, a creature can take an action to produce the spell's effect from it, using your spellcasting ability modifier.",
+          "uses": "1 stored spell",
+          "recharge": "long rest"
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 12,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Magic Item Savant",
+          "level": 14,
+          "type": "passive",
+          "description": "At 14th level, your skill with magic items deepens: You can attune to up to five magic items at once. You ignore all class, race, spell, and level requirements on attuning to or using a magic item."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 16,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Magic Item Master",
+          "level": 18,
+          "type": "passive",
+          "description": "Beginning at 18th level, you can attune to up to six magic items at once."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 19,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Soul of Artifice",
+          "level": 20,
+          "type": "passive",
+          "description": "At 20th level, you develop a mystical connection to your magic items, which you can draw on for protection: You gain a +1 bonus to all saving throws per magic item you are currently attuned to. If you're reduced to 0 hit points but not killed outright, you can use your reaction to end one of your artificer infusions, causing you to drop to 1 hit point instead."
+        }
+      ],
+      "subclasses": {
+        "Alchemist": {
+          "name": "Alchemist",
+          "source": "TCoE",
+          "page": 14,
+          "description": "An Alchemist is an expert at combining reagents to produce mystical effects. Alchemists use their creations to give life and to leech it away.",
+          "features": [
+            {
+              "name": "Tool Proficiency",
+              "level": 3,
+              "type": "passive",
+              "description": "When you adopt this specialization at 3rd level, you gain proficiency with alchemist's supplies. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice."
+            },
+            {
+              "name": "Alchemist Spells",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you always have certain spells prepared after you reach particular levels in this class: 3rd \u2014 Healing Word, Ray of Sickness; 5th \u2014 Flaming Sphere, Melf's Acid Arrow; 9th \u2014 Gaseous Form, Mass Healing Word; 13th \u2014 Blight, Death Ward; 17th \u2014 Cloudkill, Raise Dead."
+            },
+            {
+              "name": "Experimental Elixir",
+              "level": 3,
+              "type": "passive",
+              "description": "Beginning at 3rd level, whenever you finish a long rest, you can magically produce an experimental elixir in an empty flask you touch. Roll on the Experimental Elixir table for the elixir's effect. A creature can drink the elixir or administer it to an incapacitated creature as an action. The elixir lasts 24 hours. You can create additional elixirs by expending a spell slot of 1st level or higher for each one. You can create a number of elixirs equal to your Intelligence modifier (minimum 1) for free each long rest.",
+              "uses": "Int modifier",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Alchemical Savant",
+              "level": 5,
+              "type": "passive",
+              "description": "At 5th level, you've developed masterful command of magical chemicals, enhancing the healing and damage you create through them. Whenever you cast a spell using your alchemist's supplies as the spellcasting focus, you gain a bonus to one roll of the spell: healing spells gain +Int modifier to one die of healing; spells that deal acid, fire, necrotic, or poison damage gain +Int modifier to one damage roll."
+            },
+            {
+              "name": "Restorative Reagents",
+              "level": 9,
+              "type": "passive",
+              "description": "Starting at 9th level, you can incorporate restorative reagents into some of your works: Whenever a creature drinks an experimental elixir you created, the creature gains temporary hit points equal to 2d6 + your Intelligence modifier. You can cast Lesser Restoration without expending a spell slot, and it counts as an artificer spell for you. You can use this a number of times equal to your Intelligence modifier (minimum once), regaining all uses on a long rest.",
+              "uses": "Int modifier",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Chemical Mastery",
+              "level": 15,
+              "type": "passive",
+              "description": "By 15th level, you have been exposed to so many chemicals that they pose little risk to you, and you can use them to quickly end certain ailments: You gain resistance to acid and poison damage, and immunity to the poisoned condition. You can cast Greater Restoration and Heal without expending a spell slot, without preparing them, and without material components, provided you use alchemist's supplies as the spellcasting focus. Once you cast either spell with this feature, you can't cast that spell with it again until you finish a long rest.",
+              "uses": "1 each",
+              "recharge": "long rest"
+            }
+          ]
+        },
+        "Armorer": {
+          "name": "Armorer",
+          "source": "TCoE",
+          "page": 15,
+          "description": "An Armorer infuses their armor with elemental energy and turns it into a weapon. Armorers walk into the thick of combat, shielded by their extraordinary inventions.",
+          "features": [
+            {
+              "name": "Tools of the Trade",
+              "level": 3,
+              "type": "passive",
+              "description": "When you adopt this specialization at 3rd level, you gain proficiency with heavy armor. You also gain proficiency with smith's tools. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice."
+            },
+            {
+              "name": "Armorer Spells",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you always have certain spells prepared: 3rd \u2014 Magic Missile, Thunderwave; 5th \u2014 Mirror Image, Shatter; 9th \u2014 Hypnotic Pattern, Lightning Bolt; 13th \u2014 Fire Shield, Greater Invisibility; 17th \u2014 Passwall, Wall of Force."
+            },
+            {
+              "name": "Arcane Armor",
+              "level": 3,
+              "type": "passive",
+              "description": "Your metallurgical pursuits have led to you making armor a conduit for your magic. As an action, you can turn a suit of armor you are wearing into Arcane Armor, provided you have smith's tools in hand. You gain the following benefits: The armor can't be removed against your will. The armor attaches to you and expands to cover your entire body. The armor replaces any missing limbs. If the armor normally has a Strength requirement, the Arcane Armor lacks this requirement for you. You can use the armor as a spellcasting focus. The armor attaches and detaches as a bonus action."
+            },
+            {
+              "name": "Armor Model",
+              "level": 3,
+              "type": "choice",
+              "options": [
+                "Guardian",
+                "Infiltrator"
+              ],
+              "description": "Choose your Armor Model at 3rd level. Guardian: Thunder Gauntlets (1d8 thunder, target has disadvantage on attacks against others) and Defensive Field (bonus action: gain temp HP equal to artificer level, prof bonus uses/long rest). Infiltrator: Lightning Launcher (ranged 1d6 lightning, 90ft, one hit/turn adds 1d6 lightning), Powered Steps (+5ft speed), Dampening Field (advantage on Dexterity (Stealth) checks)."
+            },
+            {
+              "name": "Extra Attack",
+              "level": 5,
+              "type": "passive",
+              "description": "Beginning at 5th level, you can attack twice, rather than once, whenever you take the Attack action on your turn."
+            },
+            {
+              "name": "Armor Modifications",
+              "level": 9,
+              "type": "passive",
+              "description": "At 9th level, you learn how to use your Infuse Item feature to specially modify your Arcane Armor. That armor now counts as separate items for the purposes of your Infuse Item feature: chest, boots, helmet, and the armor's special weapon. Each of those items can bear one of your infusions, and the infusions transfer over if you change your armor model with the Armor Model feature."
+            },
+            {
+              "name": "Perfected Armor",
+              "level": 15,
+              "type": "passive",
+              "description": "At 15th level, your Arcane Armor gains additional benefits based on its model: Guardian \u2014 Deflect Attack (use reaction when a creature you can see hits a target within 30ft; the target gets +5 AC, potentially causing the attack to miss). Infiltrator \u2014 Improved Lightning Launcher (the 1d6 bonus lightning damage applies to all hits, not just one per turn, and the launcher deals an extra 1d6 lightning damage)."
+            }
+          ]
+        },
+        "Artillerist": {
+          "name": "Artillerist",
+          "source": "TCoE",
+          "page": 17,
+          "description": "An Artillerist specializes in using magic to hurl energy, projectiles, and explosions on a battlefield. This destructive power is valued by armies in the wars on many different worlds.",
+          "features": [
+            {
+              "name": "Tool Proficiency",
+              "level": 3,
+              "type": "passive",
+              "description": "When you adopt this specialization at 3rd level, you gain proficiency with woodcarver's tools. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice."
+            },
+            {
+              "name": "Artillerist Spells",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you always have certain spells prepared: 3rd \u2014 Shield, Thunderwave; 5th \u2014 Scorching Ray, Shatter; 9th \u2014 Fireball, Wind Wall; 13th \u2014 Ice Storm, Wall of Fire; 17th \u2014 Cone of Cold, Wall of Force."
+            },
+            {
+              "name": "Eldritch Cannon",
+              "level": 3,
+              "type": "action",
+              "description": "At 3rd level, you've learned how to create a magical cannon. Using woodcarver's tools or smith's tools, you can take an action to magically create a Small or Tiny eldritch cannon in an unoccupied space. A cannon can be: Flamethrower (15ft cone, Dex save or 2d8 fire damage), Force Ballista (ranged spell attack, 2d8 force, push 5ft), or Protector (20ft radius temp HP equal to 1d8 + Int mod). You can have 1 cannon at a time (2 at level 15). As a bonus action, you can activate the cannon. It lasts 1 hour.",
+              "uses": "1 (2 at level 15)",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Arcane Firearm",
+              "level": 5,
+              "type": "passive",
+              "description": "At 5th level, you know how to turn a wand, staff, or rod into an arcane firearm, a conduit for your destructive spells. When you finish a long rest, you can use woodcarver's tools to carve special sigils into a wand, staff, or rod and thereby turn it into your arcane firearm. When you cast an artificer spell through the firearm, roll a d8, and you gain a bonus to one of the spell's damage rolls equal to the number rolled."
+            },
+            {
+              "name": "Explosive Cannon",
+              "level": 9,
+              "type": "action",
+              "description": "Starting at 9th level, every eldritch cannon you create is more destructive: The cannon's damage rolls all increase by 1d8. As an action, you can command the cannon to detonate if you are within 60 feet of it. Doing so destroys the cannon and forces each creature within 20 feet of it to make a DC saving throw (8 + prof + Int), taking 3d8 force damage on a failed save, or half on a success."
+            },
+            {
+              "name": "Fortified Position",
+              "level": 15,
+              "type": "passive",
+              "description": "At 15th level, you're a master at forming well-defended emplacements using Eldritch Cannon: You and your allies have half cover while within 10 feet of a cannon you create with Eldritch Cannon, taking advantage of the cannon's magic. You can now have two cannons at the same time."
+            }
+          ]
+        },
+        "Battle Smith": {
+          "name": "Battle Smith",
+          "source": "TCoE",
+          "page": 18,
+          "description": "Armies require a good supply of weapons and armor, and someone has to fill that need. Artificers of the Battle Smith subclass defend others and target foes from a distance using the magic-infused weapon of their own creation.",
+          "features": [
+            {
+              "name": "Tool Proficiency",
+              "level": 3,
+              "type": "passive",
+              "description": "When you adopt this specialization at 3rd level, you gain proficiency with smith's tools. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice."
+            },
+            {
+              "name": "Battle Smith Spells",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you always have certain spells prepared: 3rd \u2014 Heroism, Shield; 5th \u2014 Branding Smite, Warding Bond; 9th \u2014 Aura of Vitality, Conjure Barrage; 13th \u2014 Aura of Purity, Fire Shield; 17th \u2014 Banishing Smite, Mass Cure Wounds."
+            },
+            {
+              "name": "Battle Ready",
+              "level": 3,
+              "type": "passive",
+              "description": "When you reach 3rd level, your combat training and your experiments with magic have paid off in two ways: You gain proficiency with martial weapons. When you attack with a magic weapon, you can use your Intelligence modifier, instead of Strength or Dexterity, for the attack and damage rolls."
+            },
+            {
+              "name": "Steel Defender",
+              "level": 3,
+              "type": "passive",
+              "description": "By 3rd level, your tinkering has borne you a faithful companion, a steel defender. It's friendly to you and your companions, and it obeys your commands. In combat, the defender shares your initiative count, but it takes its turn immediately after yours. It can move and use its reaction on its own, but the only action it takes on its turn is the Dodge action, unless you take a bonus action on your turn to command it to take another action. If the mending spell is cast on it, it regains 2d6 hit points. It regains half its hit points when you finish a long rest.",
+              "uses": "1 (recreate after long rest if destroyed)",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Extra Attack",
+              "level": 5,
+              "type": "passive",
+              "description": "Beginning at 5th level, you can attack twice, rather than once, whenever you take the Attack action on your turn."
+            },
+            {
+              "name": "Arcane Jolt",
+              "level": 9,
+              "type": "passive",
+              "description": "At 9th level, you've learned new ways to channel arcane energy to harm or heal. When either you hit a target with a magic weapon attack or your steel defender hits a target, you can channel magical energy through the strike to create one of the following effects: The target takes an extra 2d6 force damage. Choose one creature or object you can see within 30 feet of the target. Magical energy leaps from the target to the chosen creature or object, healing the chosen creature for 2d6 hit points. You can use this energy a number of times equal to your Intelligence modifier (minimum once), but you can do so no more than once on a turn. You regain all expended uses when you finish a long rest.",
+              "uses": "Int modifier",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Improved Defender",
+              "level": 15,
+              "type": "passive",
+              "description": "At 15th level, your Arcane Jolt and steel defender become more powerful: The extra damage and the healing of your Arcane Jolt both increase to 4d6. Your steel defender gains a +2 bonus to Armor Class. Whenever your steel defender uses its Deflect Attack, the attacker takes force damage equal to 1d4 + your Intelligence modifier."
+            }
+          ]
+        }
+      }
     }
   },
   "backgrounds": {
@@ -9443,7 +10370,8 @@
       },
       "classes": [
         "Wizard",
-        "Sorcerer"
+        "Sorcerer",
+        "Artificer"
       ]
     },
     {
@@ -9480,7 +10408,8 @@
       "classes": [
         "Wizard",
         "Bard",
-        "Sorcerer"
+        "Sorcerer",
+        "Artificer"
       ]
     },
     {
@@ -9522,7 +10451,8 @@
       },
       "classes": [
         "Wizard",
-        "Sorcerer"
+        "Sorcerer",
+        "Artificer"
       ]
     },
     {
@@ -9628,7 +10558,8 @@
         "notes": "Sense magic within 30 ft; see school of magic"
       },
       "classes": [
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ]
     },
     {
@@ -9852,7 +10783,8 @@
       },
       "classes": [
         "Wizard",
-        "Warlock"
+        "Warlock",
+        "Artificer"
       ]
     },
     {
@@ -9869,7 +10801,8 @@
       },
       "classes": [
         "Wizard",
-        "Sorcerer"
+        "Sorcerer",
+        "Artificer"
       ]
     },
     {
@@ -9974,7 +10907,8 @@
         "notes": "+1d4 to one ability check before spell ends"
       },
       "classes": [
-        "Cleric"
+        "Cleric",
+        "Artificer"
       ]
     },
     {
@@ -9990,7 +10924,8 @@
         "notes": "Stabilise creature at 0 HP"
       },
       "classes": [
-        "Cleric"
+        "Cleric",
+        "Artificer"
       ]
     },
     {
@@ -10042,7 +10977,8 @@
       },
       "classes": [
         "Cleric",
-        "Ranger"
+        "Ranger",
+        "Artificer"
       ]
     },
     {
@@ -10285,7 +11221,8 @@
       },
       "classes": [
         "Cleric",
-        "Ranger"
+        "Ranger",
+        "Artificer"
       ]
     },
     {
@@ -10359,7 +11296,8 @@
         "notes": "pull Large or smaller 10 ft closer"
       },
       "classes": [
-        "Druid"
+        "Druid",
+        "Artificer"
       ]
     },
     {
@@ -10481,7 +11419,8 @@
       },
       "classes": [
         "Druid",
-        "Ranger"
+        "Ranger",
+        "Artificer"
       ]
     },
     {
@@ -10616,7 +11555,8 @@
       },
       "classes": [
         "Bard",
-        "Warlock"
+        "Warlock",
+        "Artificer"
       ]
     },
     {
@@ -10652,7 +11592,8 @@
       "classes": [
         "Bard",
         "Paladin",
-        "Warlock"
+        "Warlock",
+        "Artificer"
       ]
     },
     {
@@ -11027,7 +11968,8 @@
         "notes": "Ignore difficult terrain; immune to paralyzed/restrained from spells"
       },
       "classes": [
-        "Ranger"
+        "Ranger",
+        "Artificer"
       ]
     },
     {
@@ -11056,7 +11998,8 @@
       "duration": "Concentration, up to 1 minute",
       "description": "Each object in a 20-foot cube within range is outlined in blue, green, or violet light. Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed dim light in a 10-foot radius. Any attack roll against an affected creature or object has advantage if the attacker can see it, and the affected creature or object can't benefit from being invisible.",
       "classes": [
-        "Drow"
+        "Drow",
+        "Artificer"
       ],
       "combat": {
         "save": "dex",
@@ -11305,7 +12248,8 @@
       "classes": [
         "Warlock",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ]
     },
     {
@@ -11465,7 +12409,8 @@
       "classes": [
         "Warlock",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ]
     },
     {
@@ -12383,7 +13328,8 @@
       "description": "You set an alarm against unwanted intrusion. Choose a door, window, or an area within range no larger than a 20-foot cube. Until the spell ends, an alarm alerts you whenever a Tiny or larger creature touches or enters the warded area.",
       "classes": [
         "Wizard",
-        "Ranger"
+        "Ranger",
+        "Artificer"
       ],
       "ritual": true
     },
@@ -12429,7 +13375,8 @@
       "description": "You choose one object that you must touch throughout the casting. If it is a magic item or some other magic-imbued object, you learn its properties and how to use them.",
       "classes": [
         "Bard",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": true
     },
@@ -12518,7 +13465,8 @@
       "description": "You implant a message within an object in range, a message that is uttered when a trigger condition is met. The message is spoken in your voice and is no louder than a normal conversation.",
       "classes": [
         "Bard",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": true
     },
@@ -12631,7 +13579,8 @@
         "Druid",
         "Ranger",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": true
     },
@@ -12918,7 +13867,8 @@
       "description": "You touch one to three pebbles and imbue them with magic. You or someone else can make a ranged spell attack with one of the pebbles by throwing it or hurling it with a sling. On a hit, the target takes 1d6 + your spellcasting ability modifier bludgeoning damage.",
       "classes": [
         "Druid",
-        "Warlock"
+        "Warlock",
+        "Artificer"
       ],
       "combat": {
         "attack": "ranged",
@@ -12940,7 +13890,8 @@
         "Cleric",
         "Druid",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ]
     },
     {
@@ -13151,7 +14102,8 @@
         "Ranger",
         "Druid",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": false
     },
@@ -13168,7 +14120,8 @@
         "Ranger",
         "Bard",
         "Druid",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "combat": {
         "slotScale": "+1 additional target per slot above 1st"
@@ -13243,7 +14196,8 @@
         "Ranger",
         "Druid",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": false
     },
@@ -13311,7 +14265,8 @@
         "Ranger",
         "Cleric",
         "Druid",
-        "Paladin"
+        "Paladin",
+        "Artificer"
       ],
       "ritual": false
     },
@@ -13378,7 +14333,8 @@
       "description": "A nonmagical weapon you touch becomes a magic weapon. Choose one of the following damage types: acid, cold, fire, lightning, or thunder. For the duration, the weapon has a +1 bonus to attack rolls and deals an extra 1d4 damage of the chosen type on a hit.",
       "classes": [
         "Ranger",
-        "Paladin"
+        "Paladin",
+        "Artificer"
       ],
       "combat": {
         "damage": "1d4",
@@ -13401,7 +14357,8 @@
         "Cleric",
         "Druid",
         "Sorcerer",
-        "Wizard"
+        "Wizard",
+        "Artificer"
       ],
       "ritual": false
     },
@@ -13537,6 +14494,486 @@
         "Druid"
       ],
       "ritual": false
+    },
+    {
+      "name": "Absorb Elements",
+      "level": 1,
+      "school": "Abjuration",
+      "castTime": "1 reaction",
+      "range": "Self",
+      "duration": "1 round",
+      "classes": [
+        "Artificer",
+        "Druid",
+        "Ranger",
+        "Wizard"
+      ],
+      "description": "The spell captures some of the incoming energy, lessening its effect on you and storing it for your next melee attack. You have resistance to the triggering damage type until the start of your next turn. Also, the first time you hit with a melee attack on your next turn, the target takes an extra 1d6 damage of the triggering type, and the spell ends."
+    },
+    {
+      "name": "Disguise Self",
+      "level": 1,
+      "school": "Illusion",
+      "castTime": "1 action",
+      "range": "Self",
+      "duration": "1 hour",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You make yourself \u2014 including your clothing, armor, weapons, and other belongings on your person \u2014 look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can't change your body type, so you must adopt a form that has the same basic arrangement of limbs."
+    },
+    {
+      "name": "False Life",
+      "level": 1,
+      "school": "Necromancy",
+      "castTime": "1 action",
+      "range": "Self",
+      "duration": "1 hour",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Bolstering yourself with a necromantic facsimile of life, you gain 1d4 + 4 temporary hit points for the duration. At Higher Levels: When you cast this spell using a spell slot of 2nd level or higher, you gain 5 additional temporary hit points for each slot level above 1st."
+    },
+    {
+      "name": "Grease",
+      "level": 1,
+      "school": "Conjuration",
+      "castTime": "1 action",
+      "range": "60 feet",
+      "duration": "1 minute",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "Slick grease covers the ground in a 10-foot square centered on a point within range. For the duration, it is difficult terrain. When the grease appears, each creature standing in its area must succeed on a Dexterity saving throw or fall prone. A creature that enters the area or ends its turn there must also succeed on a Dexterity saving throw or fall prone."
+    },
+    {
+      "name": "Purify Food and Drink",
+      "level": 1,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "10 feet",
+      "duration": "Instantaneous",
+      "classes": [
+        "Artificer",
+        "Cleric",
+        "Druid",
+        "Paladin"
+      ],
+      "description": "All nonmagical food and drink within a 5-foot-radius sphere centered on a point of your choice within range is purified and rendered free of poison and disease."
+    },
+    {
+      "name": "Sanctuary",
+      "level": 1,
+      "school": "Abjuration",
+      "castTime": "1 bonus action",
+      "range": "30 feet",
+      "duration": "1 minute",
+      "classes": [
+        "Artificer",
+        "Cleric"
+      ],
+      "description": "You ward a creature within range against attack. Until the spell ends, any creature who targets the warded creature with an attack or a harmful spell must first make a Wisdom saving throw. On a failed save, the creature must choose a new target or lose the attack or spell. On a successful save, the creature can target the warded creature normally. The spell ends if the warded creature makes an attack, casts a spell that affects an enemy, or deals damage."
+    },
+    {
+      "name": "Snare",
+      "level": 1,
+      "school": "Abjuration",
+      "castTime": "1 minute",
+      "range": "Touch",
+      "duration": "8 hours",
+      "classes": [
+        "Artificer",
+        "Druid",
+        "Ranger",
+        "Wizard"
+      ],
+      "description": "As you cast this spell, you use the rope to create a circle with a 5-foot radius on the ground or the floor. When you finish casting, the rope disappears and the circle becomes a magic trap. The trap is nearly invisible, requiring a DC 20 Perception check to spot. The trap triggers when a Small, Medium, or Large creature moves onto the ground or floor in the spell's radius. The creature must succeed on a Dexterity saving throw or be hoisted into the air, leaving it hanging upside down 3 feet above the ground or the floor. The creature is restrained there until the spell ends."
+    },
+    {
+      "name": "Aid",
+      "level": 2,
+      "school": "Abjuration",
+      "castTime": "1 action",
+      "range": "30 feet",
+      "duration": "8 hours",
+      "classes": [
+        "Artificer",
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "Your spell bolsters your allies with toughness and resolve. Choose up to three creatures within range. Each target's hit point maximum and current hit points increase by 5 for the duration. At Higher Levels: When you cast this spell using a spell slot of 3rd level or higher, a target's hit points increase by an additional 5 for each slot level above 2nd."
+    },
+    {
+      "name": "Arcane Lock",
+      "level": 2,
+      "school": "Abjuration",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Until dispelled",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You touch a closed door, window, gate, chest, or other entryway, and it becomes locked for the duration. You and the creatures you designate when you cast this spell can open the object normally. You can also set a password that, when spoken within 5 feet of the object, suppresses this spell for 1 minute. Otherwise, it is impassable until it is broken or the spell is dispelled or suppressed. Casting knock on the object suppresses arcane lock for 10 minutes. While affected by this spell, the object is more difficult to break or force open; the DC to break it or pick any locks on it increases by 10."
+    },
+    {
+      "name": "Blur",
+      "level": 2,
+      "school": "Illusion",
+      "castTime": "1 action",
+      "range": "Self",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight."
+    },
+    {
+      "name": "Continual Flame",
+      "level": 2,
+      "school": "Evocation",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Until dispelled",
+      "classes": [
+        "Artificer",
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "A flame, equivalent in brightness to a torch, springs forth from an object that you touch. The effect looks like a regular flame, but it creates no heat and doesn't use oxygen. A continual flame can be covered or hidden but not smothered or quenched."
+    },
+    {
+      "name": "Enhance Ability",
+      "level": 2,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Concentration, up to 1 hour",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You touch a creature and bestow upon it a magical enhancement. Choose one of the following effects; the target gains that effect until the spell ends. Bear's Endurance, Bull's Strength, Cat's Grace, Eagle's Splendor, Fox's Cunning, or Owl's Wisdom \u2014 each grants advantage on related ability checks and a bonus. At Higher Levels: You can target one additional creature for each slot level above 2nd."
+    },
+    {
+      "name": "Heat Metal",
+      "level": 2,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "60 feet",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Druid"
+      ],
+      "description": "Choose a manufactured metal object, such as a metal weapon or a suit of heavy or medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 fire damage when you cast the spell. Until the spell ends, you can use a bonus action on each of your subsequent turns to deal this damage again. At Higher Levels: The damage increases by 1d8 for each slot level above 2nd."
+    },
+    {
+      "name": "Levitate",
+      "level": 2,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "60 feet",
+      "duration": "Concentration, up to 10 minutes",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "One creature or object of your choice that you can see within range rises vertically, up to 20 feet, and remains suspended there for the duration. The spell can levitate a target that weighs up to 500 pounds. An unwilling creature that succeeds on a Constitution saving throw is unaffected. The target can move only by pushing or pulling against a fixed object or surface within reach, which allows it to move as if it were climbing."
+    },
+    {
+      "name": "Magic Weapon",
+      "level": 2,
+      "school": "Transmutation",
+      "castTime": "1 bonus action",
+      "range": "Touch",
+      "duration": "Concentration, up to 1 hour",
+      "classes": [
+        "Artificer",
+        "Paladin",
+        "Wizard"
+      ],
+      "description": "You touch a nonmagical weapon. Until the spell ends, that weapon becomes a magic weapon with a +1 bonus to attack rolls and damage rolls. At Higher Levels: When you cast this spell using a spell slot of 4th level or higher, the bonus increases to +2. When you use a spell slot of 6th level or higher, the bonus increases to +3."
+    },
+    {
+      "name": "Rope Trick",
+      "level": 2,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "1 hour",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You touch a length of rope that is up to 60 feet long. One end of the rope then rises into the air until the whole rope hangs perpendicular to the ground. At the upper end of the rope, an invisible entrance opens to an extradimensional space that lasts until the spell ends. The extradimensional space can be reached by climbing to the top of the rope. Up to eight Medium or smaller creatures can fit in the extradimensional space."
+    },
+    {
+      "name": "See Invisibility",
+      "level": 2,
+      "school": "Divination",
+      "castTime": "1 action",
+      "range": "Self",
+      "duration": "1 hour",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "For the duration, you see invisible creatures and objects as if they were visible, and you can see into the Ethereal Plane, out to a range of 60 feet."
+    },
+    {
+      "name": "Web",
+      "level": 2,
+      "school": "Conjuration",
+      "castTime": "1 action",
+      "range": "60 feet",
+      "duration": "Concentration, up to 1 hour",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You conjure a mass of thick, sticky webbing at a point of your choice within range. The webs fill a 20-foot cube from that point. The webs last for the duration. The webs are difficult terrain and lightly obscure their area. A creature that starts its turn in the webs or that enters them during its turn must make a Dexterity saving throw. On a failed save, the creature is restrained as long as it remains in the webs or until it breaks free."
+    },
+    {
+      "name": "Blink",
+      "level": 3,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "Self",
+      "duration": "1 minute",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Roll a d20 at the end of each of your turns for the duration of the spell. On a roll of 11 or higher, you vanish from your current plane of existence and appear in the Ethereal Plane. At the start of your next turn, you return to an unoccupied space within 10 feet of the space you vanished from."
+    },
+    {
+      "name": "Glyph of Warding",
+      "level": 3,
+      "school": "Abjuration",
+      "castTime": "1 hour",
+      "range": "Touch",
+      "duration": "Until dispelled or triggered",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "When you cast this spell, you inscribe a glyph that harms other creatures, either upon a surface or within an object that can be closed. If you choose a surface, the glyph can cover an area of the surface no larger than 10 feet in diameter. The glyph can be nearly invisible (DC 13 Investigation to notice). The glyph is triggered when a creature moves within 5 feet of it, touches it, or manipulates the object it's inscribed on."
+    },
+    {
+      "name": "Revivify",
+      "level": 3,
+      "school": "Necromancy",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Instantaneous",
+      "classes": [
+        "Artificer",
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "You touch a creature that has died within the last minute. That creature returns to life with 1 hit point. This spell can't return to life a creature that has died of old age, nor can it restore any missing body parts."
+    },
+    {
+      "name": "Tiny Servant",
+      "level": 3,
+      "school": "Transmutation",
+      "castTime": "1 minute",
+      "range": "Touch",
+      "duration": "8 hours",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You touch one Tiny, nonmagical object that isn't attached to another object or a surface and isn't being carried by another creature. The target animates and sprouts little arms and legs, becoming a creature under your control until the spell ends or the creature drops to 0 hit points. At Higher Levels: You can animate two additional objects for each spell slot level above 3rd."
+    },
+    {
+      "name": "Arcane Eye",
+      "level": 4,
+      "school": "Divination",
+      "castTime": "1 action",
+      "range": "30 feet",
+      "duration": "Concentration, up to 1 hour",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You create an invisible, magical eye within range that hovers in the air for the duration. You mentally receive visual information from the eye, which has normal vision and darkvision out to 30 feet. The eye can look in every direction. As an action, you can move the eye up to 30 feet in any direction. There is no limit to how far away from you the eye can move."
+    },
+    {
+      "name": "Elemental Bane",
+      "level": 4,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "90 feet",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Druid",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Choose one creature you can see and one of the following damage types: acid, cold, fire, lightning, or thunder. The target must succeed on a Constitution saving throw or be affected by the spell for its duration. The first time each turn the affected target takes damage of the chosen type, the target takes an extra 2d6 damage. Additionally, the target loses any resistance to that damage type until the spell ends. At Higher Levels: You can target one additional creature for each slot level above 4th."
+    },
+    {
+      "name": "Fabricate",
+      "level": 4,
+      "school": "Transmutation",
+      "castTime": "10 minutes",
+      "range": "120 feet",
+      "duration": "Instantaneous",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You convert raw materials into products of the same material. For example, you can fabricate a wooden bridge from a clump of trees, a rope from a patch of hemp, or clothes from flax or wool. Choose raw materials that you can see within range. You can fabricate a Large or smaller object (contained within a 10-foot cube, or eight connected 5-foot cubes), given a sufficient quantity of raw material. If you are working with metal, stone, or another mineral substance, however, the fabricated object can be no larger than Medium."
+    },
+    {
+      "name": "Mordenkainen's Faithful Hound",
+      "level": 4,
+      "school": "Conjuration",
+      "castTime": "1 action",
+      "range": "30 feet",
+      "duration": "8 hours",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You conjure a phantom watchdog in an unoccupied space that you can see within range, where it remains for the duration, until you dismiss it as an action, or until you move more than 100 feet away from it. The hound is invisible to all creatures except you and can't be harmed. When a Small or larger creature comes within 30 feet of it without first speaking the password that you specify when you cast this spell, the hound starts barking loudly. The hound sees invisible creatures and can see into the Ethereal Plane. It ignores illusions."
+    },
+    {
+      "name": "Otiluke's Resilient Sphere",
+      "level": 4,
+      "school": "Evocation",
+      "castTime": "1 action",
+      "range": "30 feet",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "A sphere of shimmering force encloses a creature or object of Large size or smaller within range. An unwilling creature must make a Dexterity saving throw. On a failed save, the creature is enclosed for the duration. Nothing \u2014 not physical objects, energy, or other spell effects \u2014 can pass through the barrier, in or out, though a creature in the sphere can breathe there."
+    },
+    {
+      "name": "Stone Shape",
+      "level": 4,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Instantaneous",
+      "classes": [
+        "Artificer",
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "You touch a stone object of Medium size or smaller or a section of stone no more than 5 feet in any dimension and form it into any shape that suits your purpose. So, for example, you could shape a large rock into a weapon, idol, or coffer, or make a small passage through a wall, as long as the wall is less than 5 feet thick. You could also shape a stone door or its frame to seal the door shut."
+    },
+    {
+      "name": "Animate Objects",
+      "level": 5,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "120 feet",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Objects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can't animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points."
+    },
+    {
+      "name": "Bigby's Hand",
+      "level": 5,
+      "school": "Evocation",
+      "castTime": "1 action",
+      "range": "120 feet",
+      "duration": "Concentration, up to 1 minute",
+      "classes": [
+        "Artificer",
+        "Wizard"
+      ],
+      "description": "You create a Large hand of shimmering, translucent force in an unoccupied space that you can see within range. The hand lasts for the spell's duration, and it moves at your command, mimicking the movements of your own hand. Clenched Fist, Forceful Hand, Grasping Hand, Interposing Hand are the modes available."
+    },
+    {
+      "name": "Creation",
+      "level": 5,
+      "school": "Illusion",
+      "castTime": "1 minute",
+      "range": "30 feet",
+      "duration": "Special",
+      "classes": [
+        "Artificer",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter within range: soft goods, rope, wood, or something similar. You can also use this spell to create mineral objects such as stone, crystal, or metal. The object created must be no larger than a 5-foot cube, and the object must be of a form and material that you have seen before. The duration depends on the object's material."
+    },
+    {
+      "name": "Skill Empowerment",
+      "level": 5,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "Touch",
+      "duration": "Concentration, up to 1 hour",
+      "classes": [
+        "Artificer",
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Your magic deepens a creature's understanding of its own talent. You touch one willing creature and give it expertise in one skill of your choice; the creature must already be proficient in that skill. You must choose a skill in which the target is proficient and that isn't already benefiting from an effect, such as Expertise, that doubles its proficiency bonus."
+    },
+    {
+      "name": "Transmute Rock",
+      "level": 5,
+      "school": "Transmutation",
+      "castTime": "1 action",
+      "range": "120 feet",
+      "duration": "Until dispelled",
+      "classes": [
+        "Artificer",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "You choose an area of stone or mud up to 40 feet on a side within range and choose one of the following effects. Transmute Rock to Mud: Nonmagical rock of any sort in the area becomes thick, flowing mud. Transmute Mud to Rock: This transmutation reverses the effect of the previous transmutation, turning muddy terrain back into solid ground."
+    },
+    {
+      "name": "Wall of Stone",
+      "level": 5,
+      "school": "Evocation",
+      "castTime": "1 action",
+      "range": "120 feet",
+      "duration": "Concentration, up to 10 minutes",
+      "classes": [
+        "Artificer",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "A nonmagical wall of solid stone springs into existence at a point you choose within range. The wall is 6 inches thick and is composed of ten 10-foot-by-10-foot panels. Each panel must be contiguous with at least one other panel. Alternatively, you can create 10-foot-by-20-foot panels that are only 3 inches thick. If the wall cuts through a creature's space when it appears, the creature is pushed to one side of the wall."
     }
   ],
   "themes": {
