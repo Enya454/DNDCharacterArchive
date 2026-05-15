@@ -9603,7 +9603,9 @@
                 "Weaver's tools",
                 "Woodcarver's tools"
               ],
-              "fixedChoice": "Alchemist's supplies"
+              "fixedChoice": "Alchemist's supplies",
+              "defaultChoice": "Alchemist's supplies",
+              "defaultExcludeIfChosen": true
             },
             {
               "name": "Alchemist Spells",
@@ -9862,7 +9864,7 @@
               "name": "Tool Proficiency",
               "level": 3,
               "type": "choice",
-              "description": "You gain proficiency with Woodcarver's tools. If you already have this proficiency, you gain proficiency with one other type of artisan's tools of your choice.",
+              "description": "You gain proficiency with Woodcarver's tools. If you already have this proficiency (from your level 1 tool choice), you gain proficiency with one other type of artisan's tools of your choice.",
               "options": [
                 "Alchemist's supplies",
                 "Brewer's supplies",
@@ -9882,7 +9884,9 @@
                 "Weaver's tools",
                 "Woodcarver's tools"
               ],
-              "fixedChoice": "Woodcarver's tools"
+              "fixedChoice": "Woodcarver's tools",
+              "defaultChoice": "Woodcarver's tools",
+              "defaultExcludeIfChosen": true
             },
             {
               "name": "Artillerist Spells",
@@ -10016,7 +10020,9 @@
                 "Weaver's tools",
                 "Woodcarver's tools"
               ],
-              "fixedChoice": "Smith's tools"
+              "fixedChoice": "Smith's tools",
+              "defaultChoice": "Smith's tools",
+              "defaultExcludeIfChosen": true
             },
             {
               "name": "Battle Smith Spells",
