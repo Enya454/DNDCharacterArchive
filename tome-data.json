@@ -1309,6 +1309,79 @@
         "page": 6
       },
       "description": "Aasimar are mortals who carry a spark of the Upper Planes within their souls. They can innately access this power to heal others, sear foes, and manifest luminous wings."
+    },
+    "Dhampir": {
+      "source": {
+        "book": "Van Richten's Guide to Ravenloft",
+        "abbr": "VRGtR",
+        "page": 16
+      },
+      "description": "Dhampirs are mortals who walk the line between life and undeath. Born of a vampire's curse or dark ritual, they carry the hunger of the undead within them while retaining the warmth of the living. They are neither fully vampire nor fully mortal, existing in an unsettling twilight between two worlds.",
+      "size": "Medium or Small",
+      "speed": 35,
+      "abilityBonuses": {},
+      "abilityChoices": {
+        "count": 3,
+        "amount": 1
+      },
+      "autoLanguages": [
+        "Common"
+      ],
+      "bonusLanguages": 1,
+      "subraces": {},
+      "features": [
+        {
+          "name": "Ability Score Increases",
+          "level": 1,
+          "type": "passive",
+          "description": "When determining your character's ability scores, increase one score by 2 and increase a different score by 1, or increase three different scores by 1. Follow this rule regardless of the method you use to determine the scores."
+        },
+        {
+          "name": "Size",
+          "level": 1,
+          "type": "passive",
+          "description": "You are Medium or Small. You choose the size when you select this race."
+        },
+        {
+          "name": "Ancestral Legacy",
+          "level": 1,
+          "type": "passive",
+          "description": "If you replace a race with this lineage, you can keep the following elements of that race: any skill proficiencies you gained from it and any climbing, flying, or swimming speed you gained from it. If you don't keep any of those elements or you choose this lineage at character creation, you instead gain two skill proficiencies of your choice."
+        },
+        {
+          "name": "Darkvision",
+          "level": 1,
+          "type": "passive",
+          "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You discern colors in that darkness only as shades of gray."
+        },
+        {
+          "name": "Deathless Nature",
+          "level": 1,
+          "type": "passive",
+          "description": "You don't need to breathe. You also have resistance to necrotic damage."
+        },
+        {
+          "name": "Spider Climb",
+          "level": 1,
+          "type": "passive",
+          "description": "You have a climbing speed equal to your walking speed. In addition, at 3rd level, you can move up, down, and across vertical surfaces and upside down along ceilings, while leaving your hands free."
+        },
+        {
+          "name": "Vampiric Bite",
+          "level": 1,
+          "type": "action",
+          "description": "Your fanged bite is a natural weapon, which counts as a simple melee weapon with which you are proficient. You add your Constitution modifier, instead of your Strength modifier, to the attack and damage rolls when you attack with this bite. It deals 1d4 piercing damage on a hit. While you are missing half or more of your hit points, you have advantage on attack rolls you make with this bite. When you attack with this bite and hit a creature that isn't a Construct or an Undead, you can empower yourself in one of the following ways (your choice): You regain hit points equal to the piercing damage dealt. You gain a bonus to the next ability check or attack roll you make; the bonus equals the piercing damage dealt. You can use your Vampiric Bite a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
+          "uses": "Proficiency bonus",
+          "recharge": "long rest"
+        },
+        {
+          "name": "Languages",
+          "level": 1,
+          "type": "language_choice",
+          "count": 1,
+          "description": "You can speak, read, and write Common and one other language that you and your DM agree is appropriate for your character."
+        }
+      ]
     }
   },
   "classes": {
@@ -17151,12 +17224,41 @@
   ],
   "feats": [
     {
+      "name": "Actor",
+      "description": "Skilled at mimicry and dramatics, you gain the following benefits: Increase CHA by 1 (max 20). You have advantage on Deception and Performance checks when trying to pass yourself off as a different person. You can mimic the speech of another person or the sounds made by other creatures.",
+      "prerequisites": null,
+      "effects": {
+        "asiFixed": {
+          "cha": 1
+        }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
+      }
+    },
+    {
       "name": "Alert",
       "description": "Always on the lookout for danger, you gain the following benefits: +5 to initiative, you can't be surprised while conscious, other creatures don't gain advantage on attack rolls against you as a result of being hidden from you.",
       "prerequisites": null,
       "effects": {
         "initiative": 5
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
       }
+    },
+    {
+      "name": "Artificer Initiate",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 79
+      },
+      "description": "You've learned some of an artificer's inventiveness. You gain the following benefits: You learn one cantrip of your choice from the artificer spell list, and you learn one 1st-level spell of your choice from that list. Intelligence is your spellcasting ability for these spells. You can cast this feat's 1st-level spell without a spell slot, and you must finish a long rest before you can cast it in this way again. You can also cast the spell using any spell slots you have. You gain proficiency with one type of artisan's tools of your choice, and you can use that type of tool as a spellcasting focus for any spell you cast that uses Intelligence as its spellcasting ability."
     },
     {
       "name": "Athlete",
@@ -17168,29 +17270,52 @@
           "str",
           "dex"
         ]
-      }
-    },
-    {
-      "name": "Actor",
-      "description": "Skilled at mimicry and dramatics, you gain the following benefits: Increase CHA by 1 (max 20). You have advantage on Deception and Performance checks when trying to pass yourself off as a different person. You can mimic the speech of another person or the sounds made by other creatures.",
-      "prerequisites": null,
-      "effects": {
-        "asiFixed": {
-          "cha": 1
-        }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
       }
     },
     {
       "name": "Charger",
       "description": "When you use your action to Dash, you can use a bonus action to make one melee weapon attack or to shove a creature. If you move at least 10 feet in a straight line immediately before taking this bonus action, you either gain a +5 bonus to the attack's damage roll or push the target up to 10 feet if you choose to shove.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
+      }
+    },
+    {
+      "name": "Chef",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 79
+      },
+      "description": "Time spent mastering the culinary arts has paid off. You gain the following benefits: Increase your Constitution or Wisdom score by 1, to a maximum of 20. You gain proficiency with cook's utensils if you don't already have it. As part of a short rest, you can cook special food, provided you have ingredients and cook's utensils on hand. You can prepare enough of this food for a number of creatures equal to 4 + your proficiency bonus. Each creature that eats the food and spends one or more Hit Dice during the short rest can forgo one die roll and instead regain the maximum number of hit points the die can restore. With one hour of work or when you finish a long rest, you can cook a number of treats equal to your proficiency bonus."
     },
     {
       "name": "Crossbow Expert",
       "description": "Thanks to extensive practice with the crossbow, you ignore the loading quality of crossbows with which you are proficient. Being within 5 feet of a hostile creature doesn't impose disadvantage on your ranged attack rolls. When you use the Attack action and attack with a one-handed weapon, you can use a bonus action to attack with a hand crossbow.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
+      }
+    },
+    {
+      "name": "Crusher",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 79
+      },
+      "description": "You are practiced in the art of crushing your enemies, granting you the following benefits: Increase your Strength or Constitution by 1, to a maximum of 20. Once per turn, when you hit a creature with an attack that deals bludgeoning damage, you can move it 5 feet to an unoccupied space, provided the target is no more than one size larger than you. When you score a critical hit that deals bludgeoning damage to a creature, attack rolls against that creature are made with advantage until the start of your next turn."
     },
     {
       "name": "Defensive Duelist",
@@ -17200,7 +17325,42 @@
           "dex": 13
         }
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
+      }
+    },
+    {
+      "name": "Dragon Fear",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Dragonborn",
+      "description": "When angered, you radiate menace. You gain the following benefits: Increase your Strength, Constitution, or Charisma score by 1, to a maximum of 20. Instead of exhaling destructive energy, you can expend a use of your Breath Weapon trait to roar, forcing each creature of your choice within 30 feet of you to make a Wisdom saving throw (DC 8 + your proficiency bonus + your Charisma modifier). A target automatically succeeds if it can't hear or see you. On a failed save, a target becomes frightened of you for 1 minute. If the frightened target takes any damage, it can repeat the saving throw, ending the effect on itself on a success."
+    },
+    {
+      "name": "Dragon Hide",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Dragonborn",
+      "description": "You manifest scales and claws reminiscent of your draconic ancestors. You gain the following benefits: Increase your Strength, Constitution, or Charisma score by 1, to a maximum of 20. Your scales harden. While you aren't wearing armor, you can calculate your AC as 13 + your Dexterity modifier. You can use a shield and still gain this benefit. You grow retractable claws from the tips of your fingers. Extending or retracting the claws requires no action. The claws are natural weapons, which you can use to make unarmed strikes. If you hit with them, you deal slashing damage equal to 1d4 + your Strength modifier, instead of the normal bludgeoning damage for an unarmed strike."
+    },
+    {
+      "name": "Drow High Magic",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Elf (drow)",
+      "description": "You learn more of the magic typical of dark elves. You learn the detect magic spell and can cast it at will, without expending a spell slot. You also learn levitate and dispel magic, each of which you can cast once without expending a spell slot. You regain the ability to cast those two spells in this way when you finish a long rest. Charisma is your spellcasting ability for all three spells."
     },
     {
       "name": "Dual Wielder",
@@ -17208,13 +17368,23 @@
       "prerequisites": null,
       "effects": {
         "ac": 1
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 165
       }
     },
     {
       "name": "Dungeon Delver",
       "description": "Alert to the hidden traps and secret doors found in many dungeons, you gain the following benefits: Advantage on Perception and Investigation checks to detect secret doors. Advantage on saving throws to avoid or resist traps. Resistance to the damage dealt by traps. You can search for traps while traveling at a normal pace.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 166
+      }
     },
     {
       "name": "Durable",
@@ -17224,7 +17394,22 @@
         "asiFixed": {
           "con": 1
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 166
       }
+    },
+    {
+      "name": "Eldritch Adept",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 79
+      },
+      "prerequisite": "Spellcasting or Pact Magic feature",
+      "description": "Studying occult lore, you have unlocked eldritch power within yourself. You learn one Eldritch Invocation option of your choice from the warlock class. If the invocation has a prerequisite of any kind, you can choose that invocation only if you're a warlock who meets the prerequisite. Whenever you gain a level, you can replace the invocation you chose with a new one from the warlock class."
     },
     {
       "name": "Elemental Adept",
@@ -17243,7 +17428,71 @@
           "Lightning",
           "Thunder"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 166
       }
+    },
+    {
+      "name": "Elven Accuracy",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Elf or half-elf",
+      "description": "The accuracy of elves is legendary, especially that of elf archers and spellcasters. You have uncanny aim with attacks that rely on precision rather than brute force. You gain the following benefits: Increase your Dexterity, Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20. Whenever you have advantage on an attack roll using Dexterity, Intelligence, Wisdom, or Charisma, you can reroll one of the dice once."
+    },
+    {
+      "name": "Fade Away",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Gnome",
+      "description": "Your people are clever, with a knack for illusion magic. You have learned a magical trick for fading away when you suffer harm. You gain the following benefits: Increase your Dexterity or Intelligence score by 1, to a maximum of 20. Immediately after you take damage, you can use a reaction to magically become invisible until the end of your next turn or until you attack, deal damage, or force someone to make a saving throw. Once you use this ability, you can't do so again until you finish a short or long rest."
+    },
+    {
+      "name": "Fey Teleportation",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Elf (high elf)",
+      "description": "Your study of high elven lore has unlocked fey power that few other elves possess, except your eladrin cousins. Drawing on your fey ancestry, you can momentarily stride through the Feywild to shorten your path from one place to another. You gain the following benefits: Increase your Intelligence or Charisma score by 1, to a maximum of 20. You learn to speak, read, and write Sylvan. You learn the misty step spell and can cast it once without expending a spell slot. You regain the ability to cast it in this way when you finish a short or long rest. Intelligence is your spellcasting ability for this spell."
+    },
+    {
+      "name": "Fey Touched",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 79
+      },
+      "description": "Your exposure to the Feywild's magic has changed you, granting you the following benefits: Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20. You learn the misty step spell and one 1st-level spell of your choice. The 1st-level spell must be from the divination or enchantment school of magic. You can cast each of these spells without expending a spell slot. Once you cast either of these spells in this way, you can't cast that spell in this way again until you finish a long rest. You can also cast these spells using spell slots you have of the appropriate level. The spells' spellcasting ability is the ability increased by this feat."
+    },
+    {
+      "name": "Fighting Initiate",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "prerequisite": "Proficiency with a martial weapon",
+      "description": "Your martial training has helped you develop a particular style of fighting. As a result, you learn one Fighting Style option of your choice from the fighter class. If you already have a style, the one you choose must be different. Whenever you reach a level that grants the Ability Score Improvement feature, you can replace this feat's fighting style with another one from the fighter class that you don't have."
+    },
+    {
+      "name": "Flames of Phlegethos",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 74
+      },
+      "prerequisite": "Tiefling",
+      "description": "You learn to call on hellfire to serve your commands. You gain the following benefits: Increase your Intelligence or Charisma score by 1, to a maximum of 20. When you roll fire damage for a spell you cast, you can reroll any roll of 1 on the fire damage dice, but you must use the new roll, even if it is another 1. Whenever you cast a spell that deals fire damage, you can cause flames to wreathe you until the end of your next turn. The flames don't harm you or your possessions, and they shed bright light out to 30 feet and dim light out to an additional 30 feet. While the flames are present, any creature within 5 feet of you that hits you with a melee attack takes 1d4 fire damage."
     },
     {
       "name": "Grappler",
@@ -17253,19 +17502,73 @@
           "str": 13
         }
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      }
     },
     {
       "name": "Great Weapon Master",
       "description": "You've learned to put the weight of a weapon to your advantage: Before you make a melee attack with a heavy weapon that you are proficient with, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack's damage. When you score a critical hit or reduce a creature to 0 HP with a melee weapon, you can make one melee weapon attack as a bonus action.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      }
+    },
+    {
+      "name": "Gunner",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "description": "You have a quick hand and keen eye when employing firearms, granting you the following benefits: Increase your Dexterity score by 1, to a maximum of 20. You gain proficiency with firearms. You ignore the loading property of firearms. Being within 5 feet of a hostile creature doesn't impose disadvantage on your ranged attack rolls."
     },
     {
       "name": "Healer",
       "description": "You are an able physician, allowing you to do the following: When you use a healer's kit to stabilise a dying creature, that creature also regains 1 HP. As an action, you can spend one use of a healer's kit to tend to a creature and restore 1d6 + 4 HP to it, plus additional HP equal to the creature's maximum number of Hit Dice.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      }
+    },
+    {
+      "name": "Heavily Armored",
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      },
+      "prerequisite": "Proficiency with medium armor",
+      "description": "You have trained to master the use of heavy armor, gaining the following benefits: Increase your Strength score by 1, to a maximum of 20. You gain proficiency with heavy armor."
+    },
+    {
+      "name": "Heavy Armor Master",
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      },
+      "prerequisite": "Proficiency with heavy armor",
+      "description": "You can use your armor to deflect strikes that would kill others. Increase your Strength score by 1, to a maximum of 20. While you are wearing heavy armor, bludgeoning, piercing, and slashing damage that you take from nonmagical weapons is reduced by 3."
+    },
+    {
+      "name": "Infernal Constitution",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Tiefling",
+      "description": "Fiendish blood runs strong in you, unlocking a resilience akin to that possessed by some fiends. You gain the following benefits: Increase your Constitution score by 1, to a maximum of 20. You have resistance to cold damage and poison damage. You have advantage on saving throws against being poisoned."
     },
     {
       "name": "Inspiring Leader",
@@ -17275,7 +17578,12 @@
           "cha": 13
         }
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      }
     },
     {
       "name": "Keen Mind",
@@ -17285,6 +17593,11 @@
         "asiFixed": {
           "int": 1
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
       }
     },
     {
@@ -17302,19 +17615,43 @@
             "Light Armor"
           ]
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
       }
+    },
+    {
+      "name": "Linguist",
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      },
+      "description": "You have studied languages and codes, gaining the following benefits: Increase your Intelligence score by 1, to a maximum of 20. You learn three languages of your choice. You can ably create written ciphers. Others can't decipher a code you create unless you teach them, they succeed on an Intelligence check (DC equal to your Intelligence score + your proficiency bonus), or they use magic to decipher it."
     },
     {
       "name": "Lucky",
       "description": "You have inexplicable luck that seems to kick in at just the right moment. You have 3 luck points. Whenever you make an attack roll, ability check, or saving throw, you can spend one luck point to roll an additional d20. You choose which die to use. You can also spend a luck point when an attack roll is made against you. Luck points are restored when you finish a long rest.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 167
+      }
     },
     {
       "name": "Mage Slayer",
       "description": "You have practiced techniques useful in melee combat against spellcasters, gaining the following benefits: When a creature within 5 feet of you casts a spell, you can use your reaction to make a melee weapon attack against that creature. When you damage a creature that is concentrating on a spell, the creature has disadvantage on its saving throw. You have advantage on saving throws against spells cast by creatures within 5 feet of you.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
+      }
     },
     {
       "name": "Magic Initiate",
@@ -17337,13 +17674,23 @@
           "Warlock",
           "Wizard"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
       }
     },
     {
       "name": "Martial Adept",
       "description": "You have martial training that allows you to perform special combat manoeuvres. You gain one superiority die (d6). You learn two manoeuvres of your choice from among those available to the Battle Master archetype.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
+      }
     },
     {
       "name": "Medium Armor Master",
@@ -17351,7 +17698,22 @@
       "prerequisites": {
         "proficiency": "medium armor"
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
+      }
+    },
+    {
+      "name": "Metamagic Adept",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "prerequisite": "Spellcasting or Pact Magic feature",
+      "description": "You've learned how to exert your will on your spells to alter how they function. You gain the following benefits: You learn two Metamagic options of your choice from the sorcerer class. You can use only one Metamagic option on a spell when you cast it, unless the option says otherwise. Whenever you gain a level, you can replace one of your Metamagic options with another one from the sorcerer class. You gain 2 sorcery points to spend on Metamagic (these points are added to any sorcery points you have from the Sorcerer class; the details on using sorcery points with Metamagic appear in the Sorcerer section)."
     },
     {
       "name": "Mobile",
@@ -17359,6 +17721,11 @@
       "prerequisites": null,
       "effects": {
         "speed": 10
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
       }
     },
     {
@@ -17379,13 +17746,23 @@
             "Shields"
           ]
         }
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
       }
     },
     {
       "name": "Mounted Combatant",
       "description": "You are a dangerous foe to face while mounted. While you are mounted and aren't incapacitated: You have advantage on melee attack rolls against unmounted creatures smaller than your mount. You can force an attack targeting your mount to target you instead. If your mount is subjected to an effect allowing a Dexterity saving throw for half damage, it takes no damage on a success.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
+      }
     },
     {
       "name": "Observant",
@@ -17397,13 +17774,61 @@
           "int",
           "wis"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
       }
+    },
+    {
+      "name": "Orcish Fury",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Half-orc",
+      "description": "Your fury burns tirelessly. You gain the following benefits: Increase your Strength or Constitution score by 1, to a maximum of 20. When you hit with an attack using a simple or martial weapon, you can roll one of the weapon's damage dice an additional time and add it as extra damage of the weapon's damage type. Once you use this ability, you can't use it again until you finish a short or long rest. Immediately after you use your Relentless Endurance trait, you can use your reaction to make one weapon attack."
+    },
+    {
+      "name": "Piercer",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "description": "You have achieved a penetrating precision in combat, granting you the following benefits: Increase your Strength or Dexterity by 1, to a maximum of 20. Once per turn, when you hit a creature with an attack that deals piercing damage, you can reroll one of the attack's damage dice, and you must use the new roll. When you score a critical hit that deals piercing damage to a creature, you can roll one additional damage die when determining the extra piercing damage the target takes."
+    },
+    {
+      "name": "Poisoner",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "description": "You can prepare and deliver deadly poisons, granting you the following benefits: When you make a damage roll that deals poison damage, it ignores resistance to poison damage. You can apply poison to a weapon or piece of ammunition as a bonus action, instead of an action. You gain proficiency with the poisoner's kit if you don't already have it. With one hour of work using a poisoner's kit and expending 50 gp worth of materials, you can create a number of doses of potent poison equal to your proficiency bonus."
     },
     {
       "name": "Polearm Master",
       "description": "You can keep your enemies at bay with reach weapons. When you take the Attack action and attack with only a glaive, halberd, or quarterstaff, you can use a bonus action to make a melee attack with the opposite end of the weapon (1d4 bludgeoning). While wielding a glaive, halberd, pike, or quarterstaff, other creatures provoke opportunity attacks from you when they enter your reach.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
+      }
+    },
+    {
+      "name": "Prodigy",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Human, half-human, or variant human",
+      "description": "You have a knack for learning new things. You gain the following benefits: You gain one skill proficiency of your choice, one tool proficiency of your choice, and fluency in one language of your choice. Choose one skill in which you have proficiency. You gain expertise with that skill, which means your proficiency bonus is doubled for any ability check you make with it. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus."
     },
     {
       "name": "Resilient",
@@ -17431,6 +17856,11 @@
           "Wisdom",
           "Charisma"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 168
       }
     },
     {
@@ -17456,31 +17886,84 @@
           "Warlock",
           "Wizard"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 169
       }
     },
     {
       "name": "Savage Attacker",
       "description": "Once per turn when you roll damage for a melee weapon attack, you can reroll the weapon's damage dice and use either total.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 169
+      }
+    },
+    {
+      "name": "Second Chance",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Halfling",
+      "description": "Fortune favors you when someone tries to strike you. You gain the following benefits: Increase your Dexterity, Constitution, or Charisma score by 1, to a maximum of 20. When a creature you can see hits you with an attack roll, you can use your reaction to force that creature to reroll. Once you use this ability, you can't use it again until you roll initiative at the start of combat or until you finish a short or long rest."
     },
     {
       "name": "Sentinel",
       "description": "You have mastered techniques to take advantage of every drop in any enemy's guard. When you hit a creature with an opportunity attack, its speed becomes 0 for the rest of the turn. Creatures within 5 feet of you provoke opportunity attacks from you even if they take the Disengage action. When a creature within 5 feet of you makes an attack against a target other than you, you can use your reaction to make a melee weapon attack.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 169
+      }
+    },
+    {
+      "name": "Shadow Touched",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "description": "Your exposure to the Shadowfell's magic has changed you, granting you the following benefits: Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20. You learn the invisibility spell and one 1st-level spell of your choice. The 1st-level spell must be from the illusion or necromancy school of magic. You can cast each of these spells without expending a spell slot. Once you cast either of these spells in this way, you can't cast that spell in this way again until you finish a long rest. You can also cast these spells using spell slots you have of the appropriate level. The spells' spellcasting ability is the ability increased by this feat."
     },
     {
       "name": "Sharpshooter",
       "description": "You have mastered ranged weapons and can make shots others find impossible. Attacking at long range doesn't impose disadvantage. Your ranged weapon attacks ignore half cover and three-quarters cover. Before you make an attack with a ranged weapon you are proficient with, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack's damage.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
+      }
     },
     {
       "name": "Shield Master",
       "description": "You use shields not just for protection but also for offense. If you take the Attack action on your turn, you can use a bonus action to try to shove a creature within 5 feet. If you aren't incapacitated, you can add your shield's AC bonus to Dexterity saving throws. If you are subjected to an effect allowing a Dex save for half damage, you can use your reaction to take no damage on a success.",
       "prerequisites": null,
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
+      }
+    },
+    {
+      "name": "Skill Expert",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 80
+      },
+      "description": "You have honed your proficiency with particular skills, granting you the following benefits: Increase one ability score of your choice by 1, to a maximum of 20. You gain proficiency in one skill of your choice. Choose one skill in which you have proficiency. You gain expertise with that skill, which means your proficiency bonus is doubled for any ability check you make with it. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus."
     },
     {
       "name": "Skilled",
@@ -17495,6 +17978,11 @@
         "type": "skills",
         "label": "Choose 3 skills or tools",
         "count": 3
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
       }
     },
     {
@@ -17505,7 +17993,21 @@
           "dex": 13
         }
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
+      }
+    },
+    {
+      "name": "Slasher",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 81
+      },
+      "description": "You've learned where to cut to have the greatest results, granting you the following benefits: Increase your Strength or Dexterity by 1, to a maximum of 20. Once per turn, when you hit a creature with an attack that deals slashing damage, you can reduce the speed of the target by 10 feet until the start of your next turn. When you score a critical hit that deals slashing damage to a creature, you grievously wound it. Until the start of your next turn, the target has disadvantage on all attack rolls."
     },
     {
       "name": "Spell Sniper",
@@ -17513,7 +18015,32 @@
       "prerequisites": {
         "spellcasting": true
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
+      }
+    },
+    {
+      "name": "Squat Nimbleness",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Dwarf or Small race",
+      "description": "You are uncommonly nimble for your race. You gain the following benefits: Increase your Strength or Dexterity score by 1, to a maximum of 20. Increase your walking speed by 5 feet. You gain proficiency in the Acrobatics or Athletics skill (your choice). You have advantage on any Strength (Athletics) or Dexterity (Acrobatics) check you make to escape from being grappled."
+    },
+    {
+      "name": "Svirfneblin Magic",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Gnome (deep gnome/svirfneblin)",
+      "description": "You have inherited the innate spellcasting ability of your ancestors. This ability allows you to cast nondetection on yourself at will, without needing a material component. You can also cast each of the following spells once with this trait: blindness/deafness, blur, and disguise self. You regain the ability to cast these spells when you finish a long rest. Intelligence is your spellcasting ability for these spells."
     },
     {
       "name": "Tavern Brawler",
@@ -17525,7 +18052,39 @@
           "str",
           "con"
         ]
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
       }
+    },
+    {
+      "name": "Telekinetic",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 81
+      },
+      "description": "You awaken the ability to move things with your mind, granting you the following benefits: Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20. You learn the mage hand cantrip. You can cast it without verbal or somatic components, and you can make the spectral hand invisible. If you already know this spell, its range increases by 30 feet when you cast it. Its spellcasting ability is the ability increased by this feat. As a bonus action, you can try to telekinetically shove one creature you can see within 30 feet of you. When you do so, the target must succeed on a Strength saving throw (DC 8 + your proficiency bonus + the ability modifier of the score increased by this feat) or be moved 5 feet toward you or away from you."
+    },
+    {
+      "name": "Telepathic",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 81
+      },
+      "description": "You awaken the ability to mentally connect with others, granting you the following benefits: Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20. You can speak telepathically to any creature you can see within 60 feet of you. Your telepathic utterances are in a language you know, and the creature understands you only if it knows that language. Your communication doesn't give the creature the ability to respond to you telepathically. You can cast the detect thoughts spell, requiring no spell slot or components, and you must finish a long rest before you can cast it this way again. Your spellcasting ability for the spell is the ability increased by this feat."
+    },
+    {
+      "name": "Theologian",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 81
+      },
+      "description": "Your extensive study of religion rewards you with the following benefits: Increase your Intelligence score by 1, to a maximum of 20. You learn the thaumaturgy and detect evil and good spells. You can cast detect evil and good without expending a spell slot. Once you cast detect evil and good in this way, you can't do so again until you finish a long rest. Intelligence is your spellcasting ability for these spells."
     },
     {
       "name": "Tough",
@@ -17533,7 +18092,21 @@
       "prerequisites": null,
       "effects": {
         "hpPerLevel": 2
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
       }
+    },
+    {
+      "name": "Tracker",
+      "source": {
+        "book": "Tasha's Cauldron of Everything",
+        "abbr": "TCoE",
+        "page": 81
+      },
+      "description": "You have spent time hunting creatures and honed your skills, gaining the following benefits: Increase your Wisdom score by 1, to a maximum of 20. You learn the hunter's mark spell. You can cast it once without expending a spell slot, and you must finish a long rest before you can cast it in this way again. You can also cast the spell using any spell slots you have. Wisdom is your spellcasting ability for this spell. You have advantage on Wisdom (Survival) checks to track creatures."
     },
     {
       "name": "War Caster",
@@ -17541,7 +18114,12 @@
       "prerequisites": {
         "spellcasting": true
       },
-      "effects": {}
+      "effects": {},
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
+      }
     },
     {
       "name": "Weapon Master",
@@ -17558,7 +18136,22 @@
         "type": "weapons",
         "label": "Choose 4 weapons",
         "count": 4
+      },
+      "source": {
+        "book": "Player's Handbook",
+        "abbr": "PHB",
+        "page": 170
       }
+    },
+    {
+      "name": "Wood Elf Magic",
+      "source": {
+        "book": "Xanathar's Guide to Everything",
+        "abbr": "XGtE",
+        "page": 75
+      },
+      "prerequisite": "Elf (wood elf)",
+      "description": "You learn the magic of the primeval woods, which are revered and protected by your people. You learn one druid cantrip of your choice. You also learn the longstrider and pass without trace spells, each of which you can cast once without expending a spell slot. You regain the ability to cast these spells in this way when you finish a long rest. Wisdom is your spellcasting ability for these spells."
     }
   ],
   "standardActions": [
