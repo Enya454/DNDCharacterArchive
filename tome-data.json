@@ -9196,7 +9196,7 @@
         {
           "name": "Infuse Item",
           "level": 2,
-          "type": "eldritch_invocations",
+          "type": "infusion_choice",
           "infusionLabel": "Infusions Known",
           "countByLevel": {
             "2": 4,

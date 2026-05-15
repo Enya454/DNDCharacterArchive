@@ -774,6 +774,61 @@ function SkillPicker({ title, count, from, allSkills, current, onToggle, skillSo
 // FEATURE PANEL — source-aware, completion-highlighted,
 // ASI-capable interactive feature panel
 // ============================================================
+function InfusionPicker({ infusions, picked, maxCount, charLevel, locked, onToggle }) {
+  const [search, setSearch] = React.useState("");
+  const [expanded, setExpanded] = React.useState(null);
+
+  const filtered = infusions.filter(inf =>
+    !search || inf.name.toLowerCase().includes(search.toLowerCase())
+  ).sort((a,b) => (a.levelReq||2) - (b.levelReq||2) || a.name.localeCompare(b.name));
+
+  return (
+    <div>
+      <input value={search} onChange={e=>setSearch(e.target.value)}
+        placeholder="Search infusions…"
+        style={{ width:"100%", boxSizing:"border-box", background:"var(--surface)", border:"1px solid var(--border)",
+          color:"var(--text)", padding:"7px 10px", borderRadius:7, fontSize:12, marginBottom:8 }}/>
+      <div style={{ maxHeight:320, overflowY:"auto", display:"flex", flexDirection:"column", gap:4 }}>
+        {filtered.map(inf => {
+          const isPicked   = picked.includes(inf.name);
+          const meetsLevel = charLevel >= (inf.levelReq||2);
+          const canPick    = !locked && meetsLevel && (isPicked || picked.length < maxCount);
+          const isOpen     = expanded === inf.name;
+          return (
+            <div key={inf.name} style={{
+              borderRadius:7, border:`1px solid ${isPicked?"var(--accent)":"var(--border)"}`,
+              background: isPicked ? "rgba(var(--accent-rgb,201,162,39),0.08)" : "var(--surface)",
+              opacity: !meetsLevel ? 0.45 : 1, transition:"all 0.15s"
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 10px", cursor: meetsLevel && !locked ? "pointer" : "default" }}
+                onClick={() => canPick || isPicked ? onToggle(inf) : null}>
+                <div style={{ width:16, height:16, borderRadius:"50%", flexShrink:0,
+                  border:`2px solid ${isPicked?"var(--accent)":"var(--border)"}`,
+                  background: isPicked ? "var(--accent)" : "transparent" }}/>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <span style={{ fontSize:13, color: isPicked ? "var(--accent)" : "var(--text)", fontFamily:"var(--font-display)" }}>
+                    {inf.name}
+                  </span>
+                  {!meetsLevel && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>Requires level {inf.levelReq}</span>}
+                </div>
+                <span onClick={e=>{e.stopPropagation();setExpanded(isOpen?null:inf.name);}}
+                  style={{ fontSize:10, color:"var(--text-dim)", cursor:"pointer", padding:"2px 6px", flexShrink:0 }}>
+                  {isOpen?"▲ hide":"▼ info"}
+                </span>
+              </div>
+              {isOpen && (
+                <div style={{ padding:"0 10px 8px 34px", fontSize:12, color:"var(--text-muted)", lineHeight:1.6 }}>
+                  {inf.description}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillToggle,
     expertiseProfs, onExpertiseToggle, allSkills, languages, languageSources,
     onLanguageChoice, languageList, autoLanguages, thisLanguageSource,
@@ -794,6 +849,15 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
       case "eldritch_invocations": {
         // Count how many invocations the char should have at this level
         const countByLevel = feature.countByLevel || {"2":2};
+        let maxCount = 0;
+        for (const [lvl, cnt] of Object.entries(countByLevel)) {
+          if ((charLevel || 1) >= +lvl) maxCount = Math.max(maxCount, cnt);
+        }
+        const picked = (choices?.[feature.name] || []).length;
+        return picked >= maxCount;
+      }
+      case "infusion_choice": {
+        const countByLevel = feature.countByLevel || {"2":4};
         let maxCount = 0;
         for (const [lvl, cnt] of Object.entries(countByLevel)) {
           if ((charLevel || 1) >= +lvl) maxCount = Math.max(maxCount, cnt);
@@ -1141,7 +1205,44 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* spell_grant — racial spells auto-granted at certain levels */}
 
-          {/* eldritch_invocations — multi-select with level + prereq gating */}
+          {/* ── Infusion Choice (Artificer Infuse Item) ── */}
+          {feature.type === "infusion_choice" && (() => {
+            const countByLevel = feature.countByLevel || {"2":4};
+            let maxCount = 0;
+            for (const [lvl, cnt] of Object.entries(countByLevel)) {
+              if ((charLevel||1) >= +lvl) maxCount = Math.max(maxCount, cnt);
+            }
+            const picked = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
+            const infusions = feature.invocations || [];
+
+            const toggle = inf => {
+              if (locked) return;
+              if ((charLevel||1) < (inf.levelReq||2)) return;
+              const isPicked = picked.includes(inf.name);
+              const next = isPicked
+                ? picked.filter(n => n !== inf.name)
+                : picked.length < maxCount ? [...picked, inf.name] : picked;
+              onChoice && onChoice(feature.name, next);
+            };
+
+            return (
+              <div>
+                <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>
+                  Choose <strong style={{ color:"var(--accent)" }}>{maxCount}</strong> infusions known — {picked.length}/{maxCount} selected.
+                  {(charLevel||1) < 6 && <span style={{ color:"var(--text-dim)", marginLeft:6 }}>(More unlock as you level up)</span>}
+                </div>
+                {/* Search */}
+                <InfusionPicker
+                  infusions={infusions}
+                  picked={picked}
+                  maxCount={maxCount}
+                  charLevel={charLevel||1}
+                  locked={locked}
+                  onToggle={toggle}
+                />
+              </div>
+            );
+          })()}
           {!locked && feature.type === "eldritch_invocations" && (() => {
             const countByLevel = feature.countByLevel || {"2":2};
             let maxCount = 0;
