@@ -595,19 +595,22 @@ const TW = ({ themeKey, themes, children, charCustom }) => {
   })();
   const isLight = cc.colorMode === "light";
 
-  // Light mode overrides — swap dark surfaces for light equivalents
-  const surfaceColor = isLight ? (cc.bgColor ? lightenBg(cc.bgColor) : "#f0eeea") : t.surface;
-  const cardColor    = isLight ? "#ffffff" : t.card;
-  const borderColor  = isLight ? "rgba(0,0,0,0.12)" : t.border;
+  // Light mode — toned down, warm parchment feel rather than stark white
+  const surfaceColor = isLight ? "#e8e2d8" : t.surface;
+  const cardColor    = isLight ? "#f0ebe2" : t.card;
+  const borderColor  = isLight ? "rgba(0,0,0,0.14)" : t.border;
   const textColor    = isLight ? "#1a1814" : t.text;
   const textMuted    = isLight ? "#5a5248" : t.textMuted;
-  const textDim      = isLight ? "#9a9088" : t.textDim;
+  const textDim      = isLight ? "#8a8278" : t.textDim;
+  // In light mode, keep accent for borders/highlights but use dark colour for text
+  // so light-coloured accents (like gold) don't become unreadable on light bg
+  const accentText   = isLight ? "#1a1814" : "var(--accent)";
 
   return (
     <div style={{
-      "--bg":bg,"--surface":isLight?"#ede9e3":t.surface,"--card":cardColor,"--border":borderColor,
+      "--bg":bg,"--surface":surfaceColor,"--card":cardColor,"--border":borderColor,
       "--accent":accent,"--accent-rgb":accentRgb,"--accent2":t.accentSecondary,"--text":textColor,
-      "--text-muted":textMuted,"--text-dim":textDim,
+      "--text-muted":textMuted,"--text-dim":textDim,"--accent-text":accentText,
       "--danger":t.danger,"--success":t.success,"--info":t.info,
       "--font-display":fontD,"--font-body":fontB,"--gradient-hero":t.gradientHero,
       background: isLight
@@ -5421,7 +5424,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
   ];
 
   const sectionLabel = txt => (
-    <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
+    <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
   );
 
   return (
@@ -5442,7 +5445,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
           <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
           {/* Name */}
           <div style={{ flexShrink:0, minWidth:0 }}>
-            <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:"var(--accent)", lineHeight:1.1 }}>{char.name}</div>
+            <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:"var(--accent-text)", lineHeight:1.1 }}>{char.name}</div>
             <div style={{ fontSize:10, color:"var(--text-muted)", whiteSpace:"nowrap" }}>
               {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Lvl ${char.level}`].filter(Boolean).join(" · ")}
             </div>
@@ -5468,7 +5471,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
             <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
             <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
-            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
+            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent-text)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
           </div>
           {/* Controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
@@ -5479,7 +5482,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                 <button onClick={()=>{
                   navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
                   setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-                }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
                   {shareCopied ? "✓ Copied!" : "🔗 Copy Link"}
                 </button>
               )}
@@ -5517,7 +5520,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               return (
                 <div key={ab} style={{ textAlign:"center", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:7, padding:"5px 2px" }}>
                   <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1 }}>{ABILITY_SHORT[ab]}</div>
-                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:"var(--accent)", lineHeight:1.2 }}>{score}</div>
+                  <div style={{ fontSize:20, fontFamily:theme.fontDisplay, color:"var(--accent-text)", lineHeight:1.2 }}>{score}</div>
                   <div style={{ fontSize:13, color:"var(--text)" }}>{modStr(calcMod(score))}</div>
                 </div>
               );
@@ -5531,7 +5534,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               <div key={ab} style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 6px", borderRadius:4 }}>
                 <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0, background:sv.proficient?theme.accent:"transparent", border:`2px solid ${sv.proficient?theme.accent:"var(--border)"}` }}/>
                 <span style={{ flex:1, fontSize:12, color:sv.proficient?"var(--text)":"var(--text-muted)" }}>{ABILITY_NAMES[ab]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13 }}>{modStr(sv.value)}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:13 }}>{modStr(sv.value)}</span>
               </div>
             ))}
           </div>
@@ -5544,7 +5547,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                 <span style={{ width:7, height:7, flexShrink:0, display:"inline-block", borderRadius:d.expertise?0:"50%", transform:d.expertise?"rotate(45deg)":"none", background:d.proficient||d.expertise?theme.accent:"transparent", border:`2px solid ${d.proficient||d.expertise?theme.accent:"var(--border)"}` }}/>
                 <span style={{ flex:1, fontSize:12, color:d.proficient?"var(--text)":"var(--text-muted)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sk}</span>
                 <span style={{ fontSize:10, color:"var(--text-dim)", marginRight:2 }}>{ABILITY_SHORT[SKILLS_MAP[sk]]}</span>
-                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
+                <span style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:13, minWidth:22, textAlign:"right" }}>{modStr(d.value)}</span>
               </div>
             ))}
           </div>
@@ -5586,7 +5589,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
-                  <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent)", fontSize:24, lineHeight:1 }}>{s.v}</div>
+                  <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:24, lineHeight:1 }}>{s.v}</div>
                 </div>
               ))}
             </div>
@@ -5643,21 +5646,21 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
 
                     const divider = (txt) => (
                       <div style={{ display:"flex", alignItems:"center", gap:10, margin:"20px 0 12px" }}>
-                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:11, textTransform:"uppercase", letterSpacing:2, flexShrink:0 }}>{txt}</div>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent-text)", fontSize:11, textTransform:"uppercase", letterSpacing:2, flexShrink:0 }}>{txt}</div>
                         <div style={{ flex:1, height:1, background:"rgba(201,162,39,0.2)" }}/>
                       </div>
                     );
 
                     return (<>
                       {/* ── Background name & description ── */}
-                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, marginBottom: bg.description ? 10 : 16 }}>{char.background}</div>
+                      <div style={{ fontFamily:"var(--font-display)", color:"var(--accent-text)", fontSize:18, marginBottom: bg.description ? 10 : 16 }}>{char.background}</div>
                       {bg.description && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, marginBottom:16 }}>{bg.description}</p>}
 
                       {/* ── Special feature — pinned at top ── */}
                       {specialFeat && (<>
                         {divider("Background Feature")}
                         <div style={{ background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:10, padding:"14px 16px", marginBottom:4 }}>
-                          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>{specialFeat.name}</div>
+                          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent-text)", fontSize:15, marginBottom:8 }}>{specialFeat.name}</div>
                           <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:0 }}>{specialFeat.description}</p>
                         </div>
                       </>)}
@@ -5669,7 +5672,7 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                           {displaySkills && displaySkills.length > 0 ? (
                             <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
                               {displaySkills.map(sk => (
-                                <span key={sk} style={{ padding:"4px 12px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:13, color:"var(--accent)", fontFamily:"var(--font-display)" }}>
+                                <span key={sk} style={{ padding:"4px 12px", background:"rgba(var(--accent-rgb,201,162,39),0.08)", border:"1px solid rgba(201,162,39,0.3)", borderRadius:20, fontSize:13, color:"var(--accent-text)", fontFamily:"var(--font-display)" }}>
                                   {sk}
                                 </span>
                               ))}
@@ -5711,10 +5714,10 @@ function CharacterSheet({ char:initial, gameData, onBack, onDelete, onEdit, clou
                         {divider("Additional Proficiencies & Traits")}
                         {otherFeats.map(f => (
                           <div key={f.name} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:"12px 16px", marginBottom:8 }}>
-                            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, marginBottom:6 }}>{f.name}</div>
+                            <div style={{ fontFamily:"var(--font-display)", color:"var(--accent-text)", fontSize:14, marginBottom:6 }}>{f.name}</div>
                             <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{f.description}</p>
                             {f.type === "choice" && char.featureChoices?.[f.name] && (
-                              <div style={{ marginTop:8, padding:"5px 10px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:6, fontSize:13, color:"var(--accent)" }}>
+                              <div style={{ marginTop:8, padding:"5px 10px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:6, fontSize:13, color:"var(--accent-text)" }}>
                                 Chosen: {char.featureChoices[f.name]}
                               </div>
                             )}
