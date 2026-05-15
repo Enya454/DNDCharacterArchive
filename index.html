@@ -6169,6 +6169,58 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           {stealthDisadv && <div style={{ marginTop:8, padding:"4px 8px", background:"rgba(230,126,34,0.12)", border:"1px solid #e67e22", borderRadius:5, fontSize:10, color:"#e67e22" }}>⚠ Stealth disadvantage</div>}
           {strWarnings.map(msg=><div key={msg} style={{ marginTop:4, padding:"4px 8px", background:"rgba(192,57,43,0.12)", border:`1px solid ${theme.danger}`, borderRadius:5, fontSize:10, color:theme.danger }}>⚠ {msg}</div>)}
 
+          {/* Senses */}
+          {(() => {
+            const allFeats = [
+              ...(speciesData?.features || []),
+              ...(subraceData?.features || []),
+              ...(classData?.features || []),
+            ];
+            const senses = allFeats.filter(f => f.category === "sense");
+            if (!senses.length) return null;
+            return (<>
+              {sectionLabel("Senses")}
+              <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
+                {senses.map(f => {
+                  // Extract range from description if present
+                  const rangeMatch = f.description?.match(/(\d+)[\s-]foot/i);
+                  const range = rangeMatch ? ` ${rangeMatch[1]}ft` : "";
+                  return (
+                    <div key={f.name} style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <span style={{ fontSize:14 }}>
+                        {f.name.toLowerCase().includes("dark") ? "🌑" : f.name.toLowerCase().includes("blind") ? "🔵" : f.name.toLowerCase().includes("true") ? "👁" : "✦"}
+                      </span>
+                      <span style={{ color:"var(--text)" }}>{f.name}{range}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>);
+          })()}
+
+          {/* Defenses */}
+          {(() => {
+            const allFeats = [
+              ...(speciesData?.features || []),
+              ...(subraceData?.features || []),
+              ...(classData?.features || []),
+            ];
+            const defenses = allFeats.filter(f => f.category === "defense");
+            if (!defenses.length) return null;
+            return (<>
+              {sectionLabel("Defenses")}
+              <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
+                {defenses.map(f => (
+                  <div key={f.name} title={f.description}
+                    style={{ display:"flex", alignItems:"flex-start", gap:6, cursor:"help" }}>
+                    <span style={{ fontSize:14, flexShrink:0 }}>🛡</span>
+                    <span style={{ color:"var(--text)" }}>{f.name}</span>
+                  </div>
+                ))}
+              </div>
+            </>);
+          })()}
+
           {/* Languages */}
           {(char.languages||[]).length > 0 && (<>
             {sectionLabel("Languages")}
