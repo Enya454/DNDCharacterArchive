@@ -3225,7 +3225,10 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
     subclasses: classData?.subclasses,
     skillSources, thisSource: sourceLabel,
     asiChoices: isSpecies
-      ? { "Ability Score Increase": char.speciesAbilityChoices || {} }
+      ? (() => {
+          const asiFeatureName = (speciesData?.features || []).find(f => f.type === "asi_points")?.name || "Ability Score Increase";
+          return { [asiFeatureName]: char.speciesAbilityChoices || {} };
+        })()
       : char.asiChoices || {},
     onAsiChange: isSpecies ? setSpeciesAsi : setAsi,
     currentAbilities: char.abilities,
