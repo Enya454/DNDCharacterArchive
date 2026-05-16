@@ -401,7 +401,8 @@
           "name": "Stonecunning",
           "level": 1,
           "type": "passive",
-          "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus."
+          "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus.",
+          "category": "defense"
         }
       ],
       "subraces": {
@@ -554,7 +555,8 @@
           "name": "Gnome Cunning",
           "level": 1,
           "type": "passive",
-          "description": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."
+          "description": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic.",
+          "category": "defense"
         }
       ],
       "subraces": {
@@ -827,7 +829,8 @@
           "name": "Relentless Endurance",
           "level": 1,
           "type": "passive",
-          "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."
+          "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.",
+          "category": "defense"
         },
         {
           "name": "Savage Attacks",
@@ -1395,7 +1398,8 @@
           "type": "action",
           "description": "Your fanged bite is a natural weapon, which counts as a simple melee weapon with which you are proficient. You add your Constitution modifier, instead of your Strength modifier, to the attack and damage rolls when you attack with this bite. It deals 1d4 piercing damage on a hit. While you are missing half or more of your hit points, you have advantage on attack rolls you make with this bite. When you attack with this bite and hit a creature that isn't a Construct or an Undead, you can empower yourself in one of the following ways (your choice): You regain hit points equal to the piercing damage dealt. You gain a bonus to the next ability check or attack roll you make; the bonus equals the piercing damage dealt. You can use your Vampiric Bite a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
           "uses": "Proficiency bonus",
-          "recharge": "long rest"
+          "recharge": "long rest",
+          "actionType": "action"
         },
         {
           "name": "Languages",
@@ -1464,7 +1468,8 @@
             "max": 2,
             "per": "long"
           },
-          "note": "Advantage on STR checks/saves, resistance to B/P/S damage"
+          "note": "Advantage on STR checks/saves, resistance to B/P/S damage",
+          "category": "defense"
         },
         {
           "level": 1,
@@ -2494,7 +2499,8 @@
               "type": "action",
               "description": "When a creature you can see dies within 30 feet of you, you can use your reaction to magically summon that creature's soul in a tiny object \u2014 a token of the departed. The token is a Tiny object and has an AC of 10, 1 hit point, and immunity to psychic and poison damage. You can have a maximum number of tokens equal to your proficiency bonus, and you can use a token in a number of ways.",
               "uses": "Prof bonus tokens",
-              "recharge": "long rest"
+              "recharge": "long rest",
+              "category": "defense"
             },
             {
               "name": "Ghost Walk",
@@ -2502,7 +2508,8 @@
               "type": "action",
               "description": "You can phase partially into the realm of the dead, becoming like a ghost. As a bonus action, you assume a spectral form. While in this form, you have a flying speed of 10 feet, you can move through creatures and objects as if they were difficult terrain, and you have resistance to all damage. You can remain in this form for up to 10 minutes or until you end it as a bonus action. To use this feature again, you must finish a long rest or expend a Wails from the Grave use.",
               "uses": "1 (or expend Wails from the Grave)",
-              "recharge": "long rest"
+              "recharge": "long rest",
+              "category": "defense"
             },
             {
               "name": "Death's Friend",
@@ -2933,7 +2940,8 @@
               "level": 10,
               "name": "Eldritch Strike",
               "type": "passive",
-              "description": "At 10th level, you learn how to make your weapon strikes undercut a creature's resistance to your spells. When you hit a creature with a weapon attack, that creature has disadvantage on the next saving throw it makes against a spell you cast before the end of your next turn."
+              "description": "At 10th level, you learn how to make your weapon strikes undercut a creature's resistance to your spells. When you hit a creature with a weapon attack, that creature has disadvantage on the next saving throw it makes against a spell you cast before the end of your next turn.",
+              "category": "defense"
             },
             {
               "level": 15,
@@ -6062,7 +6070,8 @@
               "name": "Exceptional Training",
               "level": 7,
               "type": "passive",
-              "description": "Beginning at 7th level, on any of your turns when your beast companion doesn't attack, you can use a bonus action to command the beast to take the Dash, Disengage, Dodge, or Help action on its turn. In addition, the beast's attacks now count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage."
+              "description": "Beginning at 7th level, on any of your turns when your beast companion doesn't attack, you can use a bonus action to command the beast to take the Dash, Disengage, Dodge, or Help action on its turn. In addition, the beast's attacks now count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.",
+              "category": "defense"
             },
             {
               "name": "Bestial Fury",
@@ -6180,7 +6189,8 @@
               "level": 15,
               "type": "action",
               "actionType": "reaction",
-              "description": "At 15th level, your ability to move between planes enables you to slip through the planar boundaries to lessen the harm done to you. When you take damage from an attack, you can use your reaction to give yourself resistance to all of that attack's damage on this turn."
+              "description": "At 15th level, your ability to move between planes enables you to slip through the planar boundaries to lessen the harm done to you. When you take damage from an attack, you can use your reaction to give yourself resistance to all of that attack's damage on this turn.",
+              "category": "defense"
             }
           ],
           "source": {
@@ -6277,7 +6287,8 @@
               "level": 7,
               "type": "action",
               "actionType": "reaction",
-              "description": "Beginning at 7th level, the magic of the Feywild guards your mind. You have advantage on saving throws against being charmed or frightened. In addition, whenever you or a creature you can see within 120 feet of you succeeds on a saving throw against being charmed or frightened, you can use your reaction to force a different creature you can see within 120 feet of you to make a Wisdom saving throw against your spell save DC. If the save fails, the target is charmed or frightened by you (your choice) for 1 minute."
+              "description": "Beginning at 7th level, the magic of the Feywild guards your mind. You have advantage on saving throws against being charmed or frightened. In addition, whenever you or a creature you can see within 120 feet of you succeeds on a saving throw against being charmed or frightened, you can use your reaction to force a different creature you can see within 120 feet of you to make a Wisdom saving throw against your spell save DC. If the save fails, the target is charmed or frightened by you (your choice) for 1 minute.",
+              "category": "defense"
             },
             {
               "name": "Fey Reinforcements",
@@ -8318,7 +8329,8 @@
                 "Piercing",
                 "Slashing"
               ],
-              "description": "Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature."
+              "description": "Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature.",
+              "category": "defense"
             },
             {
               "name": "Hurl Through Hell",
@@ -8375,7 +8387,8 @@
               "level": 10,
               "type": "passive",
               "description": "Beginning at 10th level, your patron teaches you how to turn the mind-affecting magic of your enemies against them. You are immune to being charmed, and when another creature attempts to charm you, you can use your reaction to attempt to turn the charm back on that creature. The creature must succeed on a Wisdom saving throw against your warlock spell save DC or be charmed by you for 1 minute or until the creature takes any damage.",
-              "actionType": "reaction"
+              "actionType": "reaction",
+              "category": "defense"
             },
             {
               "name": "Dark Delirium",
@@ -8426,7 +8439,8 @@
               "name": "Thought Shield",
               "level": 10,
               "type": "passive",
-              "description": "Starting at 10th level, your thoughts can't be read by telepathy or other means unless you allow it. You also have resistance to psychic damage, and whenever a creature deals psychic damage to you, that creature takes the same amount of damage."
+              "description": "Starting at 10th level, your thoughts can't be read by telepathy or other means unless you allow it. You also have resistance to psychic damage, and whenever a creature deals psychic damage to you, that creature takes the same amount of damage.",
+              "category": "defense"
             },
             {
               "name": "Create Thrall",
@@ -8469,7 +8483,8 @@
               "name": "Radiant Soul",
               "level": 6,
               "type": "passive",
-              "description": "Starting at 6th level, your link to the Celestial allows you to serve as a conduit for radiant energy. You have resistance to radiant damage, and when you cast a spell that deals radiant or fire damage, you add your Charisma modifier to one radiant or fire damage roll of that spell."
+              "description": "Starting at 6th level, your link to the Celestial allows you to serve as a conduit for radiant energy. You have resistance to radiant damage, and when you cast a spell that deals radiant or fire damage, you add your Charisma modifier to one radiant or fire damage roll of that spell.",
+              "category": "defense"
             },
             {
               "name": "Celestial Resilience",
@@ -8522,7 +8537,8 @@
               "name": "Undying Nature",
               "level": 10,
               "type": "passive",
-              "description": "Beginning at 10th level, you can hold your breath indefinitely, and you don't require food, water, or sleep, although you still require rest to reduce exhaustion and still benefit from finishing short and long rests. In addition, you age at a slower rate. For every 10 years that pass, your body ages only 1 year, and you are immune to being magically aged."
+              "description": "Beginning at 10th level, you can hold your breath indefinitely, and you don't require food, water, or sleep, although you still require rest to reduce exhaustion and still benefit from finishing short and long rests. In addition, you age at a slower rate. For every 10 years that pass, your body ages only 1 year, and you are immune to being magically aged.",
+              "category": "defense"
             },
             {
               "name": "Indestructible Life",
@@ -9801,7 +9817,8 @@
               "type": "passive",
               "description": "By 15th level, you have been exposed to so many chemicals that they pose little risk to you, and you can use them to quickly end certain ailments: You gain resistance to acid and poison damage, and immunity to the poisoned condition. You can cast Greater Restoration and Heal without expending a spell slot, without preparing them, and without material components, provided you use alchemist's supplies as the spellcasting focus. Once you cast either spell with this feature, you can't cast that spell with it again until you finish a long rest.",
               "uses": "1 each",
-              "recharge": "long rest"
+              "recharge": "long rest",
+              "category": "defense"
             }
           ]
         },

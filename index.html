@@ -6002,11 +6002,27 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
   const stealthDisadv = hasStealthDisadvantage(char, gameData);
   const strWarnings   = strRequirementMet(char, gameData);
 
+  // Build all speeds for the character
+  const allSpeeds = (() => {
+    const speeds = [];
+    const spd = subraceData?.speed || speciesData?.speed || 30;
+    speeds.push({ label: "Walk", value: `${spd}ft` });
+    const climb = subraceData?.climbSpeed || speciesData?.climbSpeed;
+    const swim  = subraceData?.swimSpeed  || speciesData?.swimSpeed;
+    const fly   = subraceData?.flySpeed   || speciesData?.flySpeed;
+    // Dhampir spider climb
+    const hasSpiderClimb = [...(speciesData?.features||[]),...(subraceData?.features||[])].some(f => f.name === "Spider Climb");
+    if (hasSpiderClimb) speeds.push({ label: "Climb", value: `${spd}ft` });
+    if (climb && !hasSpiderClimb) speeds.push({ label: "Climb", value: `${climb}ft` });
+    if (swim)  speeds.push({ label: "Swim",  value: `${swim}ft`  });
+    if (fly)   speeds.push({ label: "Fly",   value: `${fly}ft`   });
+    return speeds;
+  })();
+
   // Quick combat stats (beside HP)
   const combatStats = [
     { l:"AC",       v: calcAC(char, gameData) },
     { l:"Init",     v: modStr(calcMod(char.abilities.dex)) },
-    { l:"Speed",    v: `${speciesData?.speed || 30}ft` },
     { l:"Prof",     v: `+${pb}` },
     { l:"Pass Perc",v: 10 + (skills["Perception"]?.value || 0) },
     ...(isSpellcaster ? [
@@ -6015,7 +6031,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
     ] : []),
   ];
 
-  const sectionLabel = txt => (
+  const [speedOpen, setSpeedOpen] = useState(false);
     <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
   );
 
@@ -6172,25 +6188,38 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           {/* Senses */}
           {(() => {
             const allFeats = [
-              ...(speciesData?.features || []),
-              ...(subraceData?.features || []),
-              ...(classData?.features || []),
-            ];
-            const senses = allFeats.filter(f => f.category === "sense");
-            if (!senses.length) return null;
+              ...(speciesData?.features  || []).map(f=>({...f,_src:char.species})),
+              ...(subraceData?.features  || []).map(f=>({...f,_src:char.subrace})),
+              ...(classData?.features    || []).map(f=>({...f,_src:char.class})),
+              ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || []).map(f=>({...f,_src:char.subclass})),
+            ].filter(f => f.category === "sense");
+            if (!allFeats.length) return null;
             return (<>
               {sectionLabel("Senses")}
               <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
-                {senses.map(f => {
-                  // Extract range from description if present
+                {allFeats.map(f => {
                   const rangeMatch = f.description?.match(/(\d+)[\s-]foot/i);
                   const range = rangeMatch ? ` ${rangeMatch[1]}ft` : "";
+                  const icon = f.name.toLowerCase().includes("dark") ? "🌑"
+                             : f.name.toLowerCase().includes("blind") ? "🔵"
+                             : f.name.toLowerCase().includes("true")  ? "👁"
+                             : f.name.toLowerCase().includes("tremo") ? "🌍"
+                             : "✦";
                   return (
-                    <div key={f.name} style={{ display:"flex", alignItems:"center", gap:6 }}>
-                      <span style={{ fontSize:14 }}>
-                        {f.name.toLowerCase().includes("dark") ? "🌑" : f.name.toLowerCase().includes("blind") ? "🔵" : f.name.toLowerCase().includes("true") ? "👁" : "✦"}
-                      </span>
-                      <span style={{ color:"var(--text)" }}>{f.name}{range}</span>
+                    <div key={f.name} style={{ position:"relative", marginBottom:2 }}
+                      onMouseEnter={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="block"; }}
+                      onMouseLeave={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="none"; }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, cursor:"help" }}>
+                        <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
+                        <span style={{ color:"var(--text)" }}>{f.name}{range}</span>
+                      </div>
+                      <div className="tip" style={{ display:"none", position:"absolute", left:"105%", top:0, zIndex:50,
+                        width:230, background:"var(--card)", border:"1px solid var(--border)", borderRadius:8,
+                        padding:"8px 10px", boxShadow:"0 4px 16px rgba(0,0,0,0.5)", pointerEvents:"none" }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, marginBottom:4 }}>{f.name}</div>
+                        <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
+                        {f._src && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>From: {f._src}</div>}
+                      </div>
                     </div>
                   );
                 })}
@@ -6198,28 +6227,68 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             </>);
           })()}
 
-          {/* Defenses */}
+          {/* Resistances & Defenses */}
           {(() => {
             const allFeats = [
-              ...(speciesData?.features || []),
-              ...(subraceData?.features || []),
-              ...(classData?.features || []),
-            ];
-            const defenses = allFeats.filter(f => f.category === "defense");
-            if (!defenses.length) return null;
+              ...(speciesData?.features  || []).map(f=>({...f,_src:char.species})),
+              ...(subraceData?.features  || []).map(f=>({...f,_src:char.subrace})),
+              ...(classData?.features    || []).map(f=>({...f,_src:char.class})),
+              ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || []).map(f=>({...f,_src:char.subclass})),
+            ].filter(f => f.category === "defense");
+            if (!allFeats.length) return null;
             return (<>
-              {sectionLabel("Defenses")}
+              {sectionLabel("Resistances & Defenses")}
               <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
-                {defenses.map(f => (
-                  <div key={f.name} title={f.description}
-                    style={{ display:"flex", alignItems:"flex-start", gap:6, cursor:"help" }}>
-                    <span style={{ fontSize:14, flexShrink:0 }}>🛡</span>
-                    <span style={{ color:"var(--text)" }}>{f.name}</span>
-                  </div>
-                ))}
+                {allFeats.map(f => {
+                  const desc  = f.description || "";
+                  const icon  = desc.toLowerCase().includes("resistance") ? "🔰"
+                              : desc.toLowerCase().includes("immune")     ? "🛡"
+                              : desc.toLowerCase().includes("advantage")  ? "🎲"
+                              : desc.toLowerCase().includes("charmed")    ? "💜"
+                              : desc.toLowerCase().includes("sleep")      ? "💤"
+                              : "✦";
+                  const summary = (() => {
+                    const lower = desc.toLowerCase();
+                    if (lower.includes("resistance to necrotic") && lower.includes("radiant")) return "Radiant & necrotic resistance";
+                    if (lower.includes("resistance to necrotic")) return "Necrotic resistance";
+                    if (lower.includes("resistance to cold and poison")) return "Cold & poison resistance";
+                    if (lower.includes("resistance to fire")) return "Fire resistance";
+                    if (lower.includes("resistance to poison")) return "Poison resistance";
+                    const resMatch = desc.match(/resistance to ([^.]+?) damage/i);
+                    if (resMatch) return `${resMatch[1].trim()} resistance`;
+                    if (lower.includes("can't be put to sleep") || lower.includes("magic can't put you to sleep")) return "Immune to magical sleep";
+                    if (lower.includes("advantage on saving throws against being charmed")) return "Adv. vs charmed";
+                    if (lower.includes("advantage on saving throws against poison")) return "Adv. vs poison";
+                    if (lower.includes("advantage on saving throws against illusion")) return "Adv. vs illusions";
+                    if (lower.includes("advantage on saving throws against magic") || lower.includes("intelligence, wisdom, and charisma saving throws")) return "Adv. vs magic";
+                    if (lower.includes("relentless endurance")) return "Drop to 1 HP (1/LR)";
+                    if (lower.includes("stonecunning")) return "Stonecunning";
+                    if (lower.includes("brave")) return "Adv. vs frightened";
+                    if (lower.includes("fey ancestry")) return "Adv. vs charmed, immune sleep";
+                    return f.name;
+                  })();
+                  return (
+                    <div key={f.name} style={{ position:"relative", marginBottom:2 }}
+                      onMouseEnter={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="block"; }}
+                      onMouseLeave={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="none"; }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6, cursor:"help" }}>
+                        <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
+                        <span style={{ color:"var(--text)" }}>{summary}</span>
+                      </div>
+                      <div className="tip" style={{ display:"none", position:"absolute", left:"105%", top:0, zIndex:50,
+                        width:240, background:"var(--card)", border:"1px solid var(--border)", borderRadius:8,
+                        padding:"8px 10px", boxShadow:"0 4px 16px rgba(0,0,0,0.5)", pointerEvents:"none" }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, marginBottom:4 }}>{f.name}</div>
+                        <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
+                        {f._src && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>From: {f._src}</div>}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </>);
           })()}
+
 
           {/* Languages */}
           {(char.languages||[]).length > 0 && (<>
@@ -6239,7 +6308,30 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
 
           {/* ── Combat stats grid ── */}
           <div style={{ padding:"10px 16px", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, background:`rgba(0,0,0,0.12)` }}>
-            <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length}, 1fr)`, gap:8 }}>
+            <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length + 1}, 1fr)`, gap:8 }}>
+              {/* Speed — special dropdown box */}
+              {(() => {
+                return (
+                  <div key="speed" style={{ textAlign:"center", padding:"6px 4px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:8, position:"relative", cursor: allSpeeds.length > 1 ? "pointer" : "default" }}
+                    onClick={() => allSpeeds.length > 1 && setSpeedOpen(o => !o)}>
+                    <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>
+                      Speed {allSpeeds.length > 1 && <span style={{ color:"var(--accent)" }}>▾</span>}
+                    </div>
+                    <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:24, lineHeight:1 }}>{allSpeeds[0].value}</div>
+                    {speedOpen && allSpeeds.length > 1 && (
+                      <div style={{ position:"absolute", top:"100%", left:0, right:0, zIndex:30, background:"var(--card)",
+                        border:`1px solid ${"var(--border)"}`, borderRadius:8, marginTop:4, overflow:"hidden", boxShadow:"0 4px 16px rgba(0,0,0,0.4)" }}>
+                        {allSpeeds.map(s => (
+                          <div key={s.label} style={{ padding:"6px 10px", display:"flex", justifyContent:"space-between", borderBottom:`1px solid ${"var(--border)"}`, fontSize:12 }}>
+                            <span style={{ color:"var(--text-muted)" }}>{s.label}</span>
+                            <span style={{ color:"var(--accent)", fontFamily:theme.fontDisplay }}>{s.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               {combatStats.map(s=>(
                 <div key={s.l} style={{ textAlign:"center", padding:"6px 4px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, borderRadius:8 }}>
                   <div style={{ fontSize:9, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1.5, marginBottom:3, whiteSpace:"nowrap" }}>{s.l}</div>
