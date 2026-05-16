@@ -1193,24 +1193,33 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* asi_points — species flexible bonus e.g. Half-Elf +1/+1, stackable */}
           {!locked && feature.type === "asi_points" && (() => {
-            const totalPts = feature.points || 2;
-            const asi = asiChoices?.[feature.name] || {};
-            const spent = Object.values(asi).reduce((s,v)=>s+(v||0),0);
-            const rem = totalPts - spent;
-            const excluded = feature.exclude || [];
+            const totalPts  = feature.points || 2;
+            const flexible  = feature.mode === "flexible"; // allows +2 to one, +1 to others
+            const asi       = asiChoices?.[feature.name] || {};
+            const spent     = Object.values(asi).reduce((s,v)=>s+(v||0),0);
+            const rem       = totalPts - spent;
+            const excluded  = feature.exclude || [];
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
-                  Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong> — one point per ability, across {totalPts} different abilities{excluded.length?` (not ${excluded.map(ab=>ABILITY_SHORT[ab]).join(", ")})`:""}.
+                  {flexible
+                    ? <>Increase one score by <strong style={{ color:"var(--accent)" }}>2</strong> and another by <strong style={{ color:"var(--accent)" }}>1</strong>, or three different scores by <strong style={{ color:"var(--accent)" }}>1</strong> each.</>
+                    : <>Spend <strong style={{ color:"var(--accent)" }}>{totalPts} point{totalPts>1?"s":""}</strong> — one point per ability across {totalPts} different abilities{excluded.length?` (not ${excluded.map(ab=>ABILITY_SHORT[ab]).join(", ")})`:""}</>
+                  }
                   {rem > 0 ? <span style={{ color:"var(--text-dim)", marginLeft:6 }}>({rem} point{rem>1?"s":""} left)</span>
                            : <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
                   {Object.keys(ABILITY_NAMES).filter(ab => !excluded.includes(ab)).map(ab => {
-                    const base = currentAbilities?.[ab] || 10;
+                    const base  = currentAbilities?.[ab] || 10;
                     const bonus = asi[ab] || 0;
                     const total = base + bonus;
-                    const atMax = bonus >= 1;
+                    // Flexible: max 2 per ability; standard: max 1 per ability
+                    const maxBonus = flexible ? 2 : 1;
+                    const atMax    = bonus >= maxBonus;
+                    // In flexible mode: can't put +2 on a second ability if another already has +2
+                    const someHasTwo = flexible && Object.values(asi).some(v => v >= 2);
+                    const canAdd = rem > 0 && (!atMax) && !(flexible && bonus >= 1 && someHasTwo && bonus < 2);
                     return (
                       <div key={ab} style={{ padding:10, borderRadius:8, textAlign:"center",
                         background:"var(--surface)", border:`1px solid ${bonus>0?"var(--accent)":"var(--border)"}` }}>
@@ -1221,8 +1230,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                         <div style={{ display:"flex", gap:4, justifyContent:"center", marginTop:6 }}>
                           <button onClick={() => { if(bonus<=0)return; onAsiChange(feature.name,{...asi,[ab]:bonus-1}); }}
                             style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:bonus>0?"pointer":"not-allowed",fontSize:14,opacity:bonus>0?1:0.3,lineHeight:1 }}>−</button>
-                          <button onClick={() => { if(rem<=0||atMax)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
-                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:rem>0&&!atMax?"pointer":"not-allowed",fontSize:14,opacity:rem>0&&!atMax?1:0.3,lineHeight:1 }}>+</button>
+                          <button onClick={() => { if(!canAdd)return; onAsiChange(feature.name,{...asi,[ab]:bonus+1}); }}
+                            style={{ width:24,height:24,borderRadius:4,border:"1px solid var(--border)",background:"var(--card)",color:"var(--text)",cursor:canAdd?"pointer":"not-allowed",fontSize:14,opacity:canAdd?1:0.3,lineHeight:1 }}>+</button>
                         </div>
                       </div>
                     );
@@ -6112,6 +6121,11 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
         </div>
       </div>
 
+      {/* ── Shared fixed tooltip for senses/defenses ── */}
+      <div id="sense-tip" style={{ display:"none", position:"fixed", zIndex:9999, maxWidth:260, background:"var(--card)",
+        border:"1px solid var(--border)", borderRadius:9, padding:"10px 12px",
+        boxShadow:"0 6px 24px rgba(0,0,0,0.6)", pointerEvents:"none", lineHeight:1 }}/>
+
       {/* ── Two-column body ── */}
       <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
         <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
@@ -6208,19 +6222,20 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
                              : f.name.toLowerCase().includes("tremo") ? "🌍"
                              : "✦";
                   return (
-                    <div key={f.name} style={{ position:"relative", marginBottom:2 }}
-                      onMouseEnter={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="block"; }}
-                      onMouseLeave={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="none"; }}>
+                    <div key={f.name} style={{ marginBottom:2, position:"relative" }}
+                      onMouseEnter={e => {
+                        const t=document.getElementById("sense-tip");
+                        if(!t) return;
+                        const r=e.currentTarget.getBoundingClientRect();
+                        t.style.left=(r.right+10)+"px";
+                        t.style.top=Math.max(8,r.top-10)+"px";
+                        t.innerHTML=`<div style="font-family:var(--font-display);color:var(--accent);font-size:12px;margin-bottom:4px">${f.name}</div><div style="font-size:11px;color:var(--text-muted);line-height:1.6">${f.description||""}</div>${f._src?`<div style="font-size:10px;color:var(--text-dim);margin-top:6px;font-style:italic">From: ${f._src}</div>`:""}`;
+                        t.style.display="block";
+                      }}
+                      onMouseLeave={() => { const t=document.getElementById("sense-tip"); if(t) t.style.display="none"; }}>
                       <div style={{ display:"flex", alignItems:"center", gap:6, cursor:"help" }}>
                         <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
                         <span style={{ color:"var(--text)" }}>{f.name}{range}</span>
-                      </div>
-                      <div className="tip" style={{ display:"none", position:"absolute", left:"105%", top:0, zIndex:50,
-                        width:230, background:"var(--card)", border:"1px solid var(--border)", borderRadius:8,
-                        padding:"8px 10px", boxShadow:"0 4px 16px rgba(0,0,0,0.5)", pointerEvents:"none" }}>
-                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, marginBottom:4 }}>{f.name}</div>
-                        <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
-                        {f._src && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>From: {f._src}</div>}
                       </div>
                     </div>
                   );
@@ -6270,19 +6285,20 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
                     return f.name;
                   })();
                   return (
-                    <div key={f.name} style={{ position:"relative", marginBottom:2 }}
-                      onMouseEnter={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="block"; }}
-                      onMouseLeave={e => { const t=e.currentTarget.querySelector(".tip"); if(t) t.style.display="none"; }}>
+                    <div key={f.name} style={{ marginBottom:2 }}
+                      onMouseEnter={e => {
+                        const t=document.getElementById("sense-tip");
+                        if(!t) return;
+                        const r=e.currentTarget.getBoundingClientRect();
+                        t.style.left=(r.right+10)+"px";
+                        t.style.top=Math.max(8,r.top-10)+"px";
+                        t.innerHTML=`<div style="font-family:var(--font-display);color:var(--accent);font-size:12px;margin-bottom:4px">${f.name}</div><div style="font-size:11px;color:var(--text-muted);line-height:1.6">${f.description||""}</div>${f._src?`<div style="font-size:10px;color:var(--text-dim);margin-top:6px;font-style:italic">From: ${f._src}</div>`:""}`;
+                        t.style.display="block";
+                      }}
+                      onMouseLeave={() => { const t=document.getElementById("sense-tip"); if(t) t.style.display="none"; }}>
                       <div style={{ display:"flex", alignItems:"center", gap:6, cursor:"help" }}>
                         <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
                         <span style={{ color:"var(--text)" }}>{summary}</span>
-                      </div>
-                      <div className="tip" style={{ display:"none", position:"absolute", left:"105%", top:0, zIndex:50,
-                        width:240, background:"var(--card)", border:"1px solid var(--border)", borderRadius:8,
-                        padding:"8px 10px", boxShadow:"0 4px 16px rgba(0,0,0,0.5)", pointerEvents:"none" }}>
-                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:12, marginBottom:4 }}>{f.name}</div>
-                        <div style={{ fontSize:11, color:"var(--text-muted)", lineHeight:1.6 }}>{f.description}</div>
-                        {f._src && <div style={{ fontSize:10, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>From: {f._src}</div>}
                       </div>
                     </div>
                   );
