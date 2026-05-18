@@ -134,7 +134,10 @@
       0%,100% { opacity: 0.18; }
       50%     { opacity: 0.30; }
     }
-    @keyframes shimmer {
+    @media (max-width: 640px) {
+      .ws-page { padding: 12px 8px !important; }
+      .ws-card  { padding: 12px 10px !important; }
+    }
       0%   { background-position: -200% center; }
       100% { background-position:  200% center; }
     }
@@ -225,6 +228,17 @@ const useGameData = () => {
 // ── Constants ──
 const ABILITY_NAMES = { str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma" };
 const ABILITY_SHORT = { str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA" };
+// ── Mobile detection hook ─────────────────────────────────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = React.useState(() => window.innerWidth < 640);
+  React.useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return mobile;
+}
+
 const SKILLS_MAP = {
   Acrobatics:"dex","Animal Handling":"wis",Arcana:"int",Athletics:"str",
   Deception:"cha",History:"int",Insight:"wis",Intimidation:"cha",
@@ -6044,6 +6058,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
   ];
 
   const [speedOpen, setSpeedOpen] = useState(false);
+  const mobile = useIsMobile();
 
   const sectionLabel = txt => (
     <div style={{ fontFamily:theme.fontDisplay, color:"var(--accent-text)", fontSize:10, textTransform:"uppercase", letterSpacing:2, marginBottom:8, marginTop:16, paddingBottom:4, borderBottom:`1px solid rgba(var(--accent-rgb,201,162,39),0.15)` }}>{txt}</div>
@@ -6062,40 +6077,16 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
         onCancel={() => setRestModal(null)}
       />}
       {/* ── Sticky top bar ── */}
-      <div style={{ background:"var(--card)", borderBottom:"2px solid var(--accent)", padding:"8px 16px", position:"sticky", top:0, zIndex:20 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+      <div style={{ background:"var(--card)", borderBottom:"2px solid var(--accent)", padding: mobile ? "6px 10px" : "8px 16px", position:"sticky", top:0, zIndex:20 }}>
+        {/* Row 1: back + name + controls */}
+        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom: mobile ? 6 : 0 }}>
           <button onClick={onBack} style={{ background:"transparent", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", padding:"4px 10px", borderRadius:6, cursor:"pointer", fontFamily:theme.fontBody, fontSize:12, flexShrink:0 }}>← Back</button>
-          {/* Name */}
-          <div style={{ flexShrink:0, minWidth:0 }}>
-            <div style={{ fontFamily:theme.fontDisplay, fontSize:18, color:"var(--accent-text)", lineHeight:1.1 }}>{char.name}</div>
-            <div style={{ fontSize:10, color:"var(--text-muted)", whiteSpace:"nowrap" }}>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontFamily:theme.fontDisplay, fontSize: mobile ? 15 : 18, color:"var(--accent-text)", lineHeight:1.1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{char.name}</div>
+            <div style={{ fontSize:10, color:"var(--text-muted)", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
               {[char.species && (char.subrace ? `${char.species} (${char.subrace})` : char.species), char.subclass ? `${char.class} (${char.subclass})` : char.class, `Lvl ${char.level}`].filter(Boolean).join(" · ")}
             </div>
           </div>
-          {/* HP — compact inline with controls */}
-          <div style={{ display:"flex", alignItems:"center", gap:6, flex:1, minWidth:0, margin:"0 8px" }}>
-            <span style={{ fontFamily:theme.fontDisplay, fontSize:20, color:hpColour, lineHeight:1, flexShrink:0 }}>{char.hp.current}</span>
-            <span style={{ color:"var(--text-dim)", fontSize:13, flexShrink:0 }}>/{char.hp.max}</span>
-            {char.hp.temp > 0 && <span style={{ fontSize:10, color:theme.info, flexShrink:0 }}>+{char.hp.temp}</span>}
-            <div style={{ flex:1, height:7, background:"var(--bg)", borderRadius:4, overflow:"hidden", minWidth:40 }}>
-              <div style={{ height:"100%", width:`${Math.max(0,Math.min(100,(char.hp.current/Math.max(1,char.hp.max))*100))}%`, background:hpColour, borderRadius:4, transition:"all 0.3s" }}/>
-            </div>
-            <span style={{ fontSize:9, color:"var(--text-dim)", flexShrink:0 }}>HP</span>
-            {/* Inline DMG / Heal controls */}
-            <input id="hp-delta" placeholder="±" style={{ width:42, background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text)", padding:"3px 5px", borderRadius:5, fontSize:13, textAlign:"center", fontFamily:theme.fontBody, flexShrink:0 }}
-              onKeyDown={e => {
-                if (e.key !== "Enter") return;
-                const v = parseInt(e.target.value);
-                if (isNaN(v) || v <= 0) return;
-                upd({ ...char, hp: { ...char.hp, current: Math.min(char.hp.max, Math.max(0, char.hp.current - v)) } });
-                e.target.value = "";
-              }}/>
-            <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
-            <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }} style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
-            <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
-            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent-text)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
-          </div>
-          {/* Controls */}
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
             {!readOnly && <>
@@ -6103,24 +6094,45 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
               {(char.shareMode === "public" || char.shareMode === "dm") && (
                 <div style={{ display:"flex", gap:4 }}>
                   {char.shareMode === "public" && (
-                    <button onClick={()=>{
-                      navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`);
-                      setShareCopied(true); setTimeout(()=>setShareCopied(false), 2000);
-                    }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                    <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`); setShareCopied(true); setTimeout(()=>setShareCopied(false),2000); }}
+                      style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
                       {shareCopied ? "✓" : "🌐 Link"}
                     </button>
                   )}
-                  <button onClick={()=>{
-                    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}-dm`);
-                    setDmCopied(true); setTimeout(()=>setDmCopied(false), 2000);
-                  }} style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                  <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}-dm`); setDmCopied(true); setTimeout(()=>setDmCopied(false),2000); }}
+                    style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
                     {dmCopied ? "✓" : "🎲 DM Link"}
                   </button>
                 </div>
               )}
-              <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }} style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
+              <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }}
+                style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
             </>}
           </div>
+        </div>
+        {/* Row 2: HP bar + controls */}
+        <div style={{ display:"flex", alignItems:"center", gap:6, minWidth:0 }}>
+          <span style={{ fontFamily:theme.fontDisplay, fontSize:20, color:hpColour, lineHeight:1, flexShrink:0 }}>{char.hp.current}</span>
+          <span style={{ color:"var(--text-dim)", fontSize:13, flexShrink:0 }}>/{char.hp.max}</span>
+          {char.hp.temp > 0 && <span style={{ fontSize:10, color:theme.info, flexShrink:0 }}>+{char.hp.temp}</span>}
+          <div style={{ flex:1, height:7, background:"var(--bg)", borderRadius:4, overflow:"hidden", minWidth:40 }}>
+            <div style={{ height:"100%", width:`${Math.max(0,Math.min(100,(char.hp.current/Math.max(1,char.hp.max))*100))}%`, background:hpColour, borderRadius:4, transition:"all 0.3s" }}/>
+          </div>
+          <span style={{ fontSize:9, color:"var(--text-dim)", flexShrink:0 }}>HP</span>
+          <input id="hp-delta" placeholder="±" style={{ width:42, background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text)", padding:"3px 5px", borderRadius:5, fontSize:13, textAlign:"center", fontFamily:theme.fontBody, flexShrink:0 }}
+            onKeyDown={e => {
+              if (e.key !== "Enter") return;
+              const v = parseInt(e.target.value);
+              if (isNaN(v) || v <= 0) return;
+              upd({ ...char, hp: { ...char.hp, current: Math.min(char.hp.max, Math.max(0, char.hp.current - v)) } });
+              e.target.value = "";
+            }}/>
+          <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,Math.max(0,char.hp.current-v))}}); if(el)el.value=""; } }}
+            style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
+          <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }}
+            style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
+          <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>{mobile?"SR":"Short Rest"}</button>
+          <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent-text)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>{mobile?"LR":"Long Rest"}</button>
         </div>
       </div>
 
@@ -6130,11 +6142,11 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
         boxShadow:"0 6px 24px rgba(0,0,0,0.6)", pointerEvents:"none", lineHeight:1 }}/>
 
       {/* ── Two-column body ── */}
-      <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
+      <div style={{ padding: mobile ? "8px 6px 80px" : "10px 12px 12px", height: mobile ? "auto" : "calc(100vh - 56px)", boxSizing:"border-box", overflow: mobile ? "visible" : "hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
+        <div style={{ display:"grid", gridTemplateColumns: mobile ? "1fr" : "260px 1fr", height: mobile ? "auto" : "100%", gap:10, overflow: mobile ? "visible" : "hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
-        <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
+        <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY: mobile ? "visible" : "auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
 
           {/* Portrait */}
           <div style={{ textAlign:"center", marginBottom:12 }}>
@@ -6329,7 +6341,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
 
           {/* ── Combat stats grid ── */}
           <div style={{ padding:"10px 16px", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, background:`rgba(0,0,0,0.12)` }}>
-            <div style={{ display:"grid", gridTemplateColumns:`repeat(${combatStats.length + 1}, 1fr)`, gap:8 }}>
+            <div style={{ display:"grid", gridTemplateColumns: mobile ? "repeat(3, 1fr)" : `repeat(${combatStats.length + 1}, 1fr)`, gap: mobile ? 6 : 8, flexWrap:"wrap" }}>
               {/* Speed — special dropdown box */}
               {(() => {
                 return (
@@ -6363,13 +6375,13 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
 
           {/* ── Tab panel: fills remaining height ── */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
-            {/* Tab bar */}
-            <div style={{ display:"flex", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, paddingLeft:12, paddingTop:10, background:"transparent" }}>
-              {TABS.map(t=><button key={t.id} style={ts(tab===t.id)} onClick={()=>setTab(t.id)}>{t.l}</button>)}
+          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow: mobile ? "visible" : "hidden" }}>
+            {/* Tab bar — scrollable on mobile */}
+            <div style={{ display:"flex", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, paddingLeft: mobile ? 4 : 12, paddingTop:10, background:"transparent", overflowX:"auto", WebkitOverflowScrolling:"touch", scrollbarWidth:"none" }}>
+              {TABS.map(t=><button key={t.id} style={{...ts(tab===t.id), whiteSpace:"nowrap", flexShrink:0}} onClick={()=>setTab(t.id)}>{t.l}</button>)}
             </div>
             {/* Tab content — scrolls independently */}
-            <div style={{ flex:1, overflowY:"auto", padding:16 }}>
+            <div style={{ flex:1, overflowY:"auto", padding: mobile ? 10 : 16 }}>
               {tab==="actions"    && <ActionsTab     char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
