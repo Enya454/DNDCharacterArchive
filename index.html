@@ -6124,26 +6124,16 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
             {!readOnly && <>
               <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":"var(--border)"}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
-              {(char.shareMode === "public" || char.shareMode === "dm") && (
-                <div style={{ display:"flex", gap:4 }}>
-                  {char.shareMode === "public" && (
-                    <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`); setShareCopied(true); setTimeout(()=>setShareCopied(false),2000); }}
-                      style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
-                      {shareCopied ? "✓" : "🌐 Link"}
-                    </button>
-                  )}
-                  <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}-dm`); setDmCopied(true); setTimeout(()=>setDmCopied(false),2000); }}
-                    style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
-                    {dmCopied ? "✓" : "🎲 DM Link"}
-                  </button>
-                </div>
+              {char.shareMode === "public" && (
+                <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`); setShareCopied(true); setTimeout(()=>setShareCopied(false),2000); }}
+                  style={{ background:"transparent", border:"1px solid var(--accent)", color:"var(--accent-text)", padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>
+                  {shareCopied ? "✓" : "🌐 Link"}
+                </button>
               )}
-              <button onClick={()=>{ if(confirm("Delete this character permanently?")) onDelete(char.id); }}
-                style={{ background:"transparent", border:`1px solid ${theme.danger}`, color:theme.danger, padding:"3px 8px", borderRadius:6, cursor:"pointer", fontSize:11 }}>Delete</button>
             </>}
           </div>
         </div>
-        {/* Row 2: HP bar + controls */}
+        {/* Row 2: HP bar + controls (desktop only gets rest buttons) */}
         <div style={{ display:"flex", alignItems:"center", gap:6, minWidth:0 }}>
           <span style={{ fontFamily:theme.fontDisplay, fontSize:20, color:hpColour, lineHeight:1, flexShrink:0 }}>{char.hp.current}</span>
           <span style={{ color:"var(--text-dim)", fontSize:13, flexShrink:0 }}>/{char.hp.max}</span>
@@ -6164,8 +6154,10 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             style={{ padding:"3px 7px", background:"rgba(192,57,43,0.15)", border:`1px solid ${theme.danger}`, color:theme.danger, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>DMG</button>
           <button onClick={()=>{ const el=document.getElementById("hp-delta"); const v=parseInt(el?.value); if(!isNaN(v)&&v>0){upd({...char,hp:{...char.hp,current:Math.min(char.hp.max,char.hp.current+v)}}); if(el)el.value=""; } }}
             style={{ padding:"3px 7px", background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, borderRadius:5, cursor:"pointer", fontSize:11, flexShrink:0 }}>Heal</button>
-          <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>{mobile?"SR":"Short Rest"}</button>
-          <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent-text)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>{mobile?"LR":"Long Rest"}</button>
+          {!mobile && <>
+            <button onClick={()=>setRestModal("short")} style={{ padding:"3px 6px", background:"var(--surface)", border:`1px solid ${"var(--border)"}`, color:"var(--text-muted)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Short Rest</button>
+            <button onClick={()=>setRestModal("long")}  style={{ padding:"3px 6px", background:"var(--surface)", border:"1px solid var(--accent)", color:"var(--accent-text)", borderRadius:5, cursor:"pointer", fontSize:10, flexShrink:0 }}>Long Rest</button>
+          </>}
         </div>
       </div>
 
