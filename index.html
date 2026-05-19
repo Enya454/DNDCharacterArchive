@@ -5474,7 +5474,8 @@ function RelationsTab({ char, onUpdate }) {
                   </div>
                 </div>
 
-                {/* Notes — auto-shown, editable inline */}
+                {/* Notes — only for non-self nodes */}
+                {selNode.id !== SELF_ID && (
                 <div style={{ marginBottom:10 }}>
                   {editingNotes ? (
                     <div>
@@ -5502,6 +5503,7 @@ function RelationsTab({ char, onUpdate }) {
                     </div>
                   )}
                 </div>
+                )}{/* end notes for non-self */}
 
                 {/* Connections */}
                 {nodeEdges.length>0&&(
