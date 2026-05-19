@@ -7400,7 +7400,9 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             </div>
           </div>
         </div>
-        </div>{/* end sheet content */}
+        </div>
+          </div>{/* end grid */}
+          </div>{/* end sheet content */}
 
           {/* Full body art — RIGHT side */}
           {showArt && bodyArtSide === "right" && (
@@ -7416,6 +7418,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           )}
 
         </div>{/* end outer art+sheet row */}
+        </div>{/* end outer centering wrapper */}
           );
         })()
       )}
