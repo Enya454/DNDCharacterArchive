@@ -10585,16 +10585,34 @@
           "description": "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. You have ki points equal to your monk level."
         },
         {
+          "name": "Unarmored Movement",
+          "level": 2,
+          "type": "passive",
+          "description": "Starting at 2nd level, your speed increases by 10 feet while you are not wearing armor or wielding a shield. This bonus increases when you reach certain monk levels: +15ft at 6th, +20ft at 10th, +25ft at 14th, +30ft at 18th."
+        },
+        {
           "level": 3,
           "name": "Monastic Tradition",
           "type": "subclass_choice",
           "description": "When you reach 3rd level, you commit yourself to a monastic tradition."
         },
         {
+          "name": "Deflect Missiles",
+          "level": 3,
+          "type": "passive",
+          "description": "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level. If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction."
+        },
+        {
           "level": 4,
           "name": "Ability Score Improvement",
           "type": "asi",
           "description": "You can increase one ability score by 2, or two ability scores by 1 each."
+        },
+        {
+          "name": "Slow Fall",
+          "level": 4,
+          "type": "passive",
+          "description": "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."
         },
         {
           "level": 5,
@@ -10613,6 +10631,103 @@
           "actionType": "special",
           "uses": null,
           "note": "On hit, spend 1 ki point; target makes CON save or is stunned until your next turn"
+        },
+        {
+          "name": "Martial Arts (d6)",
+          "level": 5,
+          "type": "passive",
+          "description": "At 5th level, your Martial Arts die increases to d6."
+        },
+        {
+          "name": "Ki-Empowered Strikes",
+          "level": 6,
+          "type": "passive",
+          "description": "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage."
+        },
+        {
+          "name": "Evasion",
+          "level": 7,
+          "type": "passive",
+          "description": "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."
+        },
+        {
+          "name": "Stillness of Mind",
+          "level": 7,
+          "type": "passive",
+          "description": "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 8,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Purity of Body",
+          "level": 10,
+          "type": "passive",
+          "description": "At 10th level, your mastery of the ki flowing through you makes you immune to disease and poison."
+        },
+        {
+          "name": "Martial Arts (d8)",
+          "level": 11,
+          "type": "passive",
+          "description": "At 11th level, your Martial Arts die increases to d8."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 12,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Tongue of the Sun and Moon",
+          "level": 13,
+          "type": "passive",
+          "description": "Starting at 13th level, you learn to touch the ki of other minds so that you understand all spoken languages. Moreover, any creature that can understand a language can understand what you say."
+        },
+        {
+          "name": "Diamond Soul",
+          "level": 14,
+          "type": "passive",
+          "description": "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."
+        },
+        {
+          "name": "Timeless Body",
+          "level": 15,
+          "type": "passive",
+          "description": "At 15th level, your ki sustains you so that you suffer none of the frailty of old age, and you can't be aged magically. You can still die of old age, however. In addition, you no longer need food or water."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 16,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Martial Arts (d10)",
+          "level": 17,
+          "type": "passive",
+          "description": "At 17th level, your Martial Arts die increases to d10."
+        },
+        {
+          "name": "Empty Body",
+          "level": 18,
+          "type": "action",
+          "description": "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute. During that time, you also have resistance to all damage but force damage. Additionally, you can spend 8 ki points to cast the astral projection spell, without needing material components. When you do so, you can't take any other creatures with you.",
+          "uses": "4 ki (invisible) or 8 ki (astral projection)"
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 19,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Perfect Self",
+          "level": 20,
+          "type": "passive",
+          "description": "At 20th level, when you roll for initiative and have no ki points remaining, you regain 4 ki points."
         }
       ],
       "subclasses": {
@@ -10648,6 +10763,310 @@
             "abbr": "PHB",
             "page": 79
           }
+        },
+        "Way of Shadow": {
+          "name": "Way of Shadow",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 80
+          },
+          "description": "Monks of the Way of Shadow follow a tradition that values stealth and subterfuge. These monks might be called ninjas or shadowdancers, and they serve as spies and assassins.",
+          "features": [
+            {
+              "name": "Shadow Arts",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you can use your ki to duplicate the effects of certain spells. As an action, you can spend 2 ki points to cast darkness, darkvision, pass without trace, or silence, without providing material components. Additionally, you gain the minor illusion cantrip if you don't already know it."
+            },
+            {
+              "name": "Shadow Step",
+              "level": 6,
+              "type": "action",
+              "description": "At 6th level, you gain the ability to step from one shadow into another. When you are in dim light or darkness, as a bonus action you can teleport up to 60 feet to an unoccupied space you can see that is also in dim light or darkness. You then have advantage on the first melee attack you make before the end of the turn."
+            },
+            {
+              "name": "Cloak of Shadows",
+              "level": 11,
+              "type": "action",
+              "description": "By 11th level, you have learned to become one with the shadows. When you are in an area of dim light or darkness, you can use your action to become invisible. You remain invisible until you make an attack, cast a spell, or are in an area of bright light."
+            },
+            {
+              "name": "Opportunist",
+              "level": 17,
+              "type": "passive",
+              "description": "At 17th level, you can exploit a creature's momentary distraction when it is hit by an attack. Whenever a creature within 5 feet of you is hit by an attack made by a creature other than you, you can use your reaction to make a melee attack against that creature."
+            }
+          ]
+        },
+        "Way of the Four Elements": {
+          "name": "Way of the Four Elements",
+          "source": {
+            "book": "Player's Handbook",
+            "abbr": "PHB",
+            "page": 80
+          },
+          "description": "You follow a monastic tradition that teaches you to harness the elements. When you focus your ki, you can align yourself with the forces of creation and bend the four elements to your will.",
+          "features": [
+            {
+              "name": "Disciple of the Elements",
+              "level": 3,
+              "type": "passive",
+              "description": "When you choose this tradition at 3rd level, you learn magical disciplines that harness the power of the four elements. A discipline requires you to spend ki points each time you use it. You know the Elemental Attunement discipline and one other elemental discipline of your choice. You learn one additional elemental discipline of your choice at 6th, 11th, and 17th level. Disciplines: Breath of Winter, Clench of the North Wind, Eternal Mountain Defense, Fangs of the Fire Snake, Fist of Four Thunders, Fist of Unbroken Air, Flames of the Phoenix, Gong of the Summit, Mist Stance, Ride the Wind, River of Hungry Flame, Rush of the Gale Spirits, Shape the Flowing River, Sweeping Cinder Strike, Water Whip, Wave of Rolling Earth."
+            },
+            {
+              "name": "Extra Elemental Discipline",
+              "level": 6,
+              "type": "passive",
+              "description": "At 6th level, you learn one additional elemental discipline of your choice. Your ki point limit for disciplines also increases \u2014 you can spend up to 3 ki points on a discipline at this level."
+            },
+            {
+              "name": "Extra Elemental Discipline (11th)",
+              "level": 11,
+              "type": "passive",
+              "description": "At 11th level, you learn one additional elemental discipline of your choice, and your ki point limit increases to 4."
+            },
+            {
+              "name": "Extra Elemental Discipline (17th)",
+              "level": 17,
+              "type": "passive",
+              "description": "At 17th level, you learn one additional elemental discipline, and your ki point limit increases to 5."
+            }
+          ]
+        },
+        "Way of the Long Death": {
+          "name": "Way of the Long Death",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 32
+          },
+          "description": "Your monastery studied the meaning of death, sought to fathom its mysteries, and come to grips with the fact that all living things must one day die. Your order teaches that death is the greatest teacher.",
+          "features": [
+            {
+              "name": "Touch of Death",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting when you choose this tradition at 3rd level, your study of death allows you to extract vitality from another creature as it nears its demise. When you reduce a creature within 5 feet of you to 0 hit points, you gain temporary hit points equal to your Wisdom modifier + your monk level (minimum 1 temporary hit point)."
+            },
+            {
+              "name": "Hour of Reaping",
+              "level": 6,
+              "type": "action",
+              "description": "At 6th level, you gain the ability to unsettle or terrify those around you as an action, for your soul has been touched by the shadow of death. When you take this action, each creature within 30 feet of you that can see you must succeed on a Wisdom saving throw or be frightened of you until the end of your next turn."
+            },
+            {
+              "name": "Mastery of Death",
+              "level": 11,
+              "type": "passive",
+              "description": "Beginning at 11th level, you use your familiarity with death to escape its grasp. When you are reduced to 0 hit points, you can expend 1 ki point (no action required) to have 1 hit point instead."
+            },
+            {
+              "name": "Touch of the Long Death",
+              "level": 17,
+              "type": "action",
+              "description": "Starting at 17th level, your touch can channel the power of death into a creature. As an action, you touch one creature within 5 feet of you, and you expend 1 to 10 ki points. The target must make a Constitution saving throw, and it takes 2d10 necrotic damage per ki point spent on a failed save, or half as much damage on a successful one.",
+              "uses": "1-10 ki points"
+            }
+          ]
+        },
+        "Way of the Sun Soul": {
+          "name": "Way of the Sun Soul",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 35
+          },
+          "description": "Monks of the Way of the Sun Soul learn to channel their life energy into searing bolts of light. They teach that meditation can unlock the ability to unleash the indomitable light shed by the soul of every living creature.",
+          "features": [
+            {
+              "name": "Radiant Sun Bolt",
+              "level": 3,
+              "type": "passive",
+              "description": "Starting at 3rd level, you can hurl searing bolts of magical radiance. You gain a new attack option that you can use with the Attack action. This special attack is a ranged spell attack with a range of 30 feet, and it deals radiant damage equal to 1d4 + your Dexterity modifier. This attack is considered a monk weapon attack for features like Martial Arts. When you take the Attack action on your turn and use this special attack as part of it, you can spend 1 ki point to make the special attack twice as a bonus action."
+            },
+            {
+              "name": "Searing Arc Strike",
+              "level": 6,
+              "type": "action",
+              "description": "At 6th level, you gain the ability to channel your ki into searing waves of energy. Immediately after you take the Attack action on your turn, you can spend 2 ki points to cast the burning hands spell as a bonus action. You can spend additional ki points to cast burning hands as a higher-level spell. Each additional ki point you spend increases the spell's level by 1. The maximum number of ki points (2 plus any additional points) that you can spend on the spell equals half your monk level."
+            },
+            {
+              "name": "Searing Sunburst",
+              "level": 11,
+              "type": "action",
+              "description": "At 11th level, you gain the ability to create an orb of light that erupts into a devastating explosion. As an action, you magically create an orb and hurl it at a point you choose within 150 feet, where it erupts into a sphere of radiant light for a brief but deadly instant. Each creature in that 20-foot-radius sphere must succeed on a Constitution saving throw or take 2d6 radiant damage. A creature doesn't need to make the save if the creature is behind total cover that is opaque. You can increase the sphere's damage by spending ki points. Each point you spend, to a maximum of 3, increases the damage by 2d6."
+            },
+            {
+              "name": "Sun Shield",
+              "level": 17,
+              "type": "passive",
+              "description": "At 17th level, you become wreathed in a luminous, magical aura. You shed bright light in a 30-foot radius and dim light for an additional 30 feet. You can extinguish or restore the light as a bonus action. If a creature hits you with a melee attack while this light shines, you can use your reaction to deal radiant damage to the creature. The radiant damage equals 5 + your Wisdom modifier."
+            }
+          ]
+        },
+        "Way of the Drunken Master": {
+          "name": "Way of the Drunken Master",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 33
+          },
+          "description": "The Way of the Drunken Master teaches its students to move with the unpredictability of a drunkard. A drunken master sways, totters, and seems about to fall over before striking with a well-placed kick or punch.",
+          "features": [
+            {
+              "name": "Bonus Proficiencies",
+              "level": 3,
+              "type": "passive",
+              "description": "When you choose this tradition at 3rd level, you gain proficiency in the Performance skill if you don't already have it. Your martial arts technique mixes combat training with the precision of a dancer and the antics of a jokester. You also gain proficiency with brewer's supplies if you don't already have it."
+            },
+            {
+              "name": "Drunken Technique",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you learn how to twist and turn quickly as part of your Flurry of Blows. Whenever you use Flurry of Blows, you gain the benefit of the Disengage action, and your walking speed increases by 10 feet until the end of the current turn."
+            },
+            {
+              "name": "Tipsy Sway",
+              "level": 6,
+              "type": "passive",
+              "description": "Starting at 6th level, you can move in sudden, swaying ways. You gain the following benefits: Leap to Your Feet \u2014 when you're prone, you can stand up by spending 5 feet of movement, rather than half your speed. Redirect Attack \u2014 when a creature misses you with a melee attack roll, you can spend 1 ki point as a reaction to cause that attack to hit one creature of your choice, other than the attacker, that you can see within 5 feet of you."
+            },
+            {
+              "name": "Drunkard's Luck",
+              "level": 11,
+              "type": "passive",
+              "description": "Starting at 11th level, you always seem to get a lucky bounce at the right moment. When you make an ability check, an attack roll, or a saving throw and have disadvantage on the roll, you can spend 2 ki points to cancel the disadvantage for that roll."
+            },
+            {
+              "name": "Intoxicated Frenzy",
+              "level": 17,
+              "type": "passive",
+              "description": "At 17th level, you gain the ability to make an overwhelming number of attacks against a group of enemies. When you use your Flurry of Blows, you can make up to three additional attacks with it (up to a total of five Flurry of Blows attacks), provided that each Flurry of Blows attack targets a different creature this turn."
+            }
+          ]
+        },
+        "Way of the Kensei": {
+          "name": "Way of the Kensei",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 34
+          },
+          "description": "Monks of the Way of the Kensei train relentlessly with their weapons, to the point where the weapon becomes an extension of the body. Founded on a mastery of sword fighting, the tradition has expanded to include many different weapons.",
+          "features": [
+            {
+              "name": "Path of the Kensei",
+              "level": 3,
+              "type": "passive",
+              "description": "When you choose this tradition at 3rd level, your special martial arts training leads you to master the use of certain weapons. This path also includes instruction in the deft strokes of calligraphy or painting. You gain the following benefits: Kensei Weapons (choose 2 weapons \u2014 one melee, one ranged \u2014 as your kensei weapons; these count as monk weapons for you; you can spend 1 ki as a bonus action to add +2 to AC until start of next turn when using a melee kensei weapon; ranged kensei weapons deal +1d4 damage on hit when you use Attack action). Agile Parry (+2 to AC until next turn if you use unarmed strike as part of Attack action while holding a kensei weapon). Kensei's Shot (bonus action to make ranged kensei attacks deal +1d4 damage until end of turn). Way of the Brush (proficiency in calligrapher's supplies or painter's supplies)."
+            },
+            {
+              "name": "One with the Blade",
+              "level": 6,
+              "type": "passive",
+              "description": "At 6th level, you extend your ki into your kensei weapons, granting you the following benefits: Magic Kensei Weapons \u2014 your attacks with your kensei weapons count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage. Deft Strike \u2014 when you hit a target with a kensei weapon, you can spend 1 ki point to cause the weapon to deal extra damage to the target equal to your Martial Arts die. You can use this feature only once on each of your turns."
+            },
+            {
+              "name": "Sharpen the Blade",
+              "level": 11,
+              "type": "action",
+              "description": "At 11th level, you gain the ability to augment your weapons further with your ki. As a bonus action, you can expend up to 3 ki points to grant one kensei weapon you touch a bonus to attack and damage rolls when you attack with it. The bonus equals the number of ki points you spent. This bonus lasts for 1 minute or until you use this feature again. This feature has no effect on a magic weapon that already has a bonus to attack and damage rolls."
+            },
+            {
+              "name": "Unerring Accuracy",
+              "level": 17,
+              "type": "passive",
+              "description": "At 17th level, your mastery of weapons grants you extraordinary accuracy. If you miss with an attack roll using a monk weapon on your turn, you can reroll it. You can use this feature only once on each of your turns."
+            }
+          ]
+        },
+        "Way of Mercy": {
+          "name": "Way of Mercy",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 49
+          },
+          "description": "Monks of the Way of Mercy learn to manipulate the life force of others to bring aid to those in need. They are wanderers who take on wretched diseases and poison into their own bodies.",
+          "features": [
+            {
+              "name": "Implements of Mercy",
+              "level": 3,
+              "type": "passive",
+              "description": "At 3rd level, you gain proficiency in the Insight and Medicine skills, and you gain proficiency with the herbalism kit. You also gain a special mask, which you can don or doff as a bonus action. The mask represents your dedication to this way and bears the visage of a life and death duality."
+            },
+            {
+              "name": "Hand of Healing",
+              "level": 3,
+              "type": "passive",
+              "description": "Your touch can mend wounds. As an action, you can spend 1 ki point to touch a creature and restore a number of hit points equal to a roll of your Martial Arts die + your Wisdom modifier. When you use your Flurry of Blows, you can replace one of the unarmed strikes with a use of this feature without spending a ki point for the healing."
+            },
+            {
+              "name": "Hand of Harm",
+              "level": 3,
+              "type": "passive",
+              "description": "You use your ki to inflict wounds. When you hit a creature with an unarmed strike, you can spend 1 ki point to deal extra necrotic damage equal to one roll of your Martial Arts die + your Wisdom modifier. You can use this feature only once per turn."
+            },
+            {
+              "name": "Physician's Touch",
+              "level": 6,
+              "type": "passive",
+              "description": "Beginning at 6th level, you can administer cures as well as harm. When you use Hand of Healing on a creature, you can also end one disease or one of the following conditions affecting the creature: blinded, deafened, paralyzed, poisoned, or stunned. When you use Hand of Harm on a creature, you can subject that creature to the poisoned condition until the end of your next turn."
+            },
+            {
+              "name": "Flurry of Healing and Harm",
+              "level": 11,
+              "type": "passive",
+              "description": "Beginning at 11th level, you can now mete out a flurry of comfort and hurt. When you use Flurry of Blows, you can now replace each of the unarmed strikes with a use of your Hand of Healing, without spending ki points for the healing. In addition, when you make an unarmed strike with Flurry of Blows, you can use Hand of Harm with that strike without spending the ki point for Hand of Harm. You can still use Hand of Harm only once per turn."
+            },
+            {
+              "name": "Hand of Ultimate Mercy",
+              "level": 17,
+              "type": "action",
+              "description": "Beginning at 17th level, your mastery of life energy opens the door to the ultimate mercy. As an action, you can touch the corpse of a creature that died within the past 24 hours and expend 5 ki points. The creature then returns to life, regaining a number of hit points equal to 4d10 + your Wisdom modifier. If the creature died while subject to any of the following conditions, it revives with them removed: blinded, deafened, paralyzed, poisoned, and stunned. Once you use this feature, you can't use it again until you finish a long rest.",
+              "uses": "1",
+              "recharge": "long rest"
+            }
+          ]
+        },
+        "Way of the Astral Self": {
+          "name": "Way of the Astral Self",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 50
+          },
+          "description": "A monk who follows the Way of the Astral Self believes that their body is an illusion. They see their ki as a representation of their true form, an astral self.",
+          "features": [
+            {
+              "name": "Arms of the Astral Self",
+              "level": 3,
+              "type": "action",
+              "description": "Your mastery of your ki allows you to summon a portion of your astral self. As a bonus action, you can spend 1 ki point to summon the arms of your astral self. When you do so, each creature of your choice that you can see within 10 feet of you must succeed on a Dexterity saving throw or take force damage equal to two rolls of your Martial Arts die. For 10 minutes, these spectral arms hover near your shoulders or surround your arms (your choice). You can use the spectral arms to make unarmed strikes. When you make an unarmed strike with the arms on your turn, your reach for it is 5 feet greater than normal. The unarmed strikes deal force damage, you can use your Wisdom modifier instead of Strength or Dexterity for the attack and damage rolls.",
+              "uses": "1 ki point"
+            },
+            {
+              "name": "Visage of the Astral Self",
+              "level": 6,
+              "type": "action",
+              "description": "Starting at 6th level, you can summon the visage of your astral self. As a bonus action, or as part of summoning your Arms of the Astral Self, you can spend 1 ki point to summon this visage for 10 minutes. It covers your face like a helmet or mask. You gain darkvision with a range of 120 feet. When you make a Wisdom (Insight) or Charisma (Intimidation) check, you can use your Wisdom modifier for the check. And creatures within 600 feet that speak a language can be understood by you and understand you regardless of language.",
+              "uses": "1 ki point"
+            },
+            {
+              "name": "Body of the Astral Self",
+              "level": 11,
+              "type": "action",
+              "description": "When you have both your astral arms and visage summoned, you can cause the body of your astral self to appear (no action required). This spectral body covers your physical form like a suit of armor, connecting your astral arms and visage. You gain the following benefits while the spectral body is present: Deflect Energy \u2014 when you take acid, cold, fire, force, lightning, or thunder damage, you can use your reaction to deflect it. When you do so, the damage you take is reduced by 1d10 + your Wisdom modifier + your monk level. Empowered Arms \u2014 once on each of your turns when you hit a target with the arms of your astral self, you can deal extra damage to the target equal to your Martial Arts die."
+            },
+            {
+              "name": "Awakened Astral Self",
+              "level": 17,
+              "type": "action",
+              "description": "At 17th level, your connection to your astral self is complete, allowing you to unleash its full potential. As a bonus action, you can spend 5 ki points to summon the arms, visage, and body of your astral self, and you undergo a transformation. For 10 minutes, you gain the following benefits: Armor of the Spirit \u2014 you gain a +2 bonus to Armor Class. Astral Barrage \u2014 whenever you use the Extra Attack feature to attack twice, you can instead attack three times if all the attacks are made with your astral arms.",
+              "uses": "5 ki"
+            }
+          ]
         }
       },
       "startingGoldDice": "5d4",
@@ -10785,7 +11204,7 @@
           "level": 3,
           "name": "Metamagic",
           "type": "choice",
-          "description": "At 3rd level, you gain the ability to twist your spells to suit your needs. Choose two Metamagic options.",
+          "description": "At 3rd level, you gain the ability to twist your spells to suit your needs. You gain two Metamagic options of your choice. You gain another one at 10th and 17th level. You can use only one Metamagic option on a spell when you cast it, unless the option says otherwise. Careful Spell (1 SP): protect up to Cha mod creatures from your spell's effects. Distant Spell (1 SP): double a spell's range, or change touch range to 30ft. Empowered Spell (1 SP): reroll up to Cha mod damage dice; can combine with other Metamagic. Extended Spell (1 SP): double a spell's duration (max 24hr). Heightened Spell (3 SP): one target has disadvantage on its first saving throw against the spell. Quickened Spell (2 SP): change a spell's casting time from 1 action to 1 bonus action. Subtle Spell (1 SP): cast a spell without verbal or somatic components. Twinned Spell (1 SP per spell level, min 1): target a second creature with a single-target spell. Seeking Spell (TCoE, 2 SP): reroll a missed spell attack. Transmuted Spell (TCoE, 1 SP): change a spell's damage type to acid, cold, fire, lightning, poison, or thunder.",
           "options": [
             "Careful Spell",
             "Distant Spell",
@@ -10794,8 +11213,82 @@
             "Heightened Spell",
             "Quickened Spell",
             "Subtle Spell",
-            "Twinned Spell"
+            "Twinned Spell",
+            "Seeking Spell",
+            "Transmuted Spell"
           ]
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 8,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Metamagic (2nd choice)",
+          "level": 10,
+          "type": "choice",
+          "options": [
+            "Careful Spell",
+            "Distant Spell",
+            "Empowered Spell",
+            "Extended Spell",
+            "Heightened Spell",
+            "Quickened Spell",
+            "Subtle Spell",
+            "Twinned Spell",
+            "Seeking Spell",
+            "Transmuted Spell"
+          ],
+          "description": "At 10th level you learn an additional Metamagic option."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 12,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 16,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Metamagic (3rd choice)",
+          "level": 17,
+          "type": "choice",
+          "options": [
+            "Careful Spell",
+            "Distant Spell",
+            "Empowered Spell",
+            "Extended Spell",
+            "Heightened Spell",
+            "Quickened Spell",
+            "Subtle Spell",
+            "Twinned Spell",
+            "Seeking Spell",
+            "Transmuted Spell"
+          ],
+          "description": "At 17th level you learn an additional Metamagic option."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 19,
+          "type": "asi",
+          "description": "Increase one ability score by 2, or two ability scores by 1 each. You cannot exceed 20 with this feature."
+        },
+        {
+          "name": "Sorcerous Restoration",
+          "level": 20,
+          "type": "passive",
+          "description": "At 20th level, you regain 4 expended sorcery points whenever you finish a short rest."
         }
       ],
       "subclasses": {
@@ -10836,6 +11329,13 @@
               "name": "Dragon Wings",
               "type": "passive",
               "description": "At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed."
+            },
+            {
+              "name": "Draconic Presence",
+              "level": 18,
+              "type": "action",
+              "description": "Beginning at 18th level, you can channel the dread presence of your dragon ancestor, causing those around you to become awestruck or frightened. As an action, you can spend 5 sorcery points to draw on this power and exude an aura of awe or fear (your choice) to a distance of 60 feet. For 1 minute or until you lose your concentration (as if you were casting a spell), each hostile creature that starts its turn in this aura must succeed on a Wisdom saving throw or be charmed (if you chose awe) or frightened (if you chose fear) until the aura ends. A creature that succeeds on this saving throw is immune to your aura for 24 hours.",
+              "uses": "5 sorcery points"
             }
           ],
           "source": {
@@ -10863,6 +11363,18 @@
               "name": "Bend Luck",
               "type": "passive",
               "description": "Starting at 6th level, you have the ability to twist fate using your wild magic. When another creature you can see makes an attack roll, an ability check, or a saving throw, you can use your reaction and spend 2 sorcery points to roll 1d4 and apply the number rolled as a bonus or penalty (your choice) to the creature's roll."
+            },
+            {
+              "name": "Controlled Chaos",
+              "level": 14,
+              "type": "passive",
+              "description": "At 14th level, you gain a modicum of control over the surges of your wild magic. Whenever you roll on the Wild Magic Surge table, you can roll twice and use either number."
+            },
+            {
+              "name": "Spell Bombardment",
+              "level": 18,
+              "type": "passive",
+              "description": "Beginning at 18th level, the harmful energy of your spells intensifies. When you roll damage for a spell and roll the highest number possible on any of the dice, choose one of those dice, roll it again and add that roll to the damage. You can use the feature only once per turn."
             }
           ],
           "source": {
@@ -10870,6 +11382,327 @@
             "abbr": "PHB",
             "page": 103
           }
+        },
+        "Divine Soul": {
+          "name": "Divine Soul",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 50
+          },
+          "description": "Sometimes the spark of magic that fuels a sorcerer comes from a divine source that glimmers within the soul. Having such a blessed soul is a sign that your innate magic might come from a distant but powerful familial connection to a divine being.",
+          "features": [
+            {
+              "name": "Divine Magic",
+              "level": 1,
+              "type": "passive",
+              "description": "Your link to the divine allows you to learn spells from the cleric spell list. A spell you choose must be of a level you can cast, as shown on the Sorcerer table. The chosen spell counts as a sorcerer spell for you, but it doesn't count against the number of sorcerer spells you know. Whenever you gain a sorcerer level, you can replace one spell you gained from this feature with another spell of the same level from the cleric spell list. In addition, choose an affinity for the source of your divine power: good, evil, law, chaos, or neutrality. Based on your choice, you have a persistent magical effect. For example, good grants Bless 1/long rest, evil grants Bane 1/long rest, etc."
+            },
+            {
+              "name": "Favored by the Gods",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, divine power guards your destiny. If you fail a saving throw or miss with an attack roll, you can roll 2d4 and add it to the total, possibly changing the outcome. Once you use this feature, you can't use it again until you finish a short or long rest.",
+              "uses": "1",
+              "recharge": "short or long rest"
+            },
+            {
+              "name": "Empowered Healing",
+              "level": 6,
+              "type": "passive",
+              "description": "Starting at 6th level, the divine energy coursing through you can empower healing spells. Whenever you or an ally within 5 feet of you rolls dice to determine the number of hit points a spell restores, you can spend 1 sorcery point to reroll any number of those dice once, as long as you aren't incapacitated. You can use this feature only once per turn."
+            },
+            {
+              "name": "Otherworldly Wings",
+              "level": 14,
+              "type": "action",
+              "description": "Starting at 14th level, you can use a bonus action to manifest a pair of spectral wings from your back. While the wings are present, you have a flying speed of 30 feet. The wings last until you're incapacitated, you die, or you dismiss them as a bonus action. The affinity you chose for your Divine Magic feature determines the appearance of the spectral wings: eagle wings for good or law, bat wings for evil or chaos, and dragonfly wings for neutrality."
+            },
+            {
+              "name": "Unearthly Recovery",
+              "level": 18,
+              "type": "action",
+              "description": "At 18th level, you gain the ability to overcome grievous injuries. As a bonus action when you have fewer than half of your hit points remaining, you can regain a number of hit points equal to half your hit point maximum. Once you use this feature, you can't use it again until you finish a long rest.",
+              "uses": "1",
+              "recharge": "long rest"
+            }
+          ]
+        },
+        "Shadow Magic": {
+          "name": "Shadow Magic",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 50
+          },
+          "description": "You are a creature of shadow, for your innate magic comes from the Shadowfell itself. You might trace your lineage to an entity from that place, or perhaps you were exposed to its fell energy and transformed by it.",
+          "features": [
+            {
+              "name": "Eyes of the Dark",
+              "level": 1,
+              "type": "passive",
+              "description": "From 1st level, you have darkvision with a range of 120 feet. When you reach 3rd level in this class, you learn the darkness spell, which doesn't count against your number of sorcerer spells known. In addition, you can cast it by spending 2 sorcery points or by expending a spell slot. If you cast it with sorcery points, you can see through the darkness created by the spell."
+            },
+            {
+              "name": "Strength of the Grave",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, your existence in a twilight state between life and death makes you difficult to defeat. When damage reduces you to 0 hit points, you can make a Charisma saving throw (DC 5 + the damage taken). On a success, you instead drop to 1 hit point. You can't use this feature if you are reduced to 0 hit points by radiant damage or by a critical hit. After the saving throw succeeds, you can't use this feature again until you finish a long rest.",
+              "uses": "1",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Hound of Ill Omen",
+              "level": 6,
+              "type": "action",
+              "description": "At 6th level, you gain the ability to call forth a howling creature of darkness to harass your foes. As a bonus action, you can spend 3 sorcery points to magically summon a hound of ill omen to target one creature you can see within 120 feet of you. The hound uses the dire wolf's statistics, with the following changes: the hound is size Medium, not Large, and it doesn't have the Pack Tactics trait. The hound appears in an unoccupied space of your choice within 30 feet of the target. Roll initiative for the hound. On its turn, it moves toward the target by the most direct route, and it can use its action only to attack the target. The hound disappears if it is reduced to 0 hit points, if its target is reduced to 0 hit points, or after 5 minutes.",
+              "uses": "3 sorcery points"
+            },
+            {
+              "name": "Shadow Walk",
+              "level": 14,
+              "type": "action",
+              "description": "At 14th level, you gain the ability to step from one shadow into another. When you are in dim light or darkness, as a bonus action, you can teleport up to 120 feet to an unoccupied space you can see that is also in dim light or darkness."
+            },
+            {
+              "name": "Umbral Form",
+              "level": 18,
+              "type": "action",
+              "description": "Starting at 18th level, you can spend 6 sorcery points as a bonus action to transform yourself into a shadowy form. In this form, you have resistance to all damage except force and radiant damage, and you can move through other creatures and objects as if they were difficult terrain. You take 5 force damage if you end your turn inside an object. You remain in this form for 1 minute. It ends early if you are incapacitated, if you die, or if you dismiss it as a bonus action.",
+              "uses": "6 sorcery points"
+            }
+          ]
+        },
+        "Storm Sorcery": {
+          "name": "Storm Sorcery",
+          "source": {
+            "book": "Xanathar's Guide to Everything",
+            "abbr": "XGtE",
+            "page": 51
+          },
+          "description": "Your innate magic comes from the power of elemental air. Many with this power can trace their magic back to a near-death experience caused by the Great Rain, though the most notable practitioners of this form of sorcery are the children of the djinn.",
+          "features": [
+            {
+              "name": "Wind Speaker",
+              "level": 1,
+              "type": "passive",
+              "description": "The arcane magic you command is infused with elemental air. You can speak, read, and write Primordial. Knowing this language allows you to understand and be understood by those who speak its dialects: Aquan, Auran, Ignan, and Terran."
+            },
+            {
+              "name": "Tempestuous Magic",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, you can use a bonus action on your turn to cause whirling gusts of elemental air to briefly surround you, immediately before or after you cast a spell of 1st level or higher. Doing so allows you to fly up to 10 feet without provoking opportunity attacks."
+            },
+            {
+              "name": "Heart of the Storm",
+              "level": 6,
+              "type": "passive",
+              "description": "At 6th level, you gain resistance to lightning and thunder damage. In addition, whenever you start casting a spell of 1st level or higher that deals lightning or thunder damage, stormy magic erupts from you. This eruption causes creatures of your choice that you can see within 10 feet of you to take lightning or thunder damage (choose each time this ability activates) equal to half your sorcerer level."
+            },
+            {
+              "name": "Storm Guide",
+              "level": 6,
+              "type": "action",
+              "description": "At 6th level, you gain the ability to subtly control the weather around you. If it is raining, you can use an action to cause the rain to stop falling in a 20-foot-radius sphere centered on you. You can end this effect as a bonus action. If it is windy, you can use a bonus action each round to choose the direction that the wind blows in a 100-foot-radius sphere centered on you. The wind blows in that direction until the end of your next turn."
+            },
+            {
+              "name": "Storm's Fury",
+              "level": 14,
+              "type": "passive",
+              "description": "Starting at 14th level, when you are hit by a melee attack, you can use your reaction to deal lightning damage to the attacker. The damage equals your sorcerer level. The attacker must also make a Strength saving throw against your sorcerer spell save DC. On a failed save, the attacker is pushed in a straight line up to 20 feet away from you."
+            },
+            {
+              "name": "Wind Soul",
+              "level": 18,
+              "type": "passive",
+              "description": "At 18th level, you gain immunity to lightning and thunder damage. You also gain a magical flying speed of 60 feet. As an action, you can reduce your flying speed to 30 feet for 1 hour and choose a number of creatures within 30 feet of you equal to 3 + your Charisma modifier. The chosen creatures gain a magical flying speed of 30 feet for 1 hour. Once you reduce your flying speed in this way, you can't do so again until you finish a short or long rest.",
+              "uses": "1",
+              "recharge": "short or long rest"
+            }
+          ]
+        },
+        "Aberrant Mind": {
+          "name": "Aberrant Mind",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 66
+          },
+          "description": "An alien influence has wrapped its tendrils around your mind, giving you psionic power. You can now touch other minds with that power and alter the world around you by using it to control the magical energy of the multiverse.",
+          "features": [
+            {
+              "name": "Telepathic Speech",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, you can form a telepathic connection between your mind and the mind of another. As a bonus action, choose one creature you can see within 30 feet of you. You and the chosen creature can speak telepathically with each other while the two of you are within a number of miles of each other equal to your Charisma modifier (minimum 1 mile). To understand each other, you each must speak mentally in a language the other knows. The telepathic connection lasts for a number of minutes equal to your sorcerer level. It ends early if you are incapacitated or die or if you use this ability to form a connection with a different creature."
+            },
+            {
+              "name": "Psionic Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Arms of Hadar",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Dissonant Whispers",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Calm Emotions",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Detect Thoughts",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Hunger of Hadar",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Sending",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Evard's Black Tentacles",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Summon Aberration",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Telekinesis",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Rary's Telepathic Bond",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
+              "name": "Psionic Sorcery",
+              "level": 6,
+              "type": "passive",
+              "description": "Beginning at 6th level, when you cast any spell of 1st level or higher from your Psionic Spells feature, you can cast it by expending a spell slot as normal or by spending a number of sorcery points equal to the spell's level. If you cast the spell using sorcery points, it requires no verbal or somatic components, and it requires no material components, unless they are consumed by the spell."
+            },
+            {
+              "name": "Psychic Defenses",
+              "level": 6,
+              "type": "passive",
+              "description": "At 6th level, you gain resistance to psychic damage, and you have advantage on saving throws against being charmed or frightened."
+            },
+            {
+              "name": "Revelation in Flesh",
+              "level": 14,
+              "type": "action",
+              "description": "Beginning at 14th level, you can reveal the aberrant truth hidden within yourself. As a bonus action, you can spend 1 or more sorcery points to magically transform your body for 10 minutes. For each sorcery point you spend, you can gain one of the following benefits of your choice, the effects of which last until the transformation ends: You can see any invisible creature within 60 feet of you, provided it isn't behind total cover. You gain a swimming speed equal to twice your walking speed, and you can breathe underwater. You gain a flying speed equal to your walking speed, and you can hover. Your body, along with any equipment you are wearing or carrying, becomes slimy and pliable. You can move through any space as narrow as 1 inch without squeezing.",
+              "uses": "1+ sorcery points"
+            },
+            {
+              "name": "Warping Implosion",
+              "level": 18,
+              "type": "action",
+              "description": "At 18th level, you can unleash your aberrant power as a space-warping anomaly. As an action, you can teleport to an unoccupied space you can see within 120 feet of you. Immediately after you disappear, each creature within 30 feet of the space you left must make a Strength saving throw. On a failed save, a creature takes 3d10 force damage and is pulled straight toward the space you left, ending up in the nearest unoccupied space to that space if their destination is occupied. On a successful save, the creature takes half as much damage and isn't pulled. Once you use this ability, you can't do so again until you finish a long rest, unless you spend 5 sorcery points to use it again.",
+              "uses": "1",
+              "recharge": "long rest"
+            }
+          ]
+        },
+        "Clockwork Soul": {
+          "name": "Clockwork Soul",
+          "source": {
+            "book": "Tasha's Cauldron of Everything",
+            "abbr": "TCoE",
+            "page": 68
+          },
+          "description": "The cosmic force of order has suffused you with magic. You might have structured your magic around the teachings of a god of law and order, or you might have been exposed to the plane of Mechanus.",
+          "features": [
+            {
+              "name": "Clockwork Magic",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Alarm",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Protection from Evil and Good",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Aid",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Lesser Restoration",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Dispel Magic",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Protection from Energy",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Freedom of Movement",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Summon Construct",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Greater Restoration",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Wall of Force",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
+              "name": "Restore Balance",
+              "level": 1,
+              "type": "passive",
+              "description": "Starting at 1st level, your connection to the plane of absolute order allows you to equalize chaotic moments. When a creature you can see within 60 feet of you is about to roll a d20 with advantage or disadvantage, you can use your reaction to prevent the roll from being affected by advantage and disadvantage. You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.",
+              "uses": "Prof bonus",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Bastion of Law",
+              "level": 6,
+              "type": "action",
+              "description": "Starting at 6th level, you can tap into the grand equation of existence to imbue a creature with a shimmering shield of order. As an action, you can expend 1 to 5 sorcery points to create a magical ward around yourself or another creature you can see within 30 feet of you. The ward lasts until you finish a long rest or until you use this feature again. The ward is represented by a number of d8s equal to the number of sorcery points spent to create it. When the warded creature takes damage, it can expend a number of those dice, roll them, and reduce the damage taken by the total rolled on those dice.",
+              "uses": "1-5 sorcery points"
+            },
+            {
+              "name": "Trance of Order",
+              "level": 14,
+              "type": "action",
+              "description": "Starting at 14th level, you gain the ability to align your consciousness to the endless calculations of Mechanus. As a bonus action, you can enter this state for 1 minute. For the duration, attack rolls against you can't benefit from advantage, and whenever you make an attack roll, an ability check, or a saving throw, you can treat a roll of 9 or lower on the d20 as a 10. Once you use this bonus action, you can't use it again until you finish a long rest, unless you spend 5 sorcery points to use it again.",
+              "uses": "1",
+              "recharge": "long rest"
+            },
+            {
+              "name": "Clockwork Cavalcade",
+              "level": 18,
+              "type": "action",
+              "description": "At 18th level, you summon spirits of order to expunge disorder around you. As an action, you summon the spirits in a 30-foot cube originating from you. The spirits look like modrons or other constructs of your choice. The spirits are intangible and invulnerable, and they create the following effects within the cube before vanishing: The spirits restore up to 100 hit points, divided as you choose among any number of creatures of your choice in the cube. Any damaged objects entirely in the cube are repaired instantly. Every spell of 6th level or lower ends on creatures and objects of your choice in the cube. Once you use this action, you can't use it again until you finish a long rest, unless you spend 7 sorcery points to use it again.",
+              "uses": "1",
+              "recharge": "long rest"
+            }
+          ]
         }
       },
       "spellcastingTable": {
