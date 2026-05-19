@@ -6999,7 +6999,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           justifyContent: align==="left" ? "flex-start" : align==="right" ? "flex-end" : "center",
           width:"100%", position:"relative" }}>
 
-          {/* Full body art — LEFT side */}
           {showArt && bodyArtSide === "left" && (
             <div style={{ width:180, flexShrink:0, position:"relative", overflow:"hidden",
               height:"calc(100vh - 56px)", alignSelf:"flex-start" }}>
@@ -7012,7 +7011,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             </div>
           )}
 
-          {/* Sheet content */}
           <div style={{ flex: align==="full" ? "1" : "none",
             width: align==="full" ? "100%" : "auto",
             maxWidth: sheetMaxW === "none" ? "100%" : sheetMaxW,
@@ -7404,7 +7402,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
           </div>
 
-          {/* Full body art — RIGHT side */}
           {showArt && bodyArtSide === "right" && (
             <div style={{ width:180, flexShrink:0, position:"relative", overflow:"hidden",
               height:"calc(100vh - 56px)", alignSelf:"flex-start" }}>
