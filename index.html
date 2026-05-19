@@ -6221,6 +6221,7 @@ function FeatureAction({ feat, char, onUpdate }) {
     else if (max === "strengthModifier")    max = Math.max(1, calcMod(char.abilities.str));
     else if (max === "dexterityModifier")   max = Math.max(1, calcMod(char.abilities.dex));
     else if (max === "proficiencyBonus")    max = Math.max(1, Math.ceil(1 + char.level / 4));
+    else if (max === "halfLevel")           max = Math.max(1, Math.floor(char.level / 2));
     else if (max === "level*5")             max = char.level * 5;
     return max;
   };
@@ -6359,6 +6360,19 @@ function ActionsTab({ char, gameData, onUpdate }) {
     ["reaction", "🔄 Reactions"],
   ];
 
+  // Split class actions: combat (attack/damage based) vs utility/other
+  const COMBAT_ACTIONS = new Set(["Rage","Wild Shape","Sneak Attack","Bardic Inspiration",
+    "Channel Divinity","Divine Smite","Flurry of Blows","Stunning Strike","Lay on Hands",
+    "Second Wind","Action Surge","Eldritch Blast","Vampiric Bite","Radiant Sun Bolt"]);
+  const classActions = byType("action");
+  const combatClassActions = classActions.filter(f => COMBAT_ACTIONS.has(f.name) || f.damageType || f.attackType);
+  const otherClassActions  = classActions.filter(f => !COMBAT_ACTIONS.has(f.name) && !f.damageType && !f.attackType);
+
+  // Collect bonusActions from features (e.g. Eldritch Cannon sub-actions)
+  const featureBonusActions = allFeatures
+    .filter(f => char.level >= (f.level||1))
+    .flatMap(f => (f.bonusActions||[]).map(ba => ({...ba, _parentFeature: f.name})));
+
   return (
     <div>
       {/* ── Category filter ── */}
@@ -6394,16 +6408,30 @@ function ActionsTab({ char, gameData, onUpdate }) {
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="action")} />
       </>)}
 
-      {show("class") && (byType("action").length > 0 || byType("special").length > 0) && (<>
+      {show("class") && (combatClassActions.length > 0 || byType("special").length > 0) && (<>
         {sHead("⭐ Class & Racial Actions")}
-        {byType("action").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+        {combatClassActions.map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
         {byType("special").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+      </>)}
+
+      {show("class") && otherClassActions.length > 0 && (<>
+        {sHead("🔧 Other Actions")}
+        {otherClassActions.map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
       </>)}
 
       {show("bonus") && (<>
         {sHead("⚡ Bonus Actions")}
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="bonus")} />
         {byType("bonus").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+        {featureBonusActions.map((ba,i) => (
+          <div key={i} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 12px", marginBottom:6 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, flex:1 }}>{ba.name}</span>
+              <span style={{ fontSize:10, color:"var(--text-dim)" }}>via {ba._parentFeature}</span>
+            </div>
+            <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.65, margin:"8px 0 0" }}>{ba.description}</p>
+          </div>
+        ))}
       </>)}
 
       {show("reaction") && (<>

@@ -13453,8 +13453,14 @@
         {
           "name": "Magical Tinkering",
           "level": 1,
-          "type": "passive",
-          "description": "At 1st level, you've learned how to invest a spark of magic into mundane objects. To use this ability, you must have thieves' tools or artisan's tools in hand. You then touch a Tiny nonmagical object as an action and give it one of the following magical properties: shedding light, emitting a recorded message, emitting an odor or nonverbal sound, or creating a visual effect. You can have a number of such objects active at once equal to your Intelligence modifier (minimum 1). You can dismiss an object's magic as an action."
+          "type": "action",
+          "description": "As an action, you can touch a Tiny nonmagical object and imbue it with one of the following magical properties of your choice: The object sheds bright light in a 5-foot radius and dim light for an additional 5 feet. Whenever tapped by a creature, the object emits a recorded message up to 6 seconds long. The object continuously emits your choice of an odor or a nonverbal sound. A static visual effect appears on one of the object's surfaces. You can have up to a number of these objects equal to your Intelligence modifier (minimum 1). To re-imbue an object, touch it again as an action.",
+          "actionType": "action",
+          "uses": {
+            "max": "intelligenceModifier",
+            "per": "long rest"
+          },
+          "recharge": "long rest"
         },
         {
           "name": "Spellcasting",
@@ -13490,7 +13496,7 @@
         {
           "name": "Infuse Item",
           "level": 2,
-          "type": "infusion_choice",
+          "type": "action",
           "infusionLabel": "Infusions Known",
           "countByLevel": {
             "2": 4,
@@ -13763,9 +13769,13 @@
             }
           ],
           "description": "You learn 4 infusions at 2nd level. You gain more as you level: 6 at 6th, 8 at 10th, 10 at 14th, 12 at 18th. Whenever you finish a long rest, you can apply your known infusions to nonmagical items. The number of items you can have infused at once equals half your artificer level (rounded down).",
-          "uses": "Half level (items active)",
+          "uses": {
+            "max": "halfLevel",
+            "per": "long rest"
+          },
           "recharge": "long rest",
-          "invocationLabel": "infusion"
+          "invocationLabel": "infusion",
+          "actionType": "action"
         },
         {
           "name": "Artificer Specialist",
@@ -13776,8 +13786,9 @@
         {
           "name": "The Right Tool for the Job",
           "level": 3,
-          "type": "passive",
-          "description": "At 3rd level, you've learned how to produce exactly the tool you need: with thieves' tools or artisan's tools in hand, you can magically create one set of artisan's tools in an unoccupied space within 5 feet of you. This creation requires 1 hour of uninterrupted work, which can coincide with a short or long rest. Though the product of magic, the tools are nonmagical, and they vanish when you use this feature again."
+          "type": "action",
+          "description": "With 1 hour of work and expending 10 gp of materials, you can produce any artisan's tool, provided you have thieves' tools or artisan's tools in hand. The tool appears fully assembled and functional. This action takes 1 hour.",
+          "actionType": "action"
         },
         {
           "name": "Ability Score Improvement",
@@ -14257,15 +14268,34 @@
               "name": "Eldritch Cannon",
               "level": 3,
               "type": "action",
-              "description": "At 3rd level, you've learned how to create a magical cannon. Using woodcarver's tools or smith's tools, you can take an action to magically create a Small or Tiny eldritch cannon in an unoccupied space. A cannon can be: Flamethrower (15ft cone, Dex save or 2d8 fire damage), Force Ballista (ranged spell attack, 2d8 force, push 5ft), or Protector (20ft radius temp HP equal to 1d8 + Int mod). You can have 1 cannon at a time (2 at level 15). As a bonus action, you can activate the cannon. It lasts 1 hour.",
-              "uses": "1 (2 at level 15)",
-              "recharge": "long rest"
+              "description": "As an action, you can conjure a magical cannon in an unoccupied space on a horizontal surface within 5 feet of you. The cannon is a magical object. It occupies its space and has AC 18, HP equal to 5 \u00d7 your artificer level, and immunity to poison damage and the poisoned condition. It disappears if reduced to 0 hp, if you conjure another cannon, or after 1 hour. As a bonus action, you can command the cannon to activate (it has a +7 to hit; uses your spell save DC). Choose its type when you create it:\n\u2022 Flamethrower: 15-ft cone, 2d8 fire damage (Dex save half)\n\u2022 Force Ballista: Ranged spell attack, 2d8 force damage, pushes 5ft\n\u2022 Protector: Grants 1d8 + Int mod temp HP to all creatures within 10ft\nAt 15th level you can create two cannons per use.",
+              "uses": {
+                "max": 1,
+                "per": "long rest"
+              },
+              "recharge": "long rest",
+              "actionType": "action",
+              "bonusActions": [
+                {
+                  "name": "Activate Flamethrower",
+                  "description": "The cannon breathes fire in a 15-foot cone. Each creature in that area must make a Dexterity saving throw against your spell save DC, taking 2d8 fire damage on a failed save or half as much on a successful one."
+                },
+                {
+                  "name": "Activate Force Ballista",
+                  "description": "Make a ranged spell attack, originating from the cannon, at one creature or object within 120 feet of it. On a hit, the target takes 2d8 force damage, and if the target is a creature, it is pushed up to 5 feet away from the cannon."
+                },
+                {
+                  "name": "Activate Protector",
+                  "description": "The cannon emits a burst of positive energy that grants itself and each creature of your choice within 10 feet of it a number of temporary hit points equal to 1d8 + your Intelligence modifier (minimum of 1 temporary hit point)."
+                }
+              ]
             },
             {
               "name": "Arcane Firearm",
               "level": 5,
-              "type": "passive",
-              "description": "At 5th level, you know how to turn a wand, staff, or rod into an arcane firearm, a conduit for your destructive spells. When you finish a long rest, you can use woodcarver's tools to carve special sigils into a wand, staff, or rod and thereby turn it into your arcane firearm. When you cast an artificer spell through the firearm, roll a d8, and you gain a bonus to one of the spell's damage rolls equal to the number rolled."
+              "type": "action",
+              "description": "After you finish a long rest, you can use woodcarver's tools to make a wand, staff, or rod and inscribe a special sigil into it. This object becomes your arcane firearm. When you cast an artificer spell through the firearm, you can add +1d8 to one of the spell's damage rolls. You can inscribe a new firearm each long rest; the old one loses its power.",
+              "actionType": "action"
             },
             {
               "name": "Explosive Cannon",
