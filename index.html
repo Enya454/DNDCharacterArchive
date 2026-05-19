@@ -5003,39 +5003,54 @@ function RelationsTab({ char, onUpdate }) {
     x: selfPos.x, y: selfPos.y, image: char.profileImage || null, role: char.class || "" };
   const displayNodes = [selfNode, ...storedNodes];
 
-  const [addingNode,  setAddingNode]  = useState(false);
-  const [editingNode, setEditingNode] = useState(null);
-  const [nodeName,    setNodeName]    = useState("");
-  const [nodeRole,    setNodeRole]    = useState("");
-  const [nodeNotes,   setNodeNotes]   = useState("");
-  const [nodeType,    setNodeType]    = useState("npc");
-  const [nodeImage,   setNodeImage]   = useState(null);
-  const [connectMode, setConnectMode] = useState(false);
-  const [connectFrom, setConnectFrom] = useState(null);
-  const [edgeDir,     setEdgeDir]     = useState("both");
-  const [edgeLabel,   setEdgeLabel]   = useState("");
-  const [pendingEdge, setPendingEdge] = useState(null);
-  const [selectedNode,setSelectedNode]= useState(null);
+  const [addingNode,     setAddingNode]     = useState(false);
+  const [editingNode,    setEditingNode]    = useState(null);
+  const [importMode,     setImportMode]     = useState(false);
+  const [importUrl,      setImportUrl]      = useState("");
+  const [importLoading,  setImportLoading]  = useState(false);
+  const [importError,    setImportError]    = useState(null);
+  const [nodeName,       setNodeName]       = useState("");
+  const [nodeRole,       setNodeRole]       = useState("");
+  const [nodeNotes,      setNodeNotes]      = useState("");
+  const [nodeType,       setNodeType]       = useState("npc");
+  const [nodeImage,      setNodeImage]      = useState(null);
+  const [nodeShareId,    setNodeShareId]    = useState(null); // char id for visit link
+  const [connectMode,    setConnectMode]    = useState(false);
+  const [connectFrom,    setConnectFrom]    = useState(null);
+  const [edgeDir,        setEdgeDir]        = useState("both");
+  const [edgeLabel,      setEdgeLabel]      = useState("");
+  const [pendingEdge,    setPendingEdge]    = useState(null);
+  const [selectedNode,   setSelectedNode]   = useState(null);
+  const [editingNotes,   setEditingNotes]   = useState(false); // inline notes edit in panel
+  const [panelNotes,     setPanelNotes]     = useState("");
 
-  // Viewport pan/zoom state
   const [vpX,  setVpX]  = useState(0);
   const [vpY,  setVpY]  = useState(0);
   const [zoom, setZoom] = useState(1);
 
-  const draggingRef   = useRef(null); // { type:"node"|"pan", id?, ox, oy }
-  const didMoveRef    = useRef(false);
-  const svgRef        = useRef(null);
-  const imgRef        = useRef(null);
-  const addImgRef     = useRef(null);
+  const draggingRef  = useRef(null);
+  const didMoveRef   = useRef(false);
+  const svgRef       = useRef(null);
+  const containerRef = useRef(null);
+  const imgRef       = useRef(null);
+  const addImgRef    = useRef(null);
 
   const saveRel = (nodes, newEdges, newSelfPos) => onUpdate({
-    ...char,
-    relations: {
+    ...char, relations: {
       nodes: nodes.filter(n => n.id !== SELF_ID),
       edges: newEdges !== undefined ? newEdges : edges,
       selfPos: newSelfPos !== undefined ? newSelfPos : selfPos,
     }
   });
+
+  // Block page scroll when pointer is over the SVG canvas
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const stop = e => e.preventDefault();
+    el.addEventListener("wheel", stop, { passive: false });
+    return () => el.removeEventListener("wheel", stop);
+  }, []);
 
   const addNode = () => {
     if (!nodeName.trim()) return;
@@ -5044,18 +5059,23 @@ function RelationsTab({ char, onUpdate }) {
     const r = 130 + Math.floor(storedNodes.length / 6) * 90;
     const x = Math.round(selfPos.x + r * Math.cos(angle));
     const y = Math.round(selfPos.y + r * Math.sin(angle));
-    saveRel([...storedNodes, { id, name:nodeName.trim(), role:nodeRole.trim(), notes:nodeNotes.trim(), type:nodeType, image:nodeImage, x, y }], edges, selfPos);
-    setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeType("npc"); setNodeImage(null); setAddingNode(false);
+    saveRel([...storedNodes, { id, name:nodeName.trim(), role:nodeRole.trim(), notes:nodeNotes.trim(), type:nodeType, image:nodeImage, shareId:nodeShareId, x, y }], edges, selfPos);
+    setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeType("npc"); setNodeImage(null); setNodeShareId(null); setAddingNode(false);
   };
 
   const startEdit = id => {
     const n = displayNodes.find(n => n.id === id); if (!n||id===SELF_ID) return;
-    setEditingNode(id); setNodeName(n.name); setNodeRole(n.role||""); setNodeNotes(n.notes||""); setNodeType(n.type); setNodeImage(n.image||null);
+    setEditingNode(id); setNodeName(n.name); setNodeRole(n.role||""); setNodeNotes(n.notes||""); setNodeType(n.type); setNodeImage(n.image||null); setNodeShareId(n.shareId||null);
   };
 
   const saveEdit = () => {
-    saveRel(storedNodes.map(n => n.id===editingNode ? { ...n, name:nodeName.trim()||n.name, role:nodeRole.trim(), notes:nodeNotes.trim(), type:nodeType, image:nodeImage } : n), edges, selfPos);
-    setEditingNode(null); setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeImage(null);
+    saveRel(storedNodes.map(n => n.id===editingNode ? { ...n, name:nodeName.trim()||n.name, role:nodeRole.trim(), notes:nodeNotes.trim(), type:nodeType, image:nodeImage, shareId:nodeShareId } : n), edges, selfPos);
+    setEditingNode(null); setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeImage(null); setNodeShareId(null);
+  };
+
+  const saveNotes = (id, notes) => {
+    saveRel(storedNodes.map(n => n.id===id ? {...n, notes} : n), edges, selfPos);
+    setEditingNotes(false);
   };
 
   const deleteNode = id => {
@@ -5076,6 +5096,28 @@ function RelationsTab({ char, onUpdate }) {
     new Promise(res => { const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.readAsDataURL(file); }).then(d=>setNodeImage(d));
   };
 
+  // Import node from share link
+  const importFromLink = async () => {
+    setImportError(null); setImportLoading(true);
+    try {
+      const url = importUrl.trim();
+      const token = url.includes("?share=") ? url.split("?share=")[1].split("&")[0] : url.trim();
+      if (!token) { setImportError("Paste a valid share link or token."); setImportLoading(false); return; }
+      const { data, error } = await sb.from("shared_characters").select("character_data").eq("token", token).single();
+      if (error||!data) { setImportError("Character not found. Check the link and try again."); setImportLoading(false); return; }
+      const c = data.character_data;
+      // Pre-fill the add form with the imported character's data
+      setNodeName(c.name || "Unknown");
+      setNodeRole([c.class, c.subclass].filter(Boolean).join(" · ") || "");
+      setNodeNotes(`${c.species||""} · Level ${c.level||1}`.trim());
+      setNodeType("npc");
+      setNodeImage(c.profileImage || null);
+      setNodeShareId(token);
+      setImportMode(false); setImportUrl(""); setAddingNode(true);
+    } catch(e) { setImportError("Failed to fetch character. Check the link."); }
+    setImportLoading(false);
+  };
+
   const nodeColour = type => ({
     self:    {bg:"rgba(201,162,39,0.25)", border:"rgba(201,162,39,0.9)",  text:"var(--accent)"},
     npc:     {bg:"rgba(80,120,200,0.18)", border:"rgba(80,120,200,0.6)",  text:"#7ab3f5"},
@@ -5086,18 +5128,17 @@ function RelationsTab({ char, onUpdate }) {
 
   const nodeIcon = type => ({self:"⚔️",npc:"👤",party:"🛡",enemy:"💀",faction:"🏰"}[type]||"👤");
 
-  // Convert screen coords to world coords
   const screenToWorld = (cx, cy) => {
     const svg = svgRef.current; if (!svg) return {x:0,y:0};
     const rect = svg.getBoundingClientRect();
-    return { x: (cx - rect.left) / zoom - vpX, y: (cy - rect.top)  / zoom - vpY };
+    return { x: (cx - rect.left) / zoom - vpX, y: (cy - rect.top) / zoom - vpY };
   };
 
   const onSvgMouseDown = e => {
     if (connectMode) return;
-    // Pan start — only if clicking empty space (target is the svg or a non-node element)
-    if (e.target === svgRef.current || e.target.tagName === 'line' || e.target.tagName === 'text') {
-      draggingRef.current = { type:"pan", ox: e.clientX - vpX * zoom, oy: e.clientY - vpY * zoom };
+    const tag = e.target.tagName;
+    if (tag==="svg" || tag==="line" || (tag==="text"&&!e.target.closest)) {
+      draggingRef.current = { type:"pan", ox: e.clientX - vpX*zoom, oy: e.clientY - vpY*zoom };
       didMoveRef.current = false;
     }
   };
@@ -5105,32 +5146,31 @@ function RelationsTab({ char, onUpdate }) {
   const onNodeMouseDown = (e, id) => {
     if (connectMode) {
       if (!connectFrom) { setConnectFrom(id); return; }
-      if (connectFrom !== id) { setPendingEdge({from:connectFrom,to:id}); setConnectMode(false); setConnectFrom(null); }
+      if (connectFrom!==id) { setPendingEdge({from:connectFrom,to:id}); setConnectMode(false); setConnectFrom(null); }
       return;
     }
     e.preventDefault(); e.stopPropagation();
     const w = screenToWorld(e.clientX, e.clientY);
     const node = displayNodes.find(n=>n.id===id);
-    draggingRef.current = { type:"node", id, ox: w.x - node.x, oy: w.y - node.y };
+    draggingRef.current = { type:"node", id, ox: w.x-node.x, oy: w.y-node.y };
     didMoveRef.current = false;
   };
 
   const onSvgMouseMove = e => {
     const d = draggingRef.current; if (!d) return;
-    if (d.type === "pan") {
+    if (d.type==="pan") {
       didMoveRef.current = true;
       setVpX((e.clientX - d.ox) / zoom);
       setVpY((e.clientY - d.oy) / zoom);
-    } else if (d.type === "node") {
+    } else {
       const w = screenToWorld(e.clientX, e.clientY);
-      const nx = Math.round(w.x - d.ox), ny = Math.round(w.y - d.oy);
-      // Only mark as moved if actually displaced
+      const nx=Math.round(w.x-d.ox), ny=Math.round(w.y-d.oy);
       const node = displayNodes.find(n=>n.id===d.id);
-      if (Math.abs(nx - node.x) > 2 || Math.abs(ny - node.y) > 2) didMoveRef.current = true;
-      if (d.id === SELF_ID) {
-        onUpdate({...char, relations:{nodes:storedNodes, edges, selfPos:{x:nx,y:ny}}});
+      if (Math.abs(nx-node.x)>2||Math.abs(ny-node.y)>2) didMoveRef.current=true;
+      if (d.id===SELF_ID) {
+        onUpdate({...char, relations:{nodes:storedNodes,edges,selfPos:{x:nx,y:ny}}});
       } else {
-        onUpdate({...char, relations:{nodes:storedNodes.map(n=>n.id===d.id?{...n,x:nx,y:ny}:n), edges, selfPos}});
+        onUpdate({...char, relations:{nodes:storedNodes.map(n=>n.id===d.id?{...n,x:nx,y:ny}:n),edges,selfPos}});
       }
     }
   };
@@ -5140,34 +5180,50 @@ function RelationsTab({ char, onUpdate }) {
   const onNodeClick = (e, id) => {
     e.stopPropagation();
     if (connectMode) return;
-    if (didMoveRef.current) { didMoveRef.current = false; return; }
+    if (didMoveRef.current) { didMoveRef.current=false; return; }
     didMoveRef.current = false;
-    setSelectedNode(prev => prev===id ? null : id);
+    const opening = selectedNode !== id;
+    setSelectedNode(opening ? id : null);
+    // Auto-open notes for editing when clicking a non-self node
+    if (opening && id !== SELF_ID) {
+      const n = displayNodes.find(n=>n.id===id);
+      setEditingNotes(true);
+      setPanelNotes(n?.notes||"");
+      setEditingNode(null); // close full edit if open
+    } else {
+      setEditingNotes(false);
+      setEditingNode(null);
+    }
   };
 
-  // Wheel zoom
   const onWheel = e => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(z => Math.min(3, Math.max(0.3, z * delta)));
+    setZoom(z => Math.min(3, Math.max(0.3, z * (e.deltaY>0?0.9:1.1))));
   };
 
   const getEdgePoints = (a, b) => {
     const r=38, dx=b.x-a.x, dy=b.y-a.y, dist=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/dist, uy=dy/dist;
-    return {x1:a.x+ux*r, y1:a.y+uy*r, x2:b.x-ux*r, y2:b.y-uy*r};
+    return {x1:a.x+ux*r,y1:a.y+uy*r,x2:b.x-ux*r,y2:b.y-uy*r};
   };
 
-  const selNode = displayNodes.find(n => n.id === selectedNode);
+  const selNode = displayNodes.find(n=>n.id===selectedNode);
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
 
       {/* Toolbar */}
       <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-        <button onClick={()=>{setAddingNode(true);setEditingNode(null);setSelectedNode(null);}}
+        <button onClick={()=>{setAddingNode(a=>!a);setImportMode(false);setEditingNode(null);}}
           style={{ padding:"6px 14px", borderRadius:7, cursor:"pointer", fontSize:12,
             border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>
           + Add Character
+        </button>
+        <button onClick={()=>{setImportMode(i=>!i);setAddingNode(false);setImportError(null);}}
+          style={{ padding:"6px 14px", borderRadius:7, cursor:"pointer", fontSize:12,
+            border:`1px solid ${importMode?"var(--accent)":"var(--border)"}`,
+            background:importMode?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+            color:importMode?"var(--accent)":"var(--text-muted)" }}>
+          🔗 Import from Link
         </button>
         <button onClick={()=>{setConnectMode(c=>!c);setConnectFrom(null);setSelectedNode(null);}}
           style={{ padding:"6px 14px", borderRadius:7, cursor:"pointer", fontSize:12,
@@ -5177,13 +5233,12 @@ function RelationsTab({ char, onUpdate }) {
           {connectMode?(connectFrom?"→ Click target…":"🔗 Click source…"):"🔗 Connect"}
         </button>
         {connectMode && <button onClick={()=>{setConnectMode(false);setConnectFrom(null);}}
-          style={{ padding:"6px 10px", borderRadius:7, cursor:"pointer", fontSize:12,
-            border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)" }}>✕ Cancel</button>}
-        {/* Zoom controls */}
+          style={{ padding:"6px 10px",borderRadius:7,cursor:"pointer",fontSize:12,
+            border:"1px solid var(--border)",background:"transparent",color:"var(--text-dim)" }}>✕ Cancel</button>}
         <div style={{ display:"flex", gap:4, marginLeft:"auto", alignItems:"center" }}>
           <button onClick={()=>setZoom(z=>Math.min(3,z*1.2))}
             style={{ width:26,height:26,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:16,lineHeight:1 }}>+</button>
-          <span style={{ fontSize:11, color:"var(--text-dim)", minWidth:38, textAlign:"center" }}>{Math.round(zoom*100)}%</span>
+          <span style={{ fontSize:11,color:"var(--text-dim)",minWidth:38,textAlign:"center" }}>{Math.round(zoom*100)}%</span>
           <button onClick={()=>setZoom(z=>Math.max(0.3,z*0.8))}
             style={{ width:26,height:26,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:16,lineHeight:1 }}>−</button>
           <button onClick={()=>{setZoom(1);setVpX(0);setVpY(0);}} title="Reset view"
@@ -5191,24 +5246,51 @@ function RelationsTab({ char, onUpdate }) {
         </div>
       </div>
 
+      {/* Import from link panel */}
+      {importMode && (
+        <div style={{ padding:"14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:9 }}>
+          <div style={{ fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13,marginBottom:8 }}>Import Character from Share Link</div>
+          <div style={{ fontSize:12,color:"var(--text-muted)",marginBottom:8 }}>
+            Paste a Tome of Heroes share link. Their character will be added as a node, and you can visit their sheet directly from the diagram.
+          </div>
+          <div style={{ display:"flex",gap:8 }}>
+            <input value={importUrl} onChange={e=>setImportUrl(e.target.value)}
+              placeholder="https://…?share=abc123 or just the token"
+              onKeyDown={e=>e.key==="Enter"&&importFromLink()}
+              style={{ flex:1,background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",padding:"8px 10px",borderRadius:6,fontSize:13 }}/>
+            <button onClick={importFromLink} disabled={importLoading}
+              style={{ padding:"8px 16px",borderRadius:6,cursor:"pointer",fontSize:13,
+                border:"1px solid var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",color:"var(--accent)",opacity:importLoading?0.6:1 }}>
+              {importLoading?"…":"Import"}
+            </button>
+          </div>
+          {importError && <div style={{ fontSize:12,color:"#e07070",marginTop:6 }}>⚠ {importError}</div>}
+        </div>
+      )}
+
       {/* Add node form */}
       {addingNode && (
-        <div style={{ padding:"14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:9 }}>
-          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>New Character</div>
-          <div style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+        <div style={{ padding:"14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:9 }}>
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10 }}>
+            <div style={{ fontFamily:"var(--font-display)",color:"var(--accent)",fontSize:13 }}>
+              {nodeShareId ? "🔗 Imported Character" : "New Character"}
+            </div>
+            {nodeShareId && <div style={{ fontSize:11,color:"var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",padding:"2px 8px",borderRadius:8,border:"1px solid rgba(var(--accent-rgb,201,162,39),0.3)" }}>Has sheet link ✓</div>}
+          </div>
+          <div style={{ display:"flex",gap:10,alignItems:"flex-start",marginBottom:8 }}>
             <div onClick={()=>addImgRef.current?.click()}
               style={{ width:52,height:52,borderRadius:"50%",border:"2px dashed var(--border)",cursor:"pointer",flexShrink:0,
                 background:"var(--card)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden" }}>
               {nodeImage?<img src={nodeImage} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:22}}>📷</span>}
             </div>
-            <div style={{ flex:1, display:"flex", flexDirection:"column", gap:6 }}>
+            <div style={{ flex:1,display:"flex",flexDirection:"column",gap:6 }}>
               <input value={nodeName} onChange={e=>setNodeName(e.target.value)} placeholder="Name *"
                 style={{ background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",padding:"7px 10px",borderRadius:6,fontSize:13 }}/>
               <input value={nodeRole} onChange={e=>setNodeRole(e.target.value)} placeholder="Role / Title"
                 style={{ background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",padding:"7px 10px",borderRadius:6,fontSize:13 }}/>
             </div>
           </div>
-          <div style={{ display:"flex", gap:5, marginBottom:8 }}>
+          <div style={{ display:"flex",gap:5,marginBottom:8 }}>
             {[["npc","👤 NPC"],["party","🛡 Party"],["enemy","💀 Enemy"],["faction","🏰 Faction"]].map(([t,l])=>(
               <div key={t} onClick={()=>setNodeType(t)}
                 style={{ flex:1,padding:"5px 2px",borderRadius:6,cursor:"pointer",textAlign:"center",fontSize:10,
@@ -5221,10 +5303,10 @@ function RelationsTab({ char, onUpdate }) {
             style={{ width:"100%",background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",
               padding:"8px 10px",borderRadius:6,fontSize:12,resize:"vertical",minHeight:52,boxSizing:"border-box",marginBottom:8 }}/>
           <input ref={addImgRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleImageUpload}/>
-          <div style={{ display:"flex", gap:8 }}>
+          <div style={{ display:"flex",gap:8 }}>
             <button onClick={addNode} style={{ flex:1,padding:"7px",borderRadius:7,cursor:"pointer",fontSize:13,
               border:"1px solid var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",color:"var(--accent)" }}>Add</button>
-            <button onClick={()=>{setAddingNode(false);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);}}
+            <button onClick={()=>{setAddingNode(false);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);setNodeShareId(null);}}
               style={{ padding:"7px 14px",borderRadius:7,cursor:"pointer",fontSize:13,
                 border:"1px solid var(--border)",background:"transparent",color:"var(--text-muted)" }}>Cancel</button>
           </div>
@@ -5239,7 +5321,7 @@ function RelationsTab({ char, onUpdate }) {
             {" ↔ "}
             <strong style={{color:"var(--accent)"}}>{displayNodes.find(n=>n.id===pendingEdge.to)?.name}</strong>
           </div>
-          <div style={{ display:"flex", gap:5, marginBottom:8 }}>
+          <div style={{ display:"flex",gap:5,marginBottom:8 }}>
             {[["both","↔ Mutual"],["forward","→ One-way"],["back","← Reverse"]].map(([d,l])=>(
               <div key={d} onClick={()=>setEdgeDir(d)}
                 style={{ flex:1,padding:"6px 4px",borderRadius:6,cursor:"pointer",textAlign:"center",fontSize:11,
@@ -5248,7 +5330,7 @@ function RelationsTab({ char, onUpdate }) {
                   color:edgeDir===d?"var(--accent)":"var(--text-muted)" }}>{l}</div>
             ))}
           </div>
-          <div style={{ display:"flex", gap:8 }}>
+          <div style={{ display:"flex",gap:8 }}>
             <input value={edgeLabel} onChange={e=>setEdgeLabel(e.target.value)} placeholder="Label (e.g. Mentor, Loves, Rival…)"
               onKeyDown={e=>{if(e.key==="Enter"){addEdge(pendingEdge.from,pendingEdge.to,edgeLabel,edgeDir);setPendingEdge(null);setEdgeLabel("");setEdgeDir("both");}}}
               style={{ flex:1,background:"var(--card)",border:"1px solid var(--border)",color:"var(--text)",padding:"7px 10px",borderRadius:6,fontSize:13 }}/>
@@ -5262,14 +5344,14 @@ function RelationsTab({ char, onUpdate }) {
         </div>
       )}
 
-      {/* SVG canvas — fills available width, fixed height, pan+zoom via transform */}
-      <div style={{ borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",
+      {/* SVG canvas */}
+      <div ref={containerRef} style={{ borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",
         overflow:"hidden",position:"relative",height:420,cursor:connectMode?"crosshair":"default" }}
         onWheel={onWheel}>
         {storedNodes.length===0 && (
           <div style={{ position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",
             color:"var(--text-dim)",fontSize:12,fontStyle:"italic",textAlign:"center",pointerEvents:"none",zIndex:1 }}>
-            Click "+ Add Character" to build your relationship diagram.<br/>Drag to pan · Scroll to zoom.
+            Add characters above · Drag to pan · Scroll to zoom
           </div>
         )}
         <svg ref={svgRef} style={{ width:"100%",height:"100%",display:"block" }}
@@ -5284,10 +5366,7 @@ function RelationsTab({ char, onUpdate }) {
             <clipPath id="clip-self"><circle cx="0" cy="0" r="33"/></clipPath>
             {storedNodes.map(n=><clipPath key={n.id} id={`clip-${n.id}`}><circle cx="0" cy="0" r="28"/></clipPath>)}
           </defs>
-
-          {/* World transform group — all content pans+zooms here */}
           <g transform={`scale(${zoom}) translate(${vpX},${vpY})`}>
-            {/* Edges */}
             {edges.map(e => {
               const a=displayNodes.find(n=>n.id===e.from), b=displayNodes.find(n=>n.id===e.to);
               if (!a||!b) return null;
@@ -5299,14 +5378,12 @@ function RelationsTab({ char, onUpdate }) {
                     stroke={isOneWay?"rgba(220,180,80,0.45)":"rgba(160,160,160,0.3)"}
                     strokeWidth={isOneWay?2.5:1.5}
                     markerEnd={e.dir!=="back"?(isOneWay?"url(#arr-lg-end)":"url(#arr-sm-end)"):"none"}
-                    markerStart={e.dir!=="forward"?(isOneWay&&e.dir==="back"?"url(#arr-lg-start)":"url(#arr-sm-start)"):"none"}/>
+                    markerStart={e.dir!=="forward"?(e.dir==="back"?"url(#arr-lg-start)":"url(#arr-sm-start)"):"none"}/>
                   {e.label && <text x={(x1+x2)/2} y={(y1+y2)/2-7} textAnchor="middle" fontSize="10"
                     fill="rgba(200,200,200,0.75)" fontFamily="var(--font-body)" style={{pointerEvents:"none"}}>{e.label}</text>}
                 </g>
               );
             })}
-
-            {/* Nodes */}
             {displayNodes.map(n => {
               const c=nodeColour(n.type), sel=selectedNode===n.id, isSelf=n.id===SELF_ID, r=isSelf?34:28;
               const fromH=connectMode&&connectFrom===n.id;
@@ -5315,17 +5392,18 @@ function RelationsTab({ char, onUpdate }) {
                   style={{cursor:connectMode?"pointer":isSelf?"move":"grab"}}
                   onMouseDown={e=>onNodeMouseDown(e,n.id)}
                   onClick={e=>onNodeClick(e,n.id)}>
-                  {(sel||fromH) && <circle r={r+5} fill="none" stroke={fromH?"#ffd700":"var(--accent)"} strokeWidth="2" opacity="0.5"/>}
+                  {(sel||fromH)&&<circle r={r+5} fill="none" stroke={fromH?"#ffd700":"var(--accent)"} strokeWidth="2" opacity="0.5"/>}
                   <circle r={r} fill={c.bg} stroke={c.border} strokeWidth={isSelf?2.5:1.5}/>
                   {n.image
-                    ? <image href={n.image} x={-r} y={-r} width={r*2} height={r*2}
+                    ?<image href={n.image} x={-r} y={-r} width={r*2} height={r*2}
                         clipPath={`url(#${isSelf?"clip-self":`clip-${n.id}`})`} preserveAspectRatio="xMidYMid slice"/>
-                    : <text y={isSelf?6:5} textAnchor="middle" fontSize={isSelf?22:18} style={{pointerEvents:"none"}}>{nodeIcon(n.type)}</text>}
+                    :<text y={isSelf?6:5} textAnchor="middle" fontSize={isSelf?22:18} style={{pointerEvents:"none"}}>{nodeIcon(n.type)}</text>}
+                  {n.shareId&&<text y={-r+10} textAnchor="middle" fontSize="8" fill="rgba(var(--accent-rgb,201,162,39),0.8)" style={{pointerEvents:"none"}}>🔗</text>}
                   <text y={r+14} textAnchor="middle" fontSize={isSelf?12:11}
                     fill={c.text} fontFamily="var(--font-display)" style={{pointerEvents:"none"}}>
                     {n.name.length>12?n.name.slice(0,11)+"…":n.name}
                   </text>
-                  {n.role && <text y={r+25} textAnchor="middle" fontSize="9"
+                  {n.role&&<text y={r+25} textAnchor="middle" fontSize="9"
                     fill="rgba(180,180,180,0.5)" style={{pointerEvents:"none"}}>
                     {n.role.length>14?n.role.slice(0,13)+"…":n.role}
                   </text>}
@@ -5336,7 +5414,7 @@ function RelationsTab({ char, onUpdate }) {
         </svg>
       </div>
 
-      {/* Node detail / edit panel */}
+      {/* Node detail panel */}
       {selNode && (() => {
         const c=nodeColour(selNode.type);
         const nodeEdges=edges.filter(e=>e.from===selNode.id||e.to===selNode.id);
@@ -5344,28 +5422,66 @@ function RelationsTab({ char, onUpdate }) {
           <div style={{ padding:"14px",background:"var(--surface)",border:`1px solid ${c.border}`,borderRadius:10 }}>
             {editingNode !== selNode.id ? (
               <div>
-                <div style={{ display:"flex",gap:12,alignItems:"flex-start",marginBottom:8 }}>
+                {/* Header row */}
+                <div style={{ display:"flex",gap:12,alignItems:"flex-start",marginBottom:10 }}>
                   <div style={{ width:46,height:46,borderRadius:"50%",flexShrink:0,overflow:"hidden",border:`2px solid ${c.border}` }}>
                     {selNode.image?<img src={selNode.image} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                       :<div style={{width:"100%",height:"100%",background:c.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{nodeIcon(selNode.type)}</div>}
                   </div>
                   <div style={{ flex:1,minWidth:0 }}>
                     <div style={{ fontFamily:"var(--font-display)",color:c.text,fontSize:16 }}>{selNode.name}</div>
-                    {selNode.role && <div style={{ fontSize:12,color:"var(--text-muted)",marginTop:2 }}>{selNode.role}</div>}
-                    {selNode.notes && <p style={{ fontSize:12,color:"var(--text-dim)",lineHeight:1.6,margin:"6px 0 0" }}>{selNode.notes}</p>}
+                    {selNode.role&&<div style={{fontSize:12,color:"var(--text-muted)",marginTop:2}}>{selNode.role}</div>}
                   </div>
-                  {selNode.id!==SELF_ID && (
-                    <div style={{ display:"flex",gap:6,flexShrink:0 }}>
+                  <div style={{ display:"flex",gap:6,flexShrink:0,alignItems:"center" }}>
+                    {selNode.shareId && (
+                      <button onClick={()=>window.open(`${window.location.origin}${window.location.pathname}?share=${selNode.shareId}`,"_blank")}
+                        style={{ padding:"5px 10px",borderRadius:6,cursor:"pointer",fontSize:11,
+                          border:"1px solid var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",color:"var(--accent)" }}>
+                        View Sheet ↗
+                      </button>
+                    )}
+                    {selNode.id!==SELF_ID&&<>
                       <button onClick={()=>startEdit(selNode.id)}
                         style={{ padding:"5px 12px",borderRadius:6,cursor:"pointer",fontSize:12,
                           border:"1px solid var(--border)",background:"var(--card)",color:"var(--text-muted)" }}>Edit</button>
                       <button onClick={()=>deleteNode(selNode.id)}
                         style={{ padding:"5px 10px",borderRadius:6,cursor:"pointer",fontSize:12,
                           border:"1px solid var(--border)",background:"transparent",color:"var(--text-dim)" }}>Delete</button>
+                    </>}
+                  </div>
+                </div>
+
+                {/* Notes — auto-shown, editable inline */}
+                <div style={{ marginBottom:10 }}>
+                  {editingNotes ? (
+                    <div>
+                      <textarea value={panelNotes} onChange={e=>setPanelNotes(e.target.value)}
+                        autoFocus placeholder="Add notes about this character…"
+                        style={{ width:"100%",background:"var(--card)",border:"1px solid var(--accent)",color:"var(--text)",
+                          padding:"8px 10px",borderRadius:7,fontSize:13,resize:"vertical",minHeight:80,
+                          boxSizing:"border-box",lineHeight:1.6,marginBottom:6 }}/>
+                      <div style={{ display:"flex",gap:6 }}>
+                        <button onClick={()=>saveNotes(selNode.id,panelNotes)}
+                          style={{ padding:"5px 14px",borderRadius:6,cursor:"pointer",fontSize:12,
+                            border:"1px solid var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",color:"var(--accent)" }}>Save</button>
+                        <button onClick={()=>{setEditingNotes(false);setPanelNotes(selNode.notes||"");}}
+                          style={{ padding:"5px 10px",borderRadius:6,cursor:"pointer",fontSize:12,
+                            border:"1px solid var(--border)",background:"transparent",color:"var(--text-muted)" }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div onClick={()=>{if(selNode.id!==SELF_ID){setEditingNotes(true);setPanelNotes(selNode.notes||"");}}}
+                      style={{ fontSize:13,color:selNode.notes?"var(--text-muted)":"var(--text-dim)",lineHeight:1.65,
+                        padding:"8px 10px",borderRadius:7,border:"1px solid var(--border)",background:"var(--card)",
+                        cursor:selNode.id!==SELF_ID?"text":"default",minHeight:42,
+                        fontStyle:selNode.notes?"normal":"italic" }}>
+                      {selNode.notes || (selNode.id!==SELF_ID ? "Click to add notes…" : "")}
                     </div>
                   )}
                 </div>
-                {nodeEdges.length>0 && (
+
+                {/* Connections */}
+                {nodeEdges.length>0&&(
                   <div>
                     <div style={{ fontSize:10,color:"var(--text-dim)",textTransform:"uppercase",letterSpacing:1,marginBottom:6 }}>Connections</div>
                     <div style={{ display:"flex",flexWrap:"wrap",gap:5 }}>
@@ -5375,11 +5491,9 @@ function RelationsTab({ char, onUpdate }) {
                         const oc=nodeColour(other?.type||"npc");
                         const dirStr=e.dir==="forward"?(e.from===selNode.id?"→":"←"):e.dir==="back"?(e.to===selNode.id?"→":"←"):"↔";
                         return (
-                          <div key={e.id} style={{ display:"flex",alignItems:"center",gap:4,padding:"3px 8px 3px 6px",borderRadius:10,
-                            background:oc.bg,border:`1px solid ${oc.border}` }}>
-                            <span style={{ fontSize:11,color:oc.text }}>{dirStr} {e.label||"linked"} {other?.name}</span>
-                            <span onClick={()=>deleteEdge(e.id)} title="Remove"
-                              style={{ fontSize:10,color:"var(--text-dim)",cursor:"pointer",marginLeft:2 }}>✕</span>
+                          <div key={e.id} style={{ display:"flex",alignItems:"center",gap:4,padding:"3px 8px 3px 6px",borderRadius:10,background:oc.bg,border:`1px solid ${oc.border}` }}>
+                            <span style={{fontSize:11,color:oc.text}}>{dirStr} {e.label||"linked"} {other?.name}</span>
+                            <span onClick={()=>deleteEdge(e.id)} title="Remove" style={{fontSize:10,color:"var(--text-dim)",cursor:"pointer",marginLeft:2}}>✕</span>
                           </div>
                         );
                       })}
@@ -5388,6 +5502,7 @@ function RelationsTab({ char, onUpdate }) {
                 )}
               </div>
             ) : (
+              // Edit mode
               <div>
                 <div style={{ fontFamily:"var(--font-display)",color:c.text,fontSize:13,marginBottom:10 }}>Edit Character</div>
                 <div style={{ display:"flex",gap:10,alignItems:"flex-start",marginBottom:8 }}>
@@ -5419,7 +5534,7 @@ function RelationsTab({ char, onUpdate }) {
                 <div style={{ display:"flex",gap:8 }}>
                   <button onClick={saveEdit} style={{ flex:1,padding:"7px",borderRadius:7,cursor:"pointer",fontSize:13,
                     border:"1px solid var(--accent)",background:"rgba(var(--accent-rgb,201,162,39),0.1)",color:"var(--accent)" }}>Save</button>
-                  <button onClick={()=>{setEditingNode(null);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);}}
+                  <button onClick={()=>{setEditingNode(null);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);setNodeShareId(null);}}
                     style={{ padding:"7px 14px",borderRadius:7,cursor:"pointer",fontSize:13,
                       border:"1px solid var(--border)",background:"transparent",color:"var(--text-muted)" }}>Cancel</button>
                 </div>
