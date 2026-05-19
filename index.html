@@ -7036,13 +7036,15 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           width:"100%", position:"relative" }}>
 
           {showArt && bodyArtSide === "left" && (
-            <div style={{ width:bodyArtSize, flexShrink:0, position:"relative",
-              height:"calc(100vh - 56px)", alignSelf:"flex-start",
-              overflow:"hidden" }}>
+            <div style={{ width:bodyArtSize, flexShrink:0, position:"fixed",
+              top:"56px", left:0, bottom:0,
+              overflow:"hidden", pointerEvents:"none", zIndex:5 }}>
               <img src={bodyArt} style={{
                 position:"absolute",
-                top:`${bodyArtCrop}%`, left:`${bodyArtCrop}%`,
-                width:`${100 - bodyArtCrop*2}%`, height:`${100 - bodyArtCrop*2}%`,
+                top:0, left:"50%",
+                transform:`translateX(-50%) scale(${1 + bodyArtCrop/40})`,
+                transformOrigin:"top center",
+                width:"100%", height:"100%",
                 objectFit:"contain", objectPosition:"top center", display:"block" }}/>
               {bodyArtFade && (
                 <div style={{ position:"absolute", inset:0, pointerEvents:"none",
@@ -7055,6 +7057,8 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             width: align==="full" ? "100%" : "auto",
             maxWidth: sheetMaxW === "none" ? "100%" : sheetMaxW,
             minWidth: 0,
+            marginLeft:  showArt && bodyArtSide === "left"  ? bodyArtSize + bodyArtGap : 0,
+            marginRight: showArt && bodyArtSide === "right" ? bodyArtSize + bodyArtGap : 0,
             padding:sheetPadding, height:"calc(100vh - 56px)",
             boxSizing:"border-box", overflow:"hidden" }}>
           <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
@@ -7441,13 +7445,15 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
         </div>
           </div>
           {showArt && bodyArtSide === "right" && (
-            <div style={{ width:bodyArtSize, flexShrink:0, position:"relative",
-              height:"calc(100vh - 56px)", alignSelf:"flex-start",
-              overflow:"hidden" }}>
+            <div style={{ width:bodyArtSize, flexShrink:0, position:"fixed",
+              top:"56px", right:0, bottom:0,
+              overflow:"hidden", pointerEvents:"none", zIndex:5 }}>
               <img src={bodyArt} style={{
                 position:"absolute",
-                top:`${bodyArtCrop}%`, left:`${bodyArtCrop}%`,
-                width:`${100 - bodyArtCrop*2}%`, height:`${100 - bodyArtCrop*2}%`,
+                top:0, left:"50%",
+                transform:`translateX(-50%) scale(${1 + bodyArtCrop/40})`,
+                transformOrigin:"top center",
+                width:"100%", height:"100%",
                 objectFit:"contain", objectPosition:"top center", display:"block" }}/>
               {bodyArtFade && (
                 <div style={{ position:"absolute", inset:0, pointerEvents:"none",
