@@ -4993,77 +4993,108 @@ function FeaturesTab({ char, gameData }) {
 // ============================================================
 function RelationsTab({ char, onUpdate }) {
   const SELF_ID = "__self__";
-  const selfNode = { id: SELF_ID, name: char.name || "You", type: "self", x: 300, y: 220,
-    image: char.profileImage || null, role: char.class || "" };
 
   const rawRelations = char.relations || { nodes: [], edges: [] };
-  // Nodes never include the self node in storage
-  const storedNodes = (rawRelations.nodes || []).filter(n => n.id !== SELF_ID);
-  const edges = rawRelations.edges || [];
-  const allNodes = [selfNode, ...storedNodes];
+  const storedNodes  = (rawRelations.nodes || []).filter(n => n.id !== SELF_ID);
+  const edges        = rawRelations.edges || [];
+  const selfPos      = rawRelations.selfPos || { x: 300, y: 220 };
+
+  // Self node always at stored position
+  const selfNode = { id: SELF_ID, name: char.name || "You", type: "self",
+    x: selfPos.x, y: selfPos.y, image: char.profileImage || null, role: char.class || "" };
+  const displayNodes = [selfNode, ...storedNodes];
 
   const [addingNode,  setAddingNode]  = useState(false);
+  const [editingNode, setEditingNode] = useState(null); // id of node being edited
   const [nodeName,    setNodeName]    = useState("");
   const [nodeRole,    setNodeRole]    = useState("");
   const [nodeNotes,   setNodeNotes]   = useState("");
   const [nodeType,    setNodeType]    = useState("npc");
-  const [nodeImage,   setNodeImage]   = useState(null); // base64
+  const [nodeImage,   setNodeImage]   = useState(null);
   const [connectMode, setConnectMode] = useState(false);
   const [connectFrom, setConnectFrom] = useState(null);
-  const [edgeDir,     setEdgeDir]     = useState("both"); // "both" | "forward" | "back"
+  const [edgeDir,     setEdgeDir]     = useState("both");
   const [edgeLabel,   setEdgeLabel]   = useState("");
   const [pendingEdge, setPendingEdge] = useState(null);
   const [selectedNode,setSelectedNode]= useState(null);
-  const [dragging,    setDragging]    = useState(null);
-  const svgRef  = useRef(null);
-  const imgRef  = useRef(null);
+  // dragging ref — doesn't cause re-renders during drag
+  const draggingRef = useRef(null);
+  const didDragRef  = useRef(false); // tracks if we actually moved during this mousedown
+  const svgRef      = useRef(null);
+  const imgRef      = useRef(null);
+  const addImgRef   = useRef(null);
 
-  const save = (nodes, edges) => onUpdate({ ...char, relations: { nodes, edges } });
+  const saveNodes = (nodes, newEdges, newSelfPos) => onUpdate({
+    ...char,
+    relations: {
+      nodes: nodes.filter(n => n.id !== SELF_ID),
+      edges: newEdges !== undefined ? newEdges : edges,
+      selfPos: newSelfPos !== undefined ? newSelfPos : selfPos,
+    }
+  });
 
   const addNode = () => {
     if (!nodeName.trim()) return;
     const id = "n" + Date.now();
     const angle = (storedNodes.length * 137.5) * (Math.PI / 180);
     const r = 130 + Math.floor(storedNodes.length / 6) * 90;
-    const x = Math.round(300 + r * Math.cos(angle));
-    const y = Math.round(220 + r * Math.sin(angle));
+    const x = Math.round(selfPos.x + r * Math.cos(angle));
+    const y = Math.round(selfPos.y + r * Math.sin(angle));
     const newNode = { id, name: nodeName.trim(), role: nodeRole.trim(), notes: nodeNotes.trim(), type: nodeType, image: nodeImage, x, y };
-    save([...storedNodes, newNode], edges);
+    saveNodes([...storedNodes, newNode], edges, selfPos);
     setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeType("npc"); setNodeImage(null); setAddingNode(false);
+  };
+
+  const startEdit = id => {
+    const n = displayNodes.find(n => n.id === id);
+    if (!n || id === SELF_ID) return;
+    setEditingNode(id);
+    setNodeName(n.name); setNodeRole(n.role||""); setNodeNotes(n.notes||""); setNodeType(n.type); setNodeImage(n.image||null);
+  };
+
+  const saveEdit = () => {
+    saveNodes(storedNodes.map(n => n.id === editingNode ? { ...n, name: nodeName.trim()||n.name, role: nodeRole.trim(), notes: nodeNotes.trim(), type: nodeType, image: nodeImage } : n), edges, selfPos);
+    setEditingNode(null); setNodeName(""); setNodeRole(""); setNodeNotes(""); setNodeImage(null);
   };
 
   const deleteNode = id => {
     if (id === SELF_ID) return;
-    save(storedNodes.filter(n => n.id !== id), edges.filter(e => e.from !== id && e.to !== id));
+    saveNodes(storedNodes.filter(n => n.id !== id), edges.filter(e => e.from !== id && e.to !== id), selfPos);
     if (selectedNode === id) setSelectedNode(null);
   };
 
   const addEdge = (from, to, label, dir) => {
     if (from === to) return;
-    save(storedNodes, [...edges, { id: "e"+Date.now(), from, to, label: label.trim(), dir: dir||"both" }]);
+    saveNodes(storedNodes, [...edges, { id:"e"+Date.now(), from, to, label: label.trim(), dir: dir||"both" }], selfPos);
   };
 
-  const deleteEdge = id => save(storedNodes, edges.filter(e => e.id !== id));
+  const deleteEdge = id => saveNodes(storedNodes, edges.filter(e => e.id !== id), selfPos);
 
   const handleImageUpload = e => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => setNodeImage(ev.target.result);
     reader.readAsDataURL(file);
   };
 
   const nodeColour = type => ({
-    self:    { bg:"rgba(201,162,39,0.25)",  border:"rgba(201,162,39,0.9)",   text:"var(--accent)" },
-    npc:     { bg:"rgba(80,120,200,0.18)",  border:"rgba(80,120,200,0.6)",   text:"#7ab3f5" },
-    party:   { bg:"rgba(39,174,96,0.18)",   border:"rgba(39,174,96,0.6)",    text:"#55cc88" },
-    enemy:   { bg:"rgba(192,57,43,0.18)",   border:"rgba(192,57,43,0.6)",    text:"#e07070" },
-    faction: { bg:"rgba(180,130,50,0.18)",  border:"rgba(201,162,39,0.6)",   text:"#c9a227" },
+    self:    { bg:"rgba(201,162,39,0.25)",  border:"rgba(201,162,39,0.9)",  text:"var(--accent)" },
+    npc:     { bg:"rgba(80,120,200,0.18)",  border:"rgba(80,120,200,0.6)",  text:"#7ab3f5" },
+    party:   { bg:"rgba(39,174,96,0.18)",   border:"rgba(39,174,96,0.6)",   text:"#55cc88" },
+    enemy:   { bg:"rgba(192,57,43,0.18)",   border:"rgba(192,57,43,0.6)",   text:"#e07070" },
+    faction: { bg:"rgba(180,130,50,0.18)",  border:"rgba(201,162,39,0.6)",  text:"#c9a227" },
   }[type] || { bg:"rgba(80,80,80,0.18)", border:"rgba(120,120,120,0.5)", text:"#aaa" });
 
   const nodeIcon = type => ({ self:"⚔️", npc:"👤", party:"🛡", enemy:"💀", faction:"🏰" }[type] || "👤");
 
-  const onMouseDown = (e, id) => {
+  const getSvgPos = e => {
+    const svg = svgRef.current; if (!svg) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  };
+
+  const onNodeMouseDown = (e, id) => {
     if (connectMode) {
       if (!connectFrom) { setConnectFrom(id); return; }
       if (connectFrom !== id) {
@@ -5073,81 +5104,61 @@ function RelationsTab({ char, onUpdate }) {
       return;
     }
     e.preventDefault();
-    const svg = svgRef.current;
-    const pt = svg.createSVGPoint();
-    pt.x = e.clientX; pt.y = e.clientY;
-    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
-    const node = allNodes.find(n => n.id === id);
-    setDragging({ id, ox: svgP.x - node.x, oy: svgP.y - node.y });
+    e.stopPropagation();
+    const svgP = getSvgPos(e);
+    if (!svgP) return;
+    const node = displayNodes.find(n => n.id === id);
+    draggingRef.current = { id, ox: svgP.x - node.x, oy: svgP.y - node.y };
+    didDragRef.current = false;
   };
 
-  const onMouseMove = e => {
-    if (!dragging) return;
-    const svg = svgRef.current;
-    const pt = svg.createSVGPoint();
-    pt.x = e.clientX; pt.y = e.clientY;
-    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
-    if (dragging.id === SELF_ID) {
-      // Update self node position in a temporary way — we don't persist self, but we can store its pos
-      onUpdate({ ...char, relations: { nodes: storedNodes, edges, selfPos: { x: Math.round(svgP.x - dragging.ox), y: Math.round(svgP.y - dragging.oy) } } });
+  const onSvgMouseMove = e => {
+    if (!draggingRef.current) return;
+    const svgP = getSvgPos(e);
+    if (!svgP) return;
+    const { id, ox, oy } = draggingRef.current;
+    const nx = Math.round(svgP.x - ox);
+    const ny = Math.round(svgP.y - oy);
+    didDragRef.current = true;
+    if (id === SELF_ID) {
+      onUpdate({ ...char, relations: { nodes: storedNodes, edges, selfPos: { x: nx, y: ny } } });
     } else {
-      save(storedNodes.map(n => n.id === dragging.id ? { ...n, x: Math.round(svgP.x - dragging.ox), y: Math.round(svgP.y - dragging.oy) } : n), edges);
+      onUpdate({ ...char, relations: { nodes: storedNodes.map(n => n.id === id ? { ...n, x: nx, y: ny } : n), edges, selfPos } });
     }
   };
 
-  // Use stored selfPos if available
-  const selfX = rawRelations.selfPos?.x ?? 300;
-  const selfY = rawRelations.selfPos?.y ?? 220;
-  const displaySelf = { ...selfNode, x: selfX, y: selfY };
-  const displayNodes = [displaySelf, ...storedNodes];
+  const onSvgMouseUp = e => {
+    draggingRef.current = null;
+  };
 
-  const onMouseUp = () => setDragging(null);
-  const selNode = displayNodes.find(n => n.id === selectedNode);
+  const onNodeClick = (e, id) => {
+    e.stopPropagation();
+    if (connectMode) return; // handled in mousedown
+    if (didDragRef.current) { didDragRef.current = false; return; } // was a drag, not a click
+    setSelectedNode(prev => prev === id ? null : id);
+  };
 
-  // Build arrowhead markers
-  const markers = (
-    <defs>
-      <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-        <path d="M0,0 L0,6 L10,3 z" fill="rgba(180,180,180,0.7)"/>
-      </marker>
-      <marker id="arrow-start" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto-start-reverse">
-        <path d="M0,0 L0,6 L10,3 z" fill="rgba(180,180,180,0.7)"/>
-      </marker>
-      <marker id="arrow-end-big" markerWidth="14" markerHeight="14" refX="12" refY="5" orient="auto">
-        <path d="M0,0 L0,10 L14,5 z" fill="rgba(var(--accent-rgb,201,162,39),0.9)"/>
-      </marker>
-      <marker id="arrow-start-big" markerWidth="14" markerHeight="14" refX="2" refY="5" orient="auto-start-reverse">
-        <path d="M0,0 L0,10 L14,5 z" fill="rgba(var(--accent-rgb,201,162,39),0.9)"/>
-      </marker>
-      <clipPath id="node-clip-self">
-        <circle cx="0" cy="0" r="33"/>
-      </clipPath>
-      {storedNodes.map(n => (
-        <clipPath key={n.id} id={`clip-${n.id}`}>
-          <circle cx="0" cy="0" r="28"/>
-        </clipPath>
-      ))}
-    </defs>
-  );
-
-  const getEdgePoints = (a, b, offset=38) => {
+  const getEdgePoints = (a, b) => {
+    const r = 38;
     const dx = b.x - a.x, dy = b.y - a.y;
     const dist = Math.sqrt(dx*dx+dy*dy) || 1;
     const ux = dx/dist, uy = dy/dist;
-    return { x1: a.x + ux*offset, y1: a.y + uy*offset, x2: b.x - ux*offset, y2: b.y - uy*offset };
+    return { x1: a.x + ux*r, y1: a.y + uy*r, x2: b.x - ux*r, y2: b.y - uy*r };
   };
 
+  const selNode = displayNodes.find(n => n.id === selectedNode);
+
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:10, height:"100%" }}>
+    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
 
       {/* Toolbar */}
       <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-        <button onClick={()=>setAddingNode(true)}
+        <button onClick={()=>{setAddingNode(true);setEditingNode(null);setSelectedNode(null);}}
           style={{ padding:"6px 14px", borderRadius:7, cursor:"pointer", fontSize:12,
             border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>
           + Add Character
         </button>
-        <button onClick={()=>{ setConnectMode(c=>!c); setConnectFrom(null); }}
+        <button onClick={()=>{ setConnectMode(c=>!c); setConnectFrom(null); setSelectedNode(null); }}
           style={{ padding:"6px 14px", borderRadius:7, cursor:"pointer", fontSize:12,
             border:`1px solid ${connectMode?"var(--accent)":"var(--border)"}`,
             background:connectMode?"rgba(var(--accent-rgb,201,162,39),0.15)":"var(--surface)",
@@ -5158,83 +5169,74 @@ function RelationsTab({ char, onUpdate }) {
           style={{ padding:"6px 10px", borderRadius:7, cursor:"pointer", fontSize:12,
             border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)" }}>✕ Cancel</button>}
         <div style={{ fontSize:11, color:"var(--text-dim)", marginLeft:"auto" }}>
-          {storedNodes.length + 1} character{storedNodes.length!==0?"s":""} · {edges.length} connection{edges.length!==1?"s":""}
+          {storedNodes.length + 1} characters · {edges.length} connection{edges.length!==1?"s":""}
         </div>
       </div>
 
       {/* Add node form */}
       {addingNode && (
         <div style={{ padding:"14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:9 }}>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
-            <input value={nodeName} onChange={e=>setNodeName(e.target.value)} placeholder="Name *"
-              style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:13 }}/>
-            <input value={nodeRole} onChange={e=>setNodeRole(e.target.value)} placeholder="Role / Title"
-              style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"8px 10px", borderRadius:6, fontSize:13 }}/>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>New Character</div>
+          <div style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+            <div onClick={()=>addImgRef.current?.click()}
+              style={{ width:52, height:52, borderRadius:"50%", border:"2px dashed var(--border)", cursor:"pointer", flexShrink:0,
+                background:"var(--card)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
+              {nodeImage ? <img src={nodeImage} style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <span style={{ fontSize:22 }}>📷</span>}
+            </div>
+            <div style={{ flex:1, display:"flex", flexDirection:"column", gap:6 }}>
+              <input value={nodeName} onChange={e=>setNodeName(e.target.value)} placeholder="Name *"
+                style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13 }}/>
+              <input value={nodeRole} onChange={e=>setNodeRole(e.target.value)} placeholder="Role / Title"
+                style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13 }}/>
+            </div>
           </div>
-          <div style={{ display:"flex", gap:6, marginBottom:8 }}>
+          <div style={{ display:"flex", gap:5, marginBottom:8 }}>
             {[["npc","👤 NPC"],["party","🛡 Party"],["enemy","💀 Enemy"],["faction","🏰 Faction"]].map(([t,l])=>(
               <div key={t} onClick={()=>setNodeType(t)}
-                style={{ flex:1, padding:"6px 4px", borderRadius:7, cursor:"pointer", textAlign:"center", fontSize:11,
+                style={{ flex:1, padding:"5px 2px", borderRadius:6, cursor:"pointer", textAlign:"center", fontSize:10,
                   border:`1px solid ${nodeType===t?"var(--accent)":"var(--border)"}`,
                   background:nodeType===t?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
                   color:nodeType===t?"var(--accent)":"var(--text-muted)" }}>{l}</div>
             ))}
           </div>
-          {/* Profile picture upload */}
-          <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:8 }}>
-            <div onClick={()=>imgRef.current?.click()}
-              style={{ width:48, height:48, borderRadius:"50%", border:"2px dashed var(--border)", cursor:"pointer",
-                background:"var(--card)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, overflow:"hidden" }}>
-              {nodeImage ? <img src={nodeImage} style={{ width:"100%", height:"100%", objectFit:"cover" }}/> : <span style={{ fontSize:20 }}>📷</span>}
-            </div>
-            <span style={{ fontSize:12, color:"var(--text-muted)" }}>
-              {nodeImage ? <><span style={{ color:"var(--success)" }}>✓ Photo added</span> <span onClick={()=>setNodeImage(null)} style={{ cursor:"pointer", color:"var(--text-dim)", marginLeft:6 }}>Remove</span></> : "Add profile photo (optional)"}
-            </span>
-            <input ref={imgRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleImageUpload}/>
-          </div>
           <textarea value={nodeNotes} onChange={e=>setNodeNotes(e.target.value)} placeholder="Notes (optional)…"
             style={{ width:"100%", background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)",
-              padding:"8px 10px", borderRadius:6, fontSize:13, resize:"vertical", minHeight:56, boxSizing:"border-box", marginBottom:8 }}/>
+              padding:"8px 10px", borderRadius:6, fontSize:12, resize:"vertical", minHeight:52, boxSizing:"border-box", marginBottom:8 }}/>
+          <input ref={addImgRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleImageUpload}/>
           <div style={{ display:"flex", gap:8 }}>
-            <button onClick={addNode} style={{ flex:1, padding:"8px", borderRadius:7, cursor:"pointer", fontSize:13,
+            <button onClick={addNode} style={{ flex:1, padding:"7px", borderRadius:7, cursor:"pointer", fontSize:13,
               border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>Add</button>
             <button onClick={()=>{setAddingNode(false);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);}}
-              style={{ padding:"8px 16px", borderRadius:7, cursor:"pointer", fontSize:13,
+              style={{ padding:"7px 14px", borderRadius:7, cursor:"pointer", fontSize:13,
                 border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>Cancel</button>
           </div>
         </div>
       )}
 
-      {/* Edge label + direction modal */}
+      {/* Edge direction + label modal */}
       {pendingEdge && (
         <div style={{ padding:"12px 14px", background:"var(--surface)", border:"1px solid var(--accent)", borderRadius:9 }}>
-          <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>
-            Connection: <strong style={{ color:"var(--accent)" }}>{displayNodes.find(n=>n.id===pendingEdge.from)?.name}</strong>
+          <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:8 }}>
+            <strong style={{ color:"var(--accent)" }}>{displayNodes.find(n=>n.id===pendingEdge.from)?.name}</strong>
             {" ↔ "}
             <strong style={{ color:"var(--accent)" }}>{displayNodes.find(n=>n.id===pendingEdge.to)?.name}</strong>
           </div>
-          {/* Direction selector */}
-          <div style={{ display:"flex", gap:6, marginBottom:10 }}>
-            {[
-              ["both",    "↔ Both ways",     "Mutual relationship"],
-              ["forward", "→ One way",       `${displayNodes.find(n=>n.id===pendingEdge.from)?.name} → ${displayNodes.find(n=>n.id===pendingEdge.to)?.name}`],
-              ["back",    "← One way",       `${displayNodes.find(n=>n.id===pendingEdge.to)?.name} → ${displayNodes.find(n=>n.id===pendingEdge.from)?.name}`],
-            ].map(([d,l,hint])=>(
-              <div key={d} onClick={()=>setEdgeDir(d)} title={hint}
-                style={{ flex:1, padding:"6px 4px", borderRadius:7, cursor:"pointer", textAlign:"center", fontSize:11,
+          <div style={{ display:"flex", gap:5, marginBottom:8 }}>
+            {[["both","↔ Mutual"],["forward","→ One-way"],["back","← Reverse"]].map(([d,l])=>(
+              <div key={d} onClick={()=>setEdgeDir(d)}
+                style={{ flex:1, padding:"6px 4px", borderRadius:6, cursor:"pointer", textAlign:"center", fontSize:11,
                   border:`1px solid ${edgeDir===d?"var(--accent)":"var(--border)"}`,
                   background:edgeDir===d?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
                   color:edgeDir===d?"var(--accent)":"var(--text-muted)" }}>{l}</div>
             ))}
           </div>
           <div style={{ display:"flex", gap:8 }}>
-            <input value={edgeLabel} onChange={e=>setEdgeLabel(e.target.value)}
-              placeholder="Relationship label (e.g. Mentor, Rival, Loves…)"
+            <input value={edgeLabel} onChange={e=>setEdgeLabel(e.target.value)} placeholder="Label (e.g. Mentor, Loves, Rival…)"
               onKeyDown={e=>{if(e.key==="Enter"){addEdge(pendingEdge.from,pendingEdge.to,edgeLabel,edgeDir);setPendingEdge(null);setEdgeLabel("");setEdgeDir("both");}}}
               style={{ flex:1, background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13 }}/>
             <button onClick={()=>{addEdge(pendingEdge.from,pendingEdge.to,edgeLabel,edgeDir);setPendingEdge(null);setEdgeLabel("");setEdgeDir("both");}}
               style={{ padding:"7px 14px", borderRadius:6, cursor:"pointer", fontSize:13,
-                border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>Add</button>
+                border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>Save</button>
             <button onClick={()=>{setPendingEdge(null);setEdgeLabel("");setEdgeDir("both");}}
               style={{ padding:"7px 10px", borderRadius:6, cursor:"pointer", fontSize:13,
                 border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>✕</button>
@@ -5242,112 +5244,176 @@ function RelationsTab({ char, onUpdate }) {
         </div>
       )}
 
-      {/* Selected node detail */}
-      {selNode && (
-        <div style={{ padding:"12px 14px", background:"var(--surface)", border:`1px solid ${nodeColour(selNode.type).border}`, borderRadius:9, display:"flex", gap:12, alignItems:"flex-start" }}>
-          <div style={{ width:44, height:44, borderRadius:"50%", flexShrink:0, overflow:"hidden", border:`2px solid ${nodeColour(selNode.type).border}` }}>
-            {selNode.image ? <img src={selNode.image} style={{ width:"100%", height:"100%", objectFit:"cover" }}/> : <div style={{ width:"100%", height:"100%", background:nodeColour(selNode.type).bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{nodeIcon(selNode.type)}</div>}
-          </div>
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"var(--font-display)", color:nodeColour(selNode.type).text, fontSize:15 }}>{selNode.name}</div>
-            {selNode.role && <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:1 }}>{selNode.role}</div>}
-            {selNode.notes && <div style={{ fontSize:12, color:"var(--text-dim)", marginTop:5, lineHeight:1.6 }}>{selNode.notes}</div>}
-            {edges.filter(e=>e.from===selNode.id||e.to===selNode.id).length > 0 && (
-              <div style={{ marginTop:8, display:"flex", flexWrap:"wrap", gap:4 }}>
-                {edges.filter(e=>e.from===selNode.id||e.to===selNode.id).map(e=>{
-                  const otherId = e.from===selNode.id ? e.to : e.from;
-                  const other   = displayNodes.find(n=>n.id===otherId);
-                  const dirStr  = e.dir==="forward"? (e.from===selNode.id?"→":"←") : e.dir==="back"? (e.to===selNode.id?"→":"←") : "↔";
-                  return <span key={e.id} onClick={()=>deleteEdge(e.id)} title="Click to remove" style={{ fontSize:11, padding:"2px 8px", borderRadius:10, cursor:"pointer",
-                    background:nodeColour(other?.type||"npc").bg, border:`1px solid ${nodeColour(other?.type||"npc").border}`, color:nodeColour(other?.type||"npc").text }}>
-                    {dirStr} {e.label||"link"} {other?.name} ✕
-                  </span>;
-                })}
-              </div>
-            )}
-          </div>
-          {selNode.id !== SELF_ID && <button onClick={()=>deleteNode(selNode.id)}
-            style={{ padding:"4px 10px", borderRadius:6, cursor:"pointer", fontSize:11,
-              border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)", flexShrink:0 }}>Delete</button>}
-        </div>
-      )}
-
       {/* SVG diagram */}
-      <div style={{ flex:1, overflow:"auto", borderRadius:10, border:"1px solid var(--border)", background:"var(--surface)", minHeight:400 }}>
+      <div style={{ overflow:"auto", borderRadius:10, border:"1px solid var(--border)", background:"var(--surface)", minHeight:400, position:"relative" }}>
+        {storedNodes.length === 0 && (
+          <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
+            color:"var(--text-dim)", fontSize:12, fontStyle:"italic", textAlign:"center", pointerEvents:"none" }}>
+            Click "+ Add Character" to start building your relationship diagram
+          </div>
+        )}
         <svg ref={svgRef} width="600" height="440" style={{ display:"block", cursor:connectMode?"crosshair":"default" }}
-          onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
-          {markers}
+          onMouseMove={onSvgMouseMove} onMouseUp={onSvgMouseUp} onMouseLeave={onSvgMouseUp}
+          onClick={()=>{ if(!connectMode) setSelectedNode(null); }}>
+          <defs>
+            <marker id="arr-sm-end"   markerWidth="8"  markerHeight="8"  refX="7"  refY="3"  orient="auto"><path d="M0,0 L0,6 L8,3 z"   fill="rgba(160,160,160,0.7)"/></marker>
+            <marker id="arr-sm-start" markerWidth="8"  markerHeight="8"  refX="1"  refY="3"  orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="rgba(160,160,160,0.7)"/></marker>
+            <marker id="arr-lg-end"   markerWidth="12" markerHeight="12" refX="11" refY="4.5" orient="auto"><path d="M0,0 L0,9 L12,4.5 z" fill="rgba(220,180,80,0.9)"/></marker>
+            <marker id="arr-lg-start" markerWidth="12" markerHeight="12" refX="1"  refY="4.5" orient="auto-start-reverse"><path d="M0,0 L0,9 L12,4.5 z" fill="rgba(220,180,80,0.9)"/></marker>
+            <clipPath id="clip-self"><circle cx="0" cy="0" r="33"/></clipPath>
+            {storedNodes.map(n => <clipPath key={n.id} id={`clip-${n.id}`}><circle cx="0" cy="0" r="28"/></clipPath>)}
+          </defs>
 
-          {/* Edges */}
+          {/* Edges — no delete button, clean lines only */}
           {edges.map(e => {
             const a = displayNodes.find(n=>n.id===e.from);
             const b = displayNodes.find(n=>n.id===e.to);
             if (!a||!b) return null;
-            const r = 38;
-            const {x1,y1,x2,y2} = getEdgePoints(a,b,r);
+            const {x1,y1,x2,y2} = getEdgePoints(a, b);
             const mx=(x1+x2)/2, my=(y1+y2)/2;
-            const isBig = e.dir==="forward"||e.dir==="back";
-            const markerEnd    = isBig ? "url(#arrow-end-big)"   : "url(#arrow-end)";
-            const markerStart  = (e.dir==="back"||e.dir==="both") && !isBig ? "url(#arrow-start)" :
-                                 e.dir==="both" ? "url(#arrow-start)" : "none";
-            const hasEndArrow  = e.dir==="both"||e.dir==="forward";
-            const hasStartArrow= e.dir==="both"||e.dir==="back";
+            const isOneWay = e.dir==="forward"||e.dir==="back";
+            const mEnd   = isOneWay ? "url(#arr-lg-end)"   : "url(#arr-sm-end)";
+            const mStart = isOneWay ? (e.dir==="back"?"url(#arr-lg-start)":"none") : "url(#arr-sm-start)";
             return (
               <g key={e.id}>
                 <line x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke="rgba(180,180,180,0.35)" strokeWidth={isBig?2.5:1.5}
-                  markerEnd={hasEndArrow ? markerEnd : "none"}
-                  markerStart={hasStartArrow ? (isBig?"url(#arrow-start-big)":"url(#arrow-start)") : "none"}/>
-                {e.label && (
-                  <text x={mx} y={my-7} textAnchor="middle" fontSize="10"
-                    fill="rgba(200,200,200,0.75)" fontFamily="var(--font-body)">{e.label}</text>
-                )}
-                {/* Delete dot */}
-                <circle cx={mx} cy={my} r="6" fill="rgba(60,60,60,0.6)"
-                  stroke="rgba(150,150,150,0.4)" strokeWidth="1"
-                  style={{ cursor:"pointer" }} onClick={()=>deleteEdge(e.id)}/>
-                <text x={mx} y={my+3.5} textAnchor="middle" fontSize="8" fill="rgba(200,200,200,0.7)" style={{ pointerEvents:"none" }}>✕</text>
+                  stroke={isOneWay?"rgba(220,180,80,0.45)":"rgba(160,160,160,0.3)"}
+                  strokeWidth={isOneWay?2.5:1.5}
+                  markerEnd={e.dir!=="back"?mEnd:"none"}
+                  markerStart={e.dir!=="forward"?mStart:"none"}/>
+                {e.label && <text x={mx} y={my-7} textAnchor="middle" fontSize="10"
+                  fill="rgba(200,200,200,0.7)" fontFamily="var(--font-body)">{e.label}</text>}
               </g>
             );
           })}
 
           {/* Nodes */}
           {displayNodes.map(n => {
-            const c   = nodeColour(n.type);
-            const sel = selectedNode === n.id;
+            const c    = nodeColour(n.type);
+            const sel  = selectedNode === n.id;
             const isSelf = n.id === SELF_ID;
-            const r   = isSelf ? 34 : 28;
+            const r    = isSelf ? 34 : 28;
             const fromH = connectMode && connectFrom === n.id;
             return (
               <g key={n.id} transform={`translate(${n.x},${n.y})`}
                 style={{ cursor: connectMode?"pointer":isSelf?"move":"grab" }}
-                onMouseDown={e=>onMouseDown(e,n.id)}
-                onClick={()=>{ if(!connectMode) setSelectedNode(sel?null:n.id); }}>
-                {/* Glow ring for selected/connect */}
+                onMouseDown={e=>onNodeMouseDown(e,n.id)}
+                onClick={e=>onNodeClick(e,n.id)}>
                 {(sel||fromH) && <circle r={r+5} fill="none" stroke={fromH?"#ffd700":"var(--accent)"} strokeWidth="2" opacity="0.5"/>}
-                {/* Circle background */}
                 <circle r={r} fill={c.bg} stroke={c.border} strokeWidth={isSelf?2.5:1.5}/>
-                {/* Profile image or icon */}
-                {n.image ? (
-                  <image href={n.image} x={-r} y={-r} width={r*2} height={r*2} clipPath={`url(#${isSelf?"node-clip-self":`clip-${n.id}`})`} preserveAspectRatio="xMidYMid slice"/>
-                ) : (
-                  <text y={isSelf?6:5} textAnchor="middle" fontSize={isSelf?22:18} style={{ pointerEvents:"none" }}>{nodeIcon(n.type)}</text>
-                )}
-                {/* Name below node */}
-                <text y={r+14} textAnchor="middle" fontSize={isSelf?12:11} fill={c.text}
-                  fontFamily="var(--font-display)" style={{ pointerEvents:"none" }}>
-                  {n.name.length > 12 ? n.name.slice(0,11)+"…" : n.name}
+                {n.image
+                  ? <image href={n.image} x={-r} y={-r} width={r*2} height={r*2}
+                      clipPath={`url(#${isSelf?"clip-self":`clip-${n.id}`})`} preserveAspectRatio="xMidYMid slice"/>
+                  : <text y={isSelf?6:5} textAnchor="middle" fontSize={isSelf?22:18} style={{ pointerEvents:"none" }}>{nodeIcon(n.type)}</text>}
+                <text y={r+14} textAnchor="middle" fontSize={isSelf?12:11}
+                  fill={c.text} fontFamily="var(--font-display)" style={{ pointerEvents:"none" }}>
+                  {n.name.length>12?n.name.slice(0,11)+"…":n.name}
                 </text>
-                {n.role && (
-                  <text y={r+25} textAnchor="middle" fontSize="9" fill="rgba(180,180,180,0.55)" style={{ pointerEvents:"none" }}>
-                    {n.role.length > 14 ? n.role.slice(0,13)+"…" : n.role}
-                  </text>
-                )}
+                {n.role && <text y={r+25} textAnchor="middle" fontSize="9"
+                  fill="rgba(180,180,180,0.5)" style={{ pointerEvents:"none" }}>
+                  {n.role.length>14?n.role.slice(0,13)+"…":n.role}
+                </text>}
               </g>
             );
           })}
         </svg>
       </div>
+
+      {/* Node detail / edit panel — appears below diagram when a node is selected */}
+      {selNode && (() => {
+        const c = nodeColour(selNode.type);
+        const nodeEdges = edges.filter(e=>e.from===selNode.id||e.to===selNode.id);
+        return (
+          <div style={{ padding:"14px", background:"var(--surface)", border:`1px solid ${c.border}`, borderRadius:10 }}>
+            {editingNode !== selNode.id ? (
+              // ── View mode ──
+              <div>
+                <div style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:10 }}>
+                  <div style={{ width:48, height:48, borderRadius:"50%", flexShrink:0, overflow:"hidden", border:`2px solid ${c.border}` }}>
+                    {selNode.image
+                      ? <img src={selNode.image} style={{ width:"100%",height:"100%",objectFit:"cover" }}/>
+                      : <div style={{ width:"100%",height:"100%",background:c.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22 }}>{nodeIcon(selNode.type)}</div>}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:c.text, fontSize:16 }}>{selNode.name}</div>
+                    {selNode.role && <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:2 }}>{selNode.role}</div>}
+                  </div>
+                  <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+                    {selNode.id !== SELF_ID && <>
+                      <button onClick={()=>startEdit(selNode.id)}
+                        style={{ padding:"5px 12px", borderRadius:6, cursor:"pointer", fontSize:12,
+                          border:"1px solid var(--border)", background:"var(--card)", color:"var(--text-muted)" }}>Edit</button>
+                      <button onClick={()=>deleteNode(selNode.id)}
+                        style={{ padding:"5px 10px", borderRadius:6, cursor:"pointer", fontSize:12,
+                          border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)" }}>Delete</button>
+                    </>}
+                  </div>
+                </div>
+                {selNode.notes && <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.65, margin:"0 0 10px" }}>{selNode.notes}</p>}
+                {nodeEdges.length > 0 && (
+                  <div>
+                    <div style={{ fontSize:11, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Connections</div>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                      {nodeEdges.map(e => {
+                        const otherId = e.from===selNode.id ? e.to : e.from;
+                        const other   = displayNodes.find(n=>n.id===otherId);
+                        const oc      = nodeColour(other?.type||"npc");
+                        const dirStr  = e.dir==="forward"?(e.from===selNode.id?"→":"←"):e.dir==="back"?(e.to===selNode.id?"→":"←"):"↔";
+                        return (
+                          <div key={e.id} style={{ display:"flex", alignItems:"center", gap:4, padding:"3px 10px 3px 6px", borderRadius:10,
+                            background:oc.bg, border:`1px solid ${oc.border}` }}>
+                            <span style={{ fontSize:11, color:oc.text }}>{dirStr} {e.label||"linked to"} {other?.name}</span>
+                            <span onClick={()=>deleteEdge(e.id)} title="Remove connection"
+                              style={{ fontSize:11, color:"var(--text-dim)", cursor:"pointer", marginLeft:2, lineHeight:1 }}>✕</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // ── Edit mode ──
+              <div>
+                <div style={{ fontFamily:"var(--font-display)", color:c.text, fontSize:13, marginBottom:10 }}>Edit Character</div>
+                <div style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+                  <div onClick={()=>imgRef.current?.click()}
+                    style={{ width:52, height:52, borderRadius:"50%", border:"2px dashed var(--border)", cursor:"pointer", flexShrink:0,
+                      background:"var(--card)", overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    {nodeImage ? <img src={nodeImage} style={{ width:"100%",height:"100%",objectFit:"cover" }}/> : <span style={{ fontSize:22 }}>📷</span>}
+                  </div>
+                  <div style={{ flex:1, display:"flex", flexDirection:"column", gap:6 }}>
+                    <input value={nodeName} onChange={e=>setNodeName(e.target.value)} placeholder="Name *"
+                      style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13 }}/>
+                    <input value={nodeRole} onChange={e=>setNodeRole(e.target.value)} placeholder="Role / Title"
+                      style={{ background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"7px 10px", borderRadius:6, fontSize:13 }}/>
+                  </div>
+                </div>
+                <div style={{ display:"flex", gap:5, marginBottom:8 }}>
+                  {[["npc","👤 NPC"],["party","🛡 Party"],["enemy","💀 Enemy"],["faction","🏰 Faction"]].map(([t,l])=>(
+                    <div key={t} onClick={()=>setNodeType(t)}
+                      style={{ flex:1, padding:"5px 2px", borderRadius:6, cursor:"pointer", textAlign:"center", fontSize:10,
+                        border:`1px solid ${nodeType===t?"var(--accent)":"var(--border)"}`,
+                        background:nodeType===t?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                        color:nodeType===t?"var(--accent)":"var(--text-muted)" }}>{l}</div>
+                  ))}
+                </div>
+                <textarea value={nodeNotes} onChange={e=>setNodeNotes(e.target.value)} placeholder="Notes…"
+                  style={{ width:"100%", background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)",
+                    padding:"8px 10px", borderRadius:6, fontSize:12, resize:"vertical", minHeight:70, boxSizing:"border-box", marginBottom:8 }}/>
+                <input ref={imgRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleImageUpload}/>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={saveEdit} style={{ flex:1, padding:"7px", borderRadius:7, cursor:"pointer", fontSize:13,
+                    border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>Save</button>
+                  <button onClick={()=>{setEditingNode(null);setNodeName("");setNodeRole("");setNodeNotes("");setNodeImage(null);}}
+                    style={{ padding:"7px 14px", borderRadius:7, cursor:"pointer", fontSize:13,
+                      border:"1px solid var(--border)", background:"transparent", color:"var(--text-muted)" }}>Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
