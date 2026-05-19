@@ -228,7 +228,30 @@ const useGameData = () => {
 // ── Constants ──
 const ABILITY_NAMES = { str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma" };
 const ABILITY_SHORT = { str:"STR",dex:"DEX",con:"CON",int:"INT",wis:"WIS",cha:"CHA" };
-// ── Mobile detection hook ─────────────────────────────────────────────
+// ── Font & symbol appearance constants ─────────────────────────────
+const FONT_OPTIONS = [
+  ["'Cinzel Decorative',serif",           "Cinzel (Fantasy)"],
+  ["'MedievalSharp',serif",               "Medieval Sharp"],
+  ["Georgia,serif",                        "Georgia (Classic)"],
+  ["'Palatino Linotype',serif",            "Palatino"],
+  ["'Courier New',monospace",              "Courier (Typewriter)"],
+  ["'Crimson Pro',serif",                  "Crimson Pro"],
+  ["'Philosopher',serif",                  "Philosopher"],
+  ["'Libre Baskerville',serif",            "Libre Baskerville"],
+  ["system-ui,sans-serif",                 "System (Clean)"],
+];
+
+const SYMBOL_PRESETS = {
+  "All":       null,
+  "Stars":     ["✦","✧","★","☆","✴","✩","⁕"],
+  "Runes":     ["ᛏ","ᚨ","ᛉ","ᚱ","ᛊ","ᛗ","ᛟ","ᚷ","ᛒ","ᚦ"],
+  "Arcane":    ["⊗","⊙","◈","⬡","⬟","⌘","⊕"],
+  "Musical":   ["♩","♪","♫","♬"],
+  "Geometric": ["△","▽","◇","⬦","◈","⬡"],
+  "None":      [],
+};
+
+// ── useIsMobile hook ─────────────────────────────────────────────
 function useIsMobile() {
   const [mobile, setMobile] = React.useState(() => window.innerWidth < 640);
   React.useEffect(() => {
