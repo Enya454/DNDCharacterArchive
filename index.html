@@ -6994,7 +6994,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           const sheetPadding = align==="comfortable" ? "10px 40px 12px" : "10px 12px 12px";
 
           return (
-        // Outer wrapper — full width, positions art + sheet together
         <div style={{ display:"flex", flexDirection:"row", alignItems:"stretch",
           justifyContent: align==="left" ? "flex-start" : align==="right" ? "flex-end" : "center",
           width:"100%", position:"relative" }}>
@@ -7411,8 +7410,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
               )}
             </div>
           )}
-        </div>
-        </div>
         </div>
           );
         })()
