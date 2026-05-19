@@ -31,6 +31,7 @@
     .sheet-section-label { font-size: 11px !important; letter-spacing: 1.5px; }
 
     /* ── Floating symbol animations ── */
+    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
     @keyframes floatUp {
       0%   { transform: translateY(0)        translateX(0px)   rotate(0deg);  opacity: 0; }
       8%   { opacity: 1; }
@@ -5842,7 +5843,90 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         </div>
       </div>
 
-      {/* Light / Dark mode */}
+      {/* ── Sheet Layout ── */}
+      {sectionHead("Sheet Layout")}
+
+      {/* Sheet alignment */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Sheet Alignment</label>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
+          {[
+            ["left",        "⬅",  "Left"],
+            ["center",      "⬛",  "Center"],
+            ["right",       "➡",  "Right"],
+            ["full",        "⬜",  "Full"],
+            ["comfortable", "🖼",  "Cozy"],
+          ].map(([v, icon, lbl]) => {
+            const active = (cc.sheetAlign || "center") === v;
+            return (
+              <button key={v} onClick={()=>updCustom({sheetAlign:v})}
+                style={{ padding:"8px 4px", borderRadius:7, cursor:"pointer", textAlign:"center",
+                  border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                  background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                  color:active?"var(--accent)":"var(--text-muted)", transition:"all 0.15s" }}>
+                <div style={{ fontSize:18, marginBottom:3 }}>{icon}</div>
+                <div style={{ fontSize:10 }}>{lbl}</div>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:6 }}>
+          {{"left":"Sheet hugs the left edge","center":"Sheet centred (default)","right":"Sheet hugs the right edge","full":"Full-screen, no max width","comfortable":"Wide margins on both sides"}[cc.sheetAlign||"center"]}
+        </div>
+      </div>
+
+      {/* Full body art */}
+      <div style={{ marginBottom:14 }}>
+        <label style={label}>Full Body Character Art</label>
+        <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+          {[["none","None"],["left","Left panel"],["right","Right panel"]].map(([v,l])=>{
+            const active = (cc.bodyArtSide||"none") === v;
+            return (
+              <button key={v} onClick={()=>updCustom({bodyArtSide:v})}
+                style={{ flex:1, padding:"7px 4px", borderRadius:7, cursor:"pointer",
+                  border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                  background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                  color:active?"var(--accent)":"var(--text-muted)", fontSize:12 }}>{l}</button>
+            );
+          })}
+        </div>
+        {(cc.bodyArtSide||"none") !== "none" && (
+          <div>
+            <div style={{ fontSize:11, color:"var(--text-muted)", marginBottom:6 }}>
+              Upload a full-body portrait. It will be pinned to the {cc.bodyArtSide} side of the sheet.
+            </div>
+            <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+              {char.bodyArt && (
+                <div style={{ width:60, height:100, borderRadius:6, overflow:"hidden", border:"1px solid var(--border)", flexShrink:0 }}>
+                  <img src={char.bodyArt} style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}/>
+                </div>
+              )}
+              <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                <button onClick={()=>document.getElementById("body-art-upload").click()}
+                  style={{ padding:"6px 14px", borderRadius:6, cursor:"pointer", fontSize:12,
+                    border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)" }}>
+                  {char.bodyArt ? "Change Image" : "Upload Image"}
+                </button>
+                {char.bodyArt && (
+                  <button onClick={()=>onUpdate({...char, bodyArt:null})}
+                    style={{ padding:"5px 10px", borderRadius:6, cursor:"pointer", fontSize:11,
+                      border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)" }}>Remove</button>
+                )}
+              </div>
+            </div>
+            <input id="body-art-upload" type="file" accept="image/*" style={{ display:"none" }}
+              onChange={e => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => onUpdate({ ...char, bodyArt: ev.target.result });
+                reader.readAsDataURL(file);
+              }}/>
+          </div>
+        )}
+      </div>
+
+      {/* ── Appearance ── */}
+      {sectionHead("Appearance")}
       <div style={{ marginBottom:16 }}>
         <label style={label}>Sheet Mode</label>
         <div style={{ display:"flex", gap:8 }}>
@@ -6888,8 +6972,26 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
         </div>
       ) : (
-        <div style={{ padding:"10px 12px 12px", height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:1200, margin:"0 auto", width:"100%" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
+        (() => {
+          const align = char.custom?.sheetAlign || "center";
+          const bodyArtSide = char.custom?.bodyArtSide || "none";
+          const bodyArt     = char.bodyArt || null;
+          const sheetMaxW   = align==="full" ? "100%" : align==="comfortable" ? 960 : 1200;
+          const sheetMargin = align==="left" ? "0 auto 0 0" : align==="right" ? "0 0 0 auto" : align==="comfortable" ? "0 auto" : "0 auto";
+          const sheetPadding = align==="comfortable" ? "10px 40px 12px" : "10px 12px 12px";
+          return (
+        <div style={{ position:"relative", display:"flex", flexDirection: bodyArtSide==="right" ? "row-reverse" : "row", alignItems:"stretch" }}>
+          {/* Full body art panel */}
+          {bodyArt && bodyArtSide !== "none" && (
+            <div style={{ width:200, flexShrink:0, position:"relative", overflow:"hidden" }}>
+              <img src={bodyArt} style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top", display:"block" }}/>
+              <div style={{ position:"absolute", inset:0, background: bodyArtSide==="left"
+                ? "linear-gradient(to right, transparent 70%, var(--bg) 100%)"
+                : "linear-gradient(to left, transparent 70%, var(--bg) 100%)" }}/>
+            </div>
+          )}
+          <div style={{ flex:1, minWidth:0, padding:sheetPadding, height:"calc(100vh - 56px)", boxSizing:"border-box", overflow:"hidden", maxWidth:sheetMaxW, margin:sheetMargin, width:"100%" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
         <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
@@ -7271,7 +7373,10 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
         </div>
         </div>
-      </div>
+          </div>
+        </div>
+          );
+        })()
       )}
     </TW>
   );
@@ -8027,7 +8132,13 @@ function App() {
 
         {/* Character grid */}
         <div style={{ maxWidth:1100, margin:"0 auto", padding:"36px 24px", position:"relative", zIndex:1 }}>
-          {characters.length === 0 ? (
+          {charLoading ? (
+            <div style={{ textAlign:"center", padding:"80px 20px" }}>
+              <div style={{ fontSize:48, marginBottom:18, animation:"spin 1.5s linear infinite", display:"inline-block" }}>⚙️</div>
+              <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:20, color:dt.textMuted, marginBottom:8, letterSpacing:1 }}>Summoning your heroes…</div>
+              <div style={{ color:dt.textDim, fontSize:13, fontStyle:"italic" }}>Consulting the arcane registry</div>
+            </div>
+          ) : characters.length === 0 ? (
             <div style={{ textAlign:"center", padding:"80px 20px" }}>
               <div style={{ fontSize:72, marginBottom:18, filter:"drop-shadow(0 0 20px rgba(201,162,39,0.3))" }}>📖</div>
               <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:24, color:dt.textMuted, marginBottom:10, letterSpacing:1 }}>The tome is empty</div>
