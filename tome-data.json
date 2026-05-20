@@ -12176,7 +12176,8 @@
               "name": "Ascendant Step",
               "description": "You can cast Levitate on yourself at will, without expending a spell slot or material components.",
               "levelReq": 9,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action"
             },
             {
               "name": "Beast Speech",
@@ -12194,7 +12195,10 @@
               "name": "Bewitching Whispers",
               "description": "You can cast Compulsion once using a warlock spell slot. You can't do so again until you finish a long rest.",
               "levelReq": 7,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Book of Ancient Secrets",
@@ -12205,13 +12209,17 @@
                 "type": "text",
                 "prompt": "Note your chosen ritual spells in your character notes",
                 "note": "Choose 2 ritual spells from any class list to inscribe in your Book of Shadows."
-              }
+              },
+              "actionType": "action"
             },
             {
               "name": "Chains of Carceri",
               "description": "You can cast Hold Monster at will \u2014 targeting a celestial, fiend, or elemental \u2014 without expending a spell slot or material components. You must finish a long rest before you can use this invocation on the same creature again.",
               "levelReq": 15,
-              "prereq": "Pact of the Chain"
+              "prereq": "Pact of the Chain",
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "long rest"
             },
             {
               "name": "Devil's Sight",
@@ -12223,7 +12231,10 @@
               "name": "Dreadful Word",
               "description": "You can cast Confusion once using a warlock spell slot. You can't do so again until you finish a long rest.",
               "levelReq": 7,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Eldritch Mind",
@@ -12259,7 +12270,8 @@
               "name": "Gaze of Two Minds",
               "description": "You can use your action to touch a willing humanoid and perceive through its senses until the end of your next turn.",
               "levelReq": 1,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action"
             },
             {
               "name": "Ghostly Gaze",
@@ -12272,7 +12284,8 @@
               "description": "As an action, you gain the ability to see through solid objects to a range of 30 feet. Within that range, you have darkvision if you don't already have it. This special sight lasts for 1 minute or until your concentration ends (as if you were concentrating on a spell). During that time, you perceive objects as ghostly, transparent images. Once you use this invocation, you can't use it again until you finish a short or long rest.",
               "uses": 1,
               "recharge": "short or long rest",
-              "levelReq": 7
+              "levelReq": 7,
+              "actionType": "action"
             },
             {
               "name": "Gift of the Depths",
@@ -12314,7 +12327,10 @@
               "name": "Minions of Chaos",
               "description": "You can cast Conjure Elemental once using a warlock spell slot. You can't do so again until you finish a long rest.",
               "levelReq": 9,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Misty Visions",
@@ -12326,7 +12342,8 @@
               "name": "One with Shadows",
               "description": "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or a reaction.",
               "levelReq": 5,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action"
             },
             {
               "name": "Otherworldly Leap",
@@ -12344,19 +12361,26 @@
               "name": "Sculptor of Flesh",
               "description": "You can cast Polymorph once using a warlock spell slot. You can't do so again until you finish a long rest.",
               "levelReq": 7,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Shroud of Shadow",
               "description": "You can cast Invisibility at will, without expending a spell slot.",
               "levelReq": 15,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action"
             },
             {
               "name": "Thief of Five Fates",
               "description": "You can cast Bane once using a warlock spell slot. You can't do so again until you finish a long rest.",
               "levelReq": 1,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Thirsting Blade",
@@ -12368,19 +12392,26 @@
               "name": "Tomb of Levistus",
               "description": "As a reaction when you take damage, you can entomb yourself in ice, which melts away at the end of your next turn. You gain 10 temporary hit points per warlock level, which take as much of the triggering damage as possible. You are then vulnerable to fire damage and restrained until the effect ends.",
               "levelReq": 5,
-              "prereq": null
+              "prereq": null,
+              "actionType": "reaction",
+              "uses": 1,
+              "recharge": "short or long rest"
             },
             {
               "name": "Undying Servitude",
               "description": "You can cast Animate Dead without using a spell slot. Once you do so, you can't cast it this way again until you finish a long rest.",
               "levelReq": 5,
-              "prereq": null
+              "prereq": null,
+              "actionType": "action",
+              "uses": 1,
+              "recharge": "long rest"
             },
             {
               "name": "Voice of the Chain Master",
               "description": "You can communicate telepathically with your familiar and perceive through your familiar's senses as long as you are on the same plane of existence. Additionally, while perceiving through your familiar's senses, you can also speak through your familiar in your own voice, even if your familiar is normally incapable of speech.",
               "levelReq": 1,
-              "prereq": "Pact of the Chain"
+              "prereq": "Pact of the Chain",
+              "actionType": "action"
             },
             {
               "name": "Witch Sight",
