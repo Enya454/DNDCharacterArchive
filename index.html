@@ -6473,7 +6473,45 @@ function ActionsTab({ char, gameData, onUpdate }) {
     ["reaction", "🔄 Reactions"],
   ];
 
-  // Active invocations that have action types
+  // Spells by casting time — pull from char.spells + racialSpells
+  const allCharSpells = [
+    ...(char.spells || []),
+    ...(char.racialSpells || []),
+  ];
+  const spellsByTime = castTime => allCharSpells.filter(s => {
+    const ct = (s.castingTime || "").toLowerCase();
+    return ct.includes(castTime);
+  });
+  const reactionSpells   = spellsByTime("reaction");
+  const bonusSpells      = spellsByTime("bonus action");
+
+  const SpellActionCard = ({ spell }) => {
+    const [open, setOpen] = useState(false);
+    return (
+      <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 12px", marginBottom:6 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
+          <div style={{ flex:1 }}>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:14 }}>{spell.name}</span>
+            <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>
+              {spell.level === 0 ? "Cantrip" : `Level ${spell.level}`} · {spell.school}
+            </span>
+          </div>
+          <span style={{ fontSize:11, color:"var(--accent)", flexShrink:0 }}>{spell.castingTime}</span>
+          <span style={{ fontSize:10, color:"var(--text-dim)" }}>{open?"▲":"▼"}</span>
+        </div>
+        {open && (
+          <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.65 }}>
+            <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:6, fontSize:11, color:"var(--text-dim)" }}>
+              {spell.range    && <span>📏 {spell.range}</span>}
+              {spell.duration && <span>⏱ {spell.duration}</span>}
+              {spell.components && <span>🔤 {spell.components}</span>}
+            </div>
+            {spell.description}
+          </div>
+        )}
+      </div>
+    );
+  };
   const invocationsFeature = allClassFeats.find(f => f.type === "eldritch_invocations");
   const chosenInvocations  = char.featureChoices?.["Eldritch Invocations"] || [];
   const activeInvActions   = invocationsFeature
@@ -6557,6 +6595,7 @@ function ActionsTab({ char, gameData, onUpdate }) {
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="bonus")} />
         {byType("bonus").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
         {invByType("bonus").map(inv=><FeatureAction key={inv.name} feat={{...inv, type:"action"}} char={char} onUpdate={onUpdate}/>)}
+        {bonusSpells.map(s=><SpellActionCard key={s.name} spell={s}/>)}
         {featureBonusActions.map((ba,i) => (
           <div key={i} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 12px", marginBottom:6 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -6573,6 +6612,7 @@ function ActionsTab({ char, gameData, onUpdate }) {
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="reaction")} />
         {byType("reaction").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
         {invByType("reaction").map(inv=><FeatureAction key={inv.name} feat={{...inv, type:"action"}} char={char} onUpdate={onUpdate}/>)}
+        {reactionSpells.map(s=><SpellActionCard key={s.name} spell={s}/>)}
       </>)}
 
       {section === "all" && standardActions.filter(a=>a.actionType==="free").length > 0 && (<>
