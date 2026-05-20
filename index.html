@@ -4783,6 +4783,47 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
       {isOpen && (
         <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid var(--border)" }}>
           <p style={{ fontSize:14, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{feat.description}</p>
+          {/* Action-type features: show uses and summon HP inline */}
+          {(feat.type === "action" || feat.actionType) && (() => {
+            const spentKey = `spent_${feat.name}`;
+            const spent = char.actionUses?.[spentKey] || 0;
+            const resolveF = v => {
+              if (!v) return null;
+              if (v==="intelligenceModifier") return Math.max(1, calcMod(char.abilities.int));
+              if (v==="wisdomModifier")       return Math.max(1, calcMod(char.abilities.wis));
+              if (v==="charismaModifier")     return Math.max(1, calcMod(char.abilities.cha));
+              if (v==="halfLevel")            return Math.max(1, Math.floor(char.level/2));
+              if (v==="proficiencyBonus")     return Math.max(1, Math.ceil(1+char.level/4));
+              if (v==="level*5")              return char.level*5;
+              return typeof v === "number" ? v : null;
+            };
+            const maxUses = feat.uses ? resolveF(feat.uses.max) : null;
+            const remaining = maxUses !== null ? Math.max(0, maxUses - spent) : null;
+            const summon = feat.summon;
+            const summonMaxHp = summon ? resolveF(summon.hpFormula) : null;
+            const summonKey = summon ? `summon_${summon.storeKey}_hp` : null;
+            const summonHp = summon ? char.actionUses?.[summonKey] : null;
+            return (
+              <div style={{ marginTop:8 }}>
+                {remaining !== null && (
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                    <span style={{ fontSize:12, color:"var(--text-muted)" }}>Uses:</span>
+                    <span style={{ fontFamily:"var(--font-display)", color: remaining>0?"var(--accent)":"var(--text-dim)", fontSize:13 }}>{remaining}/{maxUses}</span>
+                    <span style={{ fontSize:11, color:"var(--text-dim)" }}>— tracked in ⚔️ Actions tab</span>
+                  </div>
+                )}
+                {summon && summonHp !== undefined && summonHp > 0 && (
+                  <div style={{ padding:"6px 10px", background:"rgba(0,0,0,0.15)", border:"1px solid var(--border)", borderRadius:6 }}>
+                    <span style={{ fontSize:12, color:"var(--accent)", fontFamily:"var(--font-display)" }}>{summon.name}</span>
+                    <span style={{ fontSize:12, color: summonHp/summonMaxHp>0.5?"var(--success)":summonHp/summonMaxHp>0.25?"#e67e22":"var(--danger)", marginLeft:8 }}>
+                      {summonHp}/{summonMaxHp} HP
+                    </span>
+                    {summon.ac && <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:8 }}>AC {summon.ac}</span>}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {chosen && (() => {
             const subKey  = feat.name + "_sub_" + String(chosen).replace(/\s+/g,"_");
             const subData = feat.optionSubChoices?.[chosen];
@@ -6430,10 +6471,22 @@ function ActionsTab({ char, gameData, onUpdate }) {
   const combatClassActions = classActions.filter(f => COMBAT_ACTIONS.has(f.name) || f.damageType || f.attackType);
   const otherClassActions  = classActions.filter(f => !COMBAT_ACTIONS.has(f.name) && !f.damageType && !f.attackType);
 
-  // Collect bonusActions from features (e.g. Eldritch Cannon sub-actions)
-  const featureBonusActions = allFeatures
-    .filter(f => char.level >= (f.level||1))
-    .flatMap(f => (f.bonusActions||[]).map(ba => ({...ba, _parentFeature: f.name})));
+  // Collect bonusActions from features — only show when the parent summon is active
+  const featureBonusActions = [
+    ...(classData?.features || []),
+    ...((char.subclass && classData?.subclasses?.[char.subclass]?.features) || []),
+    ...(speciesData?.features || []),
+    ...(subraceData?.features || []),
+  ].filter(f => char.level >= (f.level||1) && f.bonusActions?.length)
+   .flatMap(f => {
+     // Only expose bonus actions when the parent summon is active (if it has one)
+     if (f.summon) {
+       const summonKey = `summon_${f.summon.storeKey}_hp`;
+       const hp = char.actionUses?.[summonKey];
+       if (hp === undefined || hp <= 0) return [];
+     }
+     return f.bonusActions.map(ba => ({...ba, _parentFeature: f.name}));
+   });
 
   return (
     <div>
