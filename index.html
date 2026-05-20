@@ -989,53 +989,70 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             const picked  = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
             const count   = feature.count || 1;
             const details = feature.optionDetails || {};
-            const toggle = opt => {
+            const toggle  = opt => {
               const isOn = picked.includes(opt);
               const next = isOn
                 ? picked.filter(p => p !== opt)
                 : picked.length < count ? [...picked, opt] : picked;
               onChoice && onChoice(feature.name, next);
             };
+            const expandedKey = expandedMulti?.startsWith(feature.name + "_")
+              ? expandedMulti.slice(feature.name.length + 1) : null;
+            const expandedDet = expandedKey ? details[expandedKey] : null;
             return (
               <div>
                 <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
                   Choose <strong style={{ color:"var(--accent)" }}>{count}</strong> option{count!==1?"s":""}
                   {picked.length > 0 && <span style={{ color:"var(--success)", marginLeft:8 }}>({picked.length}/{count} chosen)</span>}
                 </div>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:8 }}>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom: expandedDet ? 10 : 4 }}>
                   {(feature.options||[]).map(opt => {
                     const isPicked  = picked.includes(opt);
                     const canPick   = isPicked || picked.length < count;
                     const det       = details[opt];
-                    const isExpanded = expandedMulti === (feature.name + "_" + opt);
+                    const isExp     = expandedKey === opt;
                     return (
-                      <div key={opt}>
-                        <div onClick={()=>{
-                          if (canPick||isPicked) toggle(opt);
-                          setExpandedMulti(isExpanded ? null : feature.name + "_" + opt);
-                        }}
-                          style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:20, cursor:"pointer",
+                      <div key={opt} style={{ display:"flex", alignItems:"center", gap:2 }}>
+                        {/* Select button */}
+                        <div onClick={()=>{ if(canPick||isPicked) toggle(opt); }}
+                          style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:"20px 0 0 20px", cursor:canPick||isPicked?"pointer":"default",
                             fontSize:12, transition:"all 0.15s",
                             border:`1px solid ${isPicked?"var(--accent)":canPick?"var(--border)":"var(--border)"}`,
+                            borderRight:"none",
                             background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.12)":"var(--surface)",
                             color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
                             opacity:!canPick&&!isPicked?0.4:1 }}>
                           {isPicked && <span style={{ fontSize:10 }}>✓</span>}
                           {opt}
                           {det?.cost && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:3 }}>({det.cost})</span>}
-                          <span style={{ fontSize:9, color:"var(--text-dim)", marginLeft:2 }}>{isExpanded?"▲":"▾"}</span>
                         </div>
-                        {isExpanded && det?.description && (
-                          <div style={{ marginTop:4, marginBottom:4, padding:"8px 12px", background:"rgba(0,0,0,0.15)",
-                            border:"1px solid var(--border)", borderRadius:8, fontSize:12, color:"var(--text-muted)",
-                            lineHeight:1.65, maxWidth:480 }}>
-                            {det.description}
-                          </div>
-                        )}
+                        {/* Info toggle button */}
+                        <div onClick={()=>setExpandedMulti(isExp ? null : feature.name + "_" + opt)}
+                          style={{ display:"inline-flex", alignItems:"center", justifyContent:"center",
+                            width:22, height:"100%", padding:"4px 5px", cursor:"pointer",
+                            borderRadius:"0 20px 20px 0", fontSize:10,
+                            border:`1px solid ${isExp?"var(--accent)":isPicked?"var(--accent)":"var(--border)"}`,
+                            background:isExp?"rgba(var(--accent-rgb,201,162,39),0.15)":isPicked?"rgba(var(--accent-rgb,201,162,39),0.12)":"var(--surface)",
+                            color:isExp?"var(--accent)":"var(--text-dim)",
+                            opacity:!canPick&&!isPicked?0.4:1 }}>
+                          {isExp ? "▲" : "?"}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
+                {/* Description panel — shown at bottom for whichever option is expanded */}
+                {expandedDet && (
+                  <div style={{ padding:"10px 14px", background:"rgba(0,0,0,0.15)",
+                    border:"1px solid var(--border)", borderRadius:8,
+                    fontSize:12, color:"var(--text-muted)", lineHeight:1.7 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
+                      {expandedKey}
+                      {expandedDet.cost && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>({expandedDet.cost})</span>}
+                    </div>
+                    {expandedDet.description}
+                  </div>
+                )}
               </div>
             );
           })()}
