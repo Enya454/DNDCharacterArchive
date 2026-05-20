@@ -12161,9 +12161,21 @@
           "description": "In your study of occult lore, you have unearthed Eldritch Invocations \u2014 fragments of forbidden knowledge. You gain 2 invocations at 2nd level. You gain an additional invocation at 5th, 7th, 9th, 12th, 15th, and 18th level. If an invocation has a prerequisite, you must meet it to learn that invocation. Whenever you gain a warlock level, you can replace one invocation with another.",
           "invocations": [
             {
+              "name": "Agonizing Blast",
+              "description": "When you cast Eldritch Blast, add your Charisma modifier to the damage it deals on a hit.",
+              "levelReq": 1,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
               "name": "Armor of Shadows",
               "description": "You can cast Mage Armor on yourself at will, without expending a spell slot or material components.",
               "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Ascendant Step",
+              "description": "You can cast Levitate on yourself at will, without expending a spell slot or material components.",
+              "levelReq": 9,
               "prereq": null
             },
             {
@@ -12179,9 +12191,38 @@
               "prereq": null
             },
             {
+              "name": "Bewitching Whispers",
+              "description": "You can cast Compulsion once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
+              "prereq": null
+            },
+            {
+              "name": "Book of Ancient Secrets",
+              "description": "You can inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list (e.g. Alarm, Detect Magic, Find Familiar, Identify, Illusory Script, Tenser's Floating Disk, Unseen Servant). The spells appear in the book and don't count against your spells known. With your Book of Shadows in hand, you can cast them as rituals. If you encounter a spell in written form, you can add it to your Book of Shadows if it is on any class's spell list, the spell's level is no higher than half your Warlock level (rounded up), and you spend 2 hours and 50 gp per spell level. Ritual spells: Alarm, Ceremony, Comprehend Languages, Detect Magic, Detect Poison and Disease, Find Familiar, Identify, Illusory Script, Speak with Animals, Tenser's Floating Disk, Unseen Servant, Animal Messenger, Beast Sense, Gentle Repose, Magic Mouth, Silence, Skywrite, Augury, Clairvoyance, Meld into Stone, Nondetection, Speak with Dead, Speak with Plants, Water Breathing, Water Walk, Divination, Leomund's Tiny Hut, Drawmij's Instant Summons, Planar Binding, Rary's Telepathic Bond, Forbiddance, Word of Recall.",
+              "levelReq": 1,
+              "prereq": "Pact of the Tome",
+              "subChoice": {
+                "type": "text",
+                "prompt": "Note your chosen ritual spells in your character notes",
+                "note": "Choose 2 ritual spells from any class list to inscribe in your Book of Shadows."
+              }
+            },
+            {
+              "name": "Chains of Carceri",
+              "description": "You can cast Hold Monster at will \u2014 targeting a celestial, fiend, or elemental \u2014 without expending a spell slot or material components. You must finish a long rest before you can use this invocation on the same creature again.",
+              "levelReq": 15,
+              "prereq": "Pact of the Chain"
+            },
+            {
               "name": "Devil's Sight",
               "description": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet.",
               "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Dreadful Word",
+              "description": "You can cast Confusion once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
               "prereq": null
             },
             {
@@ -12195,6 +12236,12 @@
               "description": "You can cast Detect Magic at will, without expending a spell slot.",
               "levelReq": 1,
               "prereq": null
+            },
+            {
+              "name": "Eldritch Spear",
+              "description": "When you cast Eldritch Blast, its range is 300 feet.",
+              "levelReq": 5,
+              "prereq": "Eldritch Blast cantrip"
             },
             {
               "name": "Eyes of the Rune Keeper",
@@ -12215,9 +12262,58 @@
               "prereq": null
             },
             {
+              "name": "Ghostly Gaze",
+              "prerequisite": "7th level",
+              "minLevel": 7,
+              "source": {
+                "book": "Xanathar's Guide to Everything",
+                "abbr": "XGtE",
+                "page": 57
+              },
+              "description": "As an action, you gain the ability to see through solid objects to a range of 30 feet. Within that range, you have darkvision if you don't already have it. This special sight lasts for 1 minute or until your concentration ends (as if you were concentrating on a spell). During that time, you perceive objects as ghostly, transparent images. Once you use this invocation, you can't use it again until you finish a short or long rest.",
+              "uses": 1,
+              "recharge": "short or long rest"
+            },
+            {
+              "name": "Gift of the Depths",
+              "description": "You can breathe underwater, and you gain a swimming speed equal to your walking speed. You can also cast Water Breathing without expending a spell slot. Once you do so, you can't cast it this way again until you finish a long rest.",
+              "levelReq": 12,
+              "prereq": null
+            },
+            {
+              "name": "Grasp of Hadar",
+              "description": "Once on each of your turns when you hit a creature with your Eldritch Blast, you can move that creature in a straight line 10 feet closer to you.",
+              "levelReq": 5,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Improved Pact Weapon",
+              "description": "You can use any weapon you summon with your Pact of the Blade feature as a spellcasting focus for your warlock spells. In addition, the weapon gains a +1 bonus to its attack and damage rolls, unless it is a magic weapon that already has a bonus to those rolls. Finally, the weapon you conjure can be a shortbow, longbow, light crossbow, or hand crossbow.",
+              "levelReq": 12,
+              "prereq": "Pact of the Blade"
+            },
+            {
+              "name": "Lance of Lethargy",
+              "description": "Once per turn when you hit a creature with your Eldritch Blast, you can reduce that creature's speed by 10 feet until the end of your next turn.",
+              "levelReq": 1,
+              "prereq": "Eldritch Blast cantrip"
+            },
+            {
+              "name": "Lifedrinker",
+              "description": "When you hit a creature with your pact weapon, the creature takes extra necrotic damage equal to your Charisma modifier (minimum 1).",
+              "levelReq": 12,
+              "prereq": "Pact of the Blade"
+            },
+            {
               "name": "Mask of Many Faces",
               "description": "You can cast Disguise Self at will, without expending a spell slot.",
               "levelReq": 1,
+              "prereq": null
+            },
+            {
+              "name": "Minions of Chaos",
+              "description": "You can cast Conjure Elemental once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 9,
               "prereq": null
             },
             {
@@ -12227,22 +12323,16 @@
               "prereq": null
             },
             {
-              "name": "Thief of Five Fates",
-              "description": "You can cast Bane once using a warlock spell slot. You can't do so again until you finish a long rest.",
-              "levelReq": 1,
+              "name": "One with Shadows",
+              "description": "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or a reaction.",
+              "levelReq": 5,
               "prereq": null
             },
             {
-              "name": "Agonizing Blast",
-              "description": "When you cast Eldritch Blast, add your Charisma modifier to the damage it deals on a hit.",
-              "levelReq": 1,
-              "prereq": "Eldritch Blast cantrip"
-            },
-            {
-              "name": "Lance of Lethargy",
-              "description": "Once per turn when you hit a creature with your Eldritch Blast, you can reduce that creature's speed by 10 feet until the end of your next turn.",
-              "levelReq": 1,
-              "prereq": "Eldritch Blast cantrip"
+              "name": "Otherworldly Leap",
+              "description": "You can cast Jump on yourself at will, without expending a spell slot or material components.",
+              "levelReq": 9,
+              "prereq": null
             },
             {
               "name": "Repelling Blast",
@@ -12251,21 +12341,21 @@
               "prereq": "Eldritch Blast cantrip"
             },
             {
-              "name": "Eldritch Spear",
-              "description": "When you cast Eldritch Blast, its range is 300 feet.",
-              "levelReq": 5,
-              "prereq": "Eldritch Blast cantrip"
+              "name": "Sculptor of Flesh",
+              "description": "You can cast Polymorph once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 7,
+              "prereq": null
             },
             {
-              "name": "Grasp of Hadar",
-              "description": "Once on each of your turns when you hit a creature with your Eldritch Blast, you can move that creature in a straight line 10 feet closer to you.",
-              "levelReq": 5,
-              "prereq": "Eldritch Blast cantrip"
+              "name": "Shroud of Shadow",
+              "description": "You can cast Invisibility at will, without expending a spell slot.",
+              "levelReq": 15,
+              "prereq": null
             },
             {
-              "name": "One with Shadows",
-              "description": "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or a reaction.",
-              "levelReq": 5,
+              "name": "Thief of Five Fates",
+              "description": "You can cast Bane once using a warlock spell slot. You can't do so again until you finish a long rest.",
+              "levelReq": 1,
               "prereq": null
             },
             {
@@ -12287,93 +12377,16 @@
               "prereq": null
             },
             {
-              "name": "Bewitching Whispers",
-              "description": "You can cast Compulsion once using a warlock spell slot. You can't do so again until you finish a long rest.",
-              "levelReq": 7,
-              "prereq": null
-            },
-            {
-              "name": "Dreadful Word",
-              "description": "You can cast Confusion once using a warlock spell slot. You can't do so again until you finish a long rest.",
-              "levelReq": 7,
-              "prereq": null
-            },
-            {
-              "name": "Sculptor of Flesh",
-              "description": "You can cast Polymorph once using a warlock spell slot. You can't do so again until you finish a long rest.",
-              "levelReq": 7,
-              "prereq": null
-            },
-            {
-              "name": "Ascendant Step",
-              "description": "You can cast Levitate on yourself at will, without expending a spell slot or material components.",
-              "levelReq": 9,
-              "prereq": null
-            },
-            {
-              "name": "Minions of Chaos",
-              "description": "You can cast Conjure Elemental once using a warlock spell slot. You can't do so again until you finish a long rest.",
-              "levelReq": 9,
-              "prereq": null
-            },
-            {
-              "name": "Otherworldly Leap",
-              "description": "You can cast Jump on yourself at will, without expending a spell slot or material components.",
-              "levelReq": 9,
-              "prereq": null
-            },
-            {
-              "name": "Improved Pact Weapon",
-              "description": "You can use any weapon you summon with your Pact of the Blade feature as a spellcasting focus for your warlock spells. In addition, the weapon gains a +1 bonus to its attack and damage rolls, unless it is a magic weapon that already has a bonus to those rolls. Finally, the weapon you conjure can be a shortbow, longbow, light crossbow, or hand crossbow.",
-              "levelReq": 12,
-              "prereq": "Pact of the Blade"
-            },
-            {
-              "name": "Gift of the Depths",
-              "description": "You can breathe underwater, and you gain a swimming speed equal to your walking speed. You can also cast Water Breathing without expending a spell slot. Once you do so, you can't cast it this way again until you finish a long rest.",
-              "levelReq": 12,
-              "prereq": null
-            },
-            {
-              "name": "Chains of Carceri",
-              "description": "You can cast Hold Monster at will \u2014 targeting a celestial, fiend, or elemental \u2014 without expending a spell slot or material components. You must finish a long rest before you can use this invocation on the same creature again.",
-              "levelReq": 15,
-              "prereq": "Pact of the Chain"
-            },
-            {
-              "name": "Shroud of Shadow",
-              "description": "You can cast Invisibility at will, without expending a spell slot.",
-              "levelReq": 15,
-              "prereq": null
-            },
-            {
-              "name": "Witch Sight",
-              "description": "You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic while the creature is within 30 feet of you and within line of sight.",
-              "levelReq": 15,
-              "prereq": null
-            },
-            {
               "name": "Voice of the Chain Master",
               "description": "You can communicate telepathically with your familiar and perceive through your familiar's senses as long as you are on the same plane of existence. Additionally, while perceiving through your familiar's senses, you can also speak through your familiar in your own voice, even if your familiar is normally incapable of speech.",
               "levelReq": 1,
               "prereq": "Pact of the Chain"
             },
             {
-              "name": "Book of Ancient Secrets",
-              "description": "You can inscribe magical rituals in your Book of Shadows. Choose two 1st-level spells that have the ritual tag from any class's spell list (e.g. Alarm, Detect Magic, Find Familiar, Identify, Illusory Script, Tenser's Floating Disk, Unseen Servant). The spells appear in the book and don't count against your spells known. With your Book of Shadows in hand, you can cast them as rituals. If you encounter a spell in written form, you can add it to your Book of Shadows if it is on any class's spell list, the spell's level is no higher than half your Warlock level (rounded up), and you spend 2 hours and 50 gp per spell level. Ritual spells: Alarm, Ceremony, Comprehend Languages, Detect Magic, Detect Poison and Disease, Find Familiar, Identify, Illusory Script, Speak with Animals, Tenser's Floating Disk, Unseen Servant, Animal Messenger, Beast Sense, Gentle Repose, Magic Mouth, Silence, Skywrite, Augury, Clairvoyance, Meld into Stone, Nondetection, Speak with Dead, Speak with Plants, Water Breathing, Water Walk, Divination, Leomund's Tiny Hut, Drawmij's Instant Summons, Planar Binding, Rary's Telepathic Bond, Forbiddance, Word of Recall.",
-              "levelReq": 1,
-              "prereq": "Pact of the Tome",
-              "subChoice": {
-                "type": "text",
-                "prompt": "Note your chosen ritual spells in your character notes",
-                "note": "Choose 2 ritual spells from any class list to inscribe in your Book of Shadows."
-              }
-            },
-            {
-              "name": "Lifedrinker",
-              "description": "When you hit a creature with your pact weapon, the creature takes extra necrotic damage equal to your Charisma modifier (minimum 1).",
-              "levelReq": 12,
-              "prereq": "Pact of the Blade"
+              "name": "Witch Sight",
+              "description": "You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic while the creature is within 30 feet of you and within line of sight.",
+              "levelReq": 15,
+              "prereq": null
             }
           ],
           "countByLevel": {
