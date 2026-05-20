@@ -6253,7 +6253,11 @@ function FeatureAction({ feat, char, onUpdate }) {
     onUpdate({ ...char, actionUses: { ...(char.actionUses||{}), [summonKey]: clamped } });
   };
   const spawnSummon  = () => setSummonHp(summonMaxHp);
-  const dismissSummon = () => onUpdate({ ...char, actionUses: { ...(char.actionUses||{}), [summonKey]: undefined } });
+  const dismissSummon = () => {
+    const newUses = { ...(char.actionUses||{}) };
+    delete newUses[summonKey];
+    onUpdate({ ...char, actionUses: newUses });
+  };
 
   const restLabel = feat.uses?.per === "short" ? "Short Rest" : feat.uses?.per === "long" ? "Long Rest" : feat.uses?.per === "turn" ? "Next Turn" : null;
 
@@ -6284,13 +6288,23 @@ function FeatureAction({ feat, char, onUpdate }) {
               {remaining}/{maxUses}
             </span>
             {remaining > 0 && (
-              <button onClick={()=>{ markUsed(); if(summon) spawnSummon(); }}
+              <button onClick={()=>{
+                // Spend one use AND spawn the summon in a single update
+                const newUses = { ...(char.actionUses||{}), [spentKey]: spent + 1 };
+                if (summon) newUses[summonKey] = summonMaxHp;
+                onUpdate({ ...char, actionUses: newUses });
+              }}
                 style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(var(--accent-rgb,201,162,39),0.15)", border:"1px solid var(--accent)", color:"var(--accent)" }}>
                 {summon ? `Create ${summon.name}` : "Use"}
               </button>
             )}
             {spent > 0 && restLabel && (
-              <button onClick={()=>{ recover(); if(summon) dismissSummon(); }}
+              <button onClick={()=>{
+                // Recover uses AND dismiss summon in one update
+                const newUses = { ...(char.actionUses||{}), [spentKey]: Math.max(0, spent - maxUses) };
+                if (summon) delete newUses[summonKey];
+                onUpdate({ ...char, actionUses: newUses });
+              }}
                 style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(39,174,96,0.1)", border:"1px solid var(--success)", color:"var(--success)" }}>↺ {restLabel}</button>
             )}
           </div>
