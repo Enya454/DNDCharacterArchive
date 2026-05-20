@@ -32,6 +32,20 @@
 
     /* ── Floating symbol animations ── */
     @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+    /* Prevent any content from expanding the character sheet width */
+    .sheet-tab-content * {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .sheet-tab-content p,
+    .sheet-tab-content div,
+    .sheet-tab-content span {
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .sheet-tab-content pre {
+      white-space: pre-wrap;
+    }
     @keyframes floatUp {
       0%   { transform: translateY(0)        translateX(0px)   rotate(0deg);  opacity: 0; }
       8%   { opacity: 1; }
@@ -7338,7 +7352,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
-        <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY:"auto", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0 }}>
+        <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY:"auto", overflowX:"hidden", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0, minWidth:0 }}>
 
           {/* Portrait */}
           <div style={{ textAlign:"center", marginBottom:12 }}>
@@ -7567,13 +7581,13 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
 
           {/* ── Tab panel: fills remaining height ── */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow: mobile ? "visible" : "hidden" }}>
+          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", minWidth:0 }}>
             {/* Tab bar — scrollable on mobile */}
             <div style={{ display:"flex", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, paddingLeft: mobile ? 4 : 12, paddingTop:10, background:"transparent", overflowX:"auto", WebkitOverflowScrolling:"touch", scrollbarWidth:"none" }}>
               {TABS.map(t=><button key={t.id} style={{...ts(tab===t.id), whiteSpace:"nowrap", flexShrink:0}} onClick={()=>setTab(t.id)}>{t.l}</button>)}
             </div>
             {/* Tab content — scrolls independently */}
-            <div style={{ flex:1, overflowY:"auto", padding: mobile ? 10 : 16 }}>
+            <div className="sheet-tab-content" style={{ flex:1, overflowY:"auto", overflowX:"hidden", padding: mobile ? 10 : 16, minWidth:0, wordBreak:"break-word" }}>
               {tab==="actions"    && <ActionsTab     char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
