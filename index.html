@@ -911,10 +911,6 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         const picked = (choices?.[feature.name] || []).length;
         return picked >= maxCount;
       }
-      case "multi_choice": {
-        const picked = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
-        return picked.length >= (feature.count || 1);
-      }
       case "infusion_choice": {
         const countByLevel = feature.countByLevel || {"2":4};
         let maxCount = 0;
@@ -985,77 +981,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{feature.description}</p>
 
           {/* Multi-choice — pick N from options, each expandable with details */}
-          {!locked && feature.type === "multi_choice" && (() => {
-            const picked  = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
-            const count   = feature.count || 1;
-            const details = feature.optionDetails || {};
-            const toggle  = opt => {
-              const isOn = picked.includes(opt);
-              const next = isOn
-                ? picked.filter(p => p !== opt)
-                : picked.length < count ? [...picked, opt] : picked;
-              onChoice && onChoice(feature.name, next);
-            };
-            const expandedKey = expandedMulti?.startsWith(feature.name + "_")
-              ? expandedMulti.slice(feature.name.length + 1) : null;
-            const expandedDet = expandedKey ? details[expandedKey] : null;
-            return (
-              <div>
-                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
-                  Choose <strong style={{ color:"var(--accent)" }}>{count}</strong> option{count!==1?"s":""}
-                  {picked.length > 0 && <span style={{ color:"var(--success)", marginLeft:8 }}>({picked.length}/{count} chosen)</span>}
-                </div>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom: expandedDet ? 10 : 4 }}>
-                  {(feature.options||[]).map(opt => {
-                    const isPicked  = picked.includes(opt);
-                    const canPick   = isPicked || picked.length < count;
-                    const det       = details[opt];
-                    const isExp     = expandedKey === opt;
-                    return (
-                      <div key={opt} style={{ display:"flex", alignItems:"center", gap:2 }}>
-                        {/* Select button */}
-                        <div onClick={()=>{ if(canPick||isPicked) toggle(opt); }}
-                          style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:"20px 0 0 20px", cursor:canPick||isPicked?"pointer":"default",
-                            fontSize:12, transition:"all 0.15s",
-                            border:`1px solid ${isPicked?"var(--accent)":canPick?"var(--border)":"var(--border)"}`,
-                            borderRight:"none",
-                            background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.12)":"var(--surface)",
-                            color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
-                            opacity:!canPick&&!isPicked?0.4:1 }}>
-                          {isPicked && <span style={{ fontSize:10 }}>✓</span>}
-                          {opt}
-                          {det?.cost && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:3 }}>({det.cost})</span>}
-                        </div>
-                        {/* Info toggle button */}
-                        <div onClick={()=>setExpandedMulti(isExp ? null : feature.name + "_" + opt)}
-                          style={{ display:"inline-flex", alignItems:"center", justifyContent:"center",
-                            width:22, height:"100%", padding:"4px 5px", cursor:"pointer",
-                            borderRadius:"0 20px 20px 0", fontSize:10,
-                            border:`1px solid ${isExp?"var(--accent)":isPicked?"var(--accent)":"var(--border)"}`,
-                            background:isExp?"rgba(var(--accent-rgb,201,162,39),0.15)":isPicked?"rgba(var(--accent-rgb,201,162,39),0.12)":"var(--surface)",
-                            color:isExp?"var(--accent)":"var(--text-dim)",
-                            opacity:!canPick&&!isPicked?0.4:1 }}>
-                          {isExp ? "▲" : "?"}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* Description panel — shown at bottom for whichever option is expanded */}
-                {expandedDet && (
-                  <div style={{ padding:"10px 14px", background:"rgba(0,0,0,0.15)",
-                    border:"1px solid var(--border)", borderRadius:8,
-                    fontSize:12, color:"var(--text-muted)", lineHeight:1.7 }}>
-                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
-                      {expandedKey}
-                      {expandedDet.cost && <span style={{ fontSize:11, color:"var(--text-dim)", marginLeft:8 }}>({expandedDet.cost})</span>}
-                    </div>
-                    {expandedDet.description}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+          {/* multi_choice type is handled as eldritch_invocations with invocationLabel */}
 
           {/* Simple choice */}
           {!locked && feature.type === "choice" && feature.options && (() => {
@@ -4861,19 +4787,6 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
         )}
         {locked   && <span style={ws.lockBadge}>Lvl {feat.level}</span>}
         {!locked && feat.level > 1 && !isSpecies && !isSubrace && <span style={{ fontSize:10, color:"var(--text-dim)" }}>Lvl {feat.level}</span>}
-        {(feat.type === "multi_choice") && (() => {
-          const picked = Array.isArray(char.featureChoices?.[feat.name]) ? char.featureChoices[feat.name] : [];
-          return picked.length > 0 && (
-            <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginTop:4 }}>
-              {picked.map(p => (
-                <span key={p} style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10,
-                  border:"1px solid var(--success)", background:"rgba(39,174,96,0.08)" }}>
-                  {p}{feat.optionDetails?.[p]?.cost ? ` (${feat.optionDetails[p].cost})` : ""}
-                </span>
-              ))}
-            </div>
-          );
-        })()}
         {chosen   && (() => {
           const displayChosen = Array.isArray(chosen) ? chosen.join(", ") : String(chosen).split("—")[0].trim();
           const subKey  = feat.name + "_sub_" + String(chosen).replace(/\s+/g,"_");
