@@ -6967,6 +6967,58 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
 
   const [speedOpen,      setSpeedOpen]      = useState(false);
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
+  // Auto-sync alwaysPrepared spell grants from class/subclass into racialSpells
+  React.useEffect(() => {
+    if (!gameData || !char.class) return;
+    const classes = gameData.classes || {};
+    const cd = classes[char.class];
+    if (!cd) return;
+
+    // Collect all spell_grant features that are alwaysPrepared and level-appropriate
+    const allFeats = [
+      ...(cd.features || []),
+      ...((char.subclass && cd.subclasses?.[char.subclass]?.features) || []),
+      ...(gameData.species?.[char.species]?.features || []),
+      ...(gameData.species?.[char.species]?.subraces?.[char.subrace]?.features || []),
+    ];
+
+    const newGrants = [];
+    for (const feat of allFeats) {
+      if (feat.type !== 'spell_grant' || !feat.alwaysPrepared) continue;
+      for (const grant of (feat.grants || [])) {
+        const minLevel = grant.minCharLevel || 1;
+        if (char.level < minLevel) continue;
+        // Find spell data
+        const spellData = (gameData.spells || []).find(s =>
+          s.name.toLowerCase() === grant.spellName.toLowerCase()
+        );
+        if (!spellData) continue;
+        newGrants.push({ ...spellData, sourceFeature: feat.name, racial: true });
+      }
+    }
+
+    // Merge with existing racialSpells — keep non-grant ones, replace grant ones
+    const existingNonGrant = (char.racialSpells || []).filter(s => {
+      // Keep if it's not from a spell_grant feature we manage
+      const managedSource = allFeats.some(f => f.type === 'spell_grant' && f.name === s.sourceFeature);
+      return !managedSource;
+    });
+
+    const merged = [...existingNonGrant];
+    for (const g of newGrants) {
+      if (!merged.some(s => s.name === g.name)) merged.push(g);
+    }
+
+    // Only update if actually changed
+    const current = char.racialSpells || [];
+    const changed = merged.length !== current.length ||
+      merged.some(g => !current.some(s => s.name === g.name && s.sourceFeature === g.sourceFeature));
+
+    if (changed) {
+      upd({ ...char, racialSpells: merged });
+    }
+  }, [char.class, char.subclass, char.level, char.species, char.subrace]);
+
   const mobile = useIsMobile();
 
   const sectionLabel = txt => (

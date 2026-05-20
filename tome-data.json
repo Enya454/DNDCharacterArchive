@@ -5044,6 +5044,54 @@
         "Life Domain": {
           "features": [
             {
+              "name": "Life Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Bless",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Cure Wounds",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Lesser Restoration",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Spiritual Weapon",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Beacon of Hope",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Revivify",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Death Ward",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Guardian of Faith",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Mass Cure Wounds",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Raise Dead",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "level": 1,
               "name": "Bonus Proficiency",
               "type": "passive",
@@ -5096,6 +5144,54 @@
           "description": "The gods of knowledge \u2014 including Oghma, Boccob, Gilean, Aureon, and Thoth \u2014 value learning and understanding above all.",
           "features": [
             {
+              "name": "Knowledge Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Command",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Identify",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Augury",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Suggestion",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Nondetection",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Speak with Dead",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Arcane Eye",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Confusion",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Legend Lore",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Scrying",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Blessings of Knowledge",
               "level": 1,
               "type": "passive",
@@ -5138,6 +5234,54 @@
           },
           "description": "Gods of light \u2014 including Helm, Lathander, Pholtus, Branchala, the Silver Flame, Belenus, Apollo, and Re-Horakhty \u2014 promote the ideals of rebirth and renewal.",
           "features": [
+            {
+              "name": "Light Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Burning Hands",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Faerie Fire",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Flaming Sphere",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Scorching Ray",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Daylight",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Fireball",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Guardian of Faith",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Wall of Fire",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Flame Strike",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Scrying",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Bonus Cantrip",
               "level": 1,
@@ -5189,6 +5333,54 @@
           },
           "description": "Gods of nature are as varied as the natural world itself.",
           "features": [
+            {
+              "name": "Nature Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Animal Friendship",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Speak with Animals",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Barkskin",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Spike Growth",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Plant Growth",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Wind Wall",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dominate Beast",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Grasping Vine",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Insect Plague",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Tree Stride",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Acolyte of Nature",
               "level": 1,
@@ -5247,6 +5439,54 @@
           "description": "Gods whose portfolios include the Tempest domain \u2014 including Talos, Umberlee, Kord, Zeboim, the Devourer, Zeus, and Thor \u2014 govern storms, sea, and sky.",
           "features": [
             {
+              "name": "Tempest Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Fog Cloud",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Thunderwave",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Gust of Wind",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Shatter",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Call Lightning",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Sleet Storm",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Control Water",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Ice Storm",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Destructive Wave",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Insect Plague",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Bonus Proficiencies",
               "level": 1,
               "type": "passive",
@@ -5296,6 +5536,54 @@
           "description": "Gods of trickery \u2014 such as Tymora, Beshaba, Olidammara, the Traveler, Garl Glittergold, and Loki \u2014 are mischief-makers and instigators.",
           "features": [
             {
+              "name": "Trickery Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Charm Person",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Disguise Self",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Mirror Image",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Pass without Trace",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Blink",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dispel Magic",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dimension Door",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Polymorph",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Dominate Person",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Modify Memory",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Blessing of the Trickster",
               "level": 1,
               "type": "action",
@@ -5336,6 +5624,54 @@
           },
           "description": "War has many manifestations. It can make heroes of ordinary people. It can be desperate and horrific, with acts of cruelty and cowardice eclipsing instances of excellence and courage.",
           "features": [
+            {
+              "name": "War Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Divine Favor",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Shield of Faith",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Magic Weapon",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Spiritual Weapon",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Crusader's Mantle",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Spirit Guardians",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Freedom of Movement",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Stoneskin",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Flame Strike",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Hold Monster",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Bonus Proficiencies",
               "level": 1,
@@ -5386,6 +5722,54 @@
           "description": "Magic is an energy that suffuses the multiverse and that fuels both destruction and creation. Gods of the Arcana domain know the secrets and potential of magic intimately.",
           "features": [
             {
+              "name": "Arcana Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Detect Magic",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Magic Missile",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Magic Weapon",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Nystul's Magic Aura",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Dispel Magic",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Magic Circle",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Arcane Eye",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Leomund's Secret Chest",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Planar Binding",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Teleportation Circle",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Arcane Initiate",
               "level": 1,
               "type": "passive",
@@ -5426,6 +5810,54 @@
           },
           "description": "The Death domain is concerned with the forces that cause death, as well as the negative energy that gives rise to undead creatures. Gods of death include Chemosh, Myrkul, Wee Jas, Nerull, the Raven Queen, and Bhaal.",
           "features": [
+            {
+              "name": "Death Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "False Life",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Inflict Wounds",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Blindness/Deafness",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Ray of Enfeeblement",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Animate Dead",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Vampiric Touch",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Blight",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Death Ward",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Antilife Shell",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Cloudkill",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Bonus Proficiency",
               "level": 1,
@@ -5473,6 +5905,54 @@
           },
           "description": "The Order domain represents discipline, as well as devotion to a society or an institution and strict obedience to the laws governing it.",
           "features": [
+            {
+              "name": "Order Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Command",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Heroism",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Hold Person",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Zone of Truth",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Mass Healing Word",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Slow",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Compulsion",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Locate Creature",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Commune",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Dominate Person",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Bonus Proficiencies",
               "level": 1,
@@ -5523,6 +6003,54 @@
           "description": "The balm of peace thrives at the heart of healthy communities, between friendly nations, and in the souls of the kindhearted.",
           "features": [
             {
+              "name": "Peace Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Heroism",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Sanctuary",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Aid",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Warding Bond",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Beacon of Hope",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Counterspell",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Otiluke's Resilient Sphere",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Stoneskin",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Greater Restoration",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Rary's Telepathic Bond",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Emboldening Bond",
               "level": 1,
               "type": "action",
@@ -5565,6 +6093,54 @@
           },
           "description": "The twilight transition from light into darkness often brings calm and even joy as the day's labors end and the hours of rest begin. Gods of twilight guard against the darkness that goes beyond rest.",
           "features": [
+            {
+              "name": "Twilight Domain Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Faerie Fire",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Sleep",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Moonbeam",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "See Invisibility",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Aura of Vitality",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Leomund's Tiny Hut",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Aura of Life",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Greater Invisibility",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Circle of Power",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Mislead",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Bonus Proficiencies",
               "level": 1,
@@ -7144,6 +7720,54 @@
         "Oath of Devotion": {
           "features": [
             {
+              "name": "Oath of Devotion Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Protection from Evil and Good",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Sanctuary",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Lesser Restoration",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Zone of Truth",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Beacon of Hope",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Dispel Magic",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Freedom of Movement",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Guardian of Faith",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Commune",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Flame Strike",
+                  "minCharLevel": 17
+                }
+              ]
+            },
+            {
               "level": 3,
               "name": "Sacred Weapon",
               "type": "passive",
@@ -8540,6 +9164,54 @@
           "spellcaster": false,
           "features": [
             {
+              "name": "Hunter Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Hunter's Mark",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Zephyr Strike",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Pass without Trace",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Silence",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Conjure Barrage",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Lightning Arrow",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Freedom of Movement",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Grasping Vine",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Conjure Volley",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Swift Quiver",
+                  "minCharLevel": 17
+                }
+              ]
+            },
+            {
               "name": "Hunter's Prey",
               "level": 3,
               "type": "choice",
@@ -8592,6 +9264,54 @@
         "Beast Master": {
           "spellcaster": false,
           "features": [
+            {
+              "name": "Beast Master Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Animal Friendship",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Speak with Animals",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Beast Sense",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Cordon of Arrows",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Conjure Animals",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Speak with Plants",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Dominate Beast",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Giant Insect",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Awaken",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Commune with Nature",
+                  "minCharLevel": 17
+                }
+              ]
+            },
             {
               "name": "Ranger's Companion",
               "level": 3,
@@ -8984,6 +9704,54 @@
           "spellcastingAbility": "wis",
           "features": [
             {
+              "name": "Fey Wanderer Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Charm Person",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Disguise Self",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Calm Emotions",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Misty Step",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dispel Magic",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Summon Fey",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Dimension Door",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Grant Flight",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Mislead",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Summon Celestial",
+                  "minCharLevel": 17
+                }
+              ]
+            },
+            {
               "name": "Expanded Spell List (Fey Wanderer)",
               "level": 3,
               "type": "passive",
@@ -9156,6 +9924,54 @@
           },
           "description": "Your connection to the natural world takes the form of an affinity with the tenacious and varied nature of dragonkind. You tame a drake, a lesser form of dragon, and together you explore the world.",
           "features": [
+            {
+              "name": "Drakewarden Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Absorb Elements",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Chromatic Orb",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Dragon's Breath",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Invisibility",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Elemental Weapon",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Fear",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Elemental Bane",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Raulothim's Psychic Lance",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Summon Dragon",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Draconic Transformation",
+                  "minCharLevel": 17
+                }
+              ]
+            },
             {
               "name": "Draconic Gift",
               "level": 3,
@@ -9799,6 +10615,54 @@
               "recharge": "long rest"
             },
             {
+              "name": "Circle of Dreams Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Sleep",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Phantasmal Force",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Calm Emotions",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dream",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Blink",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Seeming",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Hallucinatory Terrain",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Conjure Woodland Beings",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Dream",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Mislead",
+                  "minCharLevel": 17
+                }
+              ]
+            },
+            {
               "name": "Hearth of Moonlight and Shadow",
               "level": 6,
               "type": "passive",
@@ -9844,6 +10708,54 @@
               "description": "Starting at 2nd level, you can call forth nature spirits to influence the world around you. As a bonus action, you can magically summon an incorporeal spirit to a point you can see within 60 feet of you. The spirit creates an aura in a 30-foot radius around that point. It lasts for 1 minute or until you're incapacitated. Choose one effect: Bear Spirit (each creature in the aura gains temporary HP equal to 5 + druid level when they enter it, and you gain advantage on checks to track creatures or find them in the wilderness), Hawk Spirit (you and your allies have advantage on attack rolls against creatures in the aura), or Unicorn Spirit (you and your allies gain advantage on all ability checks made to detect creatures in the aura, and when you cast a spell using a spell slot that restores hit points, each creature of your choice in the aura also regains hit points equal to your Wisdom modifier).",
               "uses": "1",
               "recharge": "short or long rest"
+            },
+            {
+              "name": "Circle of the Shepherd Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Speak with Animals",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Animal Friendship",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Beast Sense",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Barkskin",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Conjure Animals",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Speak with Plants",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Dominate Beast",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Giant Insect",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Awaken",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Commune with Nature",
+                  "minCharLevel": 17
+                }
+              ]
             },
             {
               "name": "Mighty Summoner",
@@ -10002,6 +10914,54 @@
               "level": 2,
               "type": "action",
               "description": "At 2nd level, you gain the ability to harness constellations' power to alter your form. As a bonus action, you can expend a use of your Wild Shape feature to take on a starry form rather than transforming into a beast. While in your starry form, you retain your game statistics, but your body becomes luminous; your joints glimmer like stars, and glowing lines connect them as on a star chart. This form sheds bright light in a 10-foot radius and dim light for an additional 10 feet. The form lasts for 10 minutes. It ends early if you dismiss it (no action required), are incapacitated, die, or use this feature again. When you take on this form, choose which of the following constellations glimmers on your body: Archer (bonus action ranged spell attack for 1d8+Wis radiant damage), Chalice (when you cast a healing spell of 1st+ level, roll a d8 and restore that many extra HP to one target), or Dragon (when you make an Int or Wis check or a Constitution save to maintain concentration, treat a roll of 9 or lower as 10)."
+            },
+            {
+              "name": "Circle of Stars Spells",
+              "level": 3,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Guiding Bolt",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Magic Missile",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Augury",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Rope Trick",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Clairvoyance",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Slow",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Arcane Eye",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Greater Invisibility",
+                  "minCharLevel": 13
+                },
+                {
+                  "spellName": "Legend Lore",
+                  "minCharLevel": 17
+                },
+                {
+                  "spellName": "Skill Empowerment",
+                  "minCharLevel": 17
+                }
+              ]
             },
             {
               "name": "Cosmic Omen",
@@ -11379,6 +12339,54 @@
           "description": "Sometimes the spark of magic that fuels a sorcerer comes from a divine source that glimmers within the soul. Having such a blessed soul is a sign that your innate magic might come from a distant but powerful familial connection to a divine being.",
           "features": [
             {
+              "name": "Divine Soul Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Cure Wounds",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Guiding Bolt",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Aid",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Lesser Restoration",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Beacon of Hope",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Revivify",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Death Ward",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Guardian of Faith",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Mass Cure Wounds",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Raise Dead",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Divine Magic",
               "level": 1,
               "type": "passive",
@@ -11424,6 +12432,54 @@
           "description": "You are a creature of shadow, for your innate magic comes from the Shadowfell itself. You might trace your lineage to an entity from that place, or perhaps you were exposed to its fell energy and transformed by it.",
           "features": [
             {
+              "name": "Shadow Magic Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Darkness",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Disguise Self",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Pass without Trace",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Rope Trick",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Fear",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Gaseous Form",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Greater Invisibility",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Sinkhole",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Dominate Person",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Mislead",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Eyes of the Dark",
               "level": 1,
               "type": "passive",
@@ -11468,6 +12524,54 @@
           },
           "description": "Your innate magic comes from the power of elemental air. Many with this power can trace their magic back to a near-death experience caused by the Great Rain, though the most notable practitioners of this form of sorcery are the children of the djinn.",
           "features": [
+            {
+              "name": "Storm Sorcery Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Fog Cloud",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Thunderwave",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Gust of Wind",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Shatter",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Call Lightning",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Sleet Storm",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Ice Storm",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Control Water",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Destructive Wave",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Insect Plague",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Wind Speaker",
               "level": 1,
@@ -12534,6 +13638,54 @@
           "spellcastingAbility": "cha",
           "features": [
             {
+              "name": "The Fiend Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Burning Hands",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Command",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Blindness/Deafness",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Scorching Ray",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Fireball",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Stinking Cloud",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Fire Shield",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Wall of Fire",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Flame Strike",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Hallow",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Expanded Spell List (Fiend)",
               "level": 1,
               "type": "passive",
@@ -12599,6 +13751,54 @@
           "spellcastingAbility": "cha",
           "features": [
             {
+              "name": "The Archfey Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Faerie Fire",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Sleep",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Calm Emotions",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Phantasmal Force",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Blink",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Plant Growth",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dominate Beast",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Greater Invisibility",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Dominate Person",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Seeming",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Expanded Spell List (Archfey)",
               "level": 1,
               "type": "passive",
@@ -12657,6 +13857,54 @@
           "spellcastingAbility": "cha",
           "features": [
             {
+              "name": "The Great Old One Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Dissonant Whispers",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Tashas Hideous Laughter",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Detect Thoughts",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Phantasmal Force",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Clairvoyance",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Sending",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Dominate Beast",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Evard's Black Tentacles",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Dominate Person",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Telekinesis",
+                  "minCharLevel": 9
+                }
+              ]
+            },
+            {
               "name": "Expanded Spell List (Great Old One)",
               "level": 1,
               "type": "passive",
@@ -12704,6 +13952,54 @@
           "spellcaster": true,
           "spellcastingAbility": "cha",
           "features": [
+            {
+              "name": "The Celestial Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "Cure Wounds",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Guiding Bolt",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Flaming Sphere",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Lesser Restoration",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Daylight",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Revivify",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Guardian of Faith",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Wall of Fire",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Flame Strike",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Mass Cure Wounds",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Expanded Spell List (Celestial)",
               "level": 1,
@@ -12754,6 +14050,54 @@
           "spellcaster": true,
           "spellcastingAbility": "cha",
           "features": [
+            {
+              "name": "The Undying Spells",
+              "level": 1,
+              "type": "spell_grant",
+              "alwaysPrepared": true,
+              "grants": [
+                {
+                  "spellName": "False Life",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Ray of Sickness",
+                  "minCharLevel": 1
+                },
+                {
+                  "spellName": "Blindness/Deafness",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Silence",
+                  "minCharLevel": 3
+                },
+                {
+                  "spellName": "Feign Death",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Speak with Dead",
+                  "minCharLevel": 5
+                },
+                {
+                  "spellName": "Aura of Life",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Death Ward",
+                  "minCharLevel": 7
+                },
+                {
+                  "spellName": "Contagion",
+                  "minCharLevel": 9
+                },
+                {
+                  "spellName": "Legend Lore",
+                  "minCharLevel": 9
+                }
+              ]
+            },
             {
               "name": "Expanded Spell List (Undying)",
               "level": 1,
