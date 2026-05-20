@@ -6209,28 +6209,26 @@ function StandardActionList({ actions }) {
 function FeatureAction({ feat, char, onUpdate }) {
   const [open, setOpen] = useState(false);
 
-  // Compute max uses
-  const computeMax = uses => {
-    if (!uses) return null;
-    let max = uses.max;
-    if      (max === "charismaModifier")    max = Math.max(1, calcMod(char.abilities.cha));
-    else if (max === "charismaModifier+1")  max = Math.max(1, calcMod(char.abilities.cha) + 1);
-    else if (max === "wisdomModifier")      max = Math.max(1, calcMod(char.abilities.wis));
-    else if (max === "intelligenceModifier")max = Math.max(1, calcMod(char.abilities.int));
-    else if (max === "constitutionModifier")max = Math.max(1, calcMod(char.abilities.con));
-    else if (max === "strengthModifier")    max = Math.max(1, calcMod(char.abilities.str));
-    else if (max === "dexterityModifier")   max = Math.max(1, calcMod(char.abilities.dex));
-    else if (max === "proficiencyBonus")    max = Math.max(1, Math.ceil(1 + char.level / 4));
-    else if (max === "halfLevel")           max = Math.max(1, Math.floor(char.level / 2));
-    else if (max === "level*5")             max = char.level * 5;
-    return max;
+  // Compute max uses / HP values from formula strings
+  const resolveFormula = formula => {
+    if (!formula) return null;
+    let v = formula;
+    if      (v === "charismaModifier")     v = Math.max(1, calcMod(char.abilities.cha));
+    else if (v === "charismaModifier+1")   v = Math.max(1, calcMod(char.abilities.cha) + 1);
+    else if (v === "wisdomModifier")       v = Math.max(1, calcMod(char.abilities.wis));
+    else if (v === "intelligenceModifier") v = Math.max(1, calcMod(char.abilities.int));
+    else if (v === "constitutionModifier") v = Math.max(1, calcMod(char.abilities.con));
+    else if (v === "strengthModifier")     v = Math.max(1, calcMod(char.abilities.str));
+    else if (v === "dexterityModifier")    v = Math.max(1, calcMod(char.abilities.dex));
+    else if (v === "proficiencyBonus")     v = Math.max(1, Math.ceil(1 + char.level / 4));
+    else if (v === "halfLevel")            v = Math.max(1, Math.floor(char.level / 2));
+    else if (v === "level*5")              v = char.level * 5;
+    return v;
   };
+  const computeMax = uses => uses ? resolveFormula(uses.max) : null;
 
   const maxUses = computeMax(feat.uses);
-  const usesKey = `uses_${feat.name}`;
   const spentKey = `spent_${feat.name}`;
-
-  // Spent uses stored on char.actionUses: { "uses_Rage": 2, ... }
   const spent = char.actionUses?.[spentKey] || 0;
   const remaining = maxUses !== null ? Math.max(0, maxUses - spent) : null;
 
@@ -6243,30 +6241,38 @@ function FeatureAction({ feat, char, onUpdate }) {
     onUpdate({ ...char, actionUses: { ...(char.actionUses||{}), [spentKey]: newSpent } });
   };
 
+  // Summon HP tracker — driven from feat.summon in JSON
+  const summon = feat.summon || null;
+  const summonMaxHp = summon ? resolveFormula(summon.hpFormula) : null;
+  const summonKey   = summon ? `summon_${summon.storeKey}_hp` : null;
+  const summonHp    = summon ? (char.actionUses?.[summonKey] ?? summonMaxHp) : null;
+  const summonActive = summon && summonHp !== null && summonHp > 0 && (char.actionUses?.[summonKey] !== undefined);
+
+  const setSummonHp = hp => {
+    const clamped = Math.max(0, Math.min(summonMaxHp, hp));
+    onUpdate({ ...char, actionUses: { ...(char.actionUses||{}), [summonKey]: clamped } });
+  };
+  const spawnSummon  = () => setSummonHp(summonMaxHp);
+  const dismissSummon = () => onUpdate({ ...char, actionUses: { ...(char.actionUses||{}), [summonKey]: undefined } });
+
   const restLabel = feat.uses?.per === "short" ? "Short Rest" : feat.uses?.per === "long" ? "Long Rest" : feat.uses?.per === "turn" ? "Next Turn" : null;
 
   return (
     <div style={{ background:"var(--surface)", border:`1px solid ${open?"var(--accent)":"var(--border)"}`, borderRadius:8, padding:"10px 12px", marginBottom:6, transition:"border-color 0.15s" }}>
       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        {/* Name + note — click to expand */}
         <div style={{ flex:1, cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
           <span style={{ fontFamily:"var(--font-display)", color:"var(--text)", fontSize:14 }}>{feat.name}</span>
           {feat.note && <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:8 }}>{feat.note}</span>}
         </div>
 
-        {/* Uses tracker — only if limited */}
+        {/* Uses tracker */}
         {maxUses !== null && (
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
-            {/* Pip dots — filled = available, empty = spent. Click filled to spend, click empty to restore */}
             <div style={{ display:"flex", gap:4 }}>
               {Array.from({length: maxUses}).map((_, i) => {
-                const isSpent = i >= remaining; // pips filled from left, spent from right
+                const isSpent = i >= remaining;
                 return (
-                  <div key={i}
-                    onClick={() => {
-                      if (!isSpent) markUsed();     // filled pip → spend one
-                      else if (spent > 0) recover(1); // empty pip → restore one
-                    }}
+                  <div key={i} onClick={() => { if (!isSpent) markUsed(); else if (spent > 0) recover(1); }}
                     style={{ width:14, height:14, borderRadius:"50%", cursor:"pointer",
                       border:`2px solid ${isSpent ? "var(--border)" : "var(--accent)"}`,
                       background: isSpent ? "transparent" : "var(--accent)",
@@ -6274,24 +6280,66 @@ function FeatureAction({ feat, char, onUpdate }) {
                 );
               })}
             </div>
-            {/* Remaining count */}
             <span style={{ fontSize:12, color: remaining > 0 ? "var(--accent)" : "var(--text-dim)", fontFamily:"var(--font-display)", minWidth:28, textAlign:"center" }}>
               {remaining}/{maxUses}
             </span>
-            {/* Use button */}
             {remaining > 0 && (
-              <button onClick={markUsed} style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(var(--accent-rgb,201,162,39),0.15)", border:"1px solid var(--accent)", color:"var(--accent)" }}>Use</button>
+              <button onClick={()=>{ markUsed(); if(summon) spawnSummon(); }}
+                style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(var(--accent-rgb,201,162,39),0.15)", border:"1px solid var(--accent)", color:"var(--accent)" }}>
+                {summon ? `Create ${summon.name}` : "Use"}
+              </button>
             )}
-            {/* Recover button */}
             {spent > 0 && restLabel && (
-              <button onClick={recover} style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(39,174,96,0.1)", border:"1px solid var(--success)", color:"var(--success)" }}>↺ {restLabel}</button>
+              <button onClick={()=>{ recover(); if(summon) dismissSummon(); }}
+                style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(39,174,96,0.1)", border:"1px solid var(--success)", color:"var(--success)" }}>↺ {restLabel}</button>
             )}
           </div>
         )}
         <span style={{ color:"var(--text-dim)", fontSize:10, cursor:"pointer", flexShrink:0 }} onClick={()=>setOpen(o=>!o)}>{open?"▲":"▼"}</span>
       </div>
+
+      {/* Summon HP tracker — shown inline when a summon is active */}
+      {summon && summonActive && (
+        <div style={{ marginTop:8, padding:"10px 12px", background:"rgba(0,0,0,0.2)", border:"1px solid var(--border)", borderRadius:7 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+            <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{summon.name}</span>
+            {summon.ac && <span style={{ fontSize:11, color:"var(--text-muted)" }}>AC {summon.ac}</span>}
+            <div style={{ flex:1, height:6, background:"var(--bg)", borderRadius:3, overflow:"hidden" }}>
+              <div style={{ height:"100%", borderRadius:3, transition:"all 0.3s",
+                width:`${Math.max(0,(summonHp/summonMaxHp)*100)}%`,
+                background: summonHp/summonMaxHp > 0.5 ? "var(--success)" : summonHp/summonMaxHp > 0.25 ? "#e67e22" : "var(--danger)" }}/>
+            </div>
+            <span style={{ fontFamily:"var(--font-display)", fontSize:14,
+              color: summonHp/summonMaxHp > 0.5 ? "var(--success)" : summonHp/summonMaxHp > 0.25 ? "#e67e22" : "var(--danger)" }}>
+              {summonHp}/{summonMaxHp}
+            </span>
+          </div>
+          <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+            <button onClick={()=>setSummonHp(summonHp - 1)} disabled={summonHp <= 0}
+              style={{ padding:"3px 10px", borderRadius:5, cursor:"pointer", fontSize:12, border:"1px solid var(--border)", background:"var(--card)", color:"var(--text)", opacity:summonHp<=0?0.4:1 }}>−</button>
+            <input type="number" value={summonHp} min={0} max={summonMaxHp}
+              onChange={e=>setSummonHp(+e.target.value)}
+              style={{ width:52, textAlign:"center", background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)", padding:"3px 6px", borderRadius:5, fontSize:13 }}/>
+            <button onClick={()=>setSummonHp(summonHp + 1)} disabled={summonHp >= summonMaxHp}
+              style={{ padding:"3px 10px", borderRadius:5, cursor:"pointer", fontSize:12, border:"1px solid var(--border)", background:"var(--card)", color:"var(--text)", opacity:summonHp>=summonMaxHp?0.4:1 }}>+</button>
+            <button onClick={()=>setSummonHp(summonMaxHp)}
+              style={{ padding:"3px 10px", borderRadius:5, cursor:"pointer", fontSize:11, border:"1px solid var(--success)", background:"rgba(39,174,96,0.1)", color:"var(--success)" }}>Full HP</button>
+            <button onClick={dismissSummon}
+              style={{ padding:"3px 10px", borderRadius:5, cursor:"pointer", fontSize:11, border:"1px solid var(--border)", background:"transparent", color:"var(--text-dim)", marginLeft:"auto" }}>Dismiss</button>
+          </div>
+          {summon.notes && <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>{summon.notes}</div>}
+        </div>
+      )}
+
+      {/* Not yet summoned prompt */}
+      {summon && !summonActive && remaining === 0 && (
+        <div style={{ marginTop:6, fontSize:12, color:"var(--text-dim)", fontStyle:"italic" }}>
+          {summon.name} dismissed or not yet created.
+        </div>
+      )}
+
       {open && feat.description && (
-        <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.6 }}>
+        <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.6, whiteSpace:"pre-line" }}>
           {feat.description}
         </div>
       )}

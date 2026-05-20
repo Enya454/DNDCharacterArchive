@@ -14288,7 +14288,14 @@
                   "name": "Activate Protector",
                   "description": "The cannon emits a burst of positive energy that grants itself and each creature of your choice within 10 feet of it a number of temporary hit points equal to 1d8 + your Intelligence modifier (minimum of 1 temporary hit point)."
                 }
-              ]
+              ],
+              "summon": {
+                "name": "Eldritch Cannon",
+                "hpFormula": "level*5",
+                "ac": 18,
+                "notes": "Immune to poison damage and the poisoned condition. Disappears at 0 HP, after 1 hour, or when you conjure another.",
+                "storeKey": "eldritchCannon"
+              }
             },
             {
               "name": "Arcane Firearm",
