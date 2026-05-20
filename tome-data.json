@@ -13319,7 +13319,8 @@
                 "prompt": "Note your chosen ritual spells in your character notes",
                 "note": "Choose 2 ritual spells from any class list to inscribe in your Book of Shadows."
               },
-              "actionType": "action"
+              "actionType": "action",
+              "shortDescription": "Prerequisite: Pact of the Tome. You can inscribe ritual spells in your Book of Shadows. You gain two 1st-level ritual spells from any class. On your adventures you can add more ritual spells up to half your Warlock level (rounded up), at 2 hours and 50 gp per spell level."
             },
             {
               "name": "Chains of Carceri",

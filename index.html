@@ -6403,9 +6403,9 @@ function FeatureAction({ feat, char, onUpdate }) {
         </div>
       )}
 
-      {open && feat.description && (
+      {open && (feat.description || feat.shortDescription) && (
         <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.6, whiteSpace:"pre-line" }}>
-          {feat.description}
+          {feat.shortDescription || feat.description}
         </div>
       )}
     </div>
