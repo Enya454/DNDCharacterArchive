@@ -12152,8 +12152,8 @@
         {
           "level": 3,
           "name": "Metamagic",
-          "type": "choice",
-          "description": "At 3rd level, you gain the ability to twist your spells to suit your needs. You gain two Metamagic options of your choice. You gain another one at 10th and 17th level. You can use only one Metamagic option on a spell when you cast it, unless the option says otherwise. Careful Spell (1 SP): protect up to Cha mod creatures from your spell's effects. Distant Spell (1 SP): double a spell's range, or change touch range to 30ft. Empowered Spell (1 SP): reroll up to Cha mod damage dice; can combine with other Metamagic. Extended Spell (1 SP): double a spell's duration (max 24hr). Heightened Spell (3 SP): one target has disadvantage on its first saving throw against the spell. Quickened Spell (2 SP): change a spell's casting time from 1 action to 1 bonus action. Subtle Spell (1 SP): cast a spell without verbal or somatic components. Twinned Spell (1 SP per spell level, min 1): target a second creature with a single-target spell. Seeking Spell (TCoE, 2 SP): reroll a missed spell attack. Transmuted Spell (TCoE, 1 SP): change a spell's damage type to acid, cold, fire, lightning, poison, or thunder.",
+          "type": "multi_choice",
+          "description": "You gain two Metamagic options below. You can use only one on a spell when you cast it, unless the option says otherwise. Sorcery points (SP) are spent to activate each option.",
           "options": [
             "Careful Spell",
             "Distant Spell",
@@ -12165,7 +12165,50 @@
             "Twinned Spell",
             "Seeking Spell",
             "Transmuted Spell"
-          ]
+          ],
+          "count": 2,
+          "optionDetails": {
+            "Careful Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. Spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum 1). A chosen creature automatically succeeds on its saving throw against the spell."
+            },
+            "Distant Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell. When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."
+            },
+            "Empowered Spell": {
+              "cost": "1 SP",
+              "description": "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum 1). You must use the new rolls. You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Extended Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."
+            },
+            "Heightened Spell": {
+              "cost": "3 SP",
+              "description": "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."
+            },
+            "Quickened Spell": {
+              "cost": "2 SP",
+              "description": "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."
+            },
+            "Subtle Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."
+            },
+            "Twinned Spell": {
+              "cost": "1 SP/level",
+              "description": "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip). To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level."
+            },
+            "Seeking Spell": {
+              "cost": "2 SP",
+              "description": "(TCoE) If you make an attack roll for a spell and miss, you can spend 2 sorcery points to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Transmuted Spell": {
+              "cost": "1 SP",
+              "description": "(TCoE) When you cast a spell that deals a type of damage from the following list, you can spend 1 sorcery point to change that damage type to one of the other listed types: acid, cold, fire, lightning, poison, thunder."
+            }
+          }
         },
         {
           "name": "Ability Score Improvement",
@@ -12182,7 +12225,7 @@
         {
           "name": "Metamagic (2nd choice)",
           "level": 10,
-          "type": "choice",
+          "type": "multi_choice",
           "options": [
             "Careful Spell",
             "Distant Spell",
@@ -12195,7 +12238,50 @@
             "Seeking Spell",
             "Transmuted Spell"
           ],
-          "description": "At 10th level you learn an additional Metamagic option."
+          "description": "You learn one additional Metamagic option of your choice.",
+          "count": 1,
+          "optionDetails": {
+            "Careful Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. Spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum 1). A chosen creature automatically succeeds on its saving throw against the spell."
+            },
+            "Distant Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell. When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."
+            },
+            "Empowered Spell": {
+              "cost": "1 SP",
+              "description": "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum 1). You must use the new rolls. You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Extended Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."
+            },
+            "Heightened Spell": {
+              "cost": "3 SP",
+              "description": "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."
+            },
+            "Quickened Spell": {
+              "cost": "2 SP",
+              "description": "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."
+            },
+            "Subtle Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."
+            },
+            "Twinned Spell": {
+              "cost": "1 SP/level",
+              "description": "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip). To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level."
+            },
+            "Seeking Spell": {
+              "cost": "2 SP",
+              "description": "(TCoE) If you make an attack roll for a spell and miss, you can spend 2 sorcery points to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Transmuted Spell": {
+              "cost": "1 SP",
+              "description": "(TCoE) When you cast a spell that deals a type of damage from the following list, you can spend 1 sorcery point to change that damage type to one of the other listed types: acid, cold, fire, lightning, poison, thunder."
+            }
+          }
         },
         {
           "name": "Ability Score Improvement",
@@ -12212,7 +12298,7 @@
         {
           "name": "Metamagic (3rd choice)",
           "level": 17,
-          "type": "choice",
+          "type": "multi_choice",
           "options": [
             "Careful Spell",
             "Distant Spell",
@@ -12225,7 +12311,50 @@
             "Seeking Spell",
             "Transmuted Spell"
           ],
-          "description": "At 17th level you learn an additional Metamagic option."
+          "description": "You learn one additional Metamagic option of your choice.",
+          "count": 1,
+          "optionDetails": {
+            "Careful Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. Spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum 1). A chosen creature automatically succeeds on its saving throw against the spell."
+            },
+            "Distant Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell. When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."
+            },
+            "Empowered Spell": {
+              "cost": "1 SP",
+              "description": "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum 1). You must use the new rolls. You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Extended Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."
+            },
+            "Heightened Spell": {
+              "cost": "3 SP",
+              "description": "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."
+            },
+            "Quickened Spell": {
+              "cost": "2 SP",
+              "description": "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."
+            },
+            "Subtle Spell": {
+              "cost": "1 SP",
+              "description": "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."
+            },
+            "Twinned Spell": {
+              "cost": "1 SP/level",
+              "description": "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip). To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level."
+            },
+            "Seeking Spell": {
+              "cost": "2 SP",
+              "description": "(TCoE) If you make an attack roll for a spell and miss, you can spend 2 sorcery points to reroll the d20, and you must use the new roll. You can use Seeking Spell even if you have already used a different Metamagic option during the casting of the spell."
+            },
+            "Transmuted Spell": {
+              "cost": "1 SP",
+              "description": "(TCoE) When you cast a spell that deals a type of damage from the following list, you can spend 1 sorcery point to change that damage type to one of the other listed types: acid, cold, fire, lightning, poison, thunder."
+            }
+          }
         },
         {
           "name": "Ability Score Improvement",

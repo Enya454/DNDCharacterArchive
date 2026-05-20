@@ -891,6 +891,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
     gameData, charLevel, racialSpells, onRacialSpellToggle, featChoices, onFeatChoice }) {
 
   const [open, setOpen] = useState(!locked);
+  const [expandedMulti, setExpandedMulti] = useState(null);
   const chosen = choices?.[feature.name];
 
   // ── Completeness ──
@@ -910,7 +911,10 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         const picked = (choices?.[feature.name] || []).length;
         return picked >= maxCount;
       }
-      case "infusion_choice": {
+      case "multi_choice": {
+        const picked = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
+        return picked.length >= (feature.count || 1);
+      }
         const countByLevel = feature.countByLevel || {"2":4};
         let maxCount = 0;
         for (const [lvl, cnt] of Object.entries(countByLevel)) {
@@ -978,6 +982,62 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
       {open && (
         <div style={{ marginTop:12, paddingTop:12, borderTop:"1px solid var(--border)" }}>
           <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.6, margin:"0 0 12px" }}>{feature.description}</p>
+
+          {/* Multi-choice — pick N from options, each expandable with details */}
+          {!locked && feature.type === "multi_choice" && (() => {
+            const picked  = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
+            const count   = feature.count || 1;
+            const details = feature.optionDetails || {};
+            const toggle = opt => {
+              const isOn = picked.includes(opt);
+              const next = isOn
+                ? picked.filter(p => p !== opt)
+                : picked.length < count ? [...picked, opt] : picked;
+              onChoice && onChoice(feature.name, next);
+            };
+            return (
+              <div>
+                <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
+                  Choose <strong style={{ color:"var(--accent)" }}>{count}</strong> option{count!==1?"s":""}
+                  {picked.length > 0 && <span style={{ color:"var(--success)", marginLeft:8 }}>({picked.length}/{count} chosen)</span>}
+                </div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:8 }}>
+                  {(feature.options||[]).map(opt => {
+                    const isPicked  = picked.includes(opt);
+                    const canPick   = isPicked || picked.length < count;
+                    const det       = details[opt];
+                    const isExpanded = expandedMulti === (feature.name + "_" + opt);
+                    return (
+                      <div key={opt}>
+                        <div onClick={()=>{
+                          if (canPick||isPicked) toggle(opt);
+                          setExpandedMulti(isExpanded ? null : feature.name + "_" + opt);
+                        }}
+                          style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 12px", borderRadius:20, cursor:"pointer",
+                            fontSize:12, transition:"all 0.15s",
+                            border:`1px solid ${isPicked?"var(--accent)":canPick?"var(--border)":"var(--border)"}`,
+                            background:isPicked?"rgba(var(--accent-rgb,201,162,39),0.12)":"var(--surface)",
+                            color:isPicked?"var(--accent)":canPick?"var(--text)":"var(--text-dim)",
+                            opacity:!canPick&&!isPicked?0.4:1 }}>
+                          {isPicked && <span style={{ fontSize:10 }}>✓</span>}
+                          {opt}
+                          {det?.cost && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:3 }}>({det.cost})</span>}
+                          <span style={{ fontSize:9, color:"var(--text-dim)", marginLeft:2 }}>{isExpanded?"▲":"▾"}</span>
+                        </div>
+                        {isExpanded && det?.description && (
+                          <div style={{ marginTop:4, marginBottom:4, padding:"8px 12px", background:"rgba(0,0,0,0.15)",
+                            border:"1px solid var(--border)", borderRadius:8, fontSize:12, color:"var(--text-muted)",
+                            lineHeight:1.65, maxWidth:480 }}>
+                            {det.description}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Simple choice */}
           {!locked && feature.type === "choice" && feature.options && (() => {
@@ -4783,6 +4843,19 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
         )}
         {locked   && <span style={ws.lockBadge}>Lvl {feat.level}</span>}
         {!locked && feat.level > 1 && !isSpecies && !isSubrace && <span style={{ fontSize:10, color:"var(--text-dim)" }}>Lvl {feat.level}</span>}
+        {(feat.type === "multi_choice") && (() => {
+          const picked = Array.isArray(char.featureChoices?.[feat.name]) ? char.featureChoices[feat.name] : [];
+          return picked.length > 0 && (
+            <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginTop:4 }}>
+              {picked.map(p => (
+                <span key={p} style={{ fontSize:11, color:"var(--success)", padding:"1px 8px", borderRadius:10,
+                  border:"1px solid var(--success)", background:"rgba(39,174,96,0.08)" }}>
+                  {p}{feat.optionDetails?.[p]?.cost ? ` (${feat.optionDetails[p].cost})` : ""}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
         {chosen   && (() => {
           const displayChosen = Array.isArray(chosen) ? chosen.join(", ") : String(chosen).split("—")[0].trim();
           const subKey  = feat.name + "_sub_" + String(chosen).replace(/\s+/g,"_");
