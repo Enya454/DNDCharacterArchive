@@ -915,6 +915,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
         const picked = Array.isArray(choices?.[feature.name]) ? choices[feature.name] : [];
         return picked.length >= (feature.count || 1);
       }
+      case "infusion_choice": {
         const countByLevel = feature.countByLevel || {"2":4};
         let maxCount = 0;
         for (const [lvl, cnt] of Object.entries(countByLevel)) {
