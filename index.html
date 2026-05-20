@@ -6266,9 +6266,18 @@ function FeatureAction({ feat, char, onUpdate }) {
     else if (v === "level*5")              v = char.level * 5;
     return v;
   };
-  const computeMax = uses => uses ? resolveFormula(uses.max) : null;
-
-  const maxUses = computeMax(feat.uses);
+  const computeMax = uses => {
+    if (!uses) return null;
+    // Accept both {max, per} objects and plain numbers
+    const raw = typeof uses === "object" ? uses.max : uses;
+    return resolveFormula(raw);
+  };
+  const restLabel = (() => {
+    const per = typeof feat.uses === "object" ? feat.uses?.per : null;
+    return per === "short" || per === "short or long rest" ? "Short Rest"
+         : per === "long" || per === "long rest" ? "Long Rest"
+         : per === "turn" ? "Next Turn" : null;
+  })();
   const spentKey = `spent_${feat.name}`;
   const spent = char.actionUses?.[spentKey] || 0;
   const remaining = maxUses !== null ? Math.max(0, maxUses - spent) : null;
@@ -6300,7 +6309,7 @@ function FeatureAction({ feat, char, onUpdate }) {
     onUpdate({ ...char, actionUses: newUses });
   };
 
-  const restLabel = feat.uses?.per === "short" ? "Short Rest" : feat.uses?.per === "long" ? "Long Rest" : feat.uses?.per === "turn" ? "Next Turn" : null;
+
 
   return (
     <div style={{ background:"var(--surface)", border:`1px solid ${open?"var(--accent)":"var(--border)"}`, borderRadius:8, padding:"10px 12px", marginBottom:6, transition:"border-color 0.15s" }}>
@@ -6463,7 +6472,14 @@ function ActionsTab({ char, gameData, onUpdate }) {
     ["reaction", "🔄 Reactions"],
   ];
 
-  // Split class actions: combat (attack/damage based) vs utility/other
+  // Active invocations that have action types
+  const invocationsFeature = allClassFeats.find(f => f.type === "eldritch_invocations");
+  const chosenInvocations  = char.featureChoices?.["Eldritch Invocations"] || [];
+  const activeInvActions   = invocationsFeature
+    ? (invocationsFeature.invocations || [])
+        .filter(inv => chosenInvocations.includes(inv.name) && inv.actionType)
+    : [];
+  const invByType = type => activeInvActions.filter(i => i.actionType === type);
   const COMBAT_ACTIONS = new Set(["Rage","Wild Shape","Sneak Attack","Bardic Inspiration",
     "Channel Divinity","Divine Smite","Flurry of Blows","Stunning Strike","Lay on Hands",
     "Second Wind","Action Surge","Eldritch Blast","Vampiric Bite","Radiant Sun Bolt"]);
@@ -6529,15 +6545,17 @@ function ActionsTab({ char, gameData, onUpdate }) {
         {byType("special").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
       </>)}
 
-      {show("class") && otherClassActions.length > 0 && (<>
+      {show("class") && (otherClassActions.length > 0 || invByType("action").length > 0) && (<>
         {sHead("🔧 Other Actions")}
         {otherClassActions.map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+        {invByType("action").map(inv=><FeatureAction key={inv.name} feat={{...inv, type:"action"}} char={char} onUpdate={onUpdate}/>)}
       </>)}
 
       {show("bonus") && (<>
         {sHead("⚡ Bonus Actions")}
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="bonus")} />
         {byType("bonus").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+        {invByType("bonus").map(inv=><FeatureAction key={inv.name} feat={{...inv, type:"action"}} char={char} onUpdate={onUpdate}/>)}
         {featureBonusActions.map((ba,i) => (
           <div key={i} style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:8, padding:"10px 12px", marginBottom:6 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -6553,6 +6571,7 @@ function ActionsTab({ char, gameData, onUpdate }) {
         {sHead("🔄 Reactions")}
         <StandardActionList actions={standardActions.filter(a=>a.actionType==="reaction")} />
         {byType("reaction").map(f=><FeatureAction key={f.name} feat={f} char={char} onUpdate={onUpdate}/>)}
+        {invByType("reaction").map(inv=><FeatureAction key={inv.name} feat={{...inv, type:"action"}} char={char} onUpdate={onUpdate}/>)}
       </>)}
 
       {section === "all" && standardActions.filter(a=>a.actionType==="free").length > 0 && (<>

@@ -12197,8 +12197,10 @@
               "levelReq": 7,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Book of Ancient Secrets",
@@ -12218,8 +12220,10 @@
               "levelReq": 15,
               "prereq": "Pact of the Chain",
               "actionType": "action",
-              "uses": 1,
-              "recharge": "long rest"
+              "uses": {
+                "max": 1,
+                "per": "long rest"
+              }
             },
             {
               "name": "Devil's Sight",
@@ -12233,8 +12237,10 @@
               "levelReq": 7,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Eldritch Mind",
@@ -12282,8 +12288,10 @@
                 "page": 57
               },
               "description": "As an action, you gain the ability to see through solid objects to a range of 30 feet. Within that range, you have darkvision if you don't already have it. This special sight lasts for 1 minute or until your concentration ends (as if you were concentrating on a spell). During that time, you perceive objects as ghostly, transparent images. Once you use this invocation, you can't use it again until you finish a short or long rest.",
-              "uses": 1,
-              "recharge": "short or long rest",
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              },
               "levelReq": 7,
               "actionType": "action"
             },
@@ -12329,8 +12337,10 @@
               "levelReq": 9,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Misty Visions",
@@ -12363,8 +12373,10 @@
               "levelReq": 7,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Shroud of Shadow",
@@ -12379,8 +12391,10 @@
               "levelReq": 1,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Thirsting Blade",
@@ -12394,8 +12408,10 @@
               "levelReq": 5,
               "prereq": null,
               "actionType": "reaction",
-              "uses": 1,
-              "recharge": "short or long rest"
+              "uses": {
+                "max": 1,
+                "per": "short or long rest"
+              }
             },
             {
               "name": "Undying Servitude",
@@ -12403,8 +12419,10 @@
               "levelReq": 5,
               "prereq": null,
               "actionType": "action",
-              "uses": 1,
-              "recharge": "long rest"
+              "uses": {
+                "max": 1,
+                "per": "long rest"
+              }
             },
             {
               "name": "Voice of the Chain Master",
