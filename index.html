@@ -6278,6 +6278,7 @@ function FeatureAction({ feat, char, onUpdate }) {
          : per === "long" || per === "long rest" ? "Long Rest"
          : per === "turn" ? "Next Turn" : null;
   })();
+  const maxUses = computeMax(feat.uses);
   const spentKey = `spent_${feat.name}`;
   const spent = char.actionUses?.[spentKey] || 0;
   const remaining = maxUses !== null ? Math.max(0, maxUses - spent) : null;
