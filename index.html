@@ -33,6 +33,9 @@
     /* ── Floating symbol animations ── */
     @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
     /* Prevent any content from expanding the character sheet width */
+    .sheet-tab-content {
+      contain: layout inline-size;
+    }
     .sheet-tab-content * {
       max-width: 100%;
       box-sizing: border-box;
@@ -45,6 +48,8 @@
     }
     .sheet-tab-content pre {
       white-space: pre-wrap;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     @keyframes floatUp {
       0%   { transform: translateY(0)        translateX(0px)   rotate(0deg);  opacity: 0; }
@@ -7349,7 +7354,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             minWidth: 0,
             padding:sheetPadding, height:"100%",
             boxSizing:"border-box", overflow:"hidden" }}>
-          <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", height:"100%", gap:10, overflow:"hidden" }}>
+          <div style={{ display:"grid", gridTemplateColumns:`260px minmax(0,1fr)`, height:"100%", gap:10, overflow:"hidden" }}>
 
         {/* ══ LEFT COLUMN: portrait + everything static ══ */}
         <div style={{ borderRadius:12, border:`1px solid ${"var(--border)"}`, background:"var(--card)", overflowY:"auto", overflowX:"hidden", padding:"14px 12px", display:"flex", flexDirection:"column", gap:0, minWidth:0 }}>
@@ -7581,7 +7586,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           </div>
 
           {/* ── Tab panel: fills remaining height ── */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", minWidth:0 }}>
+          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", minWidth:0, width:0 }}>
             {/* Tab bar — scrollable on mobile */}
             <div style={{ display:"flex", borderBottom:`1px solid ${"var(--border)"}`, flexShrink:0, paddingLeft: mobile ? 4 : 12, paddingTop:10, background:"transparent", overflowX:"auto", WebkitOverflowScrolling:"touch", scrollbarWidth:"none" }}>
               {TABS.map(t=><button key={t.id} style={{...ts(tab===t.id), whiteSpace:"nowrap", flexShrink:0}} onClick={()=>setTab(t.id)}>{t.l}</button>)}
