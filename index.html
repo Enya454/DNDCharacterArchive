@@ -4845,6 +4845,13 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
   const chosenFeat = char.featChoices?.[feat.name];
   const toggleKey = feat.name + (isSpecies ? "_sp" : isSubrace ? "_sr" : "");
   const isOpen = open[toggleKey];
+
+  const [surgeResult, setSurgeResult] = useState(null);
+  const rollSurge = () => {
+    const roll = Math.floor(Math.random() * 100) + 1;
+    const entry = (feat.surgeTable || []).find(e => roll >= e.low && roll <= e.high);
+    setSurgeResult({ roll, entry });
+  };
   return (
     <div style={ws.fCard(locked)}>
       <div style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }} onClick={() => toggle(toggleKey)}>
@@ -6497,6 +6504,43 @@ function FeatureAction({ feat, char, onUpdate }) {
       {open && (feat.description || feat.shortDescription) && (
         <div style={{ marginTop:8, paddingTop:8, borderTop:"1px solid var(--border)", fontSize:13, color:"var(--text-muted)", lineHeight:1.6, whiteSpace:"pre-line" }}>
           {feat.shortDescription || feat.description}
+        </div>
+      )}
+
+      {/* Wild Magic Surge roll button */}
+      {feat.surgeTable && (
+        <div style={{ marginTop:8 }}>
+          <button onClick={e=>{ e.stopPropagation(); rollSurge(); }}
+            style={{ padding:"6px 16px", borderRadius:7, cursor:"pointer", fontSize:13,
+              border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.1)",
+              color:"var(--accent)", fontFamily:"var(--font-display)" }}>
+            🎲 Roll Wild Magic Surge
+          </button>
+          {surgeResult && (
+            <div style={{ marginTop:8, padding:"12px 14px", background:"rgba(var(--accent-rgb,201,162,39),0.08)",
+              border:"1px solid rgba(var(--accent-rgb,201,162,39),0.3)", borderRadius:9 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:6 }}>
+                <div style={{ width:40, height:40, borderRadius:8, border:"2px solid var(--accent)",
+                  background:"rgba(var(--accent-rgb,201,162,39),0.15)", display:"flex", alignItems:"center",
+                  justifyContent:"center", fontFamily:"var(--font-display)", fontSize:18,
+                  color:"var(--accent)", flexShrink:0 }}>
+                  {surgeResult.roll}
+                </div>
+                <div style={{ fontSize:11, color:"var(--text-dim)" }}>
+                  d100 — {surgeResult.entry?.low === surgeResult.entry?.high
+                    ? `result ${surgeResult.entry?.low}`
+                    : `${surgeResult.entry?.low}–${surgeResult.entry?.high}`}
+                </div>
+              </div>
+              <div style={{ fontSize:13, color:"var(--text)", lineHeight:1.7 }}>
+                {surgeResult.entry?.effect || "No effect found."}
+              </div>
+              <div onClick={()=>setSurgeResult(null)}
+                style={{ marginTop:8, fontSize:11, color:"var(--text-dim)", cursor:"pointer", display:"inline" }}>
+                ✕ dismiss
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

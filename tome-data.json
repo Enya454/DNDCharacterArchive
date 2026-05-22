@@ -12461,13 +12461,270 @@
               "level": 1,
               "name": "Wild Magic Surge",
               "type": "passive",
-              "description": "Starting when you choose this origin at 1st level, your spellcasting can unleash surges of untamed magic. Immediately after you cast a sorcerer spell of 1st level or higher, the DM can have you roll a d20. If you roll a 1, roll on the Wild Magic Surge table."
+              "description": "Starting when you choose this origin at 1st level, your spellcasting can unleash surges of untamed magic. Immediately after you cast a sorcerer spell of 1st level or higher, the DM can have you roll a d20. On a 1, roll on the Wild Magic Surge table to create a random magical effect.",
+              "surgeTable": [
+                {
+                  "low": 1,
+                  "high": 2,
+                  "effect": "Roll on this table at the start of each of your turns for the next minute, ignoring this result on subsequent rolls."
+                },
+                {
+                  "low": 3,
+                  "high": 4,
+                  "effect": "For the next minute, you can see any invisible creature if you have line of sight to it."
+                },
+                {
+                  "low": 5,
+                  "high": 6,
+                  "effect": "A modron chosen and controlled by the DM appears in an unoccupied space within 5 feet of you, then disappears 1 minute later."
+                },
+                {
+                  "low": 7,
+                  "high": 8,
+                  "effect": "You cast fireball as a 3rd-level spell centered on yourself."
+                },
+                {
+                  "low": 9,
+                  "high": 10,
+                  "effect": "You cast magic missile as a 5th-level spell."
+                },
+                {
+                  "low": 11,
+                  "high": 12,
+                  "effect": "Roll a d10. Your height changes by a number of inches equal to the roll. If the roll is odd, you shrink. If the roll is even, you grow."
+                },
+                {
+                  "low": 13,
+                  "high": 14,
+                  "effect": "You cast confusion centered on yourself."
+                },
+                {
+                  "low": 15,
+                  "high": 16,
+                  "effect": "For the next minute, you regain 5 hit points at the start of each of your turns."
+                },
+                {
+                  "low": 17,
+                  "high": 18,
+                  "effect": "You grow a long beard made of feathers that remains until you sneeze, at which point the feathers explode out from your face."
+                },
+                {
+                  "low": 19,
+                  "high": 20,
+                  "effect": "You cast grease centered on yourself."
+                },
+                {
+                  "low": 21,
+                  "high": 22,
+                  "effect": "Creatures have disadvantage on saving throws against the next spell you cast in the next minute that involves a saving throw."
+                },
+                {
+                  "low": 23,
+                  "high": 24,
+                  "effect": "Your skin turns a vibrant shade of blue. A remove curse spell can end this effect."
+                },
+                {
+                  "low": 25,
+                  "high": 26,
+                  "effect": "An eye appears on your forehead for the next minute. During that time, you have advantage on Wisdom (Perception) checks that rely on sight."
+                },
+                {
+                  "low": 27,
+                  "high": 28,
+                  "effect": "For the next minute, all your spells with a casting time of 1 action have a casting time of 1 bonus action."
+                },
+                {
+                  "low": 29,
+                  "high": 30,
+                  "effect": "You teleport up to 60 feet to an unoccupied space of your choice that you can see."
+                },
+                {
+                  "low": 31,
+                  "high": 32,
+                  "effect": "You are transported to the Astral Plane until the end of your next turn, after which time you return to the space you previously occupied or the nearest unoccupied space if that space is occupied."
+                },
+                {
+                  "low": 33,
+                  "high": 34,
+                  "effect": "Maximize the damage of the next damaging spell you cast within the next minute."
+                },
+                {
+                  "low": 35,
+                  "high": 36,
+                  "effect": "Roll a d10. Your age changes by a number of years equal to the roll. If the roll is odd, you get younger (minimum 1 year old). If the roll is even, you get older."
+                },
+                {
+                  "low": 37,
+                  "high": 38,
+                  "effect": "1d6 flumphs controlled by the DM appear in unoccupied spaces within 60 feet of you and are frightened of you. They vanish after 1 minute."
+                },
+                {
+                  "low": 39,
+                  "high": 40,
+                  "effect": "You regain 2d10 hit points."
+                },
+                {
+                  "low": 41,
+                  "high": 42,
+                  "effect": "You turn into a potted plant until the start of your next turn. While a plant, you are incapacitated and have vulnerability to all damage. If you drop to 0 hit points, your pot breaks, and your form reverts."
+                },
+                {
+                  "low": 43,
+                  "high": 44,
+                  "effect": "For the next minute, you can teleport up to 20 feet as a bonus action on each of your turns."
+                },
+                {
+                  "low": 45,
+                  "high": 46,
+                  "effect": "You cast levitate on yourself."
+                },
+                {
+                  "low": 47,
+                  "high": 48,
+                  "effect": "A unicorn controlled by the DM appears in a space within 5 feet of you, then disappears 1 minute later."
+                },
+                {
+                  "low": 49,
+                  "high": 50,
+                  "effect": "You can't speak for the next minute. Whenever you try, pink bubbles float out of your mouth."
+                },
+                {
+                  "low": 51,
+                  "high": 52,
+                  "effect": "A spectral shield hovers near you for the next minute, granting you a +2 bonus to AC and immunity to magic missile."
+                },
+                {
+                  "low": 53,
+                  "high": 54,
+                  "effect": "You are immune to being intoxicated by alcohol for the next 5d6 days."
+                },
+                {
+                  "low": 55,
+                  "high": 56,
+                  "effect": "Your hair falls out but grows back within 24 hours."
+                },
+                {
+                  "low": 57,
+                  "high": 58,
+                  "effect": "For the next minute, any flammable object you touch that isn't being worn or carried by someone else bursts into flame."
+                },
+                {
+                  "low": 59,
+                  "high": 60,
+                  "effect": "You regain your lowest-level expended spell slot."
+                },
+                {
+                  "low": 61,
+                  "high": 62,
+                  "effect": "For the next minute, you must shout when you speak."
+                },
+                {
+                  "low": 63,
+                  "high": 64,
+                  "effect": "You cast fog cloud centered on yourself."
+                },
+                {
+                  "low": 65,
+                  "high": 66,
+                  "effect": "Up to three creatures you choose within 30 feet of you take 4d10 lightning damage."
+                },
+                {
+                  "low": 67,
+                  "high": 68,
+                  "effect": "You are frightened by the nearest creature until the end of your next turn."
+                },
+                {
+                  "low": 69,
+                  "high": 70,
+                  "effect": "Each creature within 30 feet of you becomes invisible for the next minute. The invisibility ends on a creature when it attacks or casts a spell."
+                },
+                {
+                  "low": 71,
+                  "high": 72,
+                  "effect": "You gain resistance to all damage for the next minute."
+                },
+                {
+                  "low": 73,
+                  "high": 74,
+                  "effect": "A random creature within 60 feet of you becomes poisoned for 1d4 hours."
+                },
+                {
+                  "low": 75,
+                  "high": 76,
+                  "effect": "You glow with bright light in a 30-foot radius for the next minute. Any creature that ends its turn within 5 feet of you is blinded until the end of its next turn."
+                },
+                {
+                  "low": 77,
+                  "high": 78,
+                  "effect": "You cast polymorph on yourself. If you fail the saving throw, you turn into a sheep for the spell's duration."
+                },
+                {
+                  "low": 79,
+                  "high": 80,
+                  "effect": "Illusory butterflies and flower petals flutter in the air within 10 feet of you for the next minute."
+                },
+                {
+                  "low": 81,
+                  "high": 82,
+                  "effect": "You can take one additional action immediately."
+                },
+                {
+                  "low": 83,
+                  "high": 84,
+                  "effect": "Each creature within 30 feet of you takes 1d10 necrotic damage. You regain hit points equal to the sum of the necrotic damage dealt."
+                },
+                {
+                  "low": 85,
+                  "high": 86,
+                  "effect": "You cast mirror image."
+                },
+                {
+                  "low": 87,
+                  "high": 88,
+                  "effect": "You cast fly on a random creature within 60 feet of you."
+                },
+                {
+                  "low": 89,
+                  "high": 90,
+                  "effect": "You become invisible for the next minute. During that time, other creatures can't hear you. The invisibility ends if you attack or cast a spell."
+                },
+                {
+                  "low": 91,
+                  "high": 92,
+                  "effect": "If you die within the next minute, you immediately come back to life as if by the reincarnate spell."
+                },
+                {
+                  "low": 93,
+                  "high": 94,
+                  "effect": "Your size increases by one size category for the next minute."
+                },
+                {
+                  "low": 95,
+                  "high": 96,
+                  "effect": "You and all creatures within 30 feet of you gain vulnerability to piercing damage for the next minute."
+                },
+                {
+                  "low": 97,
+                  "high": 98,
+                  "effect": "You are surrounded by faint, ethereal music for the next minute."
+                },
+                {
+                  "low": 99,
+                  "high": 100,
+                  "effect": "You regain all expended sorcery points."
+                }
+              ]
             },
             {
               "level": 1,
               "name": "Tides of Chaos",
-              "type": "passive",
-              "description": "Starting at 1st level, you can manipulate the forces of chance and chaos to gain advantage on one attack roll, ability check, or saving throw. Once you do so, you must finish a long rest before you can use this feature again."
+              "type": "action",
+              "description": "You can manipulate the forces of chance and chaos to gain advantage on one attack roll, ability check, or saving throw. Once you do so, you must finish a long rest before you can use this feature again. Any time before you regain the use of this feature, the DM can have you roll on the Wild Magic Surge table immediately after you cast a sorcerer spell of 1st level or higher. You then regain the use of this feature.",
+              "actionType": "action",
+              "uses": {
+                "max": 1,
+                "per": "long rest"
+              }
             },
             {
               "level": 6,
