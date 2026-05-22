@@ -1322,6 +1322,33 @@
             }
           ],
           "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."
+        },
+        {
+          "name": "Celestial Revelation",
+          "level": 3,
+          "type": "choice",
+          "options": [
+            "Necrotic Shroud",
+            "Radiant Consumption",
+            "Radiant Soul"
+          ],
+          "description": "When you reach 3rd level, you can unleash the celestial energy within yourself. Choose one of the following forms. Once per day you can use your transformation as a bonus action, lasting for 1 minute or until you end it as a bonus action. During it, other creatures within 10 feet of you that fail a Charisma saving throw (DC = 8 + proficiency bonus + Charisma modifier) become frightened of you until the end of your next turn (Necrotic Shroud only). You regain the ability to use this after a long rest.",
+          "optionDetails": {
+            "Necrotic Shroud": {
+              "description": "Your eyes turn into empty black voids, shadowy wings sprout from your back, and necrotic energy radiates from you. Enemies within 10 ft who fail a Charisma save are frightened until end of your next turn. Once per turn when you deal damage, you can deal extra necrotic damage equal to your proficiency bonus."
+            },
+            "Radiant Consumption": {
+              "description": "Searing light temporarily radiates from your eyes and mouth. For the duration, you shed bright light in a 10-foot radius and dim light for an additional 10 feet, and at the end of each of your turns, each creature within 10 feet of you takes radiant damage equal to your proficiency bonus. Once per turn when you deal damage, you can deal extra radiant damage equal to your proficiency bonus."
+            },
+            "Radiant Soul": {
+              "description": "Two luminous, incorporeal wings sprout from your back. You gain a flying speed equal to your walking speed. Once per turn when you deal damage, you can deal extra radiant damage to one target equal to your proficiency bonus."
+            }
+          },
+          "actionType": "bonus",
+          "uses": {
+            "max": 1,
+            "per": "long rest"
+          }
         }
       ],
       "source": {
@@ -22873,6 +22900,7 @@
     "Abyssal",
     "Celestial",
     "Common",
+    "Common Sign Language",
     "Deep Speech",
     "Draconic",
     "Dwarvish",

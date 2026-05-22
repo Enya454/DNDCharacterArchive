@@ -3800,7 +3800,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                 {/* Species features */}
                 <div style={ws.secTitle}>Species Features</div>
                 {(speciesData.features || []).map(feat => (
-                  <FeaturePanel key={feat.name} feature={feat} locked={false}
+                  <FeaturePanel key={feat.name} feature={feat} locked={(char.level||1) < (feat.level||1)}
                     {...fpProps("Species", true)} />
                 ))}
 
@@ -3812,7 +3812,7 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                       <span style={{ fontSize:11, fontFamily:"var(--font-body)", color:"var(--accent2)", marginLeft:8, fontStyle:"italic" }}>Subrace</span>
                     </div>
                     {subraceData.features.map(feat => (
-                      <FeaturePanel key={feat.name} feature={feat} locked={false}
+                      <FeaturePanel key={feat.name} feature={feat} locked={(char.level||1) < (feat.level||1)}
                         {...fpProps("Subrace", true)} />
                     ))}
                   </>
@@ -4840,7 +4840,7 @@ function InventoryTab({ char, gameData, onUpdate }) {
 // FEATURES TAB (character sheet view)
 // ============================================================
 function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, ws }) {
-  const locked  = !isSpecies && !isSubrace && char.level < feat.level;
+  const locked  = char.level < (feat.level || 1);
   const chosen  = char.featureChoices?.[feat.name];
   const chosenFeat = char.featChoices?.[feat.name];
   const toggleKey = feat.name + (isSpecies ? "_sp" : isSubrace ? "_sr" : "");
