@@ -22186,6 +22186,23 @@
       "fontBody": "'Crimson Pro',serif",
       "gradientHero": "linear-gradient(135deg, #020810 0%, #051525 50%, #020810 100%)",
       "backgroundEffect": "winter"
+    },
+    "crystal": {
+      "bg": "#02050f",
+      "card": "#060d1e",
+      "surface": "#080f22",
+      "border": "rgba(80,160,255,0.20)",
+      "text": "#ddeeff",
+      "textMuted": "#88b8e0",
+      "textDim": "#446688",
+      "accent": "#60b8ff",
+      "accentText": "#a0d8ff",
+      "accentRgb": "96,184,255",
+      "success": "#40d8a0",
+      "danger": "#e05080",
+      "fontDisplay": "'Cinzel Decorative', serif",
+      "fontBody": "'Philosopher', serif",
+      "effect": "crystal"
     }
   },
   "music": {
