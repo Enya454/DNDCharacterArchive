@@ -82,7 +82,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 29
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        155,
+        188
+      ],
+      "heightNote": "Typically 5'2\"\u20136'2\""
     },
     "Elf": {
       "abilityBonuses": {
@@ -353,7 +359,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 21
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        152,
+        183
+      ],
+      "heightNote": "Typically 5'\u20136'"
     },
     "Dwarf": {
       "abilityBonuses": {
@@ -448,7 +460,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 18
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        122,
+        152
+      ],
+      "heightNote": "Typically 4'\u20135' (stout Medium)"
     },
     "Halfling": {
       "abilityBonuses": {
@@ -531,7 +549,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 26
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        81,
+        107
+      ],
+      "heightNote": "Typically 2'8\"\u20133'6\""
     },
     "Gnome": {
       "abilityBonuses": {
@@ -614,7 +638,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 35
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        91,
+        107
+      ],
+      "heightNote": "Typically 3'\u20133'6\""
     },
     "Half-Elf": {
       "abilityBonuses": {
@@ -796,7 +826,13 @@
             }
           ]
         }
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        152,
+        188
+      ],
+      "heightNote": "Typically 5'\u20136'2\""
     },
     "Half-Orc": {
       "abilityBonuses": {
@@ -844,7 +880,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 40
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        155,
+        193
+      ],
+      "heightNote": "Typically 5'\u20136'4\""
     },
     "Tiefling": {
       "abilityBonuses": {},
@@ -1212,7 +1254,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 42
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        155,
+        188
+      ],
+      "heightNote": "Typically 5'2\"\u20136'2\" (similar to humans)"
     },
     "Dragonborn": {
       "abilityBonuses": {
@@ -1268,7 +1316,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 32
-      }
+      },
+      "sizes": null,
+      "heightCm": [
+        183,
+        213
+      ],
+      "heightNote": "Typically 6'\u20137'"
     },
     "Aasimar": {
       "abilityBonuses": {
@@ -1372,7 +1426,13 @@
         "abbr": "MotM",
         "page": 6
       },
-      "description": "Aasimar are mortals who carry a spark of the Upper Planes within their souls. They can innately access this power to heal others, sear foes, and manifest luminous wings."
+      "description": "Aasimar are mortals who carry a spark of the Upper Planes within their souls. They can innately access this power to heal others, sear foes, and manifest luminous wings.",
+      "sizes": null,
+      "heightCm": [
+        155,
+        188
+      ],
+      "heightNote": "Typically human-sized, 5'2\"\u20136'2\""
     },
     "Dhampir": {
       "source": {
@@ -1381,7 +1441,7 @@
         "page": 16
       },
       "description": "Dhampirs are mortals who walk the line between life and undeath. Born of a vampire's curse or dark ritual, they carry the hunger of the undead within them while retaining the warmth of the living. They are neither fully vampire nor fully mortal, existing in an unsettling twilight between two worlds.",
-      "size": "Medium or Small",
+      "size": null,
       "speed": 35,
       "abilityBonuses": {},
       "abilityChoices": {
@@ -1454,7 +1514,22 @@
           "count": 1,
           "description": "You can speak, read, and write Common and one other language that you and your DM agree is appropriate for your character."
         }
-      ]
+      ],
+      "sizes": [
+        "Medium",
+        "Small"
+      ],
+      "heightCm": {
+        "Medium": [
+          155,
+          188
+        ],
+        "Small": [
+          81,
+          122
+        ]
+      },
+      "heightNote": "Medium: 5'2\"\u20136'2\", Small: 2'8\"\u20134'"
     }
   },
   "classes": {

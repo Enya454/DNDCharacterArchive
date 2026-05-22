@@ -3701,7 +3701,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     ].join(", ")}
                   </div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>
-                    {d.speed}ft • {d.size}
+                    {d.speed}ft · {d.sizes ? d.sizes.join(" or ") : d.size}
+                    {d.heightNote && <span style={{ marginLeft:6, color:"var(--text-dim)" }}>· {d.heightNote}</span>}
                     {d.subraces && <span style={{ color:"var(--accent)", marginLeft:6 }}>▾ {Object.keys(d.subraces).length} subraces</span>}
                   </div>
                   {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
@@ -3812,6 +3813,72 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     <span><span style={{ color:"var(--text-muted)" }}>Fly: </span><span style={{ color:"var(--accent)" }}>{subraceData?.flySpeed || speciesData.flySpeed}ft</span></span>
                   )}
                 </div>
+
+                {/* Size picker — shown when species has choosable sizes */}
+                {speciesData.sizes && speciesData.sizes.length > 1 && (
+                  <div style={{ marginBottom:14 }}>
+                    <div style={{ ...ws.secTitle }}>Size</div>
+                    <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+                      {speciesData.sizes.map(sz => {
+                        const isActive = (char.size || speciesData.sizes[0]) === sz;
+                        return (
+                          <div key={sz} onClick={()=>setChar(c=>({...c, size:sz, heightCm:null}))}
+                            style={{ flex:1, padding:"10px 14px", borderRadius:8, cursor:"pointer", textAlign:"center",
+                              border:`2px solid ${isActive?"var(--accent)":"var(--border)"}`,
+                              background:isActive?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)" }}>
+                            <div style={{ fontFamily:"var(--font-display)", color:isActive?"var(--accent)":"var(--text)", fontSize:14 }}>{sz}</div>
+                            <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>
+                              {(() => {
+                                const h = speciesData.heightCm?.[sz];
+                                return h ? `${h[0]}–${h[1]} cm` : "";
+                              })()}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Height input */}
+                {speciesData && (speciesData.heightCm || speciesData.sizes) && (() => {
+                  const currentSize = char.size || speciesData.size || (speciesData.sizes?.[0]);
+                  const hRange = Array.isArray(speciesData.heightCm)
+                    ? speciesData.heightCm
+                    : speciesData.heightCm?.[currentSize];
+                  if (!hRange) return null;
+                  const [hMin, hMax] = hRange;
+                  const h = char.heightCm || Math.round((hMin + hMax) / 2);
+                  const outOfRange = h < hMin || h > hMax;
+                  return (
+                    <div style={{ marginBottom:14, padding:"12px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:9 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>Height</div>
+                        <div style={{ fontSize:11, color:"var(--text-dim)" }}>
+                          Typical range: {hMin}–{hMax} cm ({speciesData.heightNote || ""})
+                        </div>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <input type="range" min={Math.max(50, hMin - 30)} max={hMax + 30} value={h}
+                          onChange={e=>setChar(c=>({...c, heightCm:+e.target.value}))}
+                          style={{ flex:1, accentColor:"var(--accent)" }}/>
+                        <input type="number" value={h} min={50} max={280}
+                          onChange={e=>setChar(c=>({...c, heightCm:+e.target.value}))}
+                          style={{ width:68, background:"var(--card)", border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
+                            color:"var(--text)", padding:"5px 8px", borderRadius:6, fontSize:14, textAlign:"center" }}/>
+                        <span style={{ fontSize:13, color:"var(--text-muted)", minWidth:22 }}>cm</span>
+                      </div>
+                      {outOfRange && (
+                        <div style={{ marginTop:6, fontSize:11, color:"var(--danger)" }}>
+                          ⚠ Outside typical range for {currentSize} {char.species} ({hMin}–{hMax} cm)
+                        </div>
+                      )}
+                      <div style={{ marginTop:4, fontSize:11, color:"var(--text-dim)" }}>
+                        ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48 % 1)*12)}" · {(h/100).toFixed(2)}m
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Species features */}
                 <div style={ws.secTitle}>Species Features</div>
@@ -6063,6 +6130,73 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         </div>
       </div>
 
+      {/* ── Size & Height ── */}
+      {sectionHead("Size & Height")}
+      {(() => {
+        const spData = gameData?.species?.[char.species];
+        const currentSize = char.size || spData?.size || (spData?.sizes?.[0]) || "Medium";
+        const hRange = spData?.heightCm
+          ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
+          : null;
+        const h = char.heightCm || (hRange ? Math.round((hRange[0]+hRange[1])/2) : 170);
+        const outOfRange = hRange && (h < hRange[0] || h > hRange[1]);
+        return (
+          <div>
+            {/* Size picker if multiple sizes available */}
+            {spData?.sizes?.length > 1 && (
+              <div style={{ marginBottom:12 }}>
+                <label style={label}>Size Category</label>
+                <div style={{ display:"flex", gap:6 }}>
+                  {spData.sizes.map(sz => {
+                    const active = currentSize === sz;
+                    return (
+                      <div key={sz} onClick={()=>onUpdate({...char, size:sz})}
+                        style={{ flex:1, padding:"7px 8px", borderRadius:7, cursor:"pointer", textAlign:"center",
+                          border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                          background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                          color:active?"var(--accent)":"var(--text-muted)", fontSize:13 }}>
+                        {sz}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* Height slider + input */}
+            <div>
+              <label style={label}>
+                Height — {h} cm
+                {hRange && <span style={{ color:"var(--text-dim)", fontWeight:"normal", marginLeft:8 }}>
+                  (typical: {hRange[0]}–{hRange[1]} cm)
+                </span>}
+              </label>
+              <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
+                <input type="range"
+                  min={hRange ? Math.max(50, hRange[0]-30) : 50}
+                  max={hRange ? hRange[1]+30 : 280}
+                  value={h}
+                  onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                  style={{ flex:1, accentColor:"var(--accent)" }}/>
+                <input type="number" value={h} min={50} max={280}
+                  onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                  style={{ width:64, background:"var(--card)",
+                    border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
+                    color:"var(--text)", padding:"4px 8px", borderRadius:6, fontSize:13, textAlign:"center" }}/>
+                <span style={{ fontSize:12, color:"var(--text-muted)", minWidth:20 }}>cm</span>
+              </div>
+              <div style={{ fontSize:11, color:"var(--text-dim)" }}>
+                ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}" · {(h/100).toFixed(2)}m
+              </div>
+              {outOfRange && (
+                <div style={{ marginTop:4, fontSize:11, color:"var(--danger)" }}>
+                  ⚠ Outside typical range for {currentSize} {char.species || "this species"}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Sheet Layout ── */}
       {sectionHead("Sheet Layout")}
 
@@ -7687,6 +7821,44 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           })()}
 
           {/* Resistances & Defenses */}
+          {sectionLabel("Size & Height")}
+          {(() => {
+            const currentSize = char.size || subraceData?.size || speciesData?.size || "Medium";
+            const h = char.heightCm;
+            const spData = speciesData;
+            const hRange = h && spData?.heightCm
+              ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
+              : null;
+            const outOfRange = hRange && h && (h < hRange[0] || h > hRange[1]);
+            return (
+              <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
+                <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:2 }}>
+                  <span style={{ color:"var(--text-muted)" }}>Size:</span>
+                  <span style={{ color:"var(--accent)", fontFamily:"var(--font-display)" }}>{currentSize}</span>
+                  {speciesData?.heightNote && (
+                    <span style={{ color:"var(--text-dim)", fontSize:11 }}>· {speciesData.heightNote}</span>
+                  )}
+                </div>
+                {h ? (
+                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                    <span style={{ color:"var(--text-muted)" }}>Height:</span>
+                    <span style={{ color: outOfRange ? "var(--danger)" : "var(--text)", fontFamily:"var(--font-display)" }}>
+                      {h} cm
+                    </span>
+                    <span style={{ color:"var(--text-dim)", fontSize:11 }}>
+                      ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}"
+                    </span>
+                    {outOfRange && <span style={{ color:"var(--danger)", fontSize:10 }}>⚠ atypical</span>}
+                  </div>
+                ) : (
+                  <div style={{ color:"var(--text-dim)", fontSize:11, fontStyle:"italic" }}>
+                    Height not set — configure in Settings
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {(() => {
             const allFeats = [
               ...(speciesData?.features  || []).map(f=>({...f,_src:char.species})),
