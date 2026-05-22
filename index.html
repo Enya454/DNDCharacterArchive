@@ -388,9 +388,14 @@ const isItemProficient = (item, char, classes) => {
   ] : [];
   const combined = [...allProfs, ...subProfs].map(p => p.toLowerCase());
 
-  // Direct name match
-  if (combined.includes(item.name?.toLowerCase())) return true;
-  // Proficiency group match (e.g. "Simple", "Martial", "Light", "Medium")
+  // Direct name match (e.g. "Daggers" matches item name "Dagger")
+  const itemName = item.name?.toLowerCase() || "";
+  if (combined.includes(itemName)) return true;
+  // Singular/plural name match (e.g. "daggers" matches "dagger" and vice versa)
+  if (combined.some(p => p === itemName + "s" || p + "s" === itemName)) return true;
+  // Individual weapon name match with spaces (e.g. "light crossbows" matches "Light Crossbow")
+  if (combined.some(p => itemName.startsWith(p.replace(/s$/, "")) || p.replace(/s$/, "").startsWith(itemName))) return true;
+  // Proficiency group match (e.g. "Simple", "Martial")
   const pg = item.proficiencyGroup?.toLowerCase();
   if (pg && combined.some(p => p.includes(pg))) return true;
   // Category-based fallbacks
