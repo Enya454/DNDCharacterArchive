@@ -7826,15 +7826,12 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             const currentSize = char.size || subraceData?.size || speciesData?.size || "Medium";
             const h = char.heightCm;
             const spData = speciesData;
-            const hRange = h && spData?.heightCm
-              ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
-              : null;
-            const outOfRange = hRange && h && (h < hRange[0] || h > hRange[1]);
+            const effectiveSize = char.size || (spData?.sizes ? spData.sizes[0] : spData?.size) || "Medium";
             return (
               <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
                 <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:2 }}>
                   <span style={{ color:"var(--text-muted)" }}>Size:</span>
-                  <span style={{ color:"var(--accent)", fontFamily:"var(--font-display)" }}>{currentSize}</span>
+                  <span style={{ color:"var(--accent)", fontFamily:"var(--font-display)" }}>{effectiveSize}</span>
                   {speciesData?.heightNote && (
                     <span style={{ color:"var(--text-dim)", fontSize:11 }}>· {speciesData.heightNote}</span>
                   )}
@@ -7842,13 +7839,12 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
                 {h ? (
                   <div style={{ display:"flex", gap:8, alignItems:"center" }}>
                     <span style={{ color:"var(--text-muted)" }}>Height:</span>
-                    <span style={{ color: outOfRange ? "var(--danger)" : "var(--text)", fontFamily:"var(--font-display)" }}>
+                    <span style={{ color:"var(--text)", fontFamily:"var(--font-display)" }}>
                       {h} cm
                     </span>
                     <span style={{ color:"var(--text-dim)", fontSize:11 }}>
                       ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}"
                     </span>
-                    {outOfRange && <span style={{ color:"var(--danger)", fontSize:10 }}>⚠ atypical</span>}
                   </div>
                 ) : (
                   <div style={{ color:"var(--text-dim)", fontSize:11, fontStyle:"italic" }}>
