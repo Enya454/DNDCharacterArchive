@@ -237,7 +237,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "You know the Dancing Lights cantrip. At 3rd level you can cast Faerie Fire once per long rest. At 5th level you can cast Darkness once per long rest. Charisma is your spellcasting ability for these spells."
+              "description": "You know the Dancing Lights cantrip. At 3rd level you can cast Faerie Fire once per long rest. At 5th level you can cast Darkness once per long rest. Charisma is your spellcasting ability for these spells.",
+              "alwaysPrepared": true
             },
             {
               "name": "Drow Weapon Training",
@@ -902,7 +903,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Thaumaturgy cantrip; Hellish Rebuke (2nd level) 1/long rest at 3rd; Darkness 1/long rest at 5th. CHA is your spellcasting ability."
+              "description": "Thaumaturgy cantrip; Hellish Rebuke (2nd level) 1/long rest at 3rd; Darkness 1/long rest at 5th. CHA is your spellcasting ability.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -943,7 +945,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Same as standard Infernal Legacy. Patron of Tieflings who trace their descent to Asmodeus."
+              "description": "Same as standard Infernal Legacy. Patron of Tieflings who trace their descent to Asmodeus.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -984,7 +987,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Thaumaturgy cantrip; Searing Smite 1/long rest at 3rd; Branding Smite 1/long rest at 5th. CHA is your spellcasting ability."
+              "description": "Thaumaturgy cantrip; Searing Smite 1/long rest at 3rd; Branding Smite 1/long rest at 5th. CHA is your spellcasting ability.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1025,7 +1029,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Thaumaturgy cantrip; Disguise Self 1/long rest at 3rd; Detect Thoughts 1/long rest at 5th."
+              "description": "Thaumaturgy cantrip; Disguise Self 1/long rest at 3rd; Detect Thoughts 1/long rest at 5th.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1066,7 +1071,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Minor Illusion cantrip; Disguise Self 1/long rest at 3rd; Invisibility 1/long rest at 5th."
+              "description": "Minor Illusion cantrip; Disguise Self 1/long rest at 3rd; Invisibility 1/long rest at 5th.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1107,7 +1113,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Ray of Frost cantrip; Armor of Agathys 1/long rest at 3rd; Darkness 1/long rest at 5th."
+              "description": "Ray of Frost cantrip; Armor of Agathys 1/long rest at 3rd; Darkness 1/long rest at 5th.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1148,7 +1155,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Mage Hand cantrip; Tenser's Floating Disk 1/long rest at 3rd; Arcane Lock 1/long rest at 5th."
+              "description": "Mage Hand cantrip; Tenser's Floating Disk 1/long rest at 3rd; Arcane Lock 1/long rest at 5th.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1189,7 +1197,8 @@
                   "recharge": "long"
                 }
               ],
-              "description": "Mage Hand cantrip; Burning Hands 1/long rest at 3rd; Flame Blade 1/long rest at 5th."
+              "description": "Mage Hand cantrip; Burning Hands 1/long rest at 3rd; Flame Blade 1/long rest at 5th.",
+              "alwaysPrepared": true
             }
           ],
           "source": {
@@ -1306,7 +1315,8 @@
             "max": 1,
             "per": "long"
           },
-          "note": "Touch a creature; restore HP equal to your level"
+          "note": "Touch a creature; restore HP equal to your level",
+          "alwaysPrepared": true
         },
         {
           "name": "Light Bearer",
@@ -1321,7 +1331,8 @@
               "recharge": null
             }
           ],
-          "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."
+          "description": "You know the Light cantrip. Charisma is your spellcasting ability for it.",
+          "alwaysPrepared": true
         },
         {
           "name": "Celestial Revelation",

@@ -5059,6 +5059,28 @@ function FeaturesTab({ char, gameData, onUpdate }) {
           )}
         </div>
         <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.75, margin:"0 0 0 0" }}>{feat.description}</p>
+        {feat.sorceryPoints && (() => {
+          const spMax   = char.level || 0;
+          const spSpent = char.actionUses?.["sorceryPoints_spent"] || 0;
+          const spLeft  = Math.max(0, spMax - spSpent);
+          return (
+            <div style={{ marginTop:8, display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+              <div style={{ display:"flex", gap:3, flexWrap:"wrap" }}>
+                {Array.from({length: spMax}).map((_,i) => {
+                  const isSpent = i >= spLeft;
+                  return <div key={i} style={{ width:11, height:11, borderRadius:"50%",
+                    border:`2px solid ${isSpent?"var(--border)":"var(--accent)"}`,
+                    background:isSpent?"transparent":"var(--accent)" }}/>;
+                })}
+              </div>
+              <span style={{ fontSize:12, color:"var(--accent)", fontFamily:"var(--font-display)" }}>
+                {spLeft}/{spMax} Sorcery Points
+              </span>
+              <span style={{ fontSize:11, color:"var(--text-dim)" }}>— manage in ⚔️ Actions</span>
+            </div>
+          );
+        })()}
+
         {chosen && !Array.isArray(chosen) && feat.type === "choice" && (
           <div style={{ marginTop:10, padding:"8px 12px", background:"rgba(201,162,39,0.06)", border:"1px solid var(--accent)", borderRadius:8 }}>
             <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Your Choice</div>
@@ -6471,24 +6493,23 @@ function FeatureAction({ feat, char, onUpdate }) {
         </div>
 
         {/* Sorcery Points tracker */}
-        {isSP && (
-          <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
-            <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth:200 }}>
+        {isSP && spMax > 0 && (
+          <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0, flexWrap:"wrap" }}>
+            <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth:220 }}>
               {Array.from({length: spMax}).map((_,i) => {
-                const spent = i >= spLeft;
+                const isSpent = i >= spLeft;
                 return (
-                  <div key={i} onClick={()=>{ spent ? restoreSP(1) : spendSP(1); }}
+                  <div key={i} onClick={()=>{ isSpent ? restoreSP(1) : spendSP(1); }}
                     style={{ width:12, height:12, borderRadius:"50%", cursor:"pointer",
-                      border:`2px solid ${spent?"var(--border)":"var(--accent)"}`,
-                      background:spent?"transparent":"var(--accent)",
+                      border:`2px solid ${isSpent?"var(--border)":"var(--accent)"}`,
+                      background:isSpent?"transparent":"var(--accent)",
                       transition:"all 0.12s" }}/>
                 );
               })}
             </div>
-            <span style={{ fontSize:12, color:spLeft>0?"var(--accent)":"var(--text-dim)", fontFamily:"var(--font-display)", minWidth:36, textAlign:"center" }}>
-              {spLeft}/{spMax}
+            <span style={{ fontSize:12, color:"var(--accent)", fontFamily:"var(--font-display)", minWidth:36, textAlign:"center" }}>
+              {spLeft}/{spMax} SP
             </span>
-            <span style={{ fontSize:11, color:"var(--text-dim)" }}>SP</span>
             {spSpent > 0 && (
               <button onClick={()=>restoreSP(spMax)}
                 style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(39,174,96,0.1)", border:"1px solid var(--success)", color:"var(--success)" }}>
@@ -7182,17 +7203,16 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
 
   const [speedOpen,      setSpeedOpen]      = useState(false);
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
-  // Auto-sync alwaysPrepared spell grants from class/subclass into racialSpells
+  // Auto-sync alwaysPrepared spell grants from class/subclass/species into racialSpells
   React.useEffect(() => {
-    if (!gameData || !char.class) return;
+    if (!gameData) return;
     const classes = gameData.classes || {};
-    const cd = classes[char.class];
-    if (!cd) return;
+    const cd = char.class ? classes[char.class] : null;
 
     // Collect all spell_grant features that are alwaysPrepared and level-appropriate
     const allFeats = [
-      ...(cd.features || []),
-      ...((char.subclass && cd.subclasses?.[char.subclass]?.features) || []),
+      ...(cd?.features || []),
+      ...((char.subclass && cd?.subclasses?.[char.subclass]?.features) || []),
       ...(gameData.species?.[char.species]?.features || []),
       ...(gameData.species?.[char.species]?.subraces?.[char.subrace]?.features || []),
     ];
