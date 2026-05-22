@@ -12146,8 +12146,14 @@
         {
           "level": 2,
           "name": "Font of Magic",
-          "type": "passive",
-          "description": "At 2nd level, you tap into a deep wellspring of magic within yourself. This wellspring is represented by sorcery points, which allow you to create a variety of magical effects. You have 2 sorcery points at 2nd level, and you gain one more sorcery point every time you level up, to a maximum of 20 at level 20."
+          "type": "action",
+          "description": "You have sorcery points equal to your Sorcerer level (max 20). You regain all spent sorcery points when you finish a long rest.\n\nConverting Spell Slots to Sorcery Points: As a bonus action, expend a spell slot and gain sorcery points equal to its level.\n\nCreating Spell Slots: As a bonus action, transform sorcery points into a spell slot (1st: 2 SP, 2nd: 3 SP, 3rd: 5 SP, 4th: 6 SP, 5th: 7 SP).",
+          "actionType": "action",
+          "sorceryPoints": true,
+          "uses": {
+            "max": "level",
+            "per": "long rest"
+          }
         },
         {
           "level": 3,
@@ -17460,6 +17466,362 @@
         "abbr": "PHB",
         "page": 141
       }
+    },
+    "City Watch": {
+      "description": "You have served the community where you grew up, standing as its first line of defense against crime.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Athletics",
+            "Insight"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 2
+        },
+        {
+          "name": "Watcher's Eye",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "Your experience in enforcing the law, and dealing with lawbreakers, gives you a feel for local laws and criminals. You can easily find the local outpost of the watch or a similar organization, and you know which neighborhoods are known for crime."
+        }
+      ]
+    },
+    "Clan Crafter": {
+      "description": "The Stout Folk are well known for their artisanship and the worth they place on a skilled worker.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "History",
+            "Insight"
+          ]
+        },
+        {
+          "name": "Tool Proficiency",
+          "type": "passive",
+          "description": "One type of artisan's tools."
+        },
+        {
+          "name": "Respect of the Stout Folk",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "As well respected as clan crafters are among outsiders, no one esteems them quite so highly as dwarves do. You always have free room and board in any place where shield dwarves or gold dwarves dwell."
+        }
+      ]
+    },
+    "Cloistered Scholar": {
+      "description": "As a child, you were inquisitive when your playmates were possessive or raucous. You spent your formative years as an apprentice, studying in one of Faer\u00fbn's great institutes of learning.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "History"
+          ],
+          "from": [
+            "Arcana",
+            "Nature",
+            "Religion"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 2
+        },
+        {
+          "name": "Library Access",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "You have free use of whatever library you grew up studying in. Though others must make donations or favors to access such libraries, you have access as a matter of course. You also know the people of the library and can call in favors from archivists, scholars, and librarians."
+        }
+      ]
+    },
+    "Courtier": {
+      "description": "In your earlier years, you were trained in courtly ways and the diplomacy of noble society.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Insight",
+            "Persuasion"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 2
+        },
+        {
+          "name": "Court Functionary",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "Your knowledge of how bureaucracies function lets you gain access to the records and inner workings of any noble court or governmental palace. You know how to get messages to and from nobles, and can conduct personal meetings with them if needed."
+        }
+      ]
+    },
+    "Faction Agent": {
+      "description": "Many organizations active in the world aren't bound by geographical borders. You have sworn allegiance to one such faction.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Insight"
+          ],
+          "from": [
+            "all"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 2
+        },
+        {
+          "name": "Safe Haven",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "As a faction agent, you have access to a secret network of supporters and operatives who can provide assistance on your adventures. You know a set of secret signs and passwords you can use to identify such operatives, who can provide you with access to a hidden safe house, free room and board, or assistance finding information."
+        }
+      ]
+    },
+    "Far Traveler": {
+      "description": "Almost by definition, you come from somewhere far away \u2014 a distant land whose customs are unfamiliar to the locals.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Insight",
+            "Perception"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 1
+        },
+        {
+          "name": "All Eyes on You",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "Your accent, mannerisms, figures of speech, and perhaps even your appearance all mark you as foreign. Curious glances are directed your way wherever you go. Locals assume you are a rich curiosity, or perhaps a spy. This can open doors in high society and help you get information."
+        }
+      ]
+    },
+    "Haunted One": {
+      "description": "You are haunted by something so terrible that you dare not speak of it. You've tried to bury it and run away from it, to no avail. Whatever this thing is that haunts you, it can be used as a source of strength in dark times.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "from": [
+            "Arcana",
+            "Investigation",
+            "Religion",
+            "Survival"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 2
+        },
+        {
+          "name": "Heart of Darkness",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "Those who look into your eyes can see that you have faced unimaginable horror and witnessed the depths of evil. Though they might fear you, commoners will extend every courtesy and do their utmost to help you. Unless you have shown yourself to be a danger to them, even an enemy cleric might help you in a pinch, though perhaps not without extracting a price."
+        }
+      ]
+    },
+    "Inheritor": {
+      "description": "You are the heir to something of great value \u2014 not mere coin or wealth, but an object, information, or a title that has been entrusted to you by a parent, a mentor, a liege, or some other figure of authority.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Survival"
+          ],
+          "from": [
+            "Arcana",
+            "History",
+            "Religion"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 1
+        },
+        {
+          "name": "Inheritance",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "Choose or randomly determine your inheritance from the Inheritance table. Work with your DM to figure out the details. The inheritance might be a family heirloom, a piece of information, or a title with associated benefits."
+        }
+      ]
+    },
+    "Knight of the Order": {
+      "description": "You belong to an order of knights who have sworn oaths to achieve a certain goal.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Persuasion"
+          ],
+          "from": [
+            "Arcana",
+            "History",
+            "Nature",
+            "Religion"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 1
+        },
+        {
+          "name": "Knightly Regard",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "You receive shelter and succor from members of your knightly order and those who are sympathetic to its aims. If your order is a religious one, you can gain aid from temples and related religious communities of your faith."
+        }
+      ]
+    },
+    "Mercenary Veteran": {
+      "description": "As a sell-sword who fought battles for coin, you're well acquainted with risking life and limb for a chance at a share of treasure.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Athletics",
+            "Persuasion"
+          ]
+        },
+        {
+          "name": "Mercenary Life",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "You know the mercenary life as only someone who has experienced it can. You are able to identify mercenary companies by their emblems, and you know a little about any such company, including the names of its commanders. You can find mercenary work between adventures."
+        }
+      ]
+    },
+    "Urban Bounty Hunter": {
+      "description": "Before you became an adventurer, your life was already full of conflict and excitement, because you made a living tracking down people for pay.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "from": [
+            "Deception",
+            "Insight",
+            "Persuasion",
+            "Stealth"
+          ]
+        },
+        {
+          "name": "Ear to the Ground",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "You are in frequent contact with people in the segment of society that your chosen quarries move through. These people might not be trustworthy, but they can give you valuable information. Your DM will tell you what they know."
+        }
+      ]
+    },
+    "Uthgardt Tribe Member": {
+      "description": "Though you might have only recently arrived in civilized lands, you are no stranger to the values of cooperation and group effort when striving for supremacy.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "Athletics",
+            "Survival"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 1
+        },
+        {
+          "name": "Uthgardt Heritage",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "You have an excellent knowledge of not only your tribe's territory, but also the terrain and resources of the rest of the North. You are familiar enough with any wilderness area that you find twice as much food and water as you normally would when you forage there."
+        }
+      ]
+    },
+    "Waterdhavian Noble": {
+      "description": "You are a scion of one of the great noble families of Waterdeep, a cosmopolitan city at the heart of the Sword Coast.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "fixed": [
+            "History",
+            "Persuasion"
+          ]
+        },
+        {
+          "name": "Languages",
+          "type": "language_choice",
+          "count": 1
+        },
+        {
+          "name": "Kept in Style",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "While you are in Waterdeep or elsewhere in the North, your name and signet are known to every noble and merchant of consequence. You are treated as a guest by your social peers and other nobility. Common folk make every effort to accommodate you, though they might also try to take advantage of your wealth."
+        }
+      ]
+    },
+    "Witchlight Hand": {
+      "description": "You have spent your life working for a travelling carnival \u2014 the Witchlight Carnival \u2014 which visits the Material Plane once every eight years.",
+      "features": [
+        {
+          "name": "Skill Proficiencies",
+          "type": "proficiency_choice",
+          "count": 2,
+          "from": [
+            "Acrobatics",
+            "Deception",
+            "Performance",
+            "Sleight of Hand"
+          ]
+        },
+        {
+          "name": "Carnival Fixture",
+          "type": "passive",
+          "feature_type": "background_feature",
+          "description": "The Witchlight Carnival provides you with free, modest lodgings and food. In addition, you know how to put on a good show. When you make a Charisma check as part of a carnival performance, you can add your proficiency bonus to the check if you aren't already doing so."
+        }
+      ]
     }
   },
   "spells": [

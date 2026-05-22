@@ -4890,6 +4890,7 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
               if (v==="wisdomModifier")       return Math.max(1, calcMod(char.abilities.wis));
               if (v==="charismaModifier")     return Math.max(1, calcMod(char.abilities.cha));
               if (v==="halfLevel")            return Math.max(1, Math.floor(char.level/2));
+              if (v==="level")                return char.level;
               if (v==="proficiencyBonus")     return Math.max(1, Math.ceil(1+char.level/4));
               if (v==="level*5")              return char.level*5;
               return typeof v === "number" ? v : null;
@@ -6361,6 +6362,7 @@ function FeatureAction({ feat, char, onUpdate }) {
     else if (v === "dexterityModifier")    v = Math.max(1, calcMod(char.abilities.dex));
     else if (v === "proficiencyBonus")     v = Math.max(1, Math.ceil(1 + char.level / 4));
     else if (v === "halfLevel")            v = Math.max(1, Math.floor(char.level / 2));
+    else if (v === "level")                v = char.level;
     else if (v === "level*5")              v = char.level * 5;
     return v;
   };
@@ -6410,6 +6412,15 @@ function FeatureAction({ feat, char, onUpdate }) {
 
 
 
+  // Sorcery points — special tracker when feat.sorceryPoints is true
+  const isSP   = !!feat.sorceryPoints;
+  const spMax  = isSP ? char.level : null;
+  const spKey  = "sorceryPoints_spent";
+  const spSpent = isSP ? (char.actionUses?.[spKey] || 0) : 0;
+  const spLeft  = isSP ? Math.max(0, spMax - spSpent) : null;
+  const spendSP = n => onUpdate({...char, actionUses:{...(char.actionUses||{}), [spKey]: Math.min(spMax, spSpent + (n||1))}});
+  const restoreSP = n => onUpdate({...char, actionUses:{...(char.actionUses||{}), [spKey]: Math.max(0, spSpent - (n||spMax))}});
+
   return (
     <div style={{ background:"var(--surface)", border:`1px solid ${open?"var(--accent)":"var(--border)"}`, borderRadius:8, padding:"10px 12px", marginBottom:6, transition:"border-color 0.15s" }}>
       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -6418,8 +6429,36 @@ function FeatureAction({ feat, char, onUpdate }) {
           {feat.note && <span style={{ fontSize:11, color:"var(--text-muted)", marginLeft:8 }}>{feat.note}</span>}
         </div>
 
-        {/* Uses tracker */}
-        {maxUses !== null && (
+        {/* Sorcery Points tracker */}
+        {isSP && (
+          <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
+            <div style={{ display:"flex", gap:3, flexWrap:"wrap", maxWidth:200 }}>
+              {Array.from({length: spMax}).map((_,i) => {
+                const spent = i >= spLeft;
+                return (
+                  <div key={i} onClick={()=>{ spent ? restoreSP(1) : spendSP(1); }}
+                    style={{ width:12, height:12, borderRadius:"50%", cursor:"pointer",
+                      border:`2px solid ${spent?"var(--border)":"var(--accent)"}`,
+                      background:spent?"transparent":"var(--accent)",
+                      transition:"all 0.12s" }}/>
+                );
+              })}
+            </div>
+            <span style={{ fontSize:12, color:spLeft>0?"var(--accent)":"var(--text-dim)", fontFamily:"var(--font-display)", minWidth:36, textAlign:"center" }}>
+              {spLeft}/{spMax}
+            </span>
+            <span style={{ fontSize:11, color:"var(--text-dim)" }}>SP</span>
+            {spSpent > 0 && (
+              <button onClick={()=>restoreSP(spMax)}
+                style={{ padding:"2px 8px", borderRadius:5, fontSize:11, cursor:"pointer", background:"rgba(39,174,96,0.1)", border:"1px solid var(--success)", color:"var(--success)" }}>
+                ↺ Long Rest
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Standard uses tracker */}
+        {!isSP && maxUses !== null && (
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
             <div style={{ display:"flex", gap:4 }}>
               {Array.from({length: maxUses}).map((_, i) => {
