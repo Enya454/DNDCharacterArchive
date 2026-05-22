@@ -1578,9 +1578,20 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             const toggle = inv => {
               if (!meetsLevel(inv) || !meetsPrereq(inv)) return;
               const isP = pickedNames.includes(inv.name);
-              const newList = isP
-                ? pickedNames.filter(n => n !== inv.name)
-                : pickedNames.length < maxCount ? [...pickedNames, inv.name] : pickedNames;
+              let newList;
+              if (isP) {
+                // Deselect
+                newList = pickedNames.filter(n => n !== inv.name);
+              } else if (pickedNames.length < maxCount) {
+                // Add if under cap
+                newList = [...pickedNames, inv.name];
+              } else if (maxCount === 1) {
+                // Replace — single-pick features just swap
+                newList = [inv.name];
+              } else {
+                // At max and multi-pick — don't allow (standard invocation behaviour)
+                return;
+              }
               onChoice && onChoice(feature.name, newList);
             };
 
@@ -1595,7 +1606,7 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                     const isPicked = pickedNames.includes(inv.name);
                     const canLevel = meetsLevel(inv);
                     const canPrereq = meetsPrereq(inv);
-                    const canPick = canLevel && canPrereq && (isPicked || pickedNames.length < maxCount);
+                    const canPick = canLevel && canPrereq && (isPicked || pickedNames.length < maxCount || maxCount === 1);
                     return (
                       <button key={inv.name} onClick={()=>toggle(inv)}
                         style={{padding:"5px 12px",borderRadius:20,cursor:canPick||isPicked?"pointer":"not-allowed",
