@@ -303,7 +303,7 @@ const useGameData = () => {
   const [data, setData]   = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
-    fetch("./tome-data.json")
+    fetch("./tome-data.json?v=" + Date.now())
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} — could not load tome-data.json`); return r.json(); })
       .then(setData)
       .catch(err => setError(err.message));
