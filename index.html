@@ -4955,7 +4955,7 @@ function FeatureRow({ feat, isSpecies, isSubrace, char, open, toggle, featList, 
   );
 }
 
-function FeaturesTab({ char, gameData }) {
+function FeaturesTab({ char, gameData, onUpdate }) {
   const { classes, species:speciesDb, feats:featList=[] } = gameData;
   const classData   = classes?.[char.class];
   const speciesData = speciesDb?.[char.species];
@@ -5051,13 +5051,38 @@ function FeaturesTab({ char, gameData }) {
         )}
         {feat.type === "eldritch_invocations" && invList?.length > 0 && (
           <div style={{ marginTop:10 }}>
-            <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Active Invocations ({invList.length})</div>
+            <div style={{ fontSize:10, color:"var(--text-muted)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>
+              Active {feat.invocationLabel ? feat.invocationLabel.replace(/\b\w/g,c=>c.toUpperCase()) + "s" : "Invocations"} ({invList.length})
+            </div>
             {invList.map(name => {
               const inv = (feat.invocations||[]).find(i=>i.name===name);
+              // Show uses tracker if the parent feature has uses and actionType
+              const spentKey = `spent_${feat.name}_${name.replace(/\s+/g,'_')}`;
+              const maxUses  = feat.uses?.max === 1 ? 1 : null;
+              const spent    = maxUses ? (char.actionUses?.[spentKey]||0) : 0;
+              const remaining = maxUses !== null ? Math.max(0, maxUses - spent) : null;
               return (
                 <div key={name} style={{ padding:"8px 12px", background:"rgba(201,162,39,0.04)", border:"1px solid rgba(var(--accent-rgb,201,162,39),0.18)", borderRadius:7, marginBottom:6 }}>
-                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:4 }}>
-                    {name}{inv?.prereq && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>Requires: {inv.prereq}</span>}
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, flex:1 }}>
+                      {name}{inv?.prereq && <span style={{ fontSize:10, color:"var(--text-dim)", marginLeft:8 }}>Requires: {inv.prereq}</span>}
+                    </div>
+                    {feat.uses && feat.actionType && (
+                      <div style={{ display:"flex", alignItems:"center", gap:4, flexShrink:0 }}>
+                        {feat.uses.max === 1 ? (
+                          <>
+                            <div onClick={()=>{
+                              const newUses = {...(char.actionUses||{})};
+                              if(remaining > 0) newUses[spentKey] = 1;
+                              else delete newUses[spentKey];
+                              onUpdate && onUpdate({...char, actionUses: newUses});
+                            }} style={{ width:14,height:14,borderRadius:"50%",cursor:"pointer",border:`2px solid ${remaining>0?"var(--accent)":"var(--border)"}`,background:remaining>0?"var(--accent)":"transparent",transition:"all 0.15s" }}/>
+                            <span style={{ fontSize:11, color:remaining>0?"var(--accent)":"var(--text-dim)" }}>{remaining}/{feat.uses.max}</span>
+                          </>
+                        ) : null}
+                        <span style={{ fontSize:10, color:"var(--text-dim)" }}>{feat.uses.per}</span>
+                      </div>
+                    )}
                   </div>
                   {inv?.description && <div style={{ fontSize:12, color:"var(--text-muted)", lineHeight:1.65 }}>{inv.description}</div>}
                 </div>
@@ -7459,7 +7484,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
               {tab==="actions"    && <ActionsTab     char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
-              {tab==="features"  && <FeaturesTab   char={char} gameData={gameData}/>}
+              {tab==="features"  && <FeaturesTab   char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="background" && <BackgroundTab char={char} gameData={gameData}/>}
               {tab==="relations" && <RelationsTab   char={char} onUpdate={upd}/>}
               {tab==="documents" && <DocumentsTab   char={char} onUpdate={upd} session={session} readOnly={readOnly}/>}
@@ -7751,7 +7776,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
               {tab==="actions"    && <ActionsTab     char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="spells"    && <SpellsTab    char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="inventory" && <InventoryTab  char={char} gameData={gameData} onUpdate={upd}/>}
-              {tab==="features"  && <FeaturesTab   char={char} gameData={gameData}/>}
+              {tab==="features"  && <FeaturesTab   char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="background" && <BackgroundTab char={char} gameData={gameData} onUpdate={upd}/>}
               {tab==="__old_background" && (
                 <div>
