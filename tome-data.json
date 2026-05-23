@@ -1758,7 +1758,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 49
-          }
+          },
+          "description": "Your rage is pure, frenzied fury \u2014 you become a relentless killing machine."
         },
         "Path of the Totem Warrior": {
           "features": [
@@ -1806,7 +1807,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 50
-          }
+          },
+          "description": "You draw on the spirit of an animal totem for magical power and resilience."
         },
         "Path of the Ancestral Guardian": {
           "name": "Path of the Ancestral Guardian",
@@ -2318,7 +2320,8 @@
             "abbr": "PHB",
             "page": 97
           },
-          "page": 97
+          "page": 97,
+          "description": "You hone your skills of stealth and trickery, gaining unmatched speed."
         },
         "Assassin": {
           "features": [
@@ -2358,7 +2361,8 @@
             "abbr": "PHB",
             "page": 97
           },
-          "page": 97
+          "page": 97,
+          "description": "You are a master of disguise and death, striking with deadly efficiency."
         },
         "Arcane Trickster": {
           "spellcaster": true,
@@ -2676,7 +2680,8 @@
             "abbr": "PHB",
             "page": 97
           },
-          "page": 97
+          "page": 97,
+          "description": "You augment your roguery with illusion and enchantment spells."
         },
         "Inquisitive": {
           "name": "Inquisitive",
@@ -3139,7 +3144,20 @@
             "Superior Technique",
             "Thrown Weapon Fighting",
             "Unarmed Fighting"
-          ]
+          ],
+          "optionDescriptions": {
+            "Archery": "+2 to attack rolls with ranged weapons.",
+            "Defense": "+1 to AC while wearing armour.",
+            "Dueling": "+2 to damage rolls when wielding a melee weapon in one hand and no other weapons.",
+            "Great Weapon Fighting": "Reroll 1s and 2s on damage dice when using a two-handed melee weapon.",
+            "Protection": "When a creature you can see attacks a target other than you within 5 feet, use a reaction to impose disadvantage on the attack roll.",
+            "Two-Weapon Fighting": "When two-weapon fighting, add your ability modifier to the damage of your off-hand attack.",
+            "Blind Fighting": "You have blindsight to 10 feet, allowing you to see invisible creatures in range.",
+            "Interception": "When a creature you can see hits a target within 5 feet with an attack, use a reaction to reduce the damage by 1d10 + proficiency bonus.",
+            "Superior Technique": "Learn one manoeuvre and gain one superiority die (d6).",
+            "Thrown Weapon Fighting": "Draw thrown weapons as part of the attack. +2 damage on ranged attacks with thrown weapons.",
+            "Unarmed Fighting": "Your unarmed strikes deal 1d6 + Strength (1d8 if two hands free). Grappled creatures take 1d4 bludgeoning at the start of their turn."
+          }
         },
         {
           "level": 1,
@@ -3305,7 +3323,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 72
-          }
+          },
+          "description": "You focus on the physical perfection of combat. Your critical hit range expands and your athleticism becomes extraordinary."
         },
         "Battle Master": {
           "features": [
@@ -3356,7 +3375,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 72
-          }
+          },
+          "description": "You are a master of battlefield control, learning combat manoeuvres to trip, disarm, and outmanoeuvre your foes."
         },
         "Eldritch Knight": {
           "spellcaster": true,
@@ -3668,7 +3688,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 72
-          }
+          },
+          "description": "You weave arcane magic into your martial training, gaining spells and the ability to bond with your weapons."
         },
         "Arcane Archer": {
           "name": "Arcane Archer",
@@ -4225,7 +4246,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 117
-          }
+          },
+          "description": "You unleash powerful elemental energies, blasting foes with raw magical force."
         },
         "School of Abjuration": {
           "features": [
@@ -4264,7 +4286,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 115
-          }
+          },
+          "description": "You specialise in protective magic, excelling at dispelling and warding against harm."
         },
         "School of Conjuration": {
           "name": "School of Conjuration",
@@ -5262,7 +5285,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 60
-          }
+          },
+          "description": "Your divine power focuses on vitality and healing, making you a supreme healer."
         },
         "Knowledge Domain": {
           "name": "Knowledge Domain",
@@ -6977,7 +7001,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 54
-          }
+          },
+          "description": "You seek every scrap of knowledge, learning extra skills and cutting magical secrets."
         },
         "College of Valor": {
           "features": [
@@ -7013,7 +7038,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 54
-          }
+          },
+          "description": "You inspire warriors with your tales and wade into battle yourself."
         },
         "College of Glamour": {
           "name": "College of Glamour",
@@ -7725,7 +7751,16 @@
             "Blessed Warrior",
             "Blind Fighting",
             "Interception"
-          ]
+          ],
+          "optionDescriptions": {
+            "Defense": "+1 to AC while wearing armour.",
+            "Dueling": "+2 to damage rolls with a one-handed melee weapon.",
+            "Great Weapon Fighting": "Reroll 1s and 2s on damage dice when using a two-handed weapon.",
+            "Protection": "Impose disadvantage on attacks against adjacent allies as a reaction.",
+            "Blessed Warrior": "Learn 2 cleric cantrips that count as paladin spells for you.",
+            "Blind Fighting": "Blindsight 10 feet.",
+            "Interception": "Reduce incoming damage to an adjacent ally by 1d10 + proficiency bonus."
+          }
         },
         {
           "level": 2,
@@ -7934,7 +7969,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 86
-          }
+          },
+          "description": "You uphold the ideals of justice and virtue, wielding holy power against evil."
         },
         "Oath of the Ancients": {
           "name": "Oath of the Ancients",
@@ -9036,7 +9072,16 @@
             "Thrown Weapon Fighting",
             "Druidic Warrior"
           ],
-          "description": "Choose one fighting style specialty: Archery: +2 to attack rolls with ranged weapons. Defense: +1 to AC while wearing armor. Dueling: +2 to damage when wielding a melee weapon in one hand. Two-Weapon Fighting: Add ability modifier to off-hand attack damage. Blind Fighting (TCoE): Blindsight 10ft. Thrown Weapon Fighting (TCoE): +2 damage with thrown weapons. Druidic Warrior (TCoE): Learn two druid cantrips. Wisdom is your spellcasting ability for them."
+          "description": "Choose one fighting style specialty: Archery: +2 to attack rolls with ranged weapons. Defense: +1 to AC while wearing armor. Dueling: +2 to damage when wielding a melee weapon in one hand. Two-Weapon Fighting: Add ability modifier to off-hand attack damage. Blind Fighting (TCoE): Blindsight 10ft. Thrown Weapon Fighting (TCoE): +2 damage with thrown weapons. Druidic Warrior (TCoE): Learn two druid cantrips. Wisdom is your spellcasting ability for them.",
+          "optionDescriptions": {
+            "Archery": "+2 to attack rolls with ranged weapons.",
+            "Defense": "+1 to AC while wearing armour.",
+            "Dueling": "+2 to damage rolls with one-handed melee weapons.",
+            "Two-Weapon Fighting": "Add ability modifier to off-hand attack damage.",
+            "Blind Fighting": "Blindsight 10 feet.",
+            "Druidic Warrior": "Learn 2 druid cantrips that count as ranger spells.",
+            "Thrown Weapon Fighting": "Draw thrown weapons as part of the attack, +2 damage."
+          }
         },
         {
           "name": "Spellcasting",
@@ -9389,7 +9434,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 93
-          }
+          },
+          "description": "You are a skilled tracker and combatant, specialising in destroying dangerous prey."
         },
         "Beast Master": {
           "spellcaster": false,
@@ -9472,7 +9518,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 93
-          }
+          },
+          "description": "You forge a bond with a beast companion that fights alongside you."
         },
         "Gloom Stalker": {
           "spellcaster": true,
@@ -9583,7 +9630,8 @@
             "book": "Xanathar's Guide to Everything",
             "abbr": "XGtE",
             "page": 41
-          }
+          },
+          "description": "You are a hunter of the dark, invisible to Darkvision and striking first."
         },
         "Horizon Walker": {
           "spellcaster": true,
@@ -9705,7 +9753,8 @@
             "book": "Xanathar's Guide to Everything",
             "abbr": "XGtE",
             "page": 42
-          }
+          },
+          "description": "You stand between planes, hunting aberrations and extraplanar threats."
         },
         "Monster Slayer": {
           "spellcaster": true,
@@ -9827,7 +9876,8 @@
             "book": "Xanathar's Guide to Everything",
             "abbr": "XGtE",
             "page": 43
-          }
+          },
+          "description": "You specialise in hunting powerful magical beasts and otherworldly foes."
         },
         "Fey Wanderer": {
           "spellcaster": true,
@@ -9936,7 +9986,8 @@
             "book": "Tasha's Cauldron of Everything",
             "abbr": "TCoE",
             "page": 58
-          }
+          },
+          "description": "You carry the magic of the Feywild, charming and beguiling foes."
         },
         "Swarmkeeper": {
           "name": "Swarmkeeper",
@@ -10665,7 +10716,17 @@
                 "Mountain",
                 "Swamp",
                 "Underdark"
-              ]
+              ],
+              "optionDescriptions": {
+                "Arctic": "Bonus spells themed to tundra and ice: Hold Person, Spike Growth, Sleet Storm, Ice Storm, Cone of Cold.",
+                "Coast": "Bonus spells themed to sea and shore: Mirror Image, Misty Step, Water Breathing, Control Water, Conjure Elemental.",
+                "Desert": "Bonus spells themed to arid waste: Blur, Silence, Create Food and Water, Blight, Insect Plague.",
+                "Forest": "Bonus spells themed to woodland: Barkskin, Spider Climb, Call Lightning, Plant Growth, Tree Stride.",
+                "Grassland": "Bonus spells themed to open plains: Invisibility, Pass without Trace, Daylight, Divination, Dream.",
+                "Mountain": "Bonus spells themed to highland peaks: Spider Climb, Spike Growth, Lightning Bolt, Meld into Stone, Passwall.",
+                "Swamp": "Bonus spells themed to wetlands: Acid Arrow, Darkness, Water Walk, Freedom of Movement, Insect Plague.",
+                "Underdark": "Bonus spells themed to the deep underground: Spider Climb, Web, Gaseous Form, Greater Invisibility, Stone Shape."
+              }
             },
             {
               "name": "Land's Stride",
@@ -10690,7 +10751,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 68
-          }
+          },
+          "description": "You draw power from the land itself, attuning to a specific terrain. You gain bonus spells and recover spell slots during short rests."
         },
         "Circle of the Moon": {
           "name": "Circle of the Moon",
@@ -11838,7 +11900,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 79
-          }
+          },
+          "description": "You master the martial arts body, pushing and tripping foes and achieving physical perfection."
         },
         "Way of Shadow": {
           "name": "Way of Shadow",
@@ -12586,7 +12649,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 102
-          }
+          },
+          "description": "Your innate magic comes from draconic blood in your ancestry. You gain resilience and power tied to a dragon's elemental affinity."
         },
         "Wild Magic": {
           "features": [
@@ -12882,7 +12946,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 103
-          }
+          },
+          "description": "Your magic is tied to the chaotic forces of the universe. You can cause random surges of magic and bend luck in unpredictable ways."
         },
         "Divine Soul": {
           "name": "Divine Soul",
@@ -14118,7 +14183,13 @@
             "Pact of the Tome \u2014 your patron gives you a Book of Shadows containing 3 cantrips from any class's spell list. They count as Warlock cantrips for you.",
             "Pact of the Talisman \u2014 your patron gives you an amulet. When the wearer fails an ability check, they can add a d4 to the result. You can give it to another creature."
           ],
-          "description": "Your patron grants you a boon at 3rd level."
+          "description": "Your patron grants you a boon at 3rd level.",
+          "optionDescriptions": {
+            "Pact of the Chain": "You learn the find familiar spell and can cast it as a ritual. Your familiar takes the form of a sprite, pseudodragon, quasit, or imp, and can attack in unique ways.",
+            "Pact of the Blade": "You can use your action to create a pact weapon in your empty hand. You can choose its form and use Charisma for attack and damage rolls with it.",
+            "Pact of the Tome": "Your patron gives you a Book of Shadows. Choose 3 cantrips from any class \u2014 while the book is on your person, you can cast those cantrips at will.",
+            "Pact of the Talisman": "Your patron gives you an amulet. When the wearer fails an ability check, they can add a d4 to the roll."
+          }
         },
         {
           "name": "Ability Score Improvement",
@@ -14300,7 +14371,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 109
-          }
+          },
+          "description": "You have made a pact with a fiend from the lower planes. Such entities desire the corruption and destruction of all things. You draw power from your patron's malevolence, channelling hellfire and dark bargains."
         },
         "The Archfey": {
           "spellcaster": true,
@@ -14406,7 +14478,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 108
-          }
+          },
+          "description": "Your patron is a lord or lady of the fey, a creature of legend who holds secrets that were forgotten before mortals invented writing. You gain magics to beguile and terrify, wielding the capricious power of the Feywild."
         },
         "The Great Old One": {
           "spellcaster": true,
@@ -14502,7 +14575,8 @@
             "book": "Player's Handbook",
             "abbr": "PHB",
             "page": 109
-          }
+          },
+          "description": "Your patron is a mysterious entity whose nature is utterly foreign to the fabric of reality. It communicates through dreams and whispers, and its power warps mind and space."
         },
         "The Celestial": {
           "spellcaster": true,
@@ -14600,7 +14674,8 @@
             "book": "Xanathar's Guide to Everything",
             "abbr": "XGtE",
             "page": 54
-          }
+          },
+          "description": "Your patron is a powerful being of the Upper Planes. You have been touched by divine radiance and wield light and healing alongside your eldritch power."
         },
         "The Undying": {
           "spellcaster": true,
@@ -14700,7 +14775,8 @@
             "book": "Xanathar's Guide to Everything",
             "abbr": "XGtE",
             "page": 54
-          }
+          },
+          "description": "Your patron is one who has cheated death \u2014 a lich, a deity of death, or a being that has mastered the art of unlife. You seek the secrets of immortality."
         }
       },
       "spellcastingTable": {

@@ -1107,6 +1107,22 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 ))}
               </div>
 
+              {/* Description panel for chosen option — shown when optionDescriptions or optionDetails exist */}
+              {chosen && !Array.isArray(chosen) && (() => {
+                const desc = feature.optionDescriptions?.[chosen]
+                  || feature.optionDetails?.[chosen]?.description;
+                if (!desc) return null;
+                return (
+                  <div style={{ marginTop:12, padding:"12px 14px", background:"rgba(0,0,0,0.2)",
+                    border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", borderRadius:8 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
+                      {chosen}
+                    </div>
+                    <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{desc}</p>
+                  </div>
+                );
+              })()}
+
               {/* Option sub-choices — driven by feature.optionSubChoices in JSON */}
               {chosen && feature.optionSubChoices?.[chosen] && (() => {
                 const sub    = feature.optionSubChoices[chosen];
@@ -1203,19 +1219,50 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* Subclass choice */}
           {!locked && feature.type === "subclass_choice" && subclasses && (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:8 }}>
-              {Object.entries(subclasses).map(([sc, scData]) => (
-                <div key={sc} onClick={() => onSubclassChoice(sc)} style={{
-                  padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
-                  border:`1px solid ${subclass === sc ? "var(--accent)" : "var(--border)"}`,
-                  background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
-                  color: subclass === sc ? "var(--accent)" : "var(--text)"
-                }}>
-                  {subclass === sc && "✓ "}{sc}
-                  {scData?.features?.[0] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>}
-                  {scData?.source && <div style={{ marginTop:5 }}><SourceBadge source={scData.source}/></div>}
+            <div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:8, marginBottom: subclass ? 12 : 0 }}>
+                {Object.entries(subclasses).map(([sc, scData]) => (
+                  <div key={sc} onClick={() => onSubclassChoice(sc)} style={{
+                    padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                    border:`1px solid ${subclass === sc ? "var(--accent)" : "var(--border)"}`,
+                    background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                    color: subclass === sc ? "var(--accent)" : "var(--text)"
+                  }}>
+                    {subclass === sc && "✓ "}{sc}
+                    {scData?.source && <div style={{ marginTop:4 }}><SourceBadge source={scData.source}/></div>}
+                  </div>
+                ))}
+              </div>
+              {/* Description panel for selected subclass */}
+              {subclass && subclasses[subclass] && (
+                <div style={{ padding:"14px 16px", background:"rgba(0,0,0,0.2)",
+                  border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", borderRadius:10 }}>
+                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>
+                    {subclass}
+                  </div>
+                  {subclasses[subclass].description && (
+                    <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:"0 0 10px" }}>
+                      {subclasses[subclass].description}
+                    </p>
+                  )}
+                  {/* First 3 feature names as preview */}
+                  {(subclasses[subclass].features || []).filter(f=>f.type!=="spell_grant").slice(0,3).length > 0 && (
+                    <div>
+                      <div style={{ fontSize:10, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Key Features</div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                        {(subclasses[subclass].features || []).filter(f=>f.type!=="spell_grant").slice(0,4).map(f => (
+                          <span key={f.name} style={{ fontSize:11, padding:"2px 8px", borderRadius:10,
+                            background:"rgba(var(--accent-rgb,201,162,39),0.08)",
+                            border:"1px solid rgba(var(--accent-rgb,201,162,39),0.2)",
+                            color:"var(--accent)" }}>
+                            L{f.level} {f.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
+              )}
             </div>
           )}
 
