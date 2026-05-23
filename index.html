@@ -1287,6 +1287,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
             const myExpertise = typeof expertiseProfs === "function"
               ? expertiseProfs(feature.name)
               : (expertiseProfs || []);
+            // Skills already taken by OTHER expertise features
+            const otherExpertise = (char?.skillExpertise || []).filter(s => !myExpertise.includes(s));
             return (
             <div>
               <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
@@ -1297,20 +1299,26 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 ? <p style={{ fontSize:12, color:"var(--text-dim)" }}>Select skill proficiencies first.</p>
                 : <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
                     {(skillProfs||[]).map(skill => {
-                      const isSel = myExpertise.includes(skill);
-                      const canAdd = isSel || myExpertise.length < feature.count;
+                      const isSel     = myExpertise.includes(skill);
+                      const takenElsewhere = otherExpertise.includes(skill);
+                      const canAdd    = !takenElsewhere && (isSel || myExpertise.length < feature.count);
                       return (
                         <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill, feature.name)} style={{
                           display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
                           cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
-                          background: isSel ? "rgba(var(--accent-rgb,201,162,39),0.12)" : "var(--surface)",
-                          border:`1px solid ${isSel ? "var(--accent)" : "var(--border)"}`,
-                          opacity: !canAdd ? 0.4 : 1
+                          background: isSel
+                            ? "rgba(var(--accent-rgb,201,162,39),0.12)"
+                            : takenElsewhere ? "rgba(80,120,200,0.08)" : "var(--surface)",
+                          border:`1px solid ${isSel ? "var(--accent)" : takenElsewhere ? "rgba(80,120,200,0.4)" : "var(--border)"}`,
+                          opacity: (!canAdd && !takenElsewhere) ? 0.4 : 1
                         }}>
                           <span style={{ width:12, height:12, borderRadius:0, transform:"rotate(45deg)", flexShrink:0, display:"inline-block",
-                            background: isSel ? "var(--accent)" : "transparent",
-                            border:`2px solid ${isSel ? "var(--accent)" : "var(--border)"}` }}/>
-                          <span style={{ fontSize:13 }}>{skill} ×2</span>
+                            background: isSel ? "var(--accent)" : takenElsewhere ? "rgba(80,120,200,0.5)" : "transparent",
+                            border:`2px solid ${isSel ? "var(--accent)" : takenElsewhere ? "rgba(80,120,200,0.6)" : "var(--border)"}` }}/>
+                          <span style={{ fontSize:13, color: takenElsewhere ? "#7ab3f5" : "var(--text)" }}>
+                            {skill} ×2
+                            {takenElsewhere && <span style={{ fontSize:10, color:"#7ab3f5", marginLeft:4 }}>already</span>}
+                          </span>
                         </div>
                       );
                     })}
