@@ -30,32 +30,15 @@
         },
         {
           "name": "Extra Language",
-          "level": 1,
           "type": "language_choice",
           "count": 1,
           "description": "You can speak, read, and write one extra language of your choice."
-        },
-        {
-          "name": "Extra Skill",
-          "level": 1,
-          "type": "proficiency_choice",
-          "count": 1,
-          "from": "all",
-          "description": "You gain proficiency in one skill of your choice."
         }
       ],
       "subraces": {
         "Standard Human": {
           "abilityBonuses": {},
-          "features": [
-            {
-              "name": "Extra Language",
-              "level": 1,
-              "type": "language_choice",
-              "count": 1,
-              "description": "You can speak, read, and write one extra language of your choice."
-            }
-          ]
+          "features": []
         },
         "Variant Human": {
           "abilityBonuses": {},
