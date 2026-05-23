@@ -9163,7 +9163,24 @@
             "Half-Elves",
             "Half-Orcs",
             "Tieflings"
-          ]
+          ],
+          "optionLanguages": {
+            "Aberrations": null,
+            "Beasts": null,
+            "Celestials": "Celestial",
+            "Constructs": null,
+            "Dragons": "Draconic",
+            "Elementals": null,
+            "Fey": "Sylvan",
+            "Fiends": null,
+            "Giants": "Giant",
+            "Humanoids": null,
+            "Monstrosities": null,
+            "Oozes": null,
+            "Plants": null,
+            "Undead": null
+          },
+          "grantLanguage": true
         },
         {
           "name": "Natural Explorer",
@@ -9300,7 +9317,24 @@
             "Half-Elves",
             "Half-Orcs",
             "Tieflings"
-          ]
+          ],
+          "optionLanguages": {
+            "Aberrations": null,
+            "Beasts": null,
+            "Celestials": "Celestial",
+            "Constructs": null,
+            "Dragons": "Draconic",
+            "Elementals": null,
+            "Fey": "Sylvan",
+            "Fiends": null,
+            "Giants": "Giant",
+            "Humanoids": null,
+            "Monstrosities": null,
+            "Oozes": null,
+            "Plants": null,
+            "Undead": null
+          },
+          "grantLanguage": true
         },
         {
           "name": "Natural Explorer (2nd terrain)",
@@ -9423,7 +9457,24 @@
             "Half-Elves",
             "Half-Orcs",
             "Tieflings"
-          ]
+          ],
+          "optionLanguages": {
+            "Aberrations": null,
+            "Beasts": null,
+            "Celestials": "Celestial",
+            "Constructs": null,
+            "Dragons": "Draconic",
+            "Elementals": null,
+            "Fey": "Sylvan",
+            "Fiends": null,
+            "Giants": "Giant",
+            "Humanoids": null,
+            "Monstrosities": null,
+            "Oozes": null,
+            "Plants": null,
+            "Undead": null
+          },
+          "grantLanguage": true
         },
         {
           "name": "Vanish",
