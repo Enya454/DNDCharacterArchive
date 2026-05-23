@@ -6130,73 +6130,6 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         </div>
       </div>
 
-      {/* ── Size & Height ── */}
-      {sectionHead("Size & Height")}
-      {(() => {
-        const spData = gameData?.species?.[char.species];
-        const currentSize = char.size || spData?.size || (spData?.sizes?.[0]) || "Medium";
-        const hRange = spData?.heightCm
-          ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
-          : null;
-        const h = char.heightCm || (hRange ? Math.round((hRange[0]+hRange[1])/2) : 170);
-        const outOfRange = hRange && (h < hRange[0] || h > hRange[1]);
-        return (
-          <div>
-            {/* Size picker if multiple sizes available */}
-            {spData?.sizes?.length > 1 && (
-              <div style={{ marginBottom:12 }}>
-                <label style={label}>Size Category</label>
-                <div style={{ display:"flex", gap:6 }}>
-                  {spData.sizes.map(sz => {
-                    const active = currentSize === sz;
-                    return (
-                      <div key={sz} onClick={()=>onUpdate({...char, size:sz})}
-                        style={{ flex:1, padding:"7px 8px", borderRadius:7, cursor:"pointer", textAlign:"center",
-                          border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
-                          background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
-                          color:active?"var(--accent)":"var(--text-muted)", fontSize:13 }}>
-                        {sz}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {/* Height slider + input */}
-            <div>
-              <label style={label}>
-                Height — {h} cm
-                {hRange && <span style={{ color:"var(--text-dim)", fontWeight:"normal", marginLeft:8 }}>
-                  (typical: {hRange[0]}–{hRange[1]} cm)
-                </span>}
-              </label>
-              <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
-                <input type="range"
-                  min={hRange ? Math.max(50, hRange[0]-30) : 50}
-                  max={hRange ? hRange[1]+30 : 280}
-                  value={h}
-                  onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
-                  style={{ flex:1, accentColor:"var(--accent)" }}/>
-                <input type="number" value={h} min={50} max={280}
-                  onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
-                  style={{ width:64, background:"var(--card)",
-                    border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
-                    color:"var(--text)", padding:"4px 8px", borderRadius:6, fontSize:13, textAlign:"center" }}/>
-                <span style={{ fontSize:12, color:"var(--text-muted)", minWidth:20 }}>cm</span>
-              </div>
-              <div style={{ fontSize:11, color:"var(--text-dim)" }}>
-                ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}" · {(h/100).toFixed(2)}m
-              </div>
-              {outOfRange && (
-                <div style={{ marginTop:4, fontSize:11, color:"var(--danger)" }}>
-                  ⚠ Outside typical range for {currentSize} {char.species || "this species"}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ── Sheet Layout ── */}
       {sectionHead("Sheet Layout")}
 
@@ -7897,41 +7830,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
                 })}
               </div>
             </>);
-          })()}
-
-          {/* Resistances & Defenses */}
-          {sectionLabel("Size & Height")}
-          {(() => {
-            const currentSize = char.size || subraceData?.size || speciesData?.size || "Medium";
-            const h = char.heightCm;
-            const spData = speciesData;
-            const effectiveSize = char.size || (spData?.sizes ? spData.sizes[0] : spData?.size) || "Medium";
-            return (
-              <div style={{ fontSize:12, lineHeight:1.9, marginBottom:4 }}>
-                <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:2 }}>
-                  <span style={{ color:"var(--text-muted)" }}>Size:</span>
-                  <span style={{ color:"var(--accent)", fontFamily:"var(--font-display)" }}>{effectiveSize}</span>
-                  {speciesData?.heightNote && (
-                    <span style={{ color:"var(--text-dim)", fontSize:11 }}>· {speciesData.heightNote}</span>
-                  )}
-                </div>
-                {h ? (
-                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                    <span style={{ color:"var(--text-muted)" }}>Height:</span>
-                    <span style={{ color:"var(--text)", fontFamily:"var(--font-display)" }}>
-                      {h} cm
-                    </span>
-                    <span style={{ color:"var(--text-dim)", fontSize:11 }}>
-                      ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}"
-                    </span>
-                  </div>
-                ) : (
-                  <div style={{ color:"var(--text-dim)", fontSize:11, fontStyle:"italic" }}>
-                    Height not set — configure in Settings
-                  </div>
-                )}
-              </div>
-            );
           })()}
 
           {(() => {
