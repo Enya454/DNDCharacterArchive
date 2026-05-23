@@ -1001,7 +1001,12 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           : (skillProfs || []);
         return owned.length >= (feature.count || 0);
       }
-      case "expertise_choice":   return (expertiseProfs || []).length >= (feature.count || 0);
+      case "expertise_choice": {
+        const myExp = typeof expertiseProfs === "function"
+          ? expertiseProfs(feature.name)
+          : (expertiseProfs || []);
+        return myExp.length >= (feature.count || 0);
+      }
       case "language_choice":    {
         const autoL = autoLanguages || [];
         const src = thisLanguageSource || "";
@@ -1107,6 +1112,22 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                 ))}
               </div>
 
+              {/* Description panel for chosen option — shown when optionDescriptions or optionDetails exist */}
+              {chosen && !Array.isArray(chosen) && (() => {
+                const desc = feature.optionDescriptions?.[chosen]
+                  || feature.optionDetails?.[chosen]?.description;
+                if (!desc) return null;
+                return (
+                  <div style={{ marginTop:12, padding:"12px 14px", background:"rgba(0,0,0,0.2)",
+                    border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", borderRadius:8 }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:6 }}>
+                      {chosen}
+                    </div>
+                    <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:0 }}>{desc}</p>
+                  </div>
+                );
+              })()}
+
               {/* Option sub-choices — driven by feature.optionSubChoices in JSON */}
               {chosen && feature.optionSubChoices?.[chosen] && (() => {
                 const sub    = feature.optionSubChoices[chosen];
@@ -1203,19 +1224,50 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
 
           {/* Subclass choice */}
           {!locked && feature.type === "subclass_choice" && subclasses && (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:8 }}>
-              {Object.entries(subclasses).map(([sc, scData]) => (
-                <div key={sc} onClick={() => onSubclassChoice(sc)} style={{
-                  padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
-                  border:`1px solid ${subclass === sc ? "var(--accent)" : "var(--border)"}`,
-                  background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
-                  color: subclass === sc ? "var(--accent)" : "var(--text)"
-                }}>
-                  {subclass === sc && "✓ "}{sc}
-                  {scData?.features?.[0] && <div style={{ fontSize:11, color:"var(--text-muted)", marginTop:3 }}>{scData.features[0].name}…</div>}
-                  {scData?.source && <div style={{ marginTop:5 }}><SourceBadge source={scData.source}/></div>}
+            <div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:8, marginBottom: subclass ? 12 : 0 }}>
+                {Object.entries(subclasses).map(([sc, scData]) => (
+                  <div key={sc} onClick={() => onSubclassChoice(sc)} style={{
+                    padding:"10px 14px", borderRadius:8, cursor:"pointer", fontSize:13, transition:"all 0.15s",
+                    border:`1px solid ${subclass === sc ? "var(--accent)" : "var(--border)"}`,
+                    background: subclass === sc ? "rgba(201,162,39,0.1)" : "var(--surface)",
+                    color: subclass === sc ? "var(--accent)" : "var(--text)"
+                  }}>
+                    {subclass === sc && "✓ "}{sc}
+                    {scData?.source && <div style={{ marginTop:4 }}><SourceBadge source={scData.source}/></div>}
+                  </div>
+                ))}
+              </div>
+              {/* Description panel for selected subclass */}
+              {subclass && subclasses[subclass] && (
+                <div style={{ padding:"14px 16px", background:"rgba(0,0,0,0.2)",
+                  border:"1px solid rgba(var(--accent-rgb,201,162,39),0.25)", borderRadius:10 }}>
+                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:15, marginBottom:8 }}>
+                    {subclass}
+                  </div>
+                  {subclasses[subclass].description && (
+                    <p style={{ fontSize:13, color:"var(--text-muted)", lineHeight:1.7, margin:"0 0 10px" }}>
+                      {subclasses[subclass].description}
+                    </p>
+                  )}
+                  {/* First 3 feature names as preview */}
+                  {(subclasses[subclass].features || []).filter(f=>f.type!=="spell_grant").slice(0,3).length > 0 && (
+                    <div>
+                      <div style={{ fontSize:10, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Key Features</div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                        {(subclasses[subclass].features || []).filter(f=>f.type!=="spell_grant").slice(0,4).map(f => (
+                          <span key={f.name} style={{ fontSize:11, padding:"2px 8px", borderRadius:10,
+                            background:"rgba(var(--accent-rgb,201,162,39),0.08)",
+                            border:"1px solid rgba(var(--accent-rgb,201,162,39),0.2)",
+                            color:"var(--accent)" }}>
+                            L{f.level} {f.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
+              )}
             </div>
           )}
 
@@ -1231,20 +1283,24 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
           )}
 
           {/* Expertise — only shows currently proficient skills, fixing the stale-state bug */}
-          {!locked && feature.type === "expertise_choice" && (
+          {!locked && feature.type === "expertise_choice" && (() => {
+            const myExpertise = typeof expertiseProfs === "function"
+              ? expertiseProfs(feature.name)
+              : (expertiseProfs || []);
+            return (
             <div>
               <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
                 Choose <strong style={{ color:"var(--accent)" }}>{feature.count}</strong> proficient skills for expertise (×2 prof bonus).
-                {(expertiseProfs||[]).length >= feature.count && <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
+                {myExpertise.length >= feature.count && <span style={{ color:"var(--success)", marginLeft:6 }}>✓ complete</span>}
               </div>
               {(skillProfs||[]).length === 0
                 ? <p style={{ fontSize:12, color:"var(--text-dim)" }}>Select skill proficiencies first.</p>
                 : <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:6 }}>
                     {(skillProfs||[]).map(skill => {
-                      const isSel = (expertiseProfs||[]).includes(skill);
-                      const canAdd = isSel || (expertiseProfs||[]).length < feature.count;
+                      const isSel = myExpertise.includes(skill);
+                      const canAdd = isSel || myExpertise.length < feature.count;
                       return (
-                        <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill)} style={{
+                        <div key={skill} onClick={() => canAdd && onExpertiseToggle(skill, feature.name)} style={{
                           display:"flex", alignItems:"center", gap:8, padding:"7px 12px", borderRadius:6,
                           cursor: canAdd ? "pointer" : "not-allowed", transition:"all 0.15s",
                           background: isSel ? "rgba(var(--accent-rgb,201,162,39),0.12)" : "var(--surface)",
@@ -1261,7 +1317,8 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
                   </div>
               }
             </div>
-          )}
+            );
+          })()}
 
           {/* Language choice */}
           {!locked && feature.type === "language_choice" && (() => {
@@ -3355,8 +3412,16 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
     choices: char.featureChoices, onChoice: setChoice,
     skillProfs: char.skillProficiencies,
     onSkillToggle: skill => toggleSkillForSource(skill, sourceLabel),
-    expertiseProfs: (char.skillExpertise||[]).filter(s=>(char.skillProficiencies||[]).includes(s)),
-    onExpertiseToggle: toggleExpertise,
+    expertiseProfs: (featureName) => ((char.skillExpertiseSources||{})[featureName || sourceLabel] || []).filter(s=>(char.skillProficiencies||[]).includes(s)),
+    onExpertiseToggle: (skill, featureName) => {
+      const src = featureName || sourceLabel;
+      const srcMap = char.skillExpertiseSources || {};
+      const cur = srcMap[src] || [];
+      const newSrc = cur.includes(skill) ? cur.filter(s=>s!==skill) : [...cur, skill];
+      const newMap = {...srcMap, [src]: newSrc};
+      const flat = [...new Set(Object.values(newMap).flat())];
+      setChar(c => ({...c, skillExpertiseSources: newMap, skillExpertise: flat}));
+    },
     allSkills: allSkills || [],
     languages: char.languages,
     languageSources: char.languageSources || {},
@@ -3701,7 +3766,8 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     ].join(", ")}
                   </div>
                   <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>
-                    {d.speed}ft • {d.size}
+                    {d.speed}ft · {d.sizes ? d.sizes.join(" or ") : d.size}
+                    {d.heightNote && <span style={{ marginLeft:6, color:"var(--text-dim)" }}>· {d.heightNote}</span>}
                     {d.subraces && <span style={{ color:"var(--accent)", marginLeft:6 }}>▾ {Object.keys(d.subraces).length} subraces</span>}
                   </div>
                   {d.source && <div style={{ marginTop:5 }}><SourceBadge source={d.source}/></div>}
@@ -3812,6 +3878,72 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     <span><span style={{ color:"var(--text-muted)" }}>Fly: </span><span style={{ color:"var(--accent)" }}>{subraceData?.flySpeed || speciesData.flySpeed}ft</span></span>
                   )}
                 </div>
+
+                {/* Size picker — shown when species has choosable sizes */}
+                {speciesData.sizes && speciesData.sizes.length > 1 && (
+                  <div style={{ marginBottom:14 }}>
+                    <div style={{ ...ws.secTitle }}>Size</div>
+                    <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+                      {speciesData.sizes.map(sz => {
+                        const isActive = (char.size || speciesData.sizes[0]) === sz;
+                        return (
+                          <div key={sz} onClick={()=>setChar(c=>({...c, size:sz, heightCm:null}))}
+                            style={{ flex:1, padding:"10px 14px", borderRadius:8, cursor:"pointer", textAlign:"center",
+                              border:`2px solid ${isActive?"var(--accent)":"var(--border)"}`,
+                              background:isActive?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)" }}>
+                            <div style={{ fontFamily:"var(--font-display)", color:isActive?"var(--accent)":"var(--text)", fontSize:14 }}>{sz}</div>
+                            <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:3 }}>
+                              {(() => {
+                                const h = speciesData.heightCm?.[sz];
+                                return h ? `${h[0]}–${h[1]} cm` : "";
+                              })()}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Height input */}
+                {speciesData && (speciesData.heightCm || speciesData.sizes) && (() => {
+                  const currentSize = char.size || speciesData.size || (speciesData.sizes?.[0]);
+                  const hRange = Array.isArray(speciesData.heightCm)
+                    ? speciesData.heightCm
+                    : speciesData.heightCm?.[currentSize];
+                  if (!hRange) return null;
+                  const [hMin, hMax] = hRange;
+                  const h = char.heightCm || Math.round((hMin + hMax) / 2);
+                  const outOfRange = h < hMin || h > hMax;
+                  return (
+                    <div style={{ marginBottom:14, padding:"12px 14px", background:"var(--surface)", border:"1px solid var(--border)", borderRadius:9 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>Height</div>
+                        <div style={{ fontSize:11, color:"var(--text-dim)" }}>
+                          Typical range: {hMin}–{hMax} cm ({speciesData.heightNote || ""})
+                        </div>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <input type="range" min={Math.max(50, hMin - 30)} max={hMax + 30} value={h}
+                          onChange={e=>setChar(c=>({...c, heightCm:+e.target.value}))}
+                          style={{ flex:1, accentColor:"var(--accent)" }}/>
+                        <input type="number" value={h} min={50} max={280}
+                          onChange={e=>setChar(c=>({...c, heightCm:+e.target.value}))}
+                          style={{ width:68, background:"var(--card)", border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
+                            color:"var(--text)", padding:"5px 8px", borderRadius:6, fontSize:14, textAlign:"center" }}/>
+                        <span style={{ fontSize:13, color:"var(--text-muted)", minWidth:22 }}>cm</span>
+                      </div>
+                      {outOfRange && (
+                        <div style={{ marginTop:6, fontSize:11, color:"var(--danger)" }}>
+                          ⚠ Outside typical range for {currentSize} {char.species} ({hMin}–{hMax} cm)
+                        </div>
+                      )}
+                      <div style={{ marginTop:4, fontSize:11, color:"var(--text-dim)" }}>
+                        ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48 % 1)*12)}" · {(h/100).toFixed(2)}m
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Species features */}
                 <div style={ws.secTitle}>Species Features</div>
@@ -6063,6 +6195,49 @@ function SettingsTab({ char, gameData, onUpdate, onEdit }) {
         </div>
       </div>
 
+      {/* ── Card Appearance ── */}
+      {sectionHead("Character Card")}
+      <div style={{ marginBottom:14 }}>
+        <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:10 }}>
+          Customise how your card looks on the home screen and lineup view.
+        </div>
+        {[
+          ["cardBg",     "Card Background",  "color"],
+          ["cardAccent", "Accent Colour",    "color"],
+          ["cardBorder", "Border Colour",    "color"],
+        ].map(([key, lbl]) => (
+          <div key={key} style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+            <label style={{ fontSize:12, color:"var(--text-muted)", flex:1 }}>{lbl}</label>
+            <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <input type="color"
+                value={cc[key] || (key==="cardAccent" ? "#c9a227" : key==="cardBg" ? "#060c20" : "#1a2a40")}
+                onChange={e=>updCustom({[key]:e.target.value})}
+                style={{ width:36, height:28, borderRadius:5, border:"1px solid var(--border)",
+                  cursor:"pointer", background:"transparent", padding:2 }}/>
+              <input type="text"
+                value={cc[key] || ""}
+                placeholder="default"
+                onChange={e=>updCustom({[key]:e.target.value})}
+                style={{ width:90, background:"var(--card)", border:"1px solid var(--border)",
+                  color:"var(--text)", padding:"4px 8px", borderRadius:5, fontSize:12 }}/>
+              {cc[key] && (
+                <button onClick={()=>updCustom({[key]:undefined})}
+                  style={{ padding:"3px 8px", borderRadius:5, border:"1px solid var(--border)",
+                    background:"transparent", color:"var(--text-dim)", cursor:"pointer", fontSize:11 }}>
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+        {/* Preview */}
+        <div style={{ marginTop:10, maxWidth:300 }}>
+          <div style={{ fontSize:10, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Preview</div>
+          <CharacterCard char={char} gameData={gameData} compact
+            onClick={()=>{}} onEdit={()=>{}} onDelete={()=>{}}/>
+        </div>
+      </div>
+
       {/* ── Sheet Layout ── */}
       {sectionHead("Sheet Layout")}
 
@@ -7036,6 +7211,8 @@ function BackgroundTab({ char, gameData, onUpdate }) {
       {textarea("ideals","Ideals","What principles drive your character?")}
       {textarea("bonds","Bonds","What connects your character to the world?")}
       {textarea("flaws","Flaws","What weaknesses or vices does your character have?")}
+      {divider("Physical Characteristics")}
+      <PhysicalStats char={char} gameData={gameData} onUpdate={onUpdate}/>
       {divider("Appearance & Backstory")}
       {textarea("appearance","Appearance & Backstory","Describe your character's look and history…",5)}
     </div>
@@ -7066,8 +7243,85 @@ function BackgroundTab({ char, gameData, onUpdate }) {
       {textarea("bonds","Bonds","What connects your character to the world?")}
       {textarea("flaws","Flaws","What weaknesses or vices does your character have?")}
 
+      {divider("Physical Characteristics")}
+      <PhysicalStats char={char} gameData={gameData} onUpdate={onUpdate}/>
+
       {divider("Appearance & Backstory")}
       {textarea("appearance","Appearance & Backstory","Describe your character's look and history…",5)}
+    </div>
+  );
+}
+
+function PhysicalStats({ char, gameData, onUpdate }) {
+  const spData      = gameData?.species?.[char.species];
+  const currentSize = char.size || spData?.size || (spData?.sizes?.[0]) || "Medium";
+  const hRange      = spData?.heightCm
+    ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
+    : null;
+  const h           = char.heightCm || (hRange ? Math.round((hRange[0]+hRange[1])/2) : null);
+  const outOfRange  = hRange && h && (h < hRange[0] || h > hRange[1]);
+  const editable    = !!onUpdate;
+  const lbl = txt => (
+    <label style={{ display:"block", color:"var(--text-muted)", fontSize:11,
+      textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>{txt}</label>
+  );
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:4 }}>
+      <div>
+        {lbl("Size")}
+        {spData?.sizes?.length > 1 && editable ? (
+          <div style={{ display:"flex", gap:6 }}>
+            {spData.sizes.map(sz => {
+              const active = currentSize === sz;
+              return (
+                <div key={sz} onClick={()=>onUpdate({...char, size:sz, heightCm:null})}
+                  style={{ flex:1, padding:"7px 8px", borderRadius:7, cursor:"pointer", textAlign:"center",
+                    border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                    background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--card)",
+                    color:active?"var(--accent)":"var(--text-muted)", fontSize:13,
+                    fontFamily:"var(--font-display)" }}>{sz}</div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ padding:"8px 12px", background:"var(--card)", border:"1px solid var(--border)",
+            borderRadius:7, fontSize:13, color:"var(--text)", fontFamily:"var(--font-display)" }}>
+            {currentSize}
+          </div>
+        )}
+      </div>
+      <div>
+        {lbl(hRange ? `Height — typical ${hRange[0]}–${hRange[1]} cm` : "Height")}
+        {editable ? (
+          <div>
+            <div style={{ display:"flex", gap:6, alignItems:"center", marginBottom:4 }}>
+              <input type="range"
+                min={hRange ? Math.max(50, hRange[0]-30) : 50}
+                max={hRange ? hRange[1]+30 : 280}
+                value={h || (hRange ? Math.round((hRange[0]+hRange[1])/2) : 170)}
+                onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                style={{ flex:1, accentColor:"var(--accent)" }}/>
+              <input type="number" value={h||""} min={50} max={280} placeholder="cm"
+                onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                style={{ width:60, background:"var(--card)",
+                  border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
+                  color:"var(--text)", padding:"5px 8px", borderRadius:6, fontSize:13, textAlign:"center" }}/>
+              <span style={{ fontSize:12, color:"var(--text-muted)", flexShrink:0 }}>cm</span>
+            </div>
+            {h ? (
+              <div style={{ fontSize:11, color:outOfRange?"var(--danger)":"var(--text-dim)" }}>
+                {outOfRange?"⚠ Outside typical range · ":""}
+                ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}" · {(h/100).toFixed(2)}m
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div style={{ padding:"8px 12px", background:"var(--card)", border:"1px solid var(--border)",
+            borderRadius:7, fontSize:13, color:"var(--text)" }}>
+            {h ? `${h} cm ≈ ${Math.floor(h/30.48)}'${Math.round((h/30.48%1)*12)}"` : "—"}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -7686,7 +7940,6 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
             </>);
           })()}
 
-          {/* Resistances & Defenses */}
           {(() => {
             const allFeats = [
               ...(speciesData?.features  || []).map(f=>({...f,_src:char.species})),
@@ -8221,73 +8474,85 @@ function MysticBackground({ density = "normal", symbolSet, symbolOpacity, backgr
   );
 }
 
-function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
+function CharacterCard({ char, gameData, onClick, onEdit, onDelete, compact }) {
   const { themes } = gameData;
-  const theme = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
-  const hp    = char.hp || { current:0, max:1 };
-  const pct   = Math.min(100, (hp.current / Math.max(1, hp.max)) * 100);
-  const hpC   = pct > 50 ? theme.success : pct > 25 ? "#f39c12" : theme.danger;
-  const label = char.subclass ? `${char.class} (${char.subclass})` : char.class;
+  const theme  = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
+  const hp     = char.hp || { current:0, max:1 };
+  const pct    = Math.min(100, (hp.current / Math.max(1, hp.max)) * 100);
+  const hpC    = pct > 50 ? theme.success : pct > 25 ? "#f39c12" : theme.danger;
+  const label  = char.subclass ? `${char.class} (${char.subclass})` : char.class;
+
+  // Card colour overrides
+  const cardBg     = char.custom?.cardBg     || theme.card;
+  const cardAccent = char.custom?.cardAccent || theme.accent;
+  const cardBorder = char.custom?.cardBorder || theme.border;
 
   return (
-    <div style={{ background:theme.card, border:`1px solid ${theme.border}`, borderRadius:14, padding:20, transition:"all 0.22s", position:"relative", overflow:"hidden" }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.transform = "translateY(-3px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.transform = "translateY(0)"; }}>
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:3, background:`linear-gradient(90deg,${theme.accent},${theme.accentSecondary || theme.accent})` }} />
-      {/* Main clickable area */}
+    <div style={{ background:cardBg, border:`1px solid ${cardBorder}`, borderRadius:14, padding:compact?14:20,
+      transition:"all 0.22s", position:"relative", overflow:"hidden" }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = cardAccent; e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = cardBorder; e.currentTarget.style.transform = "translateY(0)"; }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:3,
+        background:`linear-gradient(90deg,${cardAccent},${theme.accentSecondary || cardAccent})` }} />
       <div onClick={onClick} style={{ cursor:"pointer" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12, gap:12 }}>
-          {/* Portrait */}
-          <div style={{ width:56, height:56, borderRadius:8, flexShrink:0, overflow:"hidden",
-            border:`2px solid ${theme.accent}`, background:theme.surface }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:compact?8:12, gap:12 }}>
+          <div style={{ width:compact?44:56, height:compact?44:56, borderRadius:8, flexShrink:0, overflow:"hidden",
+            border:`2px solid ${cardAccent}`, background:theme.surface }}>
             {char.profileImage
               ? <img src={char.profileImage} alt={char.name}
                   style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"top" }}
                   onError={e=>e.target.style.display="none"}/>
               : <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center",
-                  justifyContent:"center", fontFamily:"'Cinzel Decorative',serif", fontSize:22, color:theme.accent }}>
+                  justifyContent:"center", fontFamily:"'Cinzel Decorative',serif",
+                  fontSize:compact?18:22, color:cardAccent }}>
                   {(char.name||"?")[0].toUpperCase()}
                 </div>
             }
           </div>
-          {/* Name + class */}
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:theme.accent, fontSize:20, lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{char.name}</div>
-            <div style={{ fontSize:13, color:theme.textMuted, marginTop:4 }}>
+            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:cardAccent,
+              fontSize:compact?15:20, lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{char.name}</div>
+            <div style={{ fontSize:12, color:theme.textMuted, marginTop:3 }}>
               <span style={{ color:theme.text }}>{char.species}</span>
               {char.species && label ? " · " : ""}<span>{label}</span>
             </div>
           </div>
-
-          {/* Level badge */}
-          <div style={{ textAlign:"center", flexShrink:0, background:`rgba(0,0,0,0.2)`,
-            border:`1px solid ${theme.border}`, borderRadius:8, padding:"6px 10px" }}>
-            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:theme.accent, fontSize:24, lineHeight:1 }}>{char.level}</div>
+          <div style={{ textAlign:"center", flexShrink:0, background:"rgba(0,0,0,0.2)",
+            border:`1px solid ${cardBorder}`, borderRadius:8, padding:compact?"4px 8px":"6px 10px" }}>
+            <div style={{ fontFamily:"'Cinzel Decorative',serif", color:cardAccent,
+              fontSize:compact?18:24, lineHeight:1 }}>{char.level}</div>
             <div style={{ fontSize:9, color:theme.textMuted, textTransform:"uppercase", letterSpacing:1.5, marginTop:2 }}>LVL</div>
           </div>
         </div>
-        <div style={{ marginBottom:12 }}>
+        <div style={{ marginBottom:compact?6:12 }}>
           <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:theme.textMuted, marginBottom:4 }}>
-            <span>Hit Points</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
+            <span>HP</span><span style={{ color:hpC }}>{hp.current}/{hp.max}</span>
           </div>
-          <div style={{ height:5, background:theme.bg, borderRadius:3, overflow:"hidden" }}>
-            <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:3, transition:"width 0.3s" }} />
+          <div style={{ height:4, background:theme.bg, borderRadius:2, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${pct}%`, background:hpC, borderRadius:2, transition:"width 0.3s" }} />
           </div>
         </div>
-        <div style={{ fontSize:12, color:theme.textMuted, marginBottom:12 }}>
-          <span>{char.background}</span>
-          <span style={{ color:theme.textDim, marginLeft:8 }}>{char.alignment}</span>
-        </div>
+        {!compact && (
+          <div style={{ fontSize:12, color:theme.textMuted, marginBottom:12 }}>
+            <span>{char.background}</span>
+            <span style={{ color:theme.textDim, marginLeft:8 }}>{char.alignment}</span>
+          </div>
+        )}
       </div>
-      {/* Action buttons */}
-      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${theme.border}`, paddingTop:10 }}>
-        <button onClick={e=>{e.stopPropagation();onClick();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.accent}`, background:"rgba(var(--accent-rgb,201,162,39),0.08)", color:theme.accent, cursor:"pointer", fontSize:12, fontFamily:theme.fontBody }}>
+      <div style={{ display:"flex", gap:8, borderTop:`1px solid ${cardBorder}`, paddingTop:compact?6:10 }}>
+        <button onClick={e=>{e.stopPropagation();onClick();}}
+          style={{ flex:1, padding:compact?"4px":"6px", borderRadius:6, border:`1px solid ${cardAccent}`,
+            background:"rgba(0,0,0,0.15)", color:cardAccent, cursor:"pointer", fontSize:11 }}>
           Open
         </button>
-        <button onClick={e=>{e.stopPropagation();onEdit();}} style={{ flex:1, padding:"6px", borderRadius:6, border:`1px solid ${theme.border}`, background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:12 }}>
-          ✏️ Edit
+        <button onClick={e=>{e.stopPropagation();onEdit();}}
+          style={{ flex:1, padding:compact?"4px":"6px", borderRadius:6, border:`1px solid ${cardBorder}`,
+            background:"transparent", color:theme.textMuted, cursor:"pointer", fontSize:11 }}>
+          ✏️
         </button>
-        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}? This cannot be undone.`)) onDelete(char.id);}} style={{ padding:"6px 10px", borderRadius:6, border:`1px solid ${theme.danger}`, background:"transparent", color:theme.danger, cursor:"pointer", fontSize:12 }}>
+        <button onClick={e=>{e.stopPropagation();if(confirm(`Delete ${char.name}?`)) onDelete(char.id);}}
+          style={{ padding:compact?"4px 8px":"6px 10px", borderRadius:6, border:`1px solid ${theme.danger}`,
+            background:"transparent", color:theme.danger, cursor:"pointer", fontSize:11 }}>
           🗑
         </button>
       </div>
@@ -8295,6 +8560,137 @@ function CharacterCard({ char, gameData, onClick, onEdit, onDelete }) {
   );
 }
 
+// ── Lineup / carousel view ──────────────────────────────────────────
+function LineupView({ characters, gameData, onOpen, onEdit, onDelete }) {
+  const [idx, setIdx] = React.useState(0);
+  const n = characters.length;
+  const prev = () => setIdx(i => (i - 1 + n) % n);
+  const next = () => setIdx(i => (i + 1) % n);
+
+  const onWheel = React.useCallback(e => {
+    if (e.deltaY > 30) next();
+    else if (e.deltaY < -30) prev();
+  }, [n]);
+
+  React.useEffect(() => {
+    const h = e => { if (e.key==="ArrowRight") next(); else if (e.key==="ArrowLeft") prev(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [n]);
+
+  const getPos = offset => {
+    const abs = ((idx + offset) % n + n) % n;
+    return { char: characters[abs], offset };
+  };
+  const slots = [-2,-1,0,1,2].map(getPos);
+
+  // Height-proportional art: map heightCm to art height px
+  const artHeight = char => {
+    const h = char.heightCm;
+    if (!h) return 400;
+    const clamp = Math.min(280, Math.max(50, h));
+    return Math.round(260 + ((clamp - 50) / 230) * 260);
+  };
+
+  const slotStyle = offset => {
+    const abs    = Math.abs(offset);
+    const scale  = abs === 0 ? 1 : abs === 1 ? 0.72 : 0.50;
+    const opacity= abs === 0 ? 1 : abs === 1 ? 0.55 : 0.22;
+    return {
+      position:        "absolute",
+      top:             0,
+      bottom:          0,
+      left:            "50%",
+      transform:       `translateX(calc(-50% + ${offset * 260}px)) scale(${scale})`,
+      transformOrigin: "top center",
+      opacity,
+      zIndex:          10 - abs * 3,
+      transition:      "all 0.45s cubic-bezier(0.34,1.2,0.64,1)",
+      pointerEvents:   abs === 0 ? "auto" : "none",
+      width:           240,
+      display:         "flex",
+      flexDirection:   "column",
+    };
+  };
+
+  const ArtPanel = ({ char, isCenter }) => {
+    const { themes } = gameData;
+    const theme  = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
+    const art    = char.bodyArt || char.profileImage || null;
+    const accent = char.custom?.cardAccent || theme.accent || "#c9a227";
+
+    return (
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:"100%", height:"100%" }}>
+
+        {/* Card on top */}
+        <div style={{ width:"100%", flexShrink:0, position:"relative", zIndex:2 }}>
+          <CharacterCard char={char} gameData={gameData} compact
+            onClick={()=>onOpen(char.id)}
+            onEdit={()=>onEdit(char.id)}
+            onDelete={onDelete}/>
+        </div>
+
+        {/* Art fills all remaining space, image centred and contained */}
+        <div style={{ flex:1, width:"100%", position:"relative", overflow:"hidden",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          boxShadow: isCenter ? `0 20px 60px rgba(0,0,0,0.7), 0 0 80px ${accent}22` : "none" }}>
+          {art
+            ? <img src={art} style={{ maxWidth:"100%", maxHeight:"100%",
+                objectFit:"contain", objectPosition:"center bottom", display:"block" }}/>
+            : <div style={{ display:"flex", flexDirection:"column",
+                alignItems:"center", justifyContent:"center", opacity:0.15 }}>
+                <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:72,
+                  color:accent, lineHeight:1 }}>
+                  {(char.name||"?")[0].toUpperCase()}
+                </div>
+              </div>
+          }
+          {/* Bottom fade */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:60,
+            background:"linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))",
+            pointerEvents:"none" }}/>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ position:"relative", width:"100%", height:"calc(100vh - 220px)",
+      minHeight:560, overflow:"hidden" }} onWheel={onWheel}>
+
+      <div style={{ position:"absolute", inset:0 }}>
+        {slots.map(({ char, offset }) => (
+          <div key={char.id + "_" + offset} style={slotStyle(offset)}>
+            <ArtPanel char={char} isCenter={offset===0}/>
+          </div>
+        ))}
+      </div>
+
+      {[["left",prev,"‹"],["right",next,"›"]].map(([side, fn, lbl]) => (
+        <button key={side} onClick={fn}
+          style={{ position:"absolute", [side]:16, top:"50%", transform:"translateY(-50%)",
+            width:44, height:44, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.12)",
+            background:"rgba(0,0,0,0.4)", color:"rgba(255,255,255,0.7)", fontSize:24,
+            cursor:"pointer", zIndex:20, display:"flex", alignItems:"center", justifyContent:"center",
+            backdropFilter:"blur(8px)", transition:"all 0.2s", lineHeight:1 }}
+          onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.7)";e.currentTarget.style.color="#fff";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,0,0,0.4)";e.currentTarget.style.color="rgba(255,255,255,0.7)";}}>
+          {lbl}
+        </button>
+      ))}
+
+      <div style={{ position:"absolute", bottom:10, left:"50%", transform:"translateX(-50%)",
+        display:"flex", gap:6, zIndex:20 }}>
+        {characters.map((c,i) => (
+          <div key={c.id} onClick={()=>setIdx(i)}
+            style={{ width:i===idx?24:8, height:8, borderRadius:4, cursor:"pointer",
+              transition:"all 0.3s",
+              background: i===idx ? "#c9a227" : "rgba(255,255,255,0.2)" }}/>
+        ))}
+      </div>
+    </div>
+  );
+}
 // ============================================================
 // ROOT APP
 // ============================================================
@@ -8606,6 +9002,7 @@ function App() {
   const [view,       setView]       = useState("home");
   const [selId,      setSelId]      = useState(null);
   const [charLoading,setCharLoading]= useState(false);
+  const [homeView,   setHomeView]   = useState("grid"); // "grid" | "lineup"
   const [showAccount, setShowAccount] = useState(false);
   const selChar = characters.find(c => c.id === selId);
 
@@ -8784,8 +9181,8 @@ function App() {
           <div style={{ position:"absolute", bottom:0, left:"10%", right:"10%", height:1, background:"linear-gradient(90deg, transparent, rgba(var(--accent-rgb,201,162,39),0.25), transparent)" }}/>
         </div>
 
-        {/* Character grid */}
-        <div style={{ maxWidth:1100, margin:"0 auto", padding:"36px 24px", position:"relative", zIndex:1 }}>
+        {/* Character grid / lineup */}
+        <div style={{ maxWidth:1100, margin:"0 auto", padding:"36px 24px 24px", position:"relative", zIndex:1 }}>
           {charLoading ? (
             <div style={{ textAlign:"center", padding:"80px 20px" }}>
               <div style={{ fontSize:48, marginBottom:18, animation:"spin 1.5s linear infinite", display:"inline-block" }}>⚙️</div>
@@ -8800,16 +9197,40 @@ function App() {
             </div>
           ) : (
             <>
-              <div style={{ fontFamily:"'Cinzel Decorative',serif", color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3, marginBottom:20 }}>
-                {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
+              {/* Toolbar */}
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+                <div style={{ fontFamily:"'Cinzel Decorative',serif", color:dt.textMuted, fontSize:11, textTransform:"uppercase", letterSpacing:3 }}>
+                  {characters.length} {characters.length === 1 ? "Hero" : "Heroes"} Registered
+                </div>
+                <div style={{ display:"flex", gap:6 }}>
+                  {[["grid","⊞ Grid"],["lineup","⦿ Lineup"]].map(([v,l]) => (
+                    <button key={v} onClick={()=>setHomeView(v)}
+                      style={{ padding:"5px 12px", borderRadius:16, border:`1px solid ${homeView===v?"var(--accent)":"rgba(255,255,255,0.12)"}`,
+                        background:homeView===v?"rgba(var(--accent-rgb,201,162,39),0.12)":"transparent",
+                        color:homeView===v?"var(--accent)":"rgba(255,255,255,0.4)", cursor:"pointer", fontSize:12 }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
-                {characters.map(c => <CharacterCard key={c.id} char={c} gameData={gameData}
-                  onClick={() => { setSelId(c.id); setView("sheet"); }}
-                  onEdit={() => { setSelId(c.id); setView("edit"); }}
+
+              {homeView === "lineup" ? (
+                <LineupView
+                  characters={characters}
+                  gameData={gameData}
+                  onOpen={id => { setSelId(id); setView("sheet"); }}
+                  onEdit={id => { setSelId(id); setView("edit"); }}
                   onDelete={delChar}
-                />)}
-              </div>
+                />
+              ) : (
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:18 }}>
+                  {characters.map(c => <CharacterCard key={c.id} char={c} gameData={gameData}
+                    onClick={() => { setSelId(c.id); setView("sheet"); }}
+                    onEdit={() => { setSelId(c.id); setView("edit"); }}
+                    onDelete={delChar}
+                  />)}
+                </div>
+              )}
             </>
           )}
         </div>
