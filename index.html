@@ -8502,135 +8502,131 @@ function LineupView({ characters, gameData, onOpen, onEdit, onDelete }) {
   const prev = () => setIdx(i => (i - 1 + n) % n);
   const next = () => setIdx(i => (i + 1) % n);
 
-  // Wheel handler
   const onWheel = React.useCallback(e => {
     if (e.deltaY > 30) next();
     else if (e.deltaY < -30) prev();
   }, [n]);
 
-  // Keyboard
   React.useEffect(() => {
     const h = e => { if (e.key==="ArrowRight") next(); else if (e.key==="ArrowLeft") prev(); };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [n]);
 
-  const PLACEHOLDER = null; // no image
-
   const getPos = offset => {
-    // offset: -2,-1,0,1,2 relative to current
     const abs = ((idx + offset) % n + n) % n;
     return { char: characters[abs], offset };
   };
-
   const slots = [-2,-1,0,1,2].map(getPos);
 
+  // Height-proportional art: map heightCm to art height px
+  const artHeight = char => {
+    const h = char.heightCm;
+    if (!h) return 400;
+    const clamp = Math.min(280, Math.max(50, h));
+    return Math.round(260 + ((clamp - 50) / 230) * 260);
+  };
+
   const slotStyle = offset => {
-    const abs = Math.abs(offset);
-    const scale   = abs === 0 ? 1 : abs === 1 ? 0.72 : 0.50;
-    const opacity = abs === 0 ? 1 : abs === 1 ? 0.55 : 0.25;
-    const z       = 10 - abs * 3;
-    // Spread horizontally
-    const spreadX = offset * 260;
+    const abs    = Math.abs(offset);
+    const scale  = abs === 0 ? 1 : abs === 1 ? 0.72 : 0.50;
+    const opacity= abs === 0 ? 1 : abs === 1 ? 0.55 : 0.22;
     return {
-      position:"absolute",
-      bottom:0,
-      left:"50%",
-      transform:`translateX(calc(-50% + ${spreadX}px)) scale(${scale})`,
-      transformOrigin:"bottom center",
+      position:        "absolute",
+      bottom:          0,
+      left:            "50%",
+      transform:       `translateX(calc(-50% + ${offset * 260}px)) scale(${scale})`,
+      transformOrigin: "bottom center",
       opacity,
-      zIndex:z,
-      transition:"all 0.45s cubic-bezier(0.34,1.2,0.64,1)",
-      pointerEvents: abs === 0 ? "auto" : "none",
-      width:260,
+      zIndex:          10 - abs * 3,
+      transition:      "all 0.45s cubic-bezier(0.34,1.2,0.64,1)",
+      pointerEvents:   abs === 0 ? "auto" : "none",
+      width:           240,
+      display:         "flex",
+      flexDirection:   "column",
+      alignItems:      "center",
     };
   };
 
   const ArtPanel = ({ char, isCenter }) => {
     const { themes } = gameData;
-    const theme = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
-    const art = char.bodyArt || char.profileImage || null;
+    const theme  = themes?.[char.theme] || themes?.[Object.keys(themes || {})[0]] || {};
+    const art    = char.bodyArt || char.profileImage || null;
     const accent = char.custom?.cardAccent || theme.accent || "#c9a227";
+    const h      = artHeight(char);
+
     return (
-      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:0 }}>
-        {/* Art */}
-        <div style={{ width:200, height:380, position:"relative", borderRadius:"12px 12px 0 0", overflow:"hidden",
-          border:`2px solid ${accent}`, borderBottom:"none",
-          background:`linear-gradient(180deg, ${theme.card} 0%, ${theme.bg} 100%)`,
-          boxShadow: isCenter ? `0 0 40px rgba(0,0,0,0.6), 0 0 80px ${accent}33` : "none" }}>
-          {art
-            ? <img src={art} style={{ width:"100%", height:"100%", objectFit:"contain",
-                objectPosition:"top center", display:"block" }}/>
-            : <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column",
-                alignItems:"center", justifyContent:"center", gap:12 }}>
-                <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:64, color:accent, opacity:0.35, lineHeight:1 }}>
-                  {(char.name||"?")[0].toUpperCase()}
-                </div>
-                <div style={{ fontSize:11, color:theme.textDim, fontStyle:"italic" }}>No portrait</div>
-              </div>
-          }
-        </div>
-        {/* Card beneath art */}
-        <div style={{ width:"100%", borderRadius:"0 0 12px 12px",
-          border:`2px solid ${accent}`, borderTop:"none",
-          background:char.custom?.cardBg || theme.card }}>
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", width:"100%" }}>
+
+        {/* Card on top — sits above art */}
+        <div style={{ width:"100%", position:"relative", zIndex:2 }}>
           <CharacterCard char={char} gameData={gameData} compact
             onClick={()=>onOpen(char.id)}
             onEdit={()=>onEdit(char.id)}
             onDelete={onDelete}/>
+        </div>
+
+        {/* Art below — no border/outline, height-proportional */}
+        <div style={{ width:160, height:h, position:"relative", overflow:"hidden",
+          boxShadow: isCenter ? `0 20px 60px rgba(0,0,0,0.7), 0 0 80px ${accent}22` : "none",
+          transition:"height 0.4s ease" }}>
+          {art
+            ? <img src={art} style={{ width:"100%", height:"100%",
+                objectFit:"contain", objectPosition:"top center", display:"block" }}/>
+            : <div style={{ width:"100%", height:"100%", display:"flex",
+                flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+                <div style={{ fontFamily:"'Cinzel Decorative',serif", fontSize:64,
+                  color:accent, opacity:0.15, lineHeight:1 }}>
+                  {(char.name||"?")[0].toUpperCase()}
+                </div>
+              </div>
+          }
+          {/* Bottom fade */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:60,
+            background:"linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))",
+            pointerEvents:"none" }}/>
         </div>
       </div>
     );
   };
 
   return (
-    <div style={{ position:"relative", width:"100%", height:"calc(100vh - 200px)",
-      minHeight:500, overflow:"hidden" }} onWheel={onWheel}>
+    <div style={{ position:"relative", width:"100%", height:"calc(100vh - 220px)",
+      minHeight:560, overflow:"hidden" }} onWheel={onWheel}>
 
-      {/* Characters */}
       <div style={{ position:"absolute", inset:0 }}>
         {slots.map(({ char, offset }) => (
-          <div key={char.id + offset} style={slotStyle(offset)}>
+          <div key={char.id + "_" + offset} style={slotStyle(offset)}>
             <ArtPanel char={char} isCenter={offset===0}/>
           </div>
         ))}
       </div>
 
-      {/* Arrow buttons */}
-      <button onClick={prev}
-        style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)",
-          width:48, height:48, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.15)",
-          background:"rgba(0,0,0,0.45)", color:"#fff", fontSize:22, cursor:"pointer", zIndex:20,
-          display:"flex", alignItems:"center", justifyContent:"center",
-          backdropFilter:"blur(6px)", transition:"all 0.2s" }}
-        onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.75)"}
-        onMouseLeave={e=>e.currentTarget.style.background="rgba(0,0,0,0.45)"}>
-        ‹
-      </button>
-      <button onClick={next}
-        style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)",
-          width:48, height:48, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.15)",
-          background:"rgba(0,0,0,0.45)", color:"#fff", fontSize:22, cursor:"pointer", zIndex:20,
-          display:"flex", alignItems:"center", justifyContent:"center",
-          backdropFilter:"blur(6px)", transition:"all 0.2s" }}
-        onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.75)"}
-        onMouseLeave={e=>e.currentTarget.style.background="rgba(0,0,0,0.45)"}>
-        ›
-      </button>
+      {[["left",prev,"‹"],["right",next,"›"]].map(([side, fn, lbl]) => (
+        <button key={side} onClick={fn}
+          style={{ position:"absolute", [side]:16, top:"50%", transform:"translateY(-50%)",
+            width:44, height:44, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.12)",
+            background:"rgba(0,0,0,0.4)", color:"rgba(255,255,255,0.7)", fontSize:24,
+            cursor:"pointer", zIndex:20, display:"flex", alignItems:"center", justifyContent:"center",
+            backdropFilter:"blur(8px)", transition:"all 0.2s", lineHeight:1 }}
+          onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,0,0,0.7)";e.currentTarget.style.color="#fff";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,0,0,0.4)";e.currentTarget.style.color="rgba(255,255,255,0.7)";}}>
+          {lbl}
+        </button>
+      ))}
 
-      {/* Dot indicator */}
-      <div style={{ position:"absolute", bottom:8, left:"50%", transform:"translateX(-50%)",
+      <div style={{ position:"absolute", bottom:10, left:"50%", transform:"translateX(-50%)",
         display:"flex", gap:6, zIndex:20 }}>
         {characters.map((c,i) => (
           <div key={c.id} onClick={()=>setIdx(i)}
-            style={{ width:i===idx?24:8, height:8, borderRadius:4, cursor:"pointer", transition:"all 0.3s",
-              background: i===idx ? "#c9a227" : "rgba(255,255,255,0.25)" }}/>
+            style={{ width:i===idx?24:8, height:8, borderRadius:4, cursor:"pointer",
+              transition:"all 0.3s",
+              background: i===idx ? "#c9a227" : "rgba(255,255,255,0.2)" }}/>
         ))}
       </div>
     </div>
   );
 }
-
 // ============================================================
 // ROOT APP
 // ============================================================
