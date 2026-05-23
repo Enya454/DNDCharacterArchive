@@ -1288,7 +1288,10 @@ function FeaturePanel({ feature, locked, choices, onChoice, skillProfs, onSkillT
               ? expertiseProfs(feature.name)
               : (expertiseProfs || []);
             // Skills already taken by OTHER expertise features
-            const otherExpertise = (char?.skillExpertise || []).filter(s => !myExpertise.includes(s));
+            const allExpertise = typeof expertiseProfs === "function"
+              ? expertiseProfs(null)  // null = all sources combined
+              : (expertiseProfs || []);
+            const otherExpertise = allExpertise.filter(s => !myExpertise.includes(s));
             return (
             <div>
               <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:10 }}>
@@ -3420,7 +3423,14 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
     choices: char.featureChoices, onChoice: setChoice,
     skillProfs: char.skillProficiencies,
     onSkillToggle: skill => toggleSkillForSource(skill, sourceLabel),
-    expertiseProfs: (featureName) => ((char.skillExpertiseSources||{})[featureName || sourceLabel] || []).filter(s=>(char.skillProficiencies||[]).includes(s)),
+    expertiseProfs: (featureName) => {
+      const srcMap = char.skillExpertiseSources || {};
+      if (featureName === null) {
+        // Return all expertise across all features
+        return [...new Set(Object.values(srcMap).flat())].filter(s=>(char.skillProficiencies||[]).includes(s));
+      }
+      return (srcMap[featureName || sourceLabel] || []).filter(s=>(char.skillProficiencies||[]).includes(s));
+    },
     onExpertiseToggle: (skill, featureName) => {
       const src = featureName || sourceLabel;
       const srcMap = char.skillExpertiseSources || {};
