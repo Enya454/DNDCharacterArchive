@@ -4174,17 +4174,24 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
 
                   {/* Existing multiclass entries */}
                   {(char.multiclasses||[]).map((mc, mcIdx) => {
-                    const mcd     = classes[mc.class];
+                    const mcd      = classes[mc.class];
+                    const mcProfs  = mcd?.multiclassProficiencies || {};
+                    const scType   = mcd?.multiclassSpellcastingType;
+
+                    // Features — suppress proficiency_choice (no starting skills)
+                    // and suppress passive "Proficiencies" feature (no starting profs beyond MC grants)
                     const mcFeats = [
                       ...(mcd?.features||[]).map(f=>({...f,_src:`${mc.class} MC`})),
                       ...((mc.subclass&&mcd?.subclasses?.[mc.subclass]?.features)||[]).map(f=>({...f,_src:mc.subclass})),
-                    ].sort((a,b)=>a.level-b.level);
-                    const canReq = mcd?.multiclassRequirements;
-                    const reqStr = canReq
-                      ? Object.entries(canReq).filter(([k])=>k!=="mode")
-                          .map(([s,v])=>`${s.toUpperCase()} ${v}`)
-                          .join(canReq.mode==="or"?" or ":" & ")
-                      : null;
+                    ]
+                    .filter(f => {
+                      // Skip starting-only features
+                      if (f.type === "proficiency_choice") return false; // no starting skill choices
+                      if (f.name === "Proficiencies" || f.name?.startsWith("Proficien")) return false;
+                      return true;
+                    })
+                    .sort((a,b)=>a.level-b.level);
+
                     return (
                       <div key={mcIdx} style={{ marginBottom:24 }}>
                         {/* Class header */}
@@ -4193,21 +4200,6 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                           <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, flex:1 }}>
                             {mc.class}
                           </div>
-                          {reqStr && <div style={{ fontSize:10, color:"var(--text-dim)" }}>Req: {reqStr}</div>}
-                          {mcd?.multiclassProficiencies && (() => {
-                            const p = mcd.multiclassProficiencies;
-                            const parts = [
-                              ...(p.armor||[]).map(a=>`Armour: ${a}`),
-                              ...(p.weapons||[]).map(w=>`Weapon: ${w}`),
-                              ...(p.tools||[]).map(t=>t),
-                              ...(p.skills ? [`${p.skills} skill`] : []),
-                            ];
-                            return parts.length ? (
-                              <div style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>
-                                Grants: {parts.join(", ")}
-                              </div>
-                            ) : null;
-                          })()}
                           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
                             <span style={{ fontSize:12, color:"var(--text-muted)" }}>Levels:</span>
                             <input type="number" min={1} max={20} value={mc.level}
@@ -4224,7 +4216,36 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                           </div>
                         </div>
 
-                        {/* Full feature panels — same as primary class */}
+                        {/* Multiclass proficiency grants */}
+                        <div style={{ marginBottom:14, padding:"10px 14px", background:"rgba(39,174,96,0.06)",
+                          border:"1px solid rgba(39,174,96,0.2)", borderRadius:8 }}>
+                          <div style={{ fontSize:11, color:"var(--success)", textTransform:"uppercase",
+                            letterSpacing:1, marginBottom:6 }}>Multiclass Proficiencies Gained</div>
+                          {[
+                            ...(mcProfs.armor||[]).map(a=>`Armour: ${a}`),
+                            ...(mcProfs.weapons||[]).map(w=>`Weapons: ${w}`),
+                            ...(mcProfs.tools||[]).map(t=>`Tool: ${t}`),
+                            ...(mcProfs.skills ? [`${mcProfs.skills} skill from ${mc.class} list`] : []),
+                          ].map((p,i)=>(
+                            <div key={i} style={{ fontSize:12, color:"var(--text-muted)" }}>· {p}</div>
+                          ))}
+                          {mcProfs.notes && (
+                            <div style={{ fontSize:11, color:"var(--text-dim)", marginTop:6, fontStyle:"italic" }}>
+                              ⚠ {mcProfs.notes}
+                            </div>
+                          )}
+                          {scType && (
+                            <div style={{ fontSize:11, color:"#7ab3f5", marginTop:6 }}>
+                              🔮 Spellcasting: {scType === "full" ? "Full caster (all levels count)"
+                                : scType === "half" ? "Half caster (÷2, rounded down)"
+                                : scType === "artificer" ? "Half caster (÷2, rounded up)"
+                                : scType === "pact" ? "Pact Magic — separate short-rest slot pool, doesn't combine with other slots"
+                                : scType}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Full feature panels — starting skill proficiency feature suppressed */}
                         {mcFeats.map((feat, i) => {
                           const locked = mc.level < feat.level;
                           const srcLabel = feat._src || `${mc.class} MC`;
@@ -4238,7 +4259,86 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                     );
                   })}
 
-                  {/* New multiclass picker */}
+                  {/* Multiclass summary */}
+                  {(char.multiclasses||[]).length > 0 && (() => {
+                    const mainScType = classes[char.class]?.multiclassSpellcastingType;
+                    const slotTable  = gameData?.multiclassSpellSlots || {};
+
+                    // Calculate combined caster level
+                    let casterLevel = 0;
+                    const addCaster = (cls, level) => {
+                      const t = classes[cls]?.multiclassSpellcastingType;
+                      if (t === "full")       casterLevel += level;
+                      else if (t === "half")  casterLevel += Math.floor(level / 2);
+                      else if (t === "artificer") casterLevel += Math.ceil(level / 2);
+                      // pact magic and non-casters don't contribute
+                    };
+                    addCaster(char.class, char.level || 1);
+                    (char.multiclasses||[]).forEach(mc => addCaster(mc.class, mc.level));
+
+                    const slots = slotTable[Math.min(20, casterLevel)] || null;
+                    const hasPact = (char.multiclasses||[]).some(mc => classes[mc.class]?.multiclassSpellcastingType === "pact")
+                      || mainScType === "pact";
+
+                    // Hit dice summary
+                    const allHitDice = [
+                      { cls: char.class, level: char.level||1, die: classes[char.class]?.hitDie||8 },
+                      ...(char.multiclasses||[]).map(mc=>({ cls:mc.class, level:mc.level, die:classes[mc.class]?.hitDie||8 })),
+                    ];
+
+                    return (
+                      <div style={{ padding:"14px 16px", background:"rgba(80,120,200,0.08)",
+                        border:"1px solid rgba(80,120,200,0.25)", borderRadius:10, marginTop:8 }}>
+                        <div style={{ fontSize:11, color:"#7ab3f5", textTransform:"uppercase",
+                          letterSpacing:1, marginBottom:10 }}>Multiclass Summary</div>
+
+                        {/* Hit Dice */}
+                        <div style={{ marginBottom:10 }}>
+                          <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:4 }}>Hit Dice</div>
+                          <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                            {allHitDice.map((hd,i)=>(
+                              <span key={i} style={{ fontSize:12, padding:"2px 8px", borderRadius:10,
+                                background:"rgba(80,120,200,0.1)", border:"1px solid rgba(80,120,200,0.3)",
+                                color:"#7ab3f5" }}>
+                                {hd.level}d{hd.die} ({hd.cls})
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Combined spell slots */}
+                        {casterLevel > 0 && slots && (
+                          <div style={{ marginBottom:hasPact?10:0 }}>
+                            <div style={{ fontSize:12, color:"var(--text-muted)", marginBottom:4 }}>
+                              Combined Spell Slots (caster level {casterLevel})
+                            </div>
+                            <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                              {slots.map((n,i)=> n > 0 ? (
+                                <span key={i} style={{ fontSize:12, padding:"2px 8px", borderRadius:10,
+                                  background:"rgba(80,120,200,0.1)", border:"1px solid rgba(80,120,200,0.3)",
+                                  color:"#7ab3f5" }}>
+                                  L{i+1}: {n}
+                                </span>
+                              ) : null)}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pact magic note */}
+                        {hasPact && (
+                          <div style={{ fontSize:11, color:"var(--text-dim)", fontStyle:"italic" }}>
+                            ⚠ Warlock Pact Magic slots are separate and recharge on Short Rest.
+                            They can be used to cast any Warlock spell you know.
+                          </div>
+                        )}
+                        {casterLevel === 0 && !hasPact && (
+                          <div style={{ fontSize:12, color:"var(--text-dim)" }}>
+                            No combined spell slots — none of your classes contribute to the combined table.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {char._addingMc && (
                     <div style={{ padding:"14px 16px", background:"var(--card)", border:"1px solid var(--accent)",
                       borderRadius:10, marginBottom:10 }}>

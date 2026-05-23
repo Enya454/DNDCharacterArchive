@@ -2091,9 +2091,12 @@
           "shields"
         ],
         "weapons": [
-          "simple",
-          "martial"
-        ]
+          "simple weapons",
+          "martial weapons"
+        ],
+        "skills": 0,
+        "tools": [],
+        "notes": "No starting equipment. No Unarmoured Defense if already have it from another source."
       }
     },
     "Rogue": {
@@ -3079,14 +3082,27 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light"
+          "light armor"
         ],
         "weapons": [],
         "skills": 1,
-        "skillPool": "Rogue",
+        "skillPool": [
+          "Acrobatics",
+          "Athletics",
+          "Deception",
+          "Insight",
+          "Intimidation",
+          "Investigation",
+          "Perception",
+          "Performance",
+          "Persuasion",
+          "Sleight of Hand",
+          "Stealth"
+        ],
         "tools": [
           "thieves' tools"
-        ]
+        ],
+        "notes": "Expertise not granted until you hit the normal Rogue level for it."
       }
     },
     "Fighter": {
@@ -4110,14 +4126,17 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
         "weapons": [
-          "simple",
-          "martial"
-        ]
+          "simple weapons",
+          "martial weapons"
+        ],
+        "skills": 0,
+        "tools": [],
+        "notes": "No Fighting Style if already have one (can still choose a different one)."
       }
     },
     "Wizard": {
@@ -5052,8 +5071,12 @@
       },
       "multiclassProficiencies": {
         "armor": [],
-        "weapons": []
-      }
+        "weapons": [],
+        "skills": 0,
+        "tools": [],
+        "notes": "Spellbook: You can copy spells from your main class spell list into your spellbook."
+      },
+      "multiclassSpellcastingType": "full"
     },
     "Cleric": {
       "hitDie": 8,
@@ -6805,12 +6828,16 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
-        "weapons": []
-      }
+        "weapons": [],
+        "skills": 0,
+        "tools": [],
+        "notes": "No martial weapons unless your deity domain grants them."
+      },
+      "multiclassSpellcastingType": "full"
     },
     "Bard": {
       "hitDie": 8,
@@ -7714,11 +7741,35 @@
         "cha": 13
       },
       "multiclassProficiencies": {
-        "armor": [],
+        "armor": [
+          "light armor"
+        ],
         "weapons": [],
         "skills": 1,
-        "skillPool": "Bard"
-      }
+        "skillPool": [
+          "Acrobatics",
+          "Animal Handling",
+          "Arcana",
+          "Athletics",
+          "Deception",
+          "History",
+          "Insight",
+          "Intimidation",
+          "Investigation",
+          "Medicine",
+          "Nature",
+          "Perception",
+          "Performance",
+          "Persuasion",
+          "Religion",
+          "Sleight of Hand",
+          "Stealth",
+          "Survival"
+        ],
+        "tools": [],
+        "notes": "Gain 1 skill from Bard list. Musical instrument proficiency not granted."
+      },
+      "multiclassSpellcastingType": "full"
     },
     "Paladin": {
       "hitDie": 10,
@@ -8984,15 +9035,19 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
         "weapons": [
-          "simple",
-          "martial"
-        ]
-      }
+          "simple weapons",
+          "martial weapons"
+        ],
+        "skills": 0,
+        "tools": [],
+        "notes": "Divine Sense and Lay on Hands are separate pools."
+      },
+      "multiclassSpellcastingType": "half"
     },
     "Ranger": {
       "hitDie": 10,
@@ -10592,17 +10647,29 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
         "weapons": [
-          "simple",
-          "martial"
+          "simple weapons",
+          "martial weapons"
         ],
         "skills": 1,
-        "skillPool": "Ranger"
-      }
+        "skillPool": [
+          "Animal Handling",
+          "Athletics",
+          "Insight",
+          "Investigation",
+          "Nature",
+          "Perception",
+          "Stealth",
+          "Survival"
+        ],
+        "tools": [],
+        "notes": "Favoured Enemy and Natural Explorer gained at L1 as normal."
+      },
+      "multiclassSpellcastingType": "half"
     },
     "Druid": {
       "hitDie": 8,
@@ -11745,12 +11812,16 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
-        "weapons": []
-      }
+        "weapons": [],
+        "skills": 0,
+        "tools": [],
+        "notes": "Druids will not wear metal armour. Medium armour and shields, but no metal."
+      },
+      "multiclassSpellcastingType": "full"
     },
     "Monk": {
       "hitDie": 8,
@@ -12376,9 +12447,12 @@
       "multiclassProficiencies": {
         "armor": [],
         "weapons": [
-          "simple",
+          "simple weapons",
           "shortswords"
-        ]
+        ],
+        "skills": 0,
+        "tools": [],
+        "notes": "Unarmoured Defense doesn't stack with Barbarian's version."
       }
     },
     "Sorcerer": {
@@ -13931,8 +14005,12 @@
       },
       "multiclassProficiencies": {
         "armor": [],
-        "weapons": []
-      }
+        "weapons": [],
+        "skills": 0,
+        "tools": [],
+        "notes": "No weapon or armour proficiencies granted."
+      },
+      "multiclassSpellcastingType": "full"
     },
     "Warlock": {
       "hitDie": 8,
@@ -15355,12 +15433,16 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light"
+          "light armor"
         ],
         "weapons": [
-          "simple"
-        ]
-      }
+          "simple weapons"
+        ],
+        "skills": 0,
+        "tools": [],
+        "notes": "Pact Magic slots are separate from regular spell slots. They recharge on short rest."
+      },
+      "multiclassSpellcastingType": "pact"
     },
     "Artificer": {
       "name": "Artificer",
@@ -16841,19 +16923,21 @@
       },
       "multiclassProficiencies": {
         "armor": [
-          "light",
-          "medium",
+          "light armor",
+          "medium armor",
           "shields"
         ],
         "weapons": [
-          "simple"
+          "simple weapons"
         ],
+        "skills": 0,
         "tools": [
           "thieves' tools",
-          "tinker's tools",
-          "one artisan's tool"
-        ]
-      }
+          "tinker's tools"
+        ],
+        "notes": "Magical Tinkering not granted until Artificer L1 features."
+      },
+      "multiclassSpellcastingType": "artificer"
     }
   },
   "backgrounds": {
@@ -25730,5 +25814,227 @@
       "actionType": "reaction",
       "description": "Trigger the action you readied when your specified condition is met."
     }
-  ]
+  ],
+  "multiclassSpellSlots": {
+    "1": [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "2": [
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "3": [
+      4,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "4": [
+      4,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "5": [
+      4,
+      3,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "6": [
+      4,
+      3,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "7": [
+      4,
+      3,
+      3,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "8": [
+      4,
+      3,
+      3,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "9": [
+      4,
+      3,
+      3,
+      3,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "10": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "11": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      0,
+      0,
+      0
+    ],
+    "12": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      0,
+      0,
+      0
+    ],
+    "13": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      0,
+      0
+    ],
+    "14": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      0,
+      0
+    ],
+    "15": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      0
+    ],
+    "16": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      0
+    ],
+    "17": [
+      4,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      1
+    ],
+    "18": [
+      4,
+      3,
+      3,
+      3,
+      3,
+      1,
+      1,
+      1,
+      1
+    ],
+    "19": [
+      4,
+      3,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1
+    ],
+    "20": [
+      4,
+      3,
+      3,
+      3,
+      3,
+      2,
+      2,
+      1,
+      1
+    ]
+  }
 }
