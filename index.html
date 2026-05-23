@@ -7170,6 +7170,8 @@ function BackgroundTab({ char, gameData, onUpdate }) {
       {textarea("ideals","Ideals","What principles drive your character?")}
       {textarea("bonds","Bonds","What connects your character to the world?")}
       {textarea("flaws","Flaws","What weaknesses or vices does your character have?")}
+      {divider("Physical Characteristics")}
+      <PhysicalStats char={char} gameData={gameData} onUpdate={onUpdate}/>
       {divider("Appearance & Backstory")}
       {textarea("appearance","Appearance & Backstory","Describe your character's look and history…",5)}
     </div>
@@ -7200,8 +7202,85 @@ function BackgroundTab({ char, gameData, onUpdate }) {
       {textarea("bonds","Bonds","What connects your character to the world?")}
       {textarea("flaws","Flaws","What weaknesses or vices does your character have?")}
 
+      {divider("Physical Characteristics")}
+      <PhysicalStats char={char} gameData={gameData} onUpdate={onUpdate}/>
+
       {divider("Appearance & Backstory")}
       {textarea("appearance","Appearance & Backstory","Describe your character's look and history…",5)}
+    </div>
+  );
+}
+
+function PhysicalStats({ char, gameData, onUpdate }) {
+  const spData      = gameData?.species?.[char.species];
+  const currentSize = char.size || spData?.size || (spData?.sizes?.[0]) || "Medium";
+  const hRange      = spData?.heightCm
+    ? (Array.isArray(spData.heightCm) ? spData.heightCm : spData.heightCm?.[currentSize])
+    : null;
+  const h           = char.heightCm || (hRange ? Math.round((hRange[0]+hRange[1])/2) : null);
+  const outOfRange  = hRange && h && (h < hRange[0] || h > hRange[1]);
+  const editable    = !!onUpdate;
+  const lbl = txt => (
+    <label style={{ display:"block", color:"var(--text-muted)", fontSize:11,
+      textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>{txt}</label>
+  );
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:4 }}>
+      <div>
+        {lbl("Size")}
+        {spData?.sizes?.length > 1 && editable ? (
+          <div style={{ display:"flex", gap:6 }}>
+            {spData.sizes.map(sz => {
+              const active = currentSize === sz;
+              return (
+                <div key={sz} onClick={()=>onUpdate({...char, size:sz, heightCm:null})}
+                  style={{ flex:1, padding:"7px 8px", borderRadius:7, cursor:"pointer", textAlign:"center",
+                    border:`2px solid ${active?"var(--accent)":"var(--border)"}`,
+                    background:active?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--card)",
+                    color:active?"var(--accent)":"var(--text-muted)", fontSize:13,
+                    fontFamily:"var(--font-display)" }}>{sz}</div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ padding:"8px 12px", background:"var(--card)", border:"1px solid var(--border)",
+            borderRadius:7, fontSize:13, color:"var(--text)", fontFamily:"var(--font-display)" }}>
+            {currentSize}
+          </div>
+        )}
+      </div>
+      <div>
+        {lbl(hRange ? `Height — typical ${hRange[0]}–${hRange[1]} cm` : "Height")}
+        {editable ? (
+          <div>
+            <div style={{ display:"flex", gap:6, alignItems:"center", marginBottom:4 }}>
+              <input type="range"
+                min={hRange ? Math.max(50, hRange[0]-30) : 50}
+                max={hRange ? hRange[1]+30 : 280}
+                value={h || (hRange ? Math.round((hRange[0]+hRange[1])/2) : 170)}
+                onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                style={{ flex:1, accentColor:"var(--accent)" }}/>
+              <input type="number" value={h||""} min={50} max={280} placeholder="cm"
+                onChange={e=>onUpdate({...char, heightCm:+e.target.value})}
+                style={{ width:60, background:"var(--card)",
+                  border:`1px solid ${outOfRange?"var(--danger)":"var(--border)"}`,
+                  color:"var(--text)", padding:"5px 8px", borderRadius:6, fontSize:13, textAlign:"center" }}/>
+              <span style={{ fontSize:12, color:"var(--text-muted)", flexShrink:0 }}>cm</span>
+            </div>
+            {h ? (
+              <div style={{ fontSize:11, color:outOfRange?"var(--danger)":"var(--text-dim)" }}>
+                {outOfRange?"⚠ Outside typical range · ":""}
+                ≈ {Math.floor(h/30.48)}'{Math.round((h/30.48%1)*12)}" · {(h/100).toFixed(2)}m
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div style={{ padding:"8px 12px", background:"var(--card)", border:"1px solid var(--border)",
+            borderRadius:7, fontSize:13, color:"var(--text)" }}>
+            {h ? `${h} cm ≈ ${Math.floor(h/30.48)}'${Math.round((h/30.48%1)*12)}"` : "—"}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
