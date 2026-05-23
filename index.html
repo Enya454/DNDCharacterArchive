@@ -6068,6 +6068,246 @@ function DocumentsTab({ char, onUpdate, session, readOnly }) {
   );
 }
 
+// ============================================================
+// LEVEL UP MODAL
+// ============================================================
+function LevelUpModal({ char, gameData, onClose, onSave }) {
+  const classes = gameData.classes || {};
+  const cd      = classes[char.class];
+  const newLevel = (char.level || 1) + 1;
+
+  // Multiclass state
+  const [mode,          setMode]       = useState("main");   // "main" | "multiclass"
+  const [mcClass,       setMcClass]    = useState("");
+  const [showMcPicker,  setShowMcPicker] = useState(false);
+
+  // HP roll
+  const hitDie  = cd?.hitDie || 8;
+  const conMod  = calcMod(char.abilities?.con || 10);
+  const avgHP   = Math.floor(hitDie / 2) + 1 + conMod;
+  const [hpChoice, setHpChoice] = useState("average"); // "average"|"roll"
+  const [rolled,   setRolled]   = useState(null);
+  const roll = () => { setRolled(Math.max(1, Math.floor(Math.random() * hitDie) + 1 + conMod)); };
+  const hpGain = hpChoice === "roll" ? (rolled ?? avgHP) : avgHP;
+
+  // New features at this level (main class only for now)
+  const newFeats = (cd?.features || []).filter(f =>
+    f.level === newLevel && f.type !== "spell_grant" && f.type !== "asi_points" && f.type !== "passive"
+  );
+  const newASI = (cd?.features || []).some(f => f.level === newLevel && f.type === "asi_points");
+
+  // Multiclass requirements check
+  const canMulticlass = cls => {
+    const req = classes[cls]?.multiclassRequirements;
+    if (!req) return false;
+    if (cls === char.class) return false; // already this class
+    const ab = char.abilities || {};
+    const entries = Object.entries(req).filter(([k]) => k !== "mode");
+    if (req.mode === "or") return entries.some(([stat, val]) => (ab[stat] || 10) >= val);
+    return entries.every(([stat, val]) => (ab[stat] || 10) >= val);
+  };
+
+  const abilityLabel = {str:"Strength",dex:"Dexterity",con:"Constitution",int:"Intelligence",wis:"Wisdom",cha:"Charisma"};
+
+  const doLevelUp = () => {
+    const isMulticlassing = mode === "multiclass" && mcClass;
+    const updates = {
+      ...char,
+      level: newLevel,
+      hp: {
+        ...char.hp,
+        max: (char.hp?.max || 0) + hpGain,
+        current: (char.hp?.current || 0) + hpGain,
+      },
+    };
+    if (isMulticlassing) {
+      const existing = char.multiclasses || [];
+      const found    = existing.find(mc => mc.class === mcClass);
+      updates.multiclasses = found
+        ? existing.map(mc => mc.class === mcClass ? {...mc, level: mc.level + 1} : mc)
+        : [...existing, { class: mcClass, level: 1, subclass: null }];
+      updates.level = newLevel; // total character level
+    }
+    onSave(updates);
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.7)", zIndex:1000,
+      display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ background:"var(--card)", border:"1px solid var(--accent)", borderRadius:14,
+        padding:28, maxWidth:520, width:"100%", maxHeight:"90vh", overflowY:"auto" }}>
+
+        {/* Header */}
+        <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:22, marginBottom:4 }}>
+          Level {newLevel}!
+        </div>
+        <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:20 }}>
+          {char.name} · {char.class} {char.subclass ? `(${char.subclass})` : ""}
+        </div>
+
+        {/* Mode selector */}
+        <div style={{ display:"flex", gap:8, marginBottom:20 }}>
+          {[["main", `Level up ${char.class}`], ["multiclass", "Multiclass"]].map(([v,l]) => (
+            <div key={v} onClick={()=>setMode(v)}
+              style={{ flex:1, padding:"8px 12px", borderRadius:8, cursor:"pointer", textAlign:"center",
+                border:`2px solid ${mode===v?"var(--accent)":"var(--border)"}`,
+                background:mode===v?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--surface)",
+                color:mode===v?"var(--accent)":"var(--text-muted)", fontSize:13 }}>
+              {l}
+            </div>
+          ))}
+        </div>
+
+        {/* HP gain */}
+        <div style={{ marginBottom:20, padding:"14px 16px", background:"var(--surface)", borderRadius:10,
+          border:"1px solid var(--border)" }}>
+          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:10 }}>
+            Hit Points
+          </div>
+          <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+            {[["average",`Average (${avgHP} HP)`],["roll","Roll for HP"]].map(([v,l])=>(
+              <div key={v} onClick={()=>setHpChoice(v)}
+                style={{ flex:1, padding:"7px", borderRadius:7, cursor:"pointer", textAlign:"center", fontSize:12,
+                  border:`1px solid ${hpChoice===v?"var(--accent)":"var(--border)"}`,
+                  background:hpChoice===v?"rgba(var(--accent-rgb,201,162,39),0.1)":"var(--card)",
+                  color:hpChoice===v?"var(--accent)":"var(--text-muted)" }}>{l}</div>
+            ))}
+          </div>
+          {hpChoice === "roll" && (
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+              <button onClick={roll}
+                style={{ padding:"6px 16px", borderRadius:7, cursor:"pointer", border:"1px solid var(--accent)",
+                  background:"rgba(var(--accent-rgb,201,162,39),0.1)", color:"var(--accent)", fontSize:13 }}>
+                🎲 Roll d{hitDie}
+              </button>
+              {rolled !== null && (
+                <span style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18 }}>
+                  {rolled} HP
+                </span>
+              )}
+            </div>
+          )}
+          <div style={{ fontSize:13, color:"var(--success)" }}>
+            +{hpGain} HP ({hpChoice==="average"?"average":"rolled"} {hpChoice==="average"?`d${hitDie}`:""}
+            {conMod>=0?` +${conMod} CON`:` ${conMod} CON`})
+          </div>
+        </div>
+
+        {/* Main class level-up */}
+        {mode === "main" && (<>
+          {newASI && (
+            <div style={{ marginBottom:14, padding:"12px 14px", background:"rgba(var(--accent-rgb,201,162,39),0.06)",
+              border:"1px solid rgba(var(--accent-rgb,201,162,39),0.3)", borderRadius:9 }}>
+              <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13, marginBottom:4 }}>
+                ✦ Ability Score Improvement
+              </div>
+              <div style={{ fontSize:12, color:"var(--text-muted)" }}>
+                You gain an ASI or feat at this level — configure in the character editor.
+              </div>
+            </div>
+          )}
+          {newFeats.length > 0 && (
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, color:"var(--text-dim)", textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>
+                New Features at Level {newLevel}
+              </div>
+              {newFeats.map(f => (
+                <div key={f.name} style={{ padding:"10px 12px", background:"var(--surface)", border:"1px solid var(--border)",
+                  borderRadius:8, marginBottom:6 }}>
+                  <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:13 }}>{f.name}</div>
+                  {f.shortDescription || f.description
+                    ? <div style={{ fontSize:12, color:"var(--text-muted)", marginTop:4, lineHeight:1.6 }}>
+                        {(f.shortDescription || f.description).slice(0,160)}{(f.shortDescription||f.description).length>160?"…":""}
+                      </div>
+                    : null}
+                </div>
+              ))}
+            </div>
+          )}
+          {newFeats.length === 0 && !newASI && (
+            <div style={{ fontSize:13, color:"var(--text-dim)", fontStyle:"italic", marginBottom:14 }}>
+              No new class features at this level — mainly spell slots / cantrips progression.
+            </div>
+          )}
+        </>)}
+
+        {/* Multiclass */}
+        {mode === "multiclass" && (
+          <div style={{ marginBottom:14 }}>
+            <div style={{ fontSize:13, color:"var(--text-muted)", marginBottom:12 }}>
+              Choose a class to multiclass into. You must meet its ability score requirements.
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
+              {Object.entries(classes).map(([cls, data]) => {
+                if (cls === char.class) return null;
+                const reqs   = data.multiclassRequirements;
+                const ok     = canMulticlass(cls);
+                const reqStr = reqs
+                  ? Object.entries(reqs).filter(([k])=>k!=="mode")
+                      .map(([s,v])=>`${abilityLabel[s]} ${v}`)
+                      .join(reqs.mode==="or"?" or ":" & ")
+                  : "—";
+                const existing = (char.multiclasses||[]).find(mc=>mc.class===cls);
+                return (
+                  <div key={cls} onClick={()=>ok&&setMcClass(cls===mcClass?"":cls)}
+                    style={{ padding:"10px 12px", borderRadius:8, cursor:ok?"pointer":"not-allowed",
+                      border:`1px solid ${mcClass===cls?"var(--accent)":ok?"var(--border)":"var(--border)"}`,
+                      background:mcClass===cls?"rgba(var(--accent-rgb,201,162,39),0.1)":ok?"var(--surface)":"var(--surface)",
+                      opacity:ok?1:0.45, transition:"all 0.15s" }}>
+                    <div style={{ fontFamily:"var(--font-display)", color:mcClass===cls?"var(--accent)":"var(--text)", fontSize:13 }}>
+                      {mcClass===cls?"✓ ":""}{cls}
+                      {existing && <span style={{ fontSize:10, color:"var(--text-muted)", marginLeft:6 }}>L{existing.level}</span>}
+                    </div>
+                    <div style={{ fontSize:10, color:ok?"var(--success)":"var(--danger)", marginTop:3 }}>
+                      {ok?"✓":"✗"} Req: {reqStr}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {mcClass && classes[mcClass]?.multiclassProficiencies && (
+              <div style={{ marginTop:12, padding:"10px 12px", background:"rgba(39,174,96,0.06)",
+                border:"1px solid rgba(39,174,96,0.25)", borderRadius:8 }}>
+                <div style={{ fontSize:11, color:"var(--success)", marginBottom:4 }}>
+                  New proficiencies from {mcClass}:
+                </div>
+                {[
+                  ...(classes[mcClass].multiclassProficiencies.armor||[]).map(a=>`Armour: ${a}`),
+                  ...(classes[mcClass].multiclassProficiencies.weapons||[]).map(w=>`Weapon: ${w}`),
+                  ...(classes[mcClass].multiclassProficiencies.tools||[]).map(t=>`Tool: ${t}`),
+                  ...(classes[mcClass].multiclassProficiencies.skills
+                    ? [`${classes[mcClass].multiclassProficiencies.skills} skill${classes[mcClass].multiclassProficiencies.skills>1?"s":""} (${mcClass} list)`]
+                    : []),
+                ].map((p,i)=>(
+                  <div key={i} style={{ fontSize:12, color:"var(--text-muted)" }}>· {p}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div style={{ display:"flex", gap:10, marginTop:4 }}>
+          <button onClick={doLevelUp}
+            disabled={mode==="multiclass"&&!mcClass}
+            style={{ flex:1, padding:"10px", borderRadius:8, cursor:mode==="multiclass"&&!mcClass?"not-allowed":"pointer",
+              border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.15)",
+              color:"var(--accent)", fontFamily:"var(--font-display)", fontSize:14,
+              opacity:mode==="multiclass"&&!mcClass?0.5:1 }}>
+            Level Up to {newLevel}!
+          </button>
+          <button onClick={onClose}
+            style={{ padding:"10px 20px", borderRadius:8, cursor:"pointer", border:"1px solid var(--border)",
+              background:"transparent", color:"var(--text-muted)", fontSize:13 }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SettingsTab({ char, gameData, onUpdate, onEdit }) {
   const cc = char.custom || {};
   const updCustom = patch => onUpdate({ ...char, custom: { ...cc, ...patch } });
@@ -7349,6 +7589,7 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
   const [tab,  setTab]    = useState("actions");
   const [saved, setSaved] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const [shareModal, setShareModal] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [dmCopied,    setDmCopied]    = useState(false);
@@ -7536,6 +7777,16 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
     <TW themeKey={char.theme} themes={themes} charCustom={char.custom || {}}>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display:"none" }}/>
 
+      {/* ── Level Up Modal ── */}
+      {showLevelUp && !readOnly && (char.level||1) < 20 && (
+        <LevelUpModal
+          char={char}
+          gameData={gameData}
+          onClose={()=>setShowLevelUp(false)}
+          onSave={updates=>{ upd(updates); setShowLevelUp(false); }}
+        />
+      )}
+
       {/* ── Rest Modal ── */}
       {restModal && <RestModal
         type={restModal}
@@ -7558,6 +7809,14 @@ function CharacterSheet({ char:initial, gameData, session, onBack, onDelete, onE
           <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
             <div style={{ opacity:saved?1:0, transition:"opacity 0.3s", padding:"2px 8px", borderRadius:20, background:"rgba(39,174,96,0.15)", border:`1px solid ${theme.success}`, color:theme.success, fontSize:10 }}>✓ Saved</div>
             {!readOnly && <>
+              {(char.level||1) < 20 && (
+                <button onClick={()=>setShowLevelUp(true)}
+                  style={{ padding:"3px 9px", borderRadius:16, cursor:"pointer", fontSize:11,
+                    border:"1px solid var(--accent)", background:"rgba(var(--accent-rgb,201,162,39),0.15)",
+                    color:"var(--accent)", fontFamily:"var(--font-display)", flexShrink:0 }}>
+                  ▲ Level Up
+                </button>
+              )}
               <div onClick={()=>upd({...char,inspiration:!char.inspiration})} title="Inspiration" style={{ width:22,height:22,borderRadius:5,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.2s", border:`2px solid ${char.inspiration?"#ffd700":"var(--border)"}`, background:char.inspiration?"rgba(255,215,0,0.2)":"transparent" }}>{char.inspiration?"✦":"✧"}</div>
               {char.shareMode === "public" && (
                 <button onClick={()=>{ navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?share=${char.id}`); setShareCopied(true); setTimeout(()=>setShareCopied(false),2000); }}

@@ -2082,6 +2082,18 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 46
+      },
+      "multiclassRequirements": {
+        "str": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "shields"
+        ],
+        "weapons": [
+          "simple",
+          "martial"
+        ]
       }
     },
     "Rogue": {
@@ -3061,7 +3073,21 @@
         "abbr": "PHB",
         "page": 94
       },
-      "page": 94
+      "page": 94,
+      "multiclassRequirements": {
+        "dex": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light"
+        ],
+        "weapons": [],
+        "skills": 1,
+        "skillPool": "Rogue",
+        "tools": [
+          "thieves' tools"
+        ]
+      }
     },
     "Fighter": {
       "hitDie": 10,
@@ -4076,6 +4102,22 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 70
+      },
+      "multiclassRequirements": {
+        "str": 13,
+        "mode": "or",
+        "dex": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": [
+          "simple",
+          "martial"
+        ]
       }
     },
     "Wizard": {
@@ -5004,6 +5046,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 112
+      },
+      "multiclassRequirements": {
+        "int": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [],
+        "weapons": []
       }
     },
     "Cleric": {
@@ -6750,6 +6799,17 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 56
+      },
+      "multiclassRequirements": {
+        "wis": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": []
       }
     },
     "Bard": {
@@ -7649,6 +7709,15 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 51
+      },
+      "multiclassRequirements": {
+        "cha": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [],
+        "weapons": [],
+        "skills": 1,
+        "skillPool": "Bard"
       }
     },
     "Paladin": {
@@ -8908,6 +8977,21 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 82
+      },
+      "multiclassRequirements": {
+        "str": 13,
+        "cha": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": [
+          "simple",
+          "martial"
+        ]
       }
     },
     "Ranger": {
@@ -10501,6 +10585,23 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 89
+      },
+      "multiclassRequirements": {
+        "dex": 13,
+        "wis": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": [
+          "simple",
+          "martial"
+        ],
+        "skills": 1,
+        "skillPool": "Ranger"
       }
     },
     "Druid": {
@@ -11638,6 +11739,17 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 64
+      },
+      "multiclassRequirements": {
+        "wis": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": []
       }
     },
     "Monk": {
@@ -12256,6 +12368,17 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 76
+      },
+      "multiclassRequirements": {
+        "dex": 13,
+        "wis": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [],
+        "weapons": [
+          "simple",
+          "shortswords"
+        ]
       }
     },
     "Sorcerer": {
@@ -13802,6 +13925,13 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 99
+      },
+      "multiclassRequirements": {
+        "cha": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [],
+        "weapons": []
       }
     },
     "Warlock": {
@@ -15219,6 +15349,17 @@
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 105
+      },
+      "multiclassRequirements": {
+        "cha": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light"
+        ],
+        "weapons": [
+          "simple"
+        ]
       }
     },
     "Artificer": {
@@ -16694,6 +16835,24 @@
             ]
           }
         }
+      },
+      "multiclassRequirements": {
+        "int": 13
+      },
+      "multiclassProficiencies": {
+        "armor": [
+          "light",
+          "medium",
+          "shields"
+        ],
+        "weapons": [
+          "simple"
+        ],
+        "tools": [
+          "thieves' tools",
+          "tinker's tools",
+          "one artisan's tool"
+        ]
       }
     }
   },
