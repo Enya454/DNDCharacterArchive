@@ -4186,46 +4186,54 @@ function CharacterCreationWizard({ gameData, onSave, onCancel, editChar }) {
                           .join(canReq.mode==="or"?" or ":" & ")
                       : null;
                     return (
-                      <div key={mcIdx} style={{ marginBottom:14, padding:"14px 16px", background:"var(--surface)",
-                        border:"1px solid var(--border)", borderRadius:10 }}>
-                        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:14, flex:1 }}>
+                      <div key={mcIdx} style={{ marginBottom:24 }}>
+                        {/* Class header */}
+                        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14,
+                          paddingBottom:10, borderBottom:"2px solid rgba(var(--accent-rgb,201,162,39),0.3)" }}>
+                          <div style={{ fontFamily:"var(--font-display)", color:"var(--accent)", fontSize:18, flex:1 }}>
                             {mc.class}
                           </div>
                           {reqStr && <div style={{ fontSize:10, color:"var(--text-dim)" }}>Req: {reqStr}</div>}
-                          <input type="number" min={1} max={20} value={mc.level}
-                            onChange={e=>{
-                              const v=Math.min(20,Math.max(1,parseInt(e.target.value)||1));
-                              setChar(c=>({...c, multiclasses: (c.multiclasses||[]).map((m,i)=>i===mcIdx?{...m,level:v}:m)}));
-                            }}
-                            style={{ width:52, background:"var(--card)", border:"1px solid var(--border)", color:"var(--text)",
-                              padding:"4px 8px", borderRadius:6, fontSize:16, textAlign:"center",
-                              fontFamily:"var(--font-display)" }}/>
-                          <span style={{ fontSize:12, color:"var(--text-muted)" }}>levels</span>
-                          <button onClick={()=>setChar(c=>({...c, multiclasses:(c.multiclasses||[]).filter((_,i)=>i!==mcIdx)}))}
-                            style={{ padding:"3px 8px", borderRadius:5, border:"1px solid var(--border)",
-                              background:"transparent", color:"var(--text-dim)", cursor:"pointer", fontSize:11 }}>✕</button>
-                        </div>
-                        {/* Multiclass features up to mc.level */}
-                        {mcFeats.filter(f=>f.level<=mc.level && f.type!=="passive" && f.type!=="spell_grant").slice(0,4).map((feat,i)=>(
-                          <div key={i} style={{ fontSize:12, color:"var(--text-dim)", padding:"3px 0",
-                            borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
-                            <span style={{ color:"var(--accent)", marginRight:6 }}>L{feat.level}</span>{feat.name}
+                          {mcd?.multiclassProficiencies && (() => {
+                            const p = mcd.multiclassProficiencies;
+                            const parts = [
+                              ...(p.armor||[]).map(a=>`Armour: ${a}`),
+                              ...(p.weapons||[]).map(w=>`Weapon: ${w}`),
+                              ...(p.tools||[]).map(t=>t),
+                              ...(p.skills ? [`${p.skills} skill`] : []),
+                            ];
+                            return parts.length ? (
+                              <div style={{ fontSize:10, color:"var(--text-dim)", fontStyle:"italic" }}>
+                                Grants: {parts.join(", ")}
+                              </div>
+                            ) : null;
+                          })()}
+                          <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0 }}>
+                            <span style={{ fontSize:12, color:"var(--text-muted)" }}>Levels:</span>
+                            <input type="number" min={1} max={20} value={mc.level}
+                              onChange={e=>{
+                                const v=Math.min(20,Math.max(1,parseInt(e.target.value)||1));
+                                setChar(c=>({...c, multiclasses:(c.multiclasses||[]).map((m,i)=>i===mcIdx?{...m,level:v}:m)}));
+                              }}
+                              style={{ width:52, background:"var(--card)", border:"1px solid var(--border)",
+                                color:"var(--text)", padding:"4px 8px", borderRadius:6, fontSize:16,
+                                textAlign:"center", fontFamily:"var(--font-display)" }}/>
+                            <button onClick={()=>setChar(c=>({...c, multiclasses:(c.multiclasses||[]).filter((_,i)=>i!==mcIdx)}))}
+                              style={{ padding:"4px 10px", borderRadius:5, border:"1px solid var(--border)",
+                                background:"transparent", color:"var(--text-dim)", cursor:"pointer", fontSize:12 }}>✕ Remove</button>
                           </div>
-                        ))}
-                        {mcd?.multiclassProficiencies && (() => {
-                          const p = mcd.multiclassProficiencies;
-                          const parts = [
-                            ...(p.armor||[]).map(a=>`Armour: ${a}`),
-                            ...(p.weapons||[]).map(w=>`Weapon: ${w}`),
-                            ...(p.tools||[]).map(t=>t),
-                          ];
-                          return parts.length ? (
-                            <div style={{ marginTop:6, fontSize:11, color:"var(--text-dim)", fontStyle:"italic" }}>
-                              Grants: {parts.join(", ")}
-                            </div>
-                          ) : null;
-                        })()}
+                        </div>
+
+                        {/* Full feature panels — same as primary class */}
+                        {mcFeats.map((feat, i) => {
+                          const locked = mc.level < feat.level;
+                          const srcLabel = feat._src || `${mc.class} MC`;
+                          return (
+                            <FeaturePanel key={`${mc.class}-${feat.name}-${i}`}
+                              feature={feat} locked={locked}
+                              {...fpProps(srcLabel)} />
+                          );
+                        })}
                       </div>
                     );
                   })}
