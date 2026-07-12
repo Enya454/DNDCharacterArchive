@@ -1522,6 +1522,62 @@
         ]
       },
       "heightNote": "Medium: 5'\u20136'4\", Small: 2'8\"\u20134'"
+    },
+    "Tabaxi": {
+      "size": "Medium",
+      "sizes": null,
+      "speed": 30,
+      "autoLanguages": [
+        "Common",
+        "Tabaxi"
+      ],
+      "heightCm": [
+        155,
+        185
+      ],
+      "heightNote": "Typically 5'2\"\u20136'1\" (lithe, cat-like build)",
+      "source": {
+        "book": "Volo's Guide to Monsters",
+        "abbr": "VGtM",
+        "page": 113
+      },
+      "features": [
+        {
+          "name": "Darkvision",
+          "level": 1,
+          "type": "passive",
+          "description": "You have a cat's keen senses, especially in the dark. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
+        },
+        {
+          "name": "Feline Agility",
+          "level": 1,
+          "type": "action",
+          "actionType": "free",
+          "uses": {
+            "max": 1,
+            "per": "recharge"
+          },
+          "description": "Your reflexes and agility allow you to move with a burst of speed. When you move on your turn in combat, you can double your speed until the end of the turn. Once you use this trait, you can't use it again until you move 0 feet on one of your turns."
+        },
+        {
+          "name": "Cat's Claws",
+          "level": 1,
+          "type": "passive",
+          "category": "combat",
+          "description": "Because of your claws, you have a climbing speed of 20 feet. In addition, your claws are natural weapons, which you can use to make unarmed strikes. If you hit with them, you deal slashing damage equal to 1d4 + your Strength modifier, instead of the bludgeoning damage normal for an unarmed strike."
+        },
+        {
+          "name": "Cat's Talent",
+          "level": 1,
+          "type": "passive",
+          "description": "You have proficiency in the Perception and Stealth skills."
+        }
+      ],
+      "abilityBonuses": {
+        "dex": 2,
+        "cha": 1
+      },
+      "subraces": {}
     }
   },
   "classes": {
@@ -25679,20 +25735,33 @@
     },
     {
       "name": "Tavern Brawler",
-      "description": "Accustomed to rough-and-tumble fighting using whatever weapons happen to be at hand, you gain the following benefits: Increase STR or CON by 1 (max 20). You are proficient with improvised weapons. Your unarmed strike uses a d4 for damage. When you hit a creature with an unarmed strike or an improvised weapon, you can use a bonus action to attempt to grapple the target.",
+      "description": "Accustomed to rough-and-tumble fighting, you gain the following benefits:\n\n\u2022 Increase your Strength or Constitution score by 1, to a maximum of 20.\n\u2022 You are proficient with improvised weapons.\n\u2022 Your unarmed strike uses a d4 for damage.\n\u2022 When you hit a creature with an unarmed strike or an improvised weapon on your turn, you can use a bonus action to attempt to grapple the target.",
       "prerequisites": null,
       "effects": {
         "asiChoice": 1,
         "asiAbilities": [
           "str",
           "con"
-        ]
+        ],
+        "weaponProficiencies": [
+          "improvised weapons"
+        ],
+        "unarmedDie": "1d4",
+        "grappleOnHit": true
       },
       "source": {
         "book": "Player's Handbook",
         "abbr": "PHB",
         "page": 170
-      }
+      },
+      "actionGrants": [
+        {
+          "name": "Tavern Brawler Grapple",
+          "actionType": "bonus",
+          "description": "After hitting with an unarmed strike or improvised weapon, attempt to grapple the target.",
+          "trigger": "After unarmed or improvised weapon hit"
+        }
+      ]
     },
     {
       "name": "Telekinetic",
