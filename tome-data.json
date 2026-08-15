@@ -1578,6 +1578,68 @@
         "cha": 1
       },
       "subraces": {}
+    },
+    "Kobold": {
+      "size": "Small",
+      "sizes": null,
+      "speed": 30,
+      "autoLanguages": [
+        "Common",
+        "Draconic"
+      ],
+      "heightCm": [
+        76,
+        100
+      ],
+      "heightNote": "Typically 2'6\"\u20133'4\"",
+      "source": {
+        "book": "Mordenkainen Presents: Monsters of the Multiverse",
+        "abbr": "MotM",
+        "page": 27
+      },
+      "abilityBonuses": {},
+      "features": [
+        {
+          "name": "Darkvision",
+          "level": 1,
+          "type": "passive",
+          "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
+        },
+        {
+          "name": "Draconic Cry",
+          "level": 1,
+          "type": "action",
+          "actionType": "bonus",
+          "uses": {
+            "max": 1,
+            "per": "short rest"
+          },
+          "description": "As a bonus action, you let out a cry at your enemies within 10 feet of you. Until the start of your next turn, you and your allies have advantage on attack rolls against any of those enemies who could hear you. You can use this trait a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest."
+        },
+        {
+          "name": "Kobold Legacy",
+          "level": 1,
+          "type": "choice",
+          "options": [
+            "Craftiness",
+            "Defiance",
+            "Draconic Sorcery"
+          ],
+          "optionDetails": {
+            "Craftiness": {
+              "description": "You gain proficiency in one of the following skills of your choice: Arcana, Investigation, Medicine, Sleight of Hand, or Survival."
+            },
+            "Defiance": {
+              "description": "You have advantage on saving throws to avoid or end the frightened condition on yourself."
+            },
+            "Draconic Sorcery": {
+              "description": "You know one cantrip of your choice from the Sorcerer spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for it (choose when you select this legacy)."
+            }
+          },
+          "description": "Kobolds' draconic nature has led to their advancements in a variety of skills. Choose one of the following legacy traits."
+        }
+      ],
+      "subraces": {}
     }
   },
   "classes": {
